@@ -46,20 +46,22 @@ async function getApiKey(): Promise<string | null> {
 
 interface AccsZoneCategory {
   id: number | string;
-  name: string;
+  title: string;   // AccsZone uses 'title' not 'name'
   slug?: string;
   description?: string;
+  image?: string;
   parent_id?: number | null;
 }
 
 interface AccsZoneProduct {
   id: number | string;
-  name: string;
+  title: string;   // AccsZone uses 'title' not 'name'
   description?: string;
-  category_id?: number | string;
+  category?: { id: number | string; title: string; slug: string };
+  subcategory?: { id: number | string; title: string; slug: string };
   price: number | string;
-  stock?: number | string;
-  unlimited_stock?: boolean;
+  available_stock?: number | string;
+  sold?: number;
   image?: string;
   slug?: string;
   min_quantity?: number;
@@ -93,16 +95,18 @@ export async function syncCategories(apiKey: string): Promise<{ synced: number; 
 
     for (const cat of rawCategories) {
       try {
-        const slug = cat.slug ?? String(cat.name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        const catName = cat.title; // AccsZone uses 'title'
+        const slug = cat.slug ?? String(catName).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
         const existing = await db.select().from(categories).where(eq(categories.slug, slug)).limit(1);
 
         if (existing[0]) {
-          await db.update(categories).set({ name: cat.name, description: cat.description ?? null }).where(eq(categories.id, existing[0].id));
+          await db.update(categories).set({ name: catName, imageUrl: cat.image ?? null }).where(eq(categories.id, existing[0].id));
         } else {
           await db.insert(categories).values({
-            name: cat.name,
+            name: catName,
             slug,
             description: cat.description ?? null,
+            imageUrl: cat.image ?? null,
             parentId: cat.parent_id ? Number(cat.parent_id) : null,
             isVisible: true,
             sortOrder: 0,
@@ -111,7 +115,7 @@ export async function syncCategories(apiKey: string): Promise<{ synced: number; 
         synced++;
       } catch (err: unknown) {
         errors++;
-        await logSystem("error", "sync", `Failed to sync category ${cat.name}`, { error: String(err) });
+        await logSystem("error", "sync", `Failed to sync category ${cat.title}`, { error: String(err) });
       }
     }
   } catch (err: unknown) {
@@ -130,8 +134,19 @@ export async function syncProducts(apiKey: string, markupPercent = 20): Promise<
   let errors = 0;
 
   try {
-    const response = await client.get("/products");
-    const rawProducts: AccsZoneProduct[] = response.data?.data ?? response.data ?? [];
+    // AccsZone uses /listings endpoint (not /products)
+    // Paginate through all pages (max 100 per page)
+    let allProducts: AccsZoneProduct[] = [];
+    let page = 1;
+    let lastPage = 1;
+    do {
+      const response = await client.get("/listings", { params: { per_page: 100, page } });
+      const pageData: AccsZoneProduct[] = response.data?.data ?? [];
+      allProducts = allProducts.concat(pageData);
+      lastPage = response.data?.meta?.last_page ?? 1;
+      page++;
+    } while (page <= lastPage && page <= 20); // safety cap at 20 pages
+    const rawProducts = allProducts;
 
     const { getDb } = await import("../db");
     const db = await getDb();
@@ -141,8 +156,11 @@ export async function syncProducts(apiKey: string, markupPercent = 20): Promise<
       try {
         const supplierPrice = Number(prod.price) || 0;
         const customerPrice = supplierPrice * (1 + markupPercent / 100);
-        const slug = prod.slug ?? String(prod.name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-        const stockQty = prod.unlimited_stock ? 9999 : (Number(prod.stock) || 0);
+        const prodName = prod.title; // AccsZone uses 'title'
+        const slug = prod.slug ?? String(prodName).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        // AccsZone uses 'available_stock'; no unlimited flag in listings
+        const stockQty = Number(prod.available_stock) || 0;
+        const isUnlimited = stockQty === 0 && Number(prod.sold ?? 0) > 0; // heuristic: sold but 0 stock = unlimited
 
         // Upsert into supplier_products cache
         const existingSupplier = await db.select().from(supplierProducts)
@@ -151,7 +169,7 @@ export async function syncProducts(apiKey: string, markupPercent = 20): Promise<
 
         if (existingSupplier[0]) {
           await db.update(supplierProducts).set({
-            rawTitle: prod.name,
+            rawTitle: prodName,
             rawPrice: supplierPrice.toFixed(2) as any,
             rawStock: stockQty,
             rawData: prod as any,
@@ -160,8 +178,8 @@ export async function syncProducts(apiKey: string, markupPercent = 20): Promise<
           await db.insert(supplierProducts).values({
             providerKey: PROVIDER_KEY,
             supplierProductId: String(prod.id),
-            supplierCategoryId: prod.category_id ? String(prod.category_id) : null,
-            rawTitle: prod.name,
+            supplierCategoryId: prod.category?.id ? String(prod.category.id) : null,
+            rawTitle: prodName,
             rawDescription: prod.description ?? null,
             rawPrice: supplierPrice.toFixed(2) as any,
             rawStock: stockQty,
@@ -174,28 +192,38 @@ export async function syncProducts(apiKey: string, markupPercent = 20): Promise<
           .where(and(eq(products.providerKey, PROVIDER_KEY), eq(products.supplierProductId, Number(prod.id))))
           .limit(1);
 
+        // Resolve category from DB
+        let categoryId: number | null = null;
+        if (prod.category?.id) {
+          const catSlug = prod.category.slug ?? String(prod.category.title).toLowerCase().replace(/[^a-z0-9]+/g, "-");
+          const catRow = await db.select().from(categories).where(eq(categories.slug, catSlug)).limit(1);
+          categoryId = catRow[0]?.id ?? null;
+        }
+
         if (existingProduct[0]) {
           // Only update price/stock if not overridden by admin
           const updateData: Record<string, unknown> = {
             stockQuantity: stockQty,
-            stockUnlimited: prod.unlimited_stock ?? false,
+            stockUnlimited: isUnlimited,
             supplierPrice: supplierPrice.toFixed(2),
             customerPriceUSD: customerPrice.toFixed(2),
           };
+          if (categoryId) updateData.categoryId = categoryId;
           await db.update(products).set(updateData).where(eq(products.id, existingProduct[0].id));
         } else {
           await db.insert(products).values({
             providerKey: PROVIDER_KEY,
             supplierProductId: Number(prod.id),
-            title: prod.name,
+            title: prodName,
             slug: `${slug}-${String(prod.id)}`,
             description: prod.description ?? null,
             imageUrl: prod.image ?? null,
+            categoryId: categoryId,
             supplierPrice: supplierPrice.toFixed(2) as any,
             markupPercent: markupPercent.toFixed(2) as any,
             customerPriceUSD: customerPrice.toFixed(2) as any,
             stockQuantity: stockQty,
-            stockUnlimited: prod.unlimited_stock ?? false,
+            stockUnlimited: isUnlimited,
             isVisible: true,
             isFeatured: false,
           });
@@ -203,7 +231,7 @@ export async function syncProducts(apiKey: string, markupPercent = 20): Promise<
         synced++;
       } catch (err: unknown) {
         errors++;
-        await logSystem("error", "sync", `Failed to sync product ${prod.name}`, { error: String(err) });
+        await logSystem("error", "sync", `Failed to sync product ${prod.title}`, { error: String(err) });
       }
     }
   } catch (err: unknown) {

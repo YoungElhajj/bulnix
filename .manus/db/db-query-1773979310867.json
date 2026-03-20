@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO provider_configs (providerKey, displayName, baseUrl, apiKey, isEnabled, defaultMarkupPercent, syncIntervalMinutes)\nVALUES ('accszone', 'AccsZone', 'https://accszone.com/api/v1', 'acz_ZKQlQcCAomQZFBQfIBh2CiWEXIqqYeofKcaZXHuLNDC2pAz2', true, 20.00, 60)\nON DUPLICATE KEY UPDATE apiKey = 'acz_ZKQlQcCAomQZFBQfIBh2CiWEXIqqYeofKcaZXHuLNDC2pAz2', isEnabled = true, baseUrl = 'https://accszone.com/api/v1';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xomvQyHT3Pc2eM.33c921a427fa --database 6qKkSV9dybS3AerhXhrTfQ --execute INSERT INTO provider_configs (providerKey, displayName, baseUrl, apiKey, isEnabled, defaultMarkupPercent, syncIntervalMinutes)\nVALUES ('accszone', 'AccsZone', 'https://accszone.com/api/v1', 'acz_ZKQlQcCAomQZFBQfIBh2CiWEXIqqYeofKcaZXHuLNDC2pAz2', true, 20.00, 60)\nON DUPLICATE KEY UPDATE apiKey = 'acz_ZKQlQcCAomQZFBQfIBh2CiWEXIqqYeofKcaZXHuLNDC2pAz2', isEnabled = true, baseUrl = 'https://accszone.com/api/v1';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 107
+}

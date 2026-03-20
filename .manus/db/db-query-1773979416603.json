@@ -1,0 +1,30 @@
+{
+  "query": "SELECT 'categories' as tbl, COUNT(*) as total FROM categories\nUNION ALL\nSELECT 'products', COUNT(*) FROM products\nUNION ALL\nSELECT 'supplier_products', COUNT(*) FROM supplier_products\nUNION ALL\nSELECT 'products_visible', COUNT(*) FROM products WHERE isVisible = true\nUNION ALL\nSELECT 'products_with_stock', COUNT(*) FROM products WHERE stockQuantity > 0 OR stockUnlimited = true;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xomvQyHT3Pc2eM.33c921a427fa --database 6qKkSV9dybS3AerhXhrTfQ --execute SELECT 'categories' as tbl, COUNT(*) as total FROM categories\nUNION ALL\nSELECT 'products', COUNT(*) FROM products\nUNION ALL\nSELECT 'supplier_products', COUNT(*) FROM supplier_products\nUNION ALL\nSELECT 'products_visible', COUNT(*) FROM products WHERE isVisible = true\nUNION ALL\nSELECT 'products_with_stock', COUNT(*) FROM products WHERE stockQuantity > 0 OR stockUnlimited = true;",
+  "rows": [
+    {
+      "tbl": "categories",
+      "total": "42"
+    },
+    {
+      "tbl": "products",
+      "total": "615"
+    },
+    {
+      "tbl": "supplier_products",
+      "total": "615"
+    },
+    {
+      "tbl": "products_with_stock",
+      "total": "605"
+    },
+    {
+      "tbl": "products_visible",
+      "total": "615"
+    }
+  ],
+  "messages": [],
+  "stdout": "tbl\ttotal\ncategories\t42\nproducts\t615\nsupplier_products\t615\nproducts_with_stock\t605\nproducts_visible\t615\n",
+  "stderr": "",
+  "execution_time_ms": 62
+}

@@ -96,6 +96,6 @@
 - [ ] Paystack API key → set in Admin > Providers or Secrets
 - [ ] Monnify API key → set in Admin > Providers or Secrets
 - [ ] NowPayments/crypto gateway API key → set in Admin > Providers
-- [ ] AccsZone API key → set in Admin > Providers
-- [ ] MySQL database credentials → DATABASE_URL secret
+- [x] AccsZone API key → configured and synced (42 categories, 615 products live)
+- [ ] MySQL database credentials → DATABASE_URL secret (production DB)
 - [ ] Production deployment → click Publish button

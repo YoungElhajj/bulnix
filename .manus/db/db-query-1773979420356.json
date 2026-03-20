@@ -1,0 +1,110 @@
+{
+  "query": "SELECT p.id, p.title, p.slug, p.supplierPrice, p.customerPriceUSD, p.stockQuantity, p.isVisible, c.name as categoryName\nFROM products p\nLEFT JOIN categories c ON p.categoryId = c.id\nORDER BY p.id DESC\nLIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xomvQyHT3Pc2eM.33c921a427fa --database 6qKkSV9dybS3AerhXhrTfQ --execute SELECT p.id, p.title, p.slug, p.supplierPrice, p.customerPriceUSD, p.stockQuantity, p.isVisible, c.name as categoryName\nFROM products p\nLEFT JOIN categories c ON p.categoryId = c.id\nORDER BY p.id DESC\nLIMIT 10;",
+  "rows": [
+    {
+      "id": "615",
+      "title": "LinkedIn Accounts | 2023 Aged | Original Email Access | 0–15 Real Connections | USA IP Registered | 2FA Enabled",
+      "slug": "linkedin-accounts-2023-aged-usa-2fa-766",
+      "supplierPrice": "14.00000000",
+      "customerPriceUSD": "16.80",
+      "stockQuantity": "99",
+      "isVisible": "1",
+      "categoryName": "LinkedIn Accounts"
+    },
+    {
+      "id": "614",
+      "title": "LinkedIn Accounts | 2019 Aged | Original Email Access | 1–15 Real Connections | USA IP Registered | 2FA Enabled",
+      "slug": "linkedin-accounts-2019-aged-usa-2fa-784",
+      "supplierPrice": "20.00000000",
+      "customerPriceUSD": "24.00",
+      "stockQuantity": "38",
+      "isVisible": "1",
+      "categoryName": "LinkedIn Accounts"
+    },
+    {
+      "id": "613",
+      "title": "LinkedIn Accounts | 2016 Aged | Original Email Access | 1–15 Real Connections | USA IP Registered | 2FA Enabled",
+      "slug": "linkedin-accounts-2016-aged-usa-2fa-786",
+      "supplierPrice": "28.00000000",
+      "customerPriceUSD": "33.60",
+      "stockQuantity": "11",
+      "isVisible": "1",
+      "categoryName": "LinkedIn Accounts"
+    },
+    {
+      "id": "612",
+      "title": "LinkedIn Accounts | 2018 Aged | Original Email Access | 1–15 Real Connections | USA IP Registered | 2FA Enabled",
+      "slug": "linkedin-accounts-2018-aged-usa-2fa-785",
+      "supplierPrice": "21.00000000",
+      "customerPriceUSD": "25.20",
+      "stockQuantity": "17",
+      "isVisible": "1",
+      "categoryName": "LinkedIn Accounts"
+    },
+    {
+      "id": "611",
+      "title": "LinkedIn Accounts | 4-6 Month Aged | Original Email Access | USA IP Registered | 2FA Enabled",
+      "slug": "linkedin-accounts-4-6-month-aged-usa-2fa-787",
+      "supplierPrice": "5.50000000",
+      "customerPriceUSD": "6.60",
+      "stockQuantity": "54",
+      "isVisible": "1",
+      "categoryName": "LinkedIn Accounts"
+    },
+    {
+      "id": "610",
+      "title": "LinkedIn Accounts | 2022 Aged | Original Email Access | 0–15 Real Connections | USA IP Registered | 2FA Enabled",
+      "slug": "linkedin-accounts-2022-aged-usa-2fa-783",
+      "supplierPrice": "16.00000000",
+      "customerPriceUSD": "19.20",
+      "stockQuantity": "44",
+      "isVisible": "1",
+      "categoryName": "LinkedIn Accounts"
+    },
+    {
+      "id": "609",
+      "title": "FB Accounts | [PVA] Number of Friends 50+ (Friends). Gender Random. The accounts are verified through SMS (number starts with +1). There is email address in the set. Profile partially filled. The accounts are registered with USA IP.",
+      "slug": "fb-accounts-pva-50plus-friends-sms-verified-usa-733",
+      "supplierPrice": "6.99000000",
+      "customerPriceUSD": "8.39",
+      "stockQuantity": "296",
+      "isVisible": "1",
+      "categoryName": "Facebook Accounts"
+    },
+    {
+      "id": "608",
+      "title": "Linkedin Accounts | 2024 Aged |  Orginal email Access | 0–15 Real Connections | USA IP Registered | 2FA Included",
+      "slug": "linkedin-accounts-2024-aged-usa-2fa-765",
+      "supplierPrice": "11.00000000",
+      "customerPriceUSD": "13.20",
+      "stockQuantity": "71",
+      "isVisible": "1",
+      "categoryName": "LinkedIn Accounts"
+    },
+    {
+      "id": "607",
+      "title": "IG Accounts | 2024 Aged | 350+ Followers | 2FA Enabled+Email Included | Best for OnlyFans | Avatar + Posts | USA IP",
+      "slug": "ig-accounts-350followers-usa-email-sms-avatar-388",
+      "supplierPrice": "2.75000000",
+      "customerPriceUSD": "3.30",
+      "stockQuantity": "4",
+      "isVisible": "1",
+      "categoryName": "Instagram Accounts"
+    },
+    {
+      "id": "606",
+      "title": "Discord Accounts | 2025 Registered | SMS & Email Verified with Included Email | Partially Filled Profiles",
+      "slug": "discord-accounts-2025-sms-email-verified-1-547",
+      "supplierPrice": "0.50000000",
+      "customerPriceUSD": "0.60",
+      "stockQuantity": "21",
+      "isVisible": "1",
+      "categoryName": "Discord Accounts"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tslug\tsupplierPrice\tcustomerPriceUSD\tstockQuantity\tisVisible\tcategoryName\n615\tLinkedIn Accounts | 2023 Aged | Original Email Access | 0–15 Real Connections | USA IP Registered | 2FA Enabled\tlinkedin-accounts-2023-aged-usa-2fa-766\t14.00000000\t16.80\t99\t1\tLinkedIn Accounts\n614\tLinkedIn Accounts | 2019 Aged | Original Email Access | 1–15 Real Connections | USA IP Registered | 2FA Enabled\tlinkedin-accounts-2019-aged-usa-2fa-784\t20.00000000\t24.00\t38\t1\tLinkedIn Accounts\n613\tLinkedIn Accounts | 2016 Aged | Original Email Access | 1–15 Real Connections | USA IP Registered | 2FA Enabled\tlinkedin-accounts-2016-aged-usa-2fa-786\t28.00000000\t33.60\t11\t1\tLinkedIn Accounts\n612\tLinkedIn Accounts | 2018 Aged | Original Email Access | 1–15 Real Connections | USA IP Registered | 2FA Enabled\tlinkedin-accounts-2018-aged-usa-2fa-785\t21.00000000\t25.20\t17\t1\tLinkedIn Accounts\n611\tLinkedIn Accounts | 4-6 Month Aged | Original Email Access | USA IP Registered | 2FA Enabled\tlinkedin-accounts-4-6-month-aged-usa-2fa-787\t5.50000000\t6.60\t54\t1\tLinkedIn Accounts\n610\tLinkedIn Accounts | 2022 Aged | Original Email Access | 0–15 Real Connections | USA IP Registered | 2FA Enabled\tlinkedin-accounts-2022-aged-usa-2fa-783\t16.00000000\t19.20\t44\t1\tLinkedIn Accounts\n609\tFB Accounts | [PVA] Number of Friends 50+ (Friends). Gender Random. The accounts are verified through SMS (number starts with +1). There is email address in the set. Profile partially filled. The accounts are registered with USA IP.\tfb-accounts-pva-50plus-friends-sms-verified-usa-733\t6.99000000\t8.39\t296\t1\tFacebook Accounts\n608\tLinkedin Accounts | 2024 Aged |  Orginal email Access | 0–15 Real Connections | USA IP Registered | 2FA Included\tlinkedin-accounts-2024-aged-usa-2fa-765\t11.00000000\t13.20\t71\t1\tLinkedIn Accounts\n607\tIG Accounts | 2024 Aged | 350+ Followers | 2FA Enabled+Email Included | Best for OnlyFans | Avatar + Posts | USA IP\tig-accounts-350followers-usa-email-sms-avatar-388\t2.75000000\t3.30\t4\t1\tInstagram Accounts\n606\tDiscord Accounts | 2025 Registered | SMS & Email Verified with Included Email | Partially Filled Profiles\tdiscord-accounts-2025-sms-email-verified-1-547\t0.50000000\t0.60\t21\t1\tDiscord Accounts\n",
+  "stderr": "",
+  "execution_time_ms": 175
+}
