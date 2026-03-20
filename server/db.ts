@@ -115,16 +115,32 @@ export async function createCategory(data: { name: string; slug: string; descrip
   return { success: true };
 }
 
-export async function updateCategory(data: { id: number; name?: string; isVisible?: boolean; sortOrder?: number }) {
+export async function updateCategory(data: {
+  id: number; name?: string; slug?: string; description?: string;
+  imageUrl?: string; parentId?: number | null; isVisible?: boolean; sortOrder?: number;
+}) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const updateData: Record<string, unknown> = {};
   if (data.name !== undefined) updateData.name = data.name;
+  if (data.slug !== undefined) updateData.slug = data.slug;
+  if (data.description !== undefined) updateData.description = data.description;
+  if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl;
+  if (data.parentId !== undefined) updateData.parentId = data.parentId;
   if (data.isVisible !== undefined) updateData.isVisible = data.isVisible;
   if (data.sortOrder !== undefined) updateData.sortOrder = data.sortOrder;
   if (Object.keys(updateData).length > 0) {
     await db.update(categories).set(updateData).where(eq(categories.id, data.id));
   }
+  return { success: true };
+}
+
+export async function deleteCategory(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Move products to uncategorized before deleting
+  await db.update(products).set({ categoryId: null }).where(eq(products.categoryId, id));
+  await db.delete(categories).where(eq(categories.id, id));
   return { success: true };
 }
 
@@ -573,8 +589,37 @@ export async function adminGetProducts(input: { page: number; limit: number; sea
   return { items, total: Number(countResult[0]?.count ?? 0) };
 }
 
+export async function adminCreateProduct(input: {
+  title: string; slug: string; description?: string; imageUrl?: string;
+  categoryId?: number; supplierPrice: number; markupPercent: number;
+  stockQuantity: number; stockUnlimited: boolean; deliveryNote?: string;
+  isVisible: boolean; isFeatured: boolean;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const customerPrice = input.supplierPrice * (1 + input.markupPercent / 100);
+  await db.insert(products).values({
+    title: input.title,
+    slug: input.slug,
+    description: input.description ?? null,
+    imageUrl: input.imageUrl ?? null,
+    categoryId: input.categoryId ?? null,
+    providerKey: "manual",
+    supplierProductId: null,
+    supplierPrice: input.supplierPrice.toFixed(8) as any,
+    customerPriceUSD: customerPrice.toFixed(2) as any,
+    markupPercent: input.markupPercent.toFixed(2) as any,
+    stockQuantity: input.stockQuantity,
+    stockUnlimited: input.stockUnlimited,
+    deliveryNote: input.deliveryNote ?? null,
+    isVisible: input.isVisible,
+    isFeatured: input.isFeatured,
+  });
+  return { success: true };
+}
+
 export async function adminUpdateProduct(input: {
-  id: number; title?: string; description?: string; markupPercent?: number;
+  id: number; title?: string; description?: string; imageUrl?: string; markupPercent?: number;
   isVisible?: boolean; isFeatured?: boolean; categoryId?: number;
   regionRestrictions?: string[]; allowedPaymentMethods?: string[];
   deliveryNote?: string; refundPolicy?: string;
@@ -584,6 +629,7 @@ export async function adminUpdateProduct(input: {
   const updateData: Record<string, unknown> = {};
   if (input.title !== undefined) updateData.title = input.title;
   if (input.description !== undefined) updateData.description = input.description;
+  if (input.imageUrl !== undefined) updateData.imageUrl = input.imageUrl;
   if (input.isVisible !== undefined) updateData.isVisible = input.isVisible;
   if (input.isFeatured !== undefined) updateData.isFeatured = input.isFeatured;
   if (input.categoryId !== undefined) updateData.categoryId = input.categoryId;

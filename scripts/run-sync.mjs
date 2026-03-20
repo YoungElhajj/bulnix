@@ -76,12 +76,29 @@ for (const prod of allListings) {
     const stockQty = parseInt(prod.available_stock) || 0;
     const isUnlimited = stockQty === 0 && (prod.sold ?? 0) > 0;
 
-    // Resolve category
+    // Resolve category (and create subcategory if present)
     let categoryId = null;
     if (prod.category?.id) {
-      const catSlug = prod.category.slug ?? slugify(prod.category.title);
+      const catSlug = (prod.category.slug ?? slugify(prod.category.title)).slice(0, 128);
       const [catRow] = await db.query("SELECT id FROM categories WHERE slug = ?", [catSlug]);
-      if (catRow.length > 0) categoryId = catRow[0].id;
+      const parentCatId = catRow[0]?.id ?? null;
+
+      if (prod.subcategory?.id && parentCatId) {
+        const subSlug = (prod.subcategory.slug ?? slugify(prod.subcategory.title)).slice(0, 128);
+        const [subRow] = await db.query("SELECT id FROM categories WHERE slug = ?", [subSlug]);
+        if (subRow.length > 0) {
+          categoryId = subRow[0].id;
+        } else {
+          await db.query(
+            "INSERT INTO categories (name, slug, parentId, isVisible, sortOrder) VALUES (?, ?, ?, true, 0)",
+            [prod.subcategory.title, subSlug, parentCatId]
+          );
+          const [newSub] = await db.query("SELECT id FROM categories WHERE slug = ?", [subSlug]);
+          categoryId = newSub[0]?.id ?? parentCatId;
+        }
+      } else {
+        categoryId = parentCatId;
+      }
     }
 
     // Upsert supplier_products

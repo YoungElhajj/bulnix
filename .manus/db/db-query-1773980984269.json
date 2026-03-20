@@ -1,0 +1,38 @@
+{
+  "query": "\nSELECT 'categories_total' as metric, COUNT(*) as count FROM categories\nUNION ALL\nSELECT 'categories_top_level', COUNT(*) FROM categories WHERE parentId IS NULL\nUNION ALL\nSELECT 'categories_sub', COUNT(*) FROM categories WHERE parentId IS NOT NULL\nUNION ALL\nSELECT 'products_total', COUNT(*) FROM products\nUNION ALL\nSELECT 'products_visible', COUNT(*) FROM products WHERE isVisible = 1\nUNION ALL\nSELECT 'products_with_image', COUNT(*) FROM products WHERE imageUrl IS NOT NULL AND imageUrl != ''\nUNION ALL\nSELECT 'products_with_category', COUNT(*) FROM products WHERE categoryId IS NOT NULL;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xomvQyHT3Pc2eM.33c921a427fa --database 6qKkSV9dybS3AerhXhrTfQ --execute \nSELECT 'categories_total' as metric, COUNT(*) as count FROM categories\nUNION ALL\nSELECT 'categories_top_level', COUNT(*) FROM categories WHERE parentId IS NULL\nUNION ALL\nSELECT 'categories_sub', COUNT(*) FROM categories WHERE parentId IS NOT NULL\nUNION ALL\nSELECT 'products_total', COUNT(*) FROM products\nUNION ALL\nSELECT 'products_visible', COUNT(*) FROM products WHERE isVisible = 1\nUNION ALL\nSELECT 'products_with_image', COUNT(*) FROM products WHERE imageUrl IS NOT NULL AND imageUrl != ''\nUNION ALL\nSELECT 'products_with_category', COUNT(*) FROM products WHERE categoryId IS NOT NULL;\n",
+  "rows": [
+    {
+      "metric": "categories_top_level",
+      "count": "43"
+    },
+    {
+      "metric": "categories_total",
+      "count": "101"
+    },
+    {
+      "metric": "products_total",
+      "count": "615"
+    },
+    {
+      "metric": "categories_sub",
+      "count": "58"
+    },
+    {
+      "metric": "products_visible",
+      "count": "615"
+    },
+    {
+      "metric": "products_with_image",
+      "count": "0"
+    },
+    {
+      "metric": "products_with_category",
+      "count": "615"
+    }
+  ],
+  "messages": [],
+  "stdout": "metric\tcount\ncategories_top_level\t43\ncategories_total\t101\nproducts_total\t615\ncategories_sub\t58\nproducts_visible\t615\nproducts_with_image\t0\nproducts_with_category\t615\n",
+  "stderr": "",
+  "execution_time_ms": 62
+}

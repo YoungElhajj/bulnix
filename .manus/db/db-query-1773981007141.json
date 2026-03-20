@@ -1,0 +1,100 @@
+{
+  "query": "SELECT id, name, slug, imageUrl FROM categories WHERE parentId IS NULL ORDER BY sortOrder LIMIT 15;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xomvQyHT3Pc2eM.33c921a427fa --database 6qKkSV9dybS3AerhXhrTfQ --execute SELECT id, name, slug, imageUrl FROM categories WHERE parentId IS NULL ORDER BY sortOrder LIMIT 15;",
+  "rows": [
+    {
+      "id": "2",
+      "name": "Gmail Accounts",
+      "slug": "buy-gmail-accounts",
+      "imageUrl": "https://accszone.com/uploads/1695668135-Gmail.jpeg"
+    },
+    {
+      "id": "3",
+      "name": "YouTube Accounts & Channels",
+      "slug": "buy-youtube-accounts",
+      "imageUrl": "https://accszone.com/uploads/1767862811_Accszoneyoutube.jpg"
+    },
+    {
+      "id": "4",
+      "name": "WhatsApp Accounts",
+      "slug": "buy-whatsapp-accounts",
+      "imageUrl": "https://accszone.com/uploads/1760008147_WhatsApp.jpg"
+    },
+    {
+      "id": "5",
+      "name": "Instagram Accounts",
+      "slug": "buy-instagram-accounts",
+      "imageUrl": "https://accszone.com/uploads/1695830338-instagram-transparent-png-14.jpg"
+    },
+    {
+      "id": "6",
+      "name": "Google Voice Accounts",
+      "slug": "buy-google-voice-accounts",
+      "imageUrl": "https://accszone.com/uploads/1703626430-Google_Voice_icon_(2018-2020).svg.png"
+    },
+    {
+      "id": "7",
+      "name": "TikTok Accounts & Followers",
+      "slug": "buy-tiktok-accounts",
+      "imageUrl": "https://accszone.com/uploads/1699253604-png-transparent-tiktok-social-media-logos-brands-icon-thumbnail.png"
+    },
+    {
+      "id": "8",
+      "name": "LinkedIn Accounts",
+      "slug": "buy-linkedin-accounts",
+      "imageUrl": "https://accszone.com/uploads/1695434753-download.png"
+    },
+    {
+      "id": "9",
+      "name": "Indeed Accounts",
+      "slug": "buy-indeed-accounts",
+      "imageUrl": "https://accszone.com/uploads/1748840541_logo-indeed-min.png"
+    },
+    {
+      "id": "10",
+      "name": "Twitter/X Accounts",
+      "slug": "buy-twitter-x-accounts",
+      "imageUrl": "https://accszone.com/uploads/1708020906_images.png"
+    },
+    {
+      "id": "11",
+      "name": "Trustpilot Accounts",
+      "slug": "buy-trustpilot-accounts",
+      "imageUrl": "https://accszone.com/uploads/1750836436_trustpilot.png"
+    },
+    {
+      "id": "12",
+      "name": "Telegram Accounts",
+      "slug": "buy-telegram-accounts",
+      "imageUrl": "https://accszone.com/uploads/1721025076_ttt.jpg"
+    },
+    {
+      "id": "13",
+      "name": "Reddit Accounts",
+      "slug": "buy-reddit-accounts",
+      "imageUrl": "https://accszone.com/uploads/1699252587-reddit-logo-23F13F6A6A-seeklogo.com.png"
+    },
+    {
+      "id": "14",
+      "name": "CashApp Accounts",
+      "slug": "buy-cashapp-accounts",
+      "imageUrl": "https://accszone.com/uploads/1743516637_IMG_4233.png"
+    },
+    {
+      "id": "15",
+      "name": "Etsy-accounts",
+      "slug": "etsy-accounts-1",
+      "imageUrl": "https://accszone.com/uploads/1773264192_etsy-vector-logo-small.png"
+    },
+    {
+      "id": "1",
+      "name": "Facebook Accounts",
+      "slug": "buy-facebook-accounts",
+      "imageUrl": "https://accszone.com/uploads/1695414345-facebook-png-transparent-background-14.jpg"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tslug\timageUrl\n2\tGmail Accounts\tbuy-gmail-accounts\thttps://accszone.com/uploads/1695668135-Gmail.jpeg\n3\tYouTube Accounts & Channels\tbuy-youtube-accounts\thttps://accszone.com/uploads/1767862811_Accszoneyoutube.jpg\n4\tWhatsApp Accounts\tbuy-whatsapp-accounts\thttps://accszone.com/uploads/1760008147_WhatsApp.jpg\n5\tInstagram Accounts\tbuy-instagram-accounts\thttps://accszone.com/uploads/1695830338-instagram-transparent-png-14.jpg\n6\tGoogle Voice Accounts\tbuy-google-voice-accounts\thttps://accszone.com/uploads/1703626430-Google_Voice_icon_(2018-2020).svg.png\n7\tTikTok Accounts & Followers\tbuy-tiktok-accounts\thttps://accszone.com/uploads/1699253604-png-transparent-tiktok-social-media-logos-brands-icon-thumbnail.png\n8\tLinkedIn Accounts\tbuy-linkedin-accounts\thttps://accszone.com/uploads/1695434753-download.png\n9\tIndeed Accounts\tbuy-indeed-accounts\thttps://accszone.com/uploads/1748840541_logo-indeed-min.png\n10\tTwitter/X Accounts\tbuy-twitter-x-accounts\thttps://accszone.com/uploads/1708020906_images.png\n11\tTrustpilot Accounts\tbuy-trustpilot-accounts\thttps://accszone.com/uploads/1750836436_trustpilot.png\n12\tTelegram Accounts\tbuy-telegram-accounts\thttps://accszone.com/uploads/1721025076_ttt.jpg\n13\tReddit Accounts\tbuy-reddit-accounts\thttps://accszone.com/uploads/1699252587-reddit-logo-23F13F6A6A-seeklogo.com.png\n14\tCashApp Accounts\tbuy-cashapp-accounts\thttps://accszone.com/uploads/1743516637_IMG_4233.png\n15\tEtsy-accounts\tetsy-accounts-1\thttps://accszone.com/uploads/1773264192_etsy-vector-logo-small.png\n1\tFacebook Accounts\tbuy-facebook-accounts\thttps://accszone.com/uploads/1695414345-facebook-png-transparent-background-14.jpg\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

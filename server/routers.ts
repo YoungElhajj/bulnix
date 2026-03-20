@@ -170,11 +170,28 @@ export const appRouter = router({
       list: adminProcedure
         .input(z.object({ page: z.number().default(1), limit: z.number().default(50), search: z.string().optional() }))
         .query(({ input }) => db.adminGetProducts(input)),
+      create: adminProcedure
+        .input(z.object({
+          title: z.string(),
+          slug: z.string(),
+          description: z.string().optional(),
+          imageUrl: z.string().optional(),
+          categoryId: z.number().optional(),
+          supplierPrice: z.number(),
+          markupPercent: z.number().default(20),
+          stockQuantity: z.number().default(0),
+          stockUnlimited: z.boolean().default(false),
+          deliveryNote: z.string().optional(),
+          isVisible: z.boolean().default(true),
+          isFeatured: z.boolean().default(false),
+        }))
+        .mutation(({ input }) => db.adminCreateProduct(input)),
       update: adminProcedure
         .input(z.object({
           id: z.number(),
           title: z.string().optional(),
           description: z.string().optional(),
+          imageUrl: z.string().optional(),
           markupPercent: z.number().optional(),
           isVisible: z.boolean().optional(),
           isFeatured: z.boolean().optional(),
@@ -247,8 +264,20 @@ export const appRouter = router({
         .input(z.object({ name: z.string(), slug: z.string(), description: z.string().optional(), parentId: z.number().optional() }))
         .mutation(({ input }) => db.createCategory(input)),
       update: adminProcedure
-        .input(z.object({ id: z.number(), name: z.string().optional(), isVisible: z.boolean().optional(), sortOrder: z.number().optional() }))
+        .input(z.object({
+          id: z.number(),
+          name: z.string().optional(),
+          slug: z.string().optional(),
+          description: z.string().optional(),
+          imageUrl: z.string().optional(),
+          parentId: z.number().nullable().optional(),
+          isVisible: z.boolean().optional(),
+          sortOrder: z.number().optional(),
+        }))
         .mutation(({ input }) => db.updateCategory(input)),
+      delete: adminProcedure
+        .input(z.object({ id: z.number() }))
+        .mutation(({ input }) => db.deleteCategory(input.id)),
     }),
 
     // System logs

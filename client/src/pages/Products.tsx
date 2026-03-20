@@ -31,7 +31,7 @@ export default function Products() {
     limit: 24,
   }, { retry: false });
 
-  const products = (data as any)?.products ?? [];
+  const products = (data as any)?.items ?? [];
   const total = (data as any)?.total ?? 0;
   const totalPages = Math.ceil(total / 24);
 

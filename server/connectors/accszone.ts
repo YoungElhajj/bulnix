@@ -192,12 +192,34 @@ export async function syncProducts(apiKey: string, markupPercent = 20): Promise<
           .where(and(eq(products.providerKey, PROVIDER_KEY), eq(products.supplierProductId, Number(prod.id))))
           .limit(1);
 
-        // Resolve category from DB
+        // Resolve category from DB (and create subcategory if present)
         let categoryId: number | null = null;
         if (prod.category?.id) {
-          const catSlug = prod.category.slug ?? String(prod.category.title).toLowerCase().replace(/[^a-z0-9]+/g, "-");
+          const catSlug = prod.category.slug ?? String(prod.category.title).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
           const catRow = await db.select().from(categories).where(eq(categories.slug, catSlug)).limit(1);
-          categoryId = catRow[0]?.id ?? null;
+          const parentCategoryId = catRow[0]?.id ?? null;
+
+          // If there's a subcategory, resolve or create it
+          if (prod.subcategory?.id && parentCategoryId) {
+            const subSlug = prod.subcategory.slug ?? String(prod.subcategory.title).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+            const subRow = await db.select().from(categories).where(eq(categories.slug, subSlug)).limit(1);
+            if (subRow[0]) {
+              categoryId = subRow[0].id;
+            } else {
+              // Create the subcategory
+              await db.insert(categories).values({
+                name: prod.subcategory.title,
+                slug: subSlug,
+                parentId: parentCategoryId,
+                isVisible: true,
+                sortOrder: 0,
+              });
+              const newSub = await db.select().from(categories).where(eq(categories.slug, subSlug)).limit(1);
+              categoryId = newSub[0]?.id ?? parentCategoryId;
+            }
+          } else {
+            categoryId = parentCategoryId;
+          }
         }
 
         if (existingProduct[0]) {

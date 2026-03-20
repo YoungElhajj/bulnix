@@ -99,3 +99,14 @@
 - [x] AccsZone API key → configured and synced (42 categories, 615 products live)
 - [ ] MySQL database credentials → DATABASE_URL secret (production DB)
 - [ ] Production deployment → click Publish button
+
+## Bug Fixes & Enhancements (Round 2)
+- [ ] Fix featured products not showing on homepage
+- [ ] Fix products not showing on storefront/listing pages
+- [ ] Fix category icons not displaying
+- [ ] Sync AccsZone subcategories into database
+- [ ] Admin: add product creation form
+- [ ] Admin: add icon/image upload for products and categories
+- [ ] Admin: edit individual categories (name, slug, icon, visibility, sort order)
+- [ ] Admin: edit individual product listings (title, description, price, image, visibility, featured)
+- [ ] Homepage: add "Become a Supplier" section

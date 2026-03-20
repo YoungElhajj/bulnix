@@ -1,0 +1,13 @@
+{
+  "query": "\nUPDATE products SET isFeatured = 1 \nWHERE id IN (\n  SELECT id FROM (\n    SELECT id FROM products \n    WHERE isVisible = 1 AND stockQuantity > 0\n    ORDER BY stockQuantity DESC, customerPriceUSD DESC\n    LIMIT 12\n  ) AS top_products\n);\nSELECT COUNT(*) as featured_count FROM products WHERE isFeatured = 1;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xomvQyHT3Pc2eM.33c921a427fa --database 6qKkSV9dybS3AerhXhrTfQ --execute \nUPDATE products SET isFeatured = 1 \nWHERE id IN (\n  SELECT id FROM (\n    SELECT id FROM products \n    WHERE isVisible = 1 AND stockQuantity > 0\n    ORDER BY stockQuantity DESC, customerPriceUSD DESC\n    LIMIT 12\n  ) AS top_products\n);\nSELECT COUNT(*) as featured_count FROM products WHERE isFeatured = 1;\n",
+  "rows": [
+    {
+      "featured_count": "12"
+    }
+  ],
+  "messages": [],
+  "stdout": "featured_count\n12\n",
+  "stderr": "",
+  "execution_time_ms": 199
+}

@@ -121,12 +121,20 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {(categoriesData?.length ? categoriesData.slice(0, 6) : HERO_CATEGORIES).map((cat: any, i: number) => (
-              <Link key={i} href={`/categories/${cat.slug || cat.name.toLowerCase().replace(/\s+/g, '-')}`}>
+            {(categoriesData as any[] | undefined ?? [])
+              .filter((c: any) => !c.parentId)
+              .slice(0, 6)
+              .map((cat: any, i: number) => (
+              <Link key={i} href={`/categories/${cat.slug}`}>
                 <div className="glass-card rounded-xl p-5 text-center cursor-pointer group hover:border-[#00B9E9]/30 transition-all duration-200 hover:-translate-y-1">
-                  <div className="text-3xl mb-3">{cat.icon || "📦"}</div>
-                  <div className="text-sm font-semibold text-white group-hover:text-[#00B9E9] transition-colors">{cat.name}</div>
-                  <div className="text-xs text-slate-500 mt-1">{cat.count || "Products"}</div>
+                  <div className="w-12 h-12 rounded-xl bg-[#0F172A] border border-white/8 flex items-center justify-center mx-auto mb-3 overflow-hidden">
+                    {cat.imageUrl ? (
+                      <img src={cat.imageUrl} alt={cat.name} className="w-9 h-9 object-contain" />
+                    ) : (
+                      <span className="text-2xl">📦</span>
+                    )}
+                  </div>
+                  <div className="text-sm font-semibold text-white group-hover:text-[#00B9E9] transition-colors line-clamp-2">{cat.name}</div>
                 </div>
               </Link>
             ))}
@@ -334,6 +342,85 @@ export default function Home() {
                   View All FAQs <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Become a Supplier ──────────────────────────────────────────────── */}
+      <section className="py-20 bg-[#080c14]">
+        <div className="container">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left: Content */}
+            <div>
+              <Badge className="mb-4 bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/20 text-xs font-semibold px-3 py-1">
+                SUPPLIER PROGRAM
+              </Badge>
+              <h2 className="text-4xl font-bold text-white mb-5 leading-tight">
+                Become a <span className="text-[#00B9E9]">Bulnix</span> Supplier
+              </h2>
+              <p className="text-slate-400 text-lg mb-8 leading-relaxed">
+                Have digital products to sell? Partner with Bulnix and reach thousands of buyers across Africa and globally. We handle payments, delivery, and customer support — you focus on supply.
+              </p>
+              <div className="space-y-4 mb-8">
+                {[
+                  { icon: TrendingUp, title: "Grow Your Revenue", desc: "Access our established buyer network and sell at volume" },
+                  { icon: Shield, title: "Secure Payouts", desc: "Get paid reliably in NGN, USD, or crypto on your schedule" },
+                  { icon: Globe, title: "Global Reach", desc: "Sell to buyers in 50+ countries through our platform" },
+                  { icon: Zap, title: "Easy Integration", desc: "Simple API or dashboard-based product listing and management" },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start gap-4">
+                    <div className="w-9 h-9 rounded-lg bg-[#00B9E9]/10 border border-[#00B9E9]/20 flex items-center justify-center shrink-0 mt-0.5">
+                      <item.icon className="h-4 w-4 text-[#00B9E9]" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-white">{item.title}</p>
+                      <p className="text-sm text-slate-400">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Link href="/contact">
+                <Button size="lg" className="bg-[#22C55E] hover:bg-[#16a34a] text-white font-semibold px-8 h-12" style={{ boxShadow: "0 0 24px rgba(34,197,94,0.25)" }}>
+                  Apply to Become a Supplier
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
+
+            {/* Right: Stats card */}
+            <div className="relative">
+              <div className="glass-card rounded-2xl p-8" style={{ border: "1px solid rgba(34,197,94,0.15)" }}>
+                <h3 className="text-lg font-bold text-white mb-6">Why Suppliers Choose Bulnix</h3>
+                <div className="grid grid-cols-2 gap-5 mb-6">
+                  {[
+                    { value: "50K+", label: "Active Buyers", color: "#00B9E9" },
+                    { value: "99.9%", label: "Platform Uptime", color: "#22C55E" },
+                    { value: "24h", label: "Onboarding Time", color: "#a855f7" },
+                    { value: "0%", label: "Setup Fee", color: "#f59e0b" },
+                  ].map((stat, i) => (
+                    <div key={i} className="text-center p-4 rounded-xl" style={{ background: `${stat.color}08`, border: `1px solid ${stat.color}15` }}>
+                      <p className="text-2xl font-bold mb-1" style={{ color: stat.color }}>{stat.value}</p>
+                      <p className="text-xs text-slate-400">{stat.label}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-3">
+                  {[
+                    "Dedicated supplier dashboard",
+                    "Real-time order & payout tracking",
+                    "Automated order fulfillment",
+                    "Priority support channel",
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <CheckCircle className="h-4 w-4 text-[#22C55E] shrink-0" />
+                      <span className="text-sm text-slate-300">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* Decorative glow */}
+              <div className="absolute -bottom-8 -right-8 w-48 h-48 bg-[#22C55E]/8 rounded-full blur-[60px] pointer-events-none" />
             </div>
           </div>
         </div>

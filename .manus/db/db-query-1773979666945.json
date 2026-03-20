@@ -1,0 +1,18 @@
+{
+  "query": "SELECT id, name, email, role, openId, createdAt FROM users ORDER BY createdAt ASC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xomvQyHT3Pc2eM.33c921a427fa --database 6qKkSV9dybS3AerhXhrTfQ --execute SELECT id, name, email, role, openId, createdAt FROM users ORDER BY createdAt ASC;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "ethanmitchell3077",
+      "email": "ethanmitchell3077@gmail.com",
+      "role": "user",
+      "openId": "4ckdc6Mzg3vbSx8KUQSufS",
+      "createdAt": "2026-03-20 03:51:04"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\topenId\tcreatedAt\n1\tethanmitchell3077\tethanmitchell3077@gmail.com\tuser\t4ckdc6Mzg3vbSx8KUQSufS\t2026-03-20 03:51:04\n",
+  "stderr": "",
+  "execution_time_ms": 73
+}
