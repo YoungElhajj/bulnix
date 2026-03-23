@@ -1,0 +1,8 @@
+{
+  "query": "SELECT id, userId, orderRef, status, totalUSD, createdAt FROM orders WHERE userId = 1 LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xomvQyHT3Pc2eM.33c921a427fa --database 6qKkSV9dybS3AerhXhrTfQ --execute SELECT id, userId, orderRef, status, totalUSD, createdAt FROM orders WHERE userId = 1 LIMIT 5;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'orderref' in 'field list'"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "query": "SELECT u.id, u.name, u.email, COUNT(o.id) as order_count FROM users u LEFT JOIN orders o ON o.userId = u.id GROUP BY u.id, u.name, u.email LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xomvQyHT3Pc2eM.33c921a427fa --database 6qKkSV9dybS3AerhXhrTfQ --execute SELECT u.id, u.name, u.email, COUNT(o.id) as order_count FROM users u LEFT JOIN orders o ON o.userId = u.id GROUP BY u.id, u.name, u.email LIMIT 10;",
+  "rows": [
+    {
+      "id": "138",
+      "name": "youngelhajj48",
+      "email": "youngelhajj48@gmail.com",
+      "order_count": "0"
+    },
+    {
+      "id": "1",
+      "name": "ethanmitchell3077",
+      "email": "ethanmitchell3077@gmail.com",
+      "order_count": "6"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\torder_count\n138\tyoungelhajj48\tyoungelhajj48@gmail.com\t0\n1\tethanmitchell3077\tethanmitchell3077@gmail.com\t6\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}

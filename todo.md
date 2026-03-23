@@ -149,3 +149,12 @@
 - [ ] Real-time stock deduction on order placement to prevent overselling
 - [ ] Fix admin user details page: show orders, order IDs, wallet balance, tickets
 - [ ] Seed demo orders and demo data for admin panel preview
+
+## Bug Fixes Round 5 (Mar 23, 2026)
+- [x] Fix dark/light theme toggle button not working in navbar
+- [x] Verify and fix sync button to actually update products/stock counts
+- [x] Assign category logos/icons to all products based on their parent category
+- [x] Fix admin orders page showing no data (was already using correct data.items field)
+- [x] Fix admin logs page showing no data (was already using correct data.items field)
+- [x] Fix admin users detail view showing orderRef (changed to orderNumber)
+- [x] Fix sync history showing wrong status colors (success vs completed)

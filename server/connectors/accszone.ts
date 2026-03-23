@@ -194,10 +194,12 @@ export async function syncProducts(apiKey: string, markupPercent = 20): Promise<
 
         // Resolve category from DB (and create subcategory if present)
         let categoryId: number | null = null;
+        let categoryImageUrl: string | null = null; // For fallback product icon
         if (prod.category?.id) {
           const catSlug = prod.category.slug ?? String(prod.category.title).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
           const catRow = await db.select().from(categories).where(eq(categories.slug, catSlug)).limit(1);
           const parentCategoryId = catRow[0]?.id ?? null;
+          categoryImageUrl = catRow[0]?.imageUrl ?? null; // Store parent category icon
 
           // If there's a subcategory, resolve or create it
           if (prod.subcategory?.id && parentCategoryId) {
@@ -205,6 +207,8 @@ export async function syncProducts(apiKey: string, markupPercent = 20): Promise<
             const subRow = await db.select().from(categories).where(eq(categories.slug, subSlug)).limit(1);
             if (subRow[0]) {
               categoryId = subRow[0].id;
+              // Use subcategory icon if available, otherwise fall back to parent category icon
+              categoryImageUrl = subRow[0].imageUrl ?? categoryImageUrl;
             } else {
               // Create the subcategory
               await db.insert(categories).values({
@@ -221,6 +225,8 @@ export async function syncProducts(apiKey: string, markupPercent = 20): Promise<
             categoryId = parentCategoryId;
           }
         }
+        // Use product's own image, or fall back to category icon
+        const resolvedImageUrl = prod.image ?? categoryImageUrl;
 
         if (existingProduct[0]) {
           // Only update price/stock if not overridden by admin
@@ -231,6 +237,8 @@ export async function syncProducts(apiKey: string, markupPercent = 20): Promise<
             customerPriceUSD: customerPrice.toFixed(2),
           };
           if (categoryId) updateData.categoryId = categoryId;
+          // Update imageUrl if product has no image but category has one
+          if (!existingProduct[0].imageUrl && resolvedImageUrl) updateData.imageUrl = resolvedImageUrl;
           await db.update(products).set(updateData).where(eq(products.id, existingProduct[0].id));
         } else {
           await db.insert(products).values({
@@ -239,7 +247,7 @@ export async function syncProducts(apiKey: string, markupPercent = 20): Promise<
             title: prodName,
             slug: `${slug}-${String(prod.id)}`,
             description: prod.description ?? null,
-            imageUrl: prod.image ?? null,
+            imageUrl: resolvedImageUrl,
             categoryId: categoryId,
             supplierPrice: supplierPrice.toFixed(2) as any,
             markupPercent: markupPercent.toFixed(2) as any,

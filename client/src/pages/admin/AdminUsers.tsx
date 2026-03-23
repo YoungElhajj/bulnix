@@ -83,7 +83,7 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-mono text-slate-300">#{order.id}</span>
-                          <span className="text-xs font-mono text-slate-500 truncate">{order.orderRef ?? "—"}</span>
+                          <span className="text-xs font-mono text-slate-500 truncate">{order.orderNumber ?? "—"}</span>
                         </div>
                         <div className="text-xs text-slate-500 mt-0.5">{new Date(order.createdAt).toLocaleString()}</div>
                       </div>

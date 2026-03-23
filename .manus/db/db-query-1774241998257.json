@@ -1,0 +1,50 @@
+{
+  "query": "SELECT id, userId, orderNumber, status, totalUSD, createdAt FROM orders WHERE userId = 1 LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xomvQyHT3Pc2eM.33c921a427fa --database 6qKkSV9dybS3AerhXhrTfQ --execute SELECT id, userId, orderNumber, status, totalUSD, createdAt FROM orders WHERE userId = 1 LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "userId": "1",
+      "orderNumber": "BLX-1773981388453-4QUDUJ",
+      "status": "pending_payment",
+      "totalUSD": "6.78",
+      "createdAt": "2026-03-20 04:36:28"
+    },
+    {
+      "id": "30001",
+      "userId": "1",
+      "orderNumber": "BLX-1773985987001-BIZVGO",
+      "status": "pending_payment",
+      "totalUSD": "5.40",
+      "createdAt": "2026-03-20 05:53:07"
+    },
+    {
+      "id": "60001",
+      "userId": "1",
+      "orderNumber": "BLX-2026-0001",
+      "status": "fulfilled",
+      "totalUSD": "12.99",
+      "createdAt": "2026-03-18 04:35:36"
+    },
+    {
+      "id": "60002",
+      "userId": "1",
+      "orderNumber": "BLX-2026-0002",
+      "status": "fulfilled",
+      "totalUSD": "22.50",
+      "createdAt": "2026-03-20 04:35:36"
+    },
+    {
+      "id": "60003",
+      "userId": "1",
+      "orderNumber": "BLX-2026-0003",
+      "status": "processing",
+      "totalUSD": "8.99",
+      "createdAt": "2026-03-22 04:35:36"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\torderNumber\tstatus\ttotalUSD\tcreatedAt\n1\t1\tBLX-1773981388453-4QUDUJ\tpending_payment\t6.78\t2026-03-20 04:36:28\n30001\t1\tBLX-1773985987001-BIZVGO\tpending_payment\t5.40\t2026-03-20 05:53:07\n60001\t1\tBLX-2026-0001\tfulfilled\t12.99\t2026-03-18 04:35:36\n60002\t1\tBLX-2026-0002\tfulfilled\t22.50\t2026-03-20 04:35:36\n60003\t1\tBLX-2026-0003\tprocessing\t8.99\t2026-03-22 04:35:36\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

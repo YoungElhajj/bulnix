@@ -36,14 +36,28 @@ export default function AdminProviders() {
   const triggerSync = trpc.admin.providers.triggerSync.useMutation({
     onSuccess: (data) => {
       toast.success((data as any)?.message ?? "Sync triggered! Products will update in the background.");
-      // Keep polling for a while to show progress
+      // Poll for completion - check sync logs every 5 seconds
+      let pollCount = 0;
+      const pollInterval = setInterval(async () => {
+        pollCount++;
+        refetchLogs();
+        refetchProviders();
+        if (pollCount >= 24) { // Max 2 minutes
+          clearInterval(pollInterval);
+          setSyncing(null);
+          setSyncStartTime(null);
+          toast.info("Sync is taking longer than expected. Check sync history for status.");
+        }
+      }, 5000);
+      // Also set a fallback timeout
       setTimeout(() => {
+        clearInterval(pollInterval);
         setSyncing(null);
         setSyncStartTime(null);
         refetchProviders();
         refetchLogs();
-        toast.success("Sync complete. Products are now up to date.");
-      }, 30000);
+        toast.success("Sync complete! Check the sync history below for results.");
+      }, 45000);
     },
     onError: (e) => { toast.error(e.message); setSyncing(null); setSyncStartTime(null); },
   });
@@ -207,7 +221,7 @@ export default function AdminProviders() {
           <div className="space-y-2">
             {logs.slice(0, 10).map((log: any) => (
               <div key={log.id} className="flex items-center gap-3 py-2 border-b border-white/5 last:border-0">
-                {log.status === "completed" ? (
+                {log.status === "success" || log.status === "completed" ? (
                   <CheckCircle className="h-4 w-4 text-[#22C55E] shrink-0" />
                 ) : log.status === "failed" ? (
                   <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />
@@ -220,10 +234,10 @@ export default function AdminProviders() {
                 </div>
                 <div className="text-xs text-slate-500 shrink-0">{new Date(log.startedAt).toLocaleString()}</div>
                 <Badge className={
-                  log.status === "completed" ? "bg-[#22C55E]/10 text-[#22C55E] border-0 text-xs" :
+                  (log.status === "success" || log.status === "completed") ? "bg-[#22C55E]/10 text-[#22C55E] border-0 text-xs" :
                   log.status === "failed" ? "bg-red-500/10 text-red-400 border-0 text-xs" :
                   "bg-[#00B9E9]/10 text-[#00B9E9] border-0 text-xs"
-                }>{log.status}</Badge>
+                }>{log.status === 'success' ? 'completed' : log.status}</Badge>
               </div>
             ))}
           </div>

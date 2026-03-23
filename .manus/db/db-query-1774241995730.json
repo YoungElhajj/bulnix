@@ -1,0 +1,202 @@
+{
+  "query": "DESCRIBE orders;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xomvQyHT3Pc2eM.33c921a427fa --database 6qKkSV9dybS3AerhXhrTfQ --execute DESCRIBE orders;",
+  "rows": [
+    {
+      "Field": "id",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "PRI",
+      "Default": "NULL",
+      "Extra": "auto_increment"
+    },
+    {
+      "Field": "orderNumber",
+      "Type": "varchar(64)",
+      "Null": "NO",
+      "Key": "UNI",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "userId",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "status",
+      "Type": "enum('pending_payment','paid','processing','fulfilled','partial','failed','cancelled','refunded','disputed')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "pending_payment",
+      "Extra": ""
+    },
+    {
+      "Field": "subtotalUSD",
+      "Type": "decimal(18,2)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "discountUSD",
+      "Type": "decimal(18,2)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0.00",
+      "Extra": ""
+    },
+    {
+      "Field": "totalUSD",
+      "Type": "decimal(18,2)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "currency",
+      "Type": "enum('NGN','USD','EUR','GBP')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "USD",
+      "Extra": ""
+    },
+    {
+      "Field": "totalInCurrency",
+      "Type": "decimal(18,2)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "exchangeRateSnapshot",
+      "Type": "decimal(18,6)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "couponCode",
+      "Type": "varchar(64)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "couponDiscountUSD",
+      "Type": "decimal(18,2)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "0.00",
+      "Extra": ""
+    },
+    {
+      "Field": "billingEmail",
+      "Type": "varchar(320)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "billingCountry",
+      "Type": "varchar(64)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "fraudFlag",
+      "Type": "tinyint(1)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "fraudReason",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "isLocked",
+      "Type": "tinyint(1)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "adminNotes",
+      "Type": "text",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "supplierOrderId",
+      "Type": "varchar(256)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "supplierStatus",
+      "Type": "varchar(64)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "fulfillmentRetries",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "lastFulfillmentAttempt",
+      "Type": "timestamp",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "createdAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": ""
+    },
+    {
+      "Field": "updatedAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+    }
+  ],
+  "messages": [],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\norderNumber\tvarchar(64)\tNO\tUNI\tNULL\t\nuserId\tint\tNO\t\tNULL\t\nstatus\tenum('pending_payment','paid','processing','fulfilled','partial','failed','cancelled','refunded','disputed')\tNO\t\tpending_payment\t\nsubtotalUSD\tdecimal(18,2)\tNO\t\tNULL\t\ndiscountUSD\tdecimal(18,2)\tNO\t\t0.00\t\ntotalUSD\tdecimal(18,2)\tNO\t\tNULL\t\ncurrency\tenum('NGN','USD','EUR','GBP')\tNO\t\tUSD\t\ntotalInCurrency\tdecimal(18,2)\tNO\t\tNULL\t\nexchangeRateSnapshot\tdecimal(18,6)\tYES\t\tNULL\t\ncouponCode\tvarchar(64)\tYES\t\tNULL\t\ncouponDiscountUSD\tdecimal(18,2)\tYES\t\t0.00\t\nbillingEmail\tvarchar(320)\tYES\t\tNULL\t\nbillingCountry\tvarchar(64)\tYES\t\tNULL\t\nfraudFlag\ttinyint(1)\tNO\t\t0\t\nfraudReason\ttext\tYES\t\tNULL\t\nisLocked\ttinyint(1)\tNO\t\t0\t\nadminNotes\ttext\tYES\t\tNULL\t\nsupplierOrderId\tvarchar(256)\tYES\t\tNULL\t\nsupplierStatus\tvarchar(64)\tYES\t\tNULL\t\nfulfillmentRetries\tint\tNO\t\t0\t\nlastFulfillmentAttempt\ttimestamp\tYES\t\tNULL\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nupdatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\n",
+  "stderr": "",
+  "execution_time_ms": 144
+}

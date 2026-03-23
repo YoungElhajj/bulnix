@@ -20,7 +20,7 @@ export default function AdminOrders() {
   const updateOrder = trpc.admin.orders.update.useMutation({ onSuccess: () => { toast.success("Order updated"); utils.admin.orders.list.invalidate(); }, onError: e => toast.error(e.message) });
   const retryFulfillment = trpc.admin.orders.retryFulfillment.useMutation({ onSuccess: () => { toast.success("Fulfillment retry triggered"); utils.admin.orders.list.invalidate(); }, onError: e => toast.error(e.message) });
 
-  const orders = (data as any)?.orders ?? [];
+  const orders = (data as any)?.items ?? [];
   const total = (data as any)?.total ?? 0;
   const statusBadge = (s: string) => ({ pending: "bg-yellow-500/10 text-yellow-400", processing: "bg-blue-500/10 text-blue-400", completed: "bg-[#22C55E]/10 text-[#22C55E]", failed: "bg-red-500/10 text-red-400", refunded: "bg-orange-500/10 text-orange-400" }[s] ?? "bg-slate-500/10 text-slate-400");
 

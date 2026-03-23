@@ -19,7 +19,7 @@ export default function AdminLogs() {
     category: category === "all" ? undefined : category,
   }, { enabled: isAuthenticated && user?.role === "admin", retry: false });
 
-  const logs = (data as any)?.logs ?? [];
+  const logs = (data as any)?.items ?? [];
   const total = (data as any)?.total ?? 0;
   const levelColor = (l: string) => ({ info: "bg-blue-500/10 text-blue-400", warn: "bg-yellow-500/10 text-yellow-400", error: "bg-red-500/10 text-red-400", debug: "bg-slate-500/10 text-slate-400" }[l] ?? "bg-slate-500/10 text-slate-400");
 
