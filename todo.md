@@ -234,3 +234,6 @@
 - [x] Wire order confirmation email after successful order
 - [x] Wire support ticket reply notification email
 - [x] Wire order status update email when admin changes order status
+
+## Email Domain Fix (Mar 23, 2026)
+- [x] Update EMAIL_FROM to noreply@support.bulnix.com (Resend verified subdomain)
