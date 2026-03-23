@@ -1,0 +1,254 @@
+/**
+ * Bulnix Email Service
+ * Uses Resend for transactional email delivery.
+ * Set RESEND_API_KEY, EMAIL_FROM, and EMAIL_FROM_NAME in environment secrets.
+ */
+import { Resend } from "resend";
+
+let _resend: Resend | null = null;
+function getResend(): Resend | null {
+  if (!process.env.RESEND_API_KEY) return null;
+  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY);
+  return _resend;
+}
+const FROM_EMAIL = process.env.EMAIL_FROM ?? "onboarding@resend.dev";
+const FROM_NAME = process.env.EMAIL_FROM_NAME ?? "Bulnix";
+const FROM = `${FROM_NAME} <${FROM_EMAIL}>`;
+
+// ─── Base HTML wrapper ────────────────────────────────────────────────────────
+function baseTemplate(title: string, body: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${title}</title>
+  <style>
+    body { margin: 0; padding: 0; background: #0B0F19; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #e2e8f0; }
+    .wrapper { max-width: 600px; margin: 0 auto; padding: 40px 20px; }
+    .card { background: #0F172A; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 40px; }
+    .logo { text-align: center; margin-bottom: 32px; }
+    .logo img { height: 40px; }
+    h1 { font-size: 22px; font-weight: 700; color: #ffffff; margin: 0 0 12px; }
+    p { font-size: 15px; line-height: 1.6; color: #94a3b8; margin: 0 0 16px; }
+    .btn { display: inline-block; background: #00B9E9; color: #ffffff !important; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 15px; margin: 8px 0 24px; }
+    .divider { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 28px 0; }
+    .label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #475569; margin-bottom: 4px; }
+    .value { font-size: 15px; color: #e2e8f0; margin-bottom: 16px; }
+    .highlight { background: rgba(0,185,233,0.08); border: 1px solid rgba(0,185,233,0.2); border-radius: 10px; padding: 20px 24px; margin: 20px 0; }
+    .highlight .code { font-size: 32px; font-weight: 800; color: #00B9E9; letter-spacing: 0.15em; text-align: center; }
+    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .status-paid { background: rgba(34,197,94,0.15); color: #22C55E; }
+    .status-processing { background: rgba(251,191,36,0.15); color: #FBBF24; }
+    .status-completed { background: rgba(0,185,233,0.15); color: #00B9E9; }
+    .footer { text-align: center; margin-top: 32px; font-size: 12px; color: #334155; }
+    .footer a { color: #475569; text-decoration: none; }
+    .social-row { text-align: center; margin: 20px 0 0; }
+    .social-row a { display: inline-block; margin: 0 8px; color: #475569; font-size: 13px; text-decoration: none; }
+    table.order-items { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    table.order-items th { text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #475569; padding: 0 0 10px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    table.order-items td { padding: 10px 0; font-size: 14px; color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; }
+    table.order-items td.name { color: #e2e8f0; }
+    table.order-items td.price { text-align: right; color: #22C55E; font-weight: 600; white-space: nowrap; }
+    .total-row { display: flex; justify-content: space-between; padding: 14px 0 0; font-size: 16px; font-weight: 700; color: #ffffff; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="logo">
+      <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663404004095/6qKkSV9dybS3AerhXhrTfQ/bulnix-logo_f53aba21.png" alt="Bulnix" />
+    </div>
+    <div class="card">
+      ${body}
+    </div>
+    <div class="footer">
+      <p style="margin-bottom:8px;">© ${new Date().getFullYear()} Bulnix. All rights reserved.</p>
+      <div class="social-row">
+        <a href="https://t.me/bulnix">Telegram</a>
+        <a href="https://wa.me/message/bulnix">WhatsApp</a>
+        <a href="https://bulnixshop.com/privacy">Privacy</a>
+        <a href="https://bulnixshop.com/terms">Terms</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+// ─── Email senders ────────────────────────────────────────────────────────────
+
+/** Send welcome email when a new user signs up */
+export async function sendWelcomeEmail(opts: {
+  to: string;
+  name: string;
+}): Promise<void> {
+  const body = `
+    <h1>Welcome to Bulnix, ${opts.name || "there"}! 🎉</h1>
+    <p>Your account is ready. You now have access to thousands of premium digital products — social media accounts, streaming services, gaming credits, VPNs, and more.</p>
+    <a href="https://bulnixshop.com/categories" class="btn">Browse Products →</a>
+    <hr class="divider" />
+    <p style="font-size:13px;">Need help getting started? Our support team is available 24/7 via <a href="https://wa.me/message/bulnix" style="color:#00B9E9;">WhatsApp</a> or by opening a <a href="https://bulnixshop.com/support" style="color:#00B9E9;">support ticket</a>.</p>
+    <p style="font-size:13px;">Join our Telegram channel for exclusive deals and updates: <a href="https://t.me/bulnix" style="color:#00B9E9;">t.me/bulnix</a></p>`;
+
+  const client = getResend();
+  if (!client) { console.warn("[email] RESEND_API_KEY not set — skipping welcome email"); return; }
+  await client.emails.send({
+    from: FROM,
+    to: opts.to,
+    subject: "Welcome to Bulnix — Your account is ready",
+    html: baseTemplate("Welcome to Bulnix", body),
+  });
+}
+
+/** Send order confirmation email */
+export async function sendOrderConfirmationEmail(opts: {
+  to: string;
+  name: string;
+  orderNumber: string;
+  orderId: number;
+  items: Array<{ title: string; quantity: number; priceUSD: number }>;
+  totalUSD: number;
+  currency: string;
+  status: string;
+}): Promise<void> {
+  const itemRows = opts.items.map(item => `
+    <tr>
+      <td class="name">${item.title}</td>
+      <td style="text-align:center;color:#94a3b8;">×${item.quantity}</td>
+      <td class="price">$${(item.priceUSD * item.quantity).toFixed(2)}</td>
+    </tr>`).join("");
+
+  const body = `
+    <h1>Order Confirmed ✅</h1>
+    <p>Hi ${opts.name || "there"}, your order has been received and is being processed.</p>
+    <div class="highlight">
+      <div class="label" style="text-align:center;">Order Number</div>
+      <div class="code">${opts.orderNumber}</div>
+    </div>
+    <table class="order-items">
+      <thead><tr><th>Product</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Price</th></tr></thead>
+      <tbody>${itemRows}</tbody>
+    </table>
+    <div class="total-row"><span>Total</span><span style="color:#22C55E;">$${opts.totalUSD.toFixed(2)}</span></div>
+    <hr class="divider" />
+    <a href="https://bulnixshop.com/orders/${opts.orderId}" class="btn">View Order Details →</a>
+    <p style="font-size:13px;">Digital products are delivered automatically once payment is confirmed. Check your order page for delivery details.</p>
+    <p style="font-size:13px;">Questions? Contact us on <a href="https://wa.me/message/bulnix" style="color:#00B9E9;">WhatsApp</a> or open a <a href="https://bulnixshop.com/support" style="color:#00B9E9;">support ticket</a>.</p>`;
+
+  const client = getResend();
+  if (!client) { console.warn("[email] RESEND_API_KEY not set — skipping order confirmation email"); return; }
+  await client.emails.send({
+    from: FROM,
+    to: opts.to,
+    subject: `Order ${opts.orderNumber} confirmed — Bulnix`,
+    html: baseTemplate("Order Confirmed", body),
+  });
+}
+
+/** Send order status update email */
+export async function sendOrderStatusEmail(opts: {
+  to: string;
+  name: string;
+  orderNumber: string;
+  orderId: number;
+  status: string;
+  message?: string;
+}): Promise<void> {
+  const statusLabel: Record<string, string> = {
+    processing: "Processing",
+    paid: "Payment Received",
+    fulfilled: "Delivered",
+    completed: "Completed",
+    cancelled: "Cancelled",
+    refunded: "Refunded",
+  };
+  const statusClass: Record<string, string> = {
+    paid: "status-paid",
+    fulfilled: "status-completed",
+    completed: "status-completed",
+    processing: "status-processing",
+  };
+  const label = statusLabel[opts.status] ?? opts.status;
+  const cls = statusClass[opts.status] ?? "status-processing";
+
+  const body = `
+    <h1>Order Update</h1>
+    <p>Hi ${opts.name || "there"}, your order status has been updated.</p>
+    <div class="highlight">
+      <div class="label" style="text-align:center;">Order ${opts.orderNumber}</div>
+      <div style="text-align:center;margin-top:8px;"><span class="status-badge ${cls}">${label}</span></div>
+    </div>
+    ${opts.message ? `<p>${opts.message}</p>` : ""}
+    <a href="https://bulnixshop.com/orders/${opts.orderId}" class="btn">View Order →</a>
+    <p style="font-size:13px;">Need help? Contact us on <a href="https://wa.me/message/bulnix" style="color:#00B9E9;">WhatsApp</a> or open a <a href="https://bulnixshop.com/support" style="color:#00B9E9;">support ticket</a>.</p>`;
+
+  const client = getResend();
+  if (!client) { console.warn("[email] RESEND_API_KEY not set — skipping order status email"); return; }
+  await client.emails.send({
+    from: FROM,
+    to: opts.to,
+    subject: `Order ${opts.orderNumber} — ${label} | Bulnix`,
+    html: baseTemplate("Order Update", body),
+  });
+}
+
+/** Send support ticket reply notification */
+export async function sendTicketReplyEmail(opts: {
+  to: string;
+  name: string;
+  ticketId: number;
+  ticketSubject: string;
+  replyPreview: string;
+}): Promise<void> {
+  const body = `
+    <h1>New reply on your ticket</h1>
+    <p>Hi ${opts.name || "there"}, our support team has replied to your ticket.</p>
+    <div class="highlight">
+      <div class="label">Ticket Subject</div>
+      <div style="color:#e2e8f0;font-size:15px;margin-bottom:12px;">${opts.ticketSubject}</div>
+      <div class="label">Reply Preview</div>
+      <div style="color:#94a3b8;font-size:14px;line-height:1.6;">${opts.replyPreview.slice(0, 200)}${opts.replyPreview.length > 200 ? "…" : ""}</div>
+    </div>
+    <a href="https://bulnixshop.com/support/${opts.ticketId}" class="btn">View Full Reply →</a>`;
+
+  const client = getResend();
+  if (!client) { console.warn("[email] RESEND_API_KEY not set — skipping ticket reply email"); return; }
+  await client.emails.send({
+    from: FROM,
+    to: opts.to,
+    subject: `Re: ${opts.ticketSubject} — Bulnix Support`,
+    html: baseTemplate("Support Reply", body),
+  });
+}
+
+/** Send password reset email (for future custom auth) */
+export async function sendPasswordResetEmail(opts: {
+  to: string;
+  name: string;
+  resetUrl: string;
+}): Promise<void> {
+  const body = `
+    <h1>Reset your password</h1>
+    <p>Hi ${opts.name || "there"}, we received a request to reset your Bulnix password. Click the button below to set a new password.</p>
+    <a href="${opts.resetUrl}" class="btn">Reset Password →</a>
+    <hr class="divider" />
+    <p style="font-size:13px;color:#475569;">This link expires in 1 hour. If you didn't request a password reset, you can safely ignore this email.</p>`;
+
+  const client = getResend();
+  if (!client) { console.warn("[email] RESEND_API_KEY not set — skipping password reset email"); return; }
+  await client.emails.send({
+    from: FROM,
+    to: opts.to,
+    subject: "Reset your Bulnix password",
+    html: baseTemplate("Password Reset", body),
+  });
+}
+
+/** Generic safe wrapper — logs errors but never throws */
+export async function safeSendEmail(fn: () => Promise<void>): Promise<void> {
+  try {
+    await fn();
+  } catch (err) {
+    console.error("[Email] Failed to send email:", err);
+  }
+}

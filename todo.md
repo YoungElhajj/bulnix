@@ -184,3 +184,17 @@
 - [x] Add subcategory grid to category product page - shows clickable subcategory pills below header
 - [x] Show product count and subcategory count on each category card in Categories page
 - [x] Fix getAdminStats to return totalProducts and visibleProducts for admin dashboard
+
+## Email Notifications & Social Features (Mar 23, 2026)
+- [x] Set up email service (Resend - lazy init, no crash when key missing)
+- [x] Welcome email on first OAuth signup
+- [x] Order confirmation email with order items, totals, and delivery info
+- [x] Order status update email template ready
+- [x] Ticket reply notification email when admin replies
+- [x] Password reset email template ready (for future custom auth)
+- [x] Add dismissible Telegram join banner at top of all pages
+- [x] Add floating WhatsApp + Telegram action buttons (bottom-right)
+- [x] Add Community section to footer (Telegram, WhatsApp, Email)
+- [x] Add Telegram/WhatsApp social icons to footer brand row
+- [ ] PENDING: Update TELEGRAM_URL and WHATSAPP_URL with real links (in SocialFloatingWidgets.tsx, TelegramBanner.tsx, Footer.tsx)
+- [ ] PENDING: Add RESEND_API_KEY, EMAIL_FROM, EMAIL_FROM_NAME secrets once domain verified

@@ -27,6 +27,7 @@ import {
   type InsertSupplierRefundClaim,
 } from "../drizzle/schema";
 import { nanoid } from "nanoid";
+import { safeSendEmail, sendOrderConfirmationEmail, sendTicketReplyEmail } from "./email";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -276,7 +277,7 @@ export async function createOrder(userId: number, input: {
 
   // Fetch products and calculate totals
   let subtotalUSD = 0;
-  const itemsWithProducts = [];
+  const itemsWithProducts: Array<{ productId: number; quantity: number; product: NonNullable<Awaited<ReturnType<typeof getProductById>>>; unitPrice: number }> = [];
   for (const item of input.items) {
     const product = await getProductById(item.productId);
     if (!product) throw new Error(`Product ${item.productId} not found`);
@@ -343,6 +344,22 @@ export async function createOrder(userId: number, input: {
   }
 
   await logSystem("info", "order", `Order ${orderNumber} created for user ${userId}`, { orderId, totalUSD });
+
+  // Send order confirmation email
+  const orderUser = await db.select({ email: users.email, name: users.name, notifyOrders: users.notifyOrders }).from(users).where(eq(users.id, userId)).limit(1);
+  const recipientEmail = orderUser[0]?.email ?? input.billingEmail ?? null;
+  if (recipientEmail && orderUser[0]?.notifyOrders !== false) {
+    safeSendEmail(() => sendOrderConfirmationEmail({
+      to: recipientEmail,
+      name: orderUser[0]?.name ?? "there",
+      orderNumber,
+      orderId,
+      items: itemsWithProducts.map(i => ({ title: i.product.title, quantity: i.quantity, priceUSD: i.unitPrice })),
+      totalUSD,
+      currency: input.currency,
+      status: "pending_payment",
+    }));
+  }
 
   return { orderId, orderNumber, totalUSD, totalInCurrency, currency: input.currency };
 }
@@ -472,6 +489,24 @@ export async function replyToTicket(userId: number, role: "user" | "admin", inpu
   if (!db) throw new Error("Database not available");
   await db.insert(ticketMessages).values({ ticketId: input.ticketId, senderId: userId, senderRole: role, message: input.message });
   await db.update(supportTickets).set({ status: role === "admin" ? "pending" : "open", updatedAt: new Date() }).where(eq(supportTickets.id, input.ticketId));
+
+  // Notify user by email when admin replies
+  if (role === "admin") {
+    const ticket = await db.select({ subject: supportTickets.subject, userId: supportTickets.userId }).from(supportTickets).where(eq(supportTickets.id, input.ticketId)).limit(1);
+    if (ticket[0]) {
+      const ticketUser = await db.select({ email: users.email, name: users.name, notifyEmail: users.notifyEmail }).from(users).where(eq(users.id, ticket[0].userId)).limit(1);
+      if (ticketUser[0]?.email && ticketUser[0]?.notifyEmail !== false) {
+        safeSendEmail(() => sendTicketReplyEmail({
+          to: ticketUser[0].email!,
+          name: ticketUser[0].name ?? "there",
+          ticketId: input.ticketId,
+          ticketSubject: ticket[0].subject,
+          replyPreview: input.message,
+        }));
+      }
+    }
+  }
+
   return { success: true };
 }
 

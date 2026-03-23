@@ -1,6 +1,7 @@
 import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import type { Express, Request, Response } from "express";
 import * as db from "../db";
+import { safeSendEmail, sendWelcomeEmail } from "../email";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
 
@@ -28,6 +29,10 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
+      // Check if this is a brand-new user before upsert
+      const existingUser = await db.getUserByOpenId(userInfo.openId);
+      const isNewUser = !existingUser;
+
       await db.upsertUser({
         openId: userInfo.openId,
         name: userInfo.name || null,
@@ -35,6 +40,14 @@ export function registerOAuthRoutes(app: Express) {
         loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
         lastSignedIn: new Date(),
       });
+
+      // Send welcome email to new users who have an email address
+      if (isNewUser && userInfo.email) {
+        safeSendEmail(() => sendWelcomeEmail({
+          to: userInfo.email!,
+          name: userInfo.name || "there",
+        }));
+      }
 
       const sessionToken = await sdk.createSessionToken(userInfo.openId, {
         name: userInfo.name || "",

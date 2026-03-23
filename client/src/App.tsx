@@ -45,6 +45,8 @@ import AdminProviders from "./pages/admin/AdminProviders";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminLogs from "./pages/admin/AdminLogs";
 import AdminSupplierRefunds from "./pages/admin/AdminSupplierRefunds";
+import SocialFloatingWidgets from "./components/SocialFloatingWidgets";
+import TelegramBanner from "./components/TelegramBanner";
 
 function Router() {
   return (
@@ -103,7 +105,9 @@ function App() {
         <CartProvider>
           <TooltipProvider>
             <Toaster />
+            <TelegramBanner />
             <Router />
+            <SocialFloatingWidgets />
           </TooltipProvider>
         </CartProvider>
       </ThemeProvider>
