@@ -46,9 +46,10 @@ export default function Home() {
   const { data: featuredProducts } = trpc.products.getFeatured.useQuery(undefined, {
     retry: false,
   });
-  const { data: categoriesData } = trpc.categories.list.useQuery(undefined, {
+  const { data: categoriesData } = trpc.categories.listWithCounts.useQuery(undefined, {
     retry: false,
   });
+  const SOCIAL_SLUGS = ["facebook-accounts", "instagram-accounts", "tiktok-accounts-followers", "whatsapp-accounts", "youtube-accounts-channels", "twitter-x-accounts", "telegram-accounts", "snapchat-accounts", "linkedin-accounts", "google-voice-accounts", "gmail-accounts", "discord-accounts"];
 
   return (
     <div className="min-h-screen bg-[#0B0F19] text-white">
@@ -120,24 +121,33 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {(categoriesData as any[] | undefined ?? [])
-              .filter((c: any) => !c.parentId)
-              .slice(0, 6)
-              .map((cat: any, i: number) => (
-              <Link key={i} href={`/categories/${cat.slug}`}>
-                <div className="glass-card rounded-xl p-5 text-center cursor-pointer group hover:border-[#00B9E9]/30 transition-all duration-200 hover:-translate-y-1">
-                  <div className="w-12 h-12 rounded-xl bg-[#0F172A] border border-white/8 flex items-center justify-center mx-auto mb-3 overflow-hidden">
-                    {cat.imageUrl ? (
-                      <img src={cat.imageUrl} alt={cat.name} className="w-9 h-9 object-contain" />
-                    ) : (
-                      <span className="text-2xl">📦</span>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {(() => {
+              const allCats = (categoriesData as any[] | undefined ?? []).filter((c: any) => !c.parentId);
+              const social = allCats.filter((c: any) => SOCIAL_SLUGS.includes(c.slug));
+              const others = allCats.filter((c: any) => !SOCIAL_SLUGS.includes(c.slug));
+              const sorted = [
+                ...social.sort((a: any, b: any) => SOCIAL_SLUGS.indexOf(a.slug) - SOCIAL_SLUGS.indexOf(b.slug)),
+                ...others,
+              ];
+              return sorted.slice(0, 12).map((cat: any, i: number) => (
+                <Link key={i} href={`/categories/${cat.slug}`}>
+                  <div className="glass-card rounded-xl p-5 text-center cursor-pointer group hover:border-[#00B9E9]/30 transition-all duration-200 hover:-translate-y-1">
+                    <div className="w-12 h-12 rounded-xl bg-[#0F172A] border border-white/8 flex items-center justify-center mx-auto mb-3 overflow-hidden">
+                      {cat.imageUrl ? (
+                        <img src={cat.imageUrl} alt={cat.name} className="w-9 h-9 object-contain" />
+                      ) : (
+                        <span className="text-2xl">📦</span>
+                      )}
+                    </div>
+                    <div className="text-sm font-semibold text-white group-hover:text-[#00B9E9] transition-colors line-clamp-2">{cat.name}</div>
+                    {(cat.productCount ?? 0) > 0 && (
+                      <div className="text-xs text-slate-500 mt-1">{cat.productCount} items</div>
                     )}
                   </div>
-                  <div className="text-sm font-semibold text-white group-hover:text-[#00B9E9] transition-colors line-clamp-2">{cat.name}</div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ));
+            })()}
           </div>
         </div>
       </section>

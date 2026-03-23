@@ -30,16 +30,21 @@ function getCategoryEmoji(cat: any): string {
   return "📦";
 }
 
+const SOCIAL_SLUGS = ["facebook-accounts", "instagram-accounts", "tiktok-accounts-followers", "whatsapp-accounts", "youtube-accounts-channels", "twitter-x-accounts", "telegram-accounts", "snapchat-accounts", "linkedin-accounts", "google-voice-accounts", "gmail-accounts", "discord-accounts"];
+
 export default function Categories() {
   const [search, setSearch] = useState("");
-  const { data: categories, isLoading } = trpc.categories.list.useQuery(undefined, { retry: false });
+  const { data: categories, isLoading } = trpc.categories.listWithCounts.useQuery(undefined, { retry: false });
 
   const allCats = (categories as any[] | undefined) ?? [];
-  // Only show top-level (parentId null) categories
+  // Only show top-level (parentId null) categories, social media pinned to top
   const topLevel = allCats.filter((c: any) => !c.parentId);
+  const socialCats = topLevel.filter((c: any) => SOCIAL_SLUGS.includes(c.slug)).sort((a: any, b: any) => SOCIAL_SLUGS.indexOf(a.slug) - SOCIAL_SLUGS.indexOf(b.slug));
+  const otherCats = topLevel.filter((c: any) => !SOCIAL_SLUGS.includes(c.slug));
+  const sortedTopLevel = [...socialCats, ...otherCats];
   const filtered = search
-    ? topLevel.filter((c: any) => c.name.toLowerCase().includes(search.toLowerCase()))
-    : topLevel;
+    ? sortedTopLevel.filter((c: any) => c.name.toLowerCase().includes(search.toLowerCase()))
+    : sortedTopLevel;
 
   return (
     <div className="min-h-screen bg-[#0B0F19] text-white">
@@ -92,9 +97,12 @@ export default function Categories() {
                     </div>
                     <h3 className="font-semibold text-white group-hover:text-[#00B9E9] transition-colors mb-1 line-clamp-2">{cat.name}</h3>
                     {subCount > 0 && (
-                      <p className="text-xs text-slate-500 mb-1">{subCount} subcategories</p>
+                      <p className="text-xs text-slate-500 mb-0.5">{subCount} subcategories</p>
                     )}
-                    {cat.description && !subCount && (
+                    {(cat.productCount ?? 0) > 0 && (
+                      <p className="text-xs text-[#00B9E9]/70">{cat.productCount} products</p>
+                    )}
+                    {cat.description && !subCount && !(cat.productCount > 0) && (
                       <p className="text-xs text-slate-500 line-clamp-2">{cat.description}</p>
                     )}
                     <div className="flex items-center gap-1 mt-3 text-xs text-[#00B9E9] opacity-0 group-hover:opacity-100 transition-opacity">

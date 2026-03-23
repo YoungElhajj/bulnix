@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, ilike, like, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, like, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   adminActions,
@@ -105,6 +105,34 @@ export async function getCategories() {
   return db.select().from(categories).where(eq(categories.isVisible, true)).orderBy(categories.sortOrder, categories.name);
 }
 
+export async function getCategoriesWithCounts() {
+  const db = await getDb();
+  if (!db) return [];
+  const cats = await db.select().from(categories).where(eq(categories.isVisible, true)).orderBy(categories.sortOrder, categories.name);
+  const counts = await db.select({ categoryId: products.categoryId, count: sql<number>`count(*)` }).from(products).where(eq(products.isVisible, true)).groupBy(products.categoryId);
+  const countMap = new Map<number, number>();
+  for (const row of counts) {
+    if (row.categoryId != null) countMap.set(row.categoryId, Number(row.count));
+  }
+  return cats.map(cat => {
+    const directCount = countMap.get(cat.id) ?? 0;
+    const childCount = cats.filter(c => c.parentId === cat.id).reduce((sum, c) => sum + (countMap.get(c.id) ?? 0), 0);
+    return { ...cat, productCount: directCount + childCount };
+  });
+}
+export async function getSubcategoriesByParentId(parentId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const subs = await db.select().from(categories).where(and(eq(categories.parentId, parentId), eq(categories.isVisible, true))).orderBy(categories.sortOrder, categories.name);
+  if (subs.length === 0) return [];
+  const subIds = subs.map(s => s.id);
+  const counts = await db.select({ categoryId: products.categoryId, count: sql<number>`count(*)` }).from(products).where(and(eq(products.isVisible, true), inArray(products.categoryId, subIds))).groupBy(products.categoryId);
+  const countMap = new Map<number, number>();
+  for (const row of counts) {
+    if (row.categoryId != null) countMap.set(row.categoryId, Number(row.count));
+  }
+  return subs.map(s => ({ ...s, productCount: countMap.get(s.id) ?? 0 }));
+}
 export async function getCategoryBySlug(slug: string) {
   const db = await getDb();
   if (!db) return null;
@@ -182,10 +210,18 @@ export async function getProducts(input: {
   else if (input.sort === "popular") orderByClause = desc(products.stockQuantity);
   else orderByClause = desc(products.updatedAt); // newest
 
-  // Handle categorySlug lookup
+  // Handle categorySlug lookup - include products from all subcategories
   if (input.categorySlug && !input.categoryId) {
     const cat = await getCategoryBySlug(input.categorySlug);
-    if (cat) conditions.push(eq(products.categoryId, cat.id));
+    if (cat) {
+      const subcats = await db.select({ id: categories.id }).from(categories).where(eq(categories.parentId, cat.id));
+      const allCategoryIds = [cat.id, ...subcats.map(s => s.id)];
+      if (allCategoryIds.length === 1) {
+        conditions.push(eq(products.categoryId, allCategoryIds[0]));
+      } else {
+        conditions.push(inArray(products.categoryId, allCategoryIds));
+      }
+    }
   }
 
   const items = await db.select().from(products).where(and(...conditions)).orderBy(orderByClause).limit(input.limit).offset(offset);
@@ -580,6 +616,8 @@ export async function getAdminStats() {
   const [pendingCount] = await db.select({ count: sql<number>`count(*)` }).from(orders).where(eq(orders.status, "pending_payment"));
   const [failedCount] = await db.select({ count: sql<number>`count(*)` }).from(orders).where(eq(orders.status, "failed"));
   const [ticketCount] = await db.select({ count: sql<number>`count(*)` }).from(supportTickets).where(eq(supportTickets.status, "open"));
+  const [totalProductCount] = await db.select({ count: sql<number>`count(*)` }).from(products);
+  const [visibleProductCount] = await db.select({ count: sql<number>`count(*)` }).from(products).where(eq(products.isVisible, true));
 
   return {
     totalUsers: Number(userCount?.count ?? 0),
@@ -588,6 +626,8 @@ export async function getAdminStats() {
     pendingOrders: Number(pendingCount?.count ?? 0),
     failedOrders: Number(failedCount?.count ?? 0),
     openTickets: Number(ticketCount?.count ?? 0),
+    totalProducts: Number(totalProductCount?.count ?? 0),
+    visibleProducts: Number(visibleProductCount?.count ?? 0),
   };
 }
 

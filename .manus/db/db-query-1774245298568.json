@@ -1,0 +1,130 @@
+{
+  "query": "SELECT c.id, c.name, c.parentId, COUNT(p.id) as product_count FROM categories c LEFT JOIN products p ON p.categoryId = c.id GROUP BY c.id, c.name, c.parentId HAVING product_count > 0 ORDER BY product_count DESC LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xomvQyHT3Pc2eM.33c921a427fa --database 6qKkSV9dybS3AerhXhrTfQ --execute SELECT c.id, c.name, c.parentId, COUNT(p.id) as product_count FROM categories c LEFT JOIN products p ON p.categoryId = c.id GROUP BY c.id, c.name, c.parentId HAVING product_count > 0 ORDER BY product_count DESC LIMIT 20;",
+  "rows": [
+    {
+      "id": "45",
+      "name": "Aged & Friends",
+      "parentId": "1",
+      "product_count": "67"
+    },
+    {
+      "id": "44",
+      "name": "Aged",
+      "parentId": "10",
+      "product_count": "66"
+    },
+    {
+      "id": "56",
+      "name": "Aged & Connections",
+      "parentId": "8",
+      "product_count": "38"
+    },
+    {
+      "id": "9",
+      "name": "Indeed Accounts",
+      "parentId": "NULL",
+      "product_count": "31"
+    },
+    {
+      "id": "82",
+      "name": "Ads Accounts",
+      "parentId": "1",
+      "product_count": "28"
+    },
+    {
+      "id": "91",
+      "name": "UK & Europe Facebook Accounts",
+      "parentId": "1",
+      "product_count": "24"
+    },
+    {
+      "id": "76",
+      "name": "Account",
+      "parentId": "26",
+      "product_count": "24"
+    },
+    {
+      "id": "58",
+      "name": "Aged & Cookies",
+      "parentId": "1",
+      "product_count": "20"
+    },
+    {
+      "id": "97",
+      "name": "Channels",
+      "parentId": "3",
+      "product_count": "16"
+    },
+    {
+      "id": "84",
+      "name": "Bundle Offer",
+      "parentId": "6",
+      "product_count": "15"
+    },
+    {
+      "id": "61",
+      "name": "PVA",
+      "parentId": "6",
+      "product_count": "13"
+    },
+    {
+      "id": "65",
+      "name": "Account",
+      "parentId": "18",
+      "product_count": "13"
+    },
+    {
+      "id": "72",
+      "name": "Accounts",
+      "parentId": "14",
+      "product_count": "12"
+    },
+    {
+      "id": "57",
+      "name": "Followers",
+      "parentId": "7",
+      "product_count": "12"
+    },
+    {
+      "id": "62",
+      "name": "New Accounts",
+      "parentId": "8",
+      "product_count": "11"
+    },
+    {
+      "id": "48",
+      "name": "Account",
+      "parentId": "25",
+      "product_count": "11"
+    },
+    {
+      "id": "73",
+      "name": "SMTP",
+      "parentId": "2",
+      "product_count": "11"
+    },
+    {
+      "id": "90",
+      "name": "Asia & Pacific Facebook Accounts",
+      "parentId": "1",
+      "product_count": "11"
+    },
+    {
+      "id": "63",
+      "name": "Aged",
+      "parentId": "2",
+      "product_count": "9"
+    },
+    {
+      "id": "94",
+      "name": "Europe",
+      "parentId": "5",
+      "product_count": "9"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tparentId\tproduct_count\n45\tAged & Friends\t1\t67\n44\tAged\t10\t66\n56\tAged & Connections\t8\t38\n9\tIndeed Accounts\tNULL\t31\n82\tAds Accounts\t1\t28\n91\tUK & Europe Facebook Accounts\t1\t24\n76\tAccount\t26\t24\n58\tAged & Cookies\t1\t20\n97\tChannels\t3\t16\n84\tBundle Offer\t6\t15\n61\tPVA\t6\t13\n65\tAccount\t18\t13\n72\tAccounts\t14\t12\n57\tFollowers\t7\t12\n62\tNew Accounts\t8\t11\n48\tAccount\t25\t11\n73\tSMTP\t2\t11\n90\tAsia & Pacific Facebook Accounts\t1\t11\n63\tAged\t2\t9\n94\tEurope\t5\t9\n",
+  "stderr": "",
+  "execution_time_ms": 145
+}

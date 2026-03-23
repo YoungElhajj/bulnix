@@ -30,9 +30,13 @@ export const appRouter = router({
   // ── Categories ──────────────────────────────────────────────────────────
   categories: router({
     list: publicProcedure.query(() => db.getCategories()),
+    listWithCounts: publicProcedure.query(() => db.getCategoriesWithCounts()),
     getBySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
       .query(({ input }) => db.getCategoryBySlug(input.slug)),
+    getSubcategories: publicProcedure
+      .input(z.object({ parentId: z.number() }))
+      .query(({ input }) => db.getSubcategoriesByParentId(input.parentId)),
   }),
 
   // ── Products ────────────────────────────────────────────────────────────

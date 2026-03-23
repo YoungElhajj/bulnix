@@ -1,0 +1,490 @@
+{
+  "query": "SELECT c.id, c.name, c.slug, c.parentId, c.imageUrl, COUNT(p.id) as product_count FROM categories c LEFT JOIN products p ON p.categoryId = c.id GROUP BY c.id, c.name, c.slug, c.parentId, c.imageUrl ORDER BY c.parentId IS NULL DESC, c.parentId, c.sortOrder LIMIT 60;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xomvQyHT3Pc2eM.33c921a427fa --database 6qKkSV9dybS3AerhXhrTfQ --execute SELECT c.id, c.name, c.slug, c.parentId, c.imageUrl, COUNT(p.id) as product_count FROM categories c LEFT JOIN products p ON p.categoryId = c.id GROUP BY c.id, c.name, c.slug, c.parentId, c.imageUrl ORDER BY c.parentId IS NULL DESC, c.parentId, c.sortOrder LIMIT 60;",
+  "rows": [
+    {
+      "id": "18",
+      "name": "Discord Accounts",
+      "slug": "buy-discord-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1732550407_discord-logo-icon-editorial-free-vector.jpg",
+      "product_count": "0"
+    },
+    {
+      "id": "24",
+      "name": "Badoo Dating Accounts",
+      "slug": "buy-badoo-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1714942391_Badoo_-_2017_Logo.svg.png",
+      "product_count": "0"
+    },
+    {
+      "id": "39",
+      "name": "GMX Email Accounts",
+      "slug": "buy-gmx-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1699469258-images.png",
+      "product_count": "0"
+    },
+    {
+      "id": "23",
+      "name": "Dating App Accounts",
+      "slug": "buy-dating-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1726699202_ds.png",
+      "product_count": "0"
+    },
+    {
+      "id": "8",
+      "name": "LinkedIn Accounts",
+      "slug": "buy-linkedin-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1695434753-download.png",
+      "product_count": "0"
+    },
+    {
+      "id": "2",
+      "name": "Gmail Accounts",
+      "slug": "buy-gmail-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1695668135-Gmail.jpeg",
+      "product_count": "0"
+    },
+    {
+      "id": "26",
+      "name": "Quora Accounts",
+      "slug": "buy-quora-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1767898651_Quora_logo accsbulk.png",
+      "product_count": "0"
+    },
+    {
+      "id": "33",
+      "name": "PlayStation Gift Cards",
+      "slug": "buy-playstation-gift-cards",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1765024357_playstation-accszone.png",
+      "product_count": "0"
+    },
+    {
+      "id": "35",
+      "name": "Mobile Proxies",
+      "slug": "buy-mobile-proxies",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1765570353_accszone-proxy.jpg",
+      "product_count": "0"
+    },
+    {
+      "id": "30",
+      "name": "Apple ID & Gift Cards",
+      "slug": "buy-apple-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1721025041_aa.png",
+      "product_count": "0"
+    },
+    {
+      "id": "17",
+      "name": "Cr🅰️igsList Ads Accounts",
+      "slug": "crigslist-ads-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1771425930_peace-symbol.png",
+      "product_count": "0"
+    },
+    {
+      "id": "13",
+      "name": "Reddit Accounts",
+      "slug": "buy-reddit-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1699252587-reddit-logo-23F13F6A6A-seeklogo.com.png",
+      "product_count": "0"
+    },
+    {
+      "id": "6",
+      "name": "Google Voice Accounts",
+      "slug": "buy-google-voice-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1703626430-Google_Voice_icon_(2018-2020).svg.png",
+      "product_count": "0"
+    },
+    {
+      "id": "11",
+      "name": "Trustpilot Accounts",
+      "slug": "buy-trustpilot-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1750836436_trustpilot.png",
+      "product_count": "0"
+    },
+    {
+      "id": "27",
+      "name": "Pinterest Accounts",
+      "slug": "buy-pinterest-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1770064949_WhatsApp Image 2026-02-03 at 1.37.13 AM.jpeg",
+      "product_count": "0"
+    },
+    {
+      "id": "16",
+      "name": "Amazon Accounts",
+      "slug": "amazon-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1772913453_download.jpg",
+      "product_count": "0"
+    },
+    {
+      "id": "9",
+      "name": "Indeed Accounts",
+      "slug": "buy-indeed-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1748840541_logo-indeed-min.png",
+      "product_count": "31"
+    },
+    {
+      "id": "31",
+      "name": "Google Play Gift Cards",
+      "slug": "buy-google-play-gift-cards",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1763910036_google-play-gift-card.png",
+      "product_count": "0"
+    },
+    {
+      "id": "37",
+      "name": "Outlook Email Accounts",
+      "slug": "buy-outlook-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1697380588-jpeg.jpg",
+      "product_count": "0"
+    },
+    {
+      "id": "42",
+      "name": "Google Ads Accounts",
+      "slug": "buy-google-ads-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1769446920_accsbulk google ads.png",
+      "product_count": "0"
+    },
+    {
+      "id": "43",
+      "name": "nnd",
+      "slug": "nnd",
+      "parentId": "NULL",
+      "imageUrl": "NULL",
+      "product_count": "0"
+    },
+    {
+      "id": "36",
+      "name": "VPN Premium",
+      "slug": "buy-vpn-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1745917740_pngimg.com - vpn_PNG18.png",
+      "product_count": "0"
+    },
+    {
+      "id": "19",
+      "name": "Taimi Dating Accounts",
+      "slug": "buy-taimi-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1746203323_unnamed.png",
+      "product_count": "0"
+    },
+    {
+      "id": "34",
+      "name": "Steam Gift Cards",
+      "slug": "buy-steam-gift-cards",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1765022037_steam-accszone.png",
+      "product_count": "0"
+    },
+    {
+      "id": "1",
+      "name": "Facebook Accounts",
+      "slug": "buy-facebook-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1695414345-facebook-png-transparent-background-14.jpg",
+      "product_count": "0"
+    },
+    {
+      "id": "20",
+      "name": "Grindr Dating Accounts",
+      "slug": "buy-grindr-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1707606070_unnamed.png",
+      "product_count": "0"
+    },
+    {
+      "id": "4",
+      "name": "WhatsApp Accounts",
+      "slug": "buy-whatsapp-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1760008147_WhatsApp.jpg",
+      "product_count": "0"
+    },
+    {
+      "id": "10",
+      "name": "Twitter/X Accounts",
+      "slug": "buy-twitter-x-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1708020906_images.png",
+      "product_count": "0"
+    },
+    {
+      "id": "25",
+      "name": "Snapchat Accounts",
+      "slug": "buy-snapchat-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1708020288_snapchat-logo-messenger-icon-realistic-social-vector-46321140.jpg",
+      "product_count": "0"
+    },
+    {
+      "id": "41",
+      "name": "USA Email & Phone Leads",
+      "slug": "buy-usa-leads",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1767699330_accszone b2b leads.jpg",
+      "product_count": "0"
+    },
+    {
+      "id": "7",
+      "name": "TikTok Accounts & Followers",
+      "slug": "buy-tiktok-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1699253604-png-transparent-tiktok-social-media-logos-brands-icon-thumbnail.png",
+      "product_count": "0"
+    },
+    {
+      "id": "22",
+      "name": "MeetMe Dating Accounts",
+      "slug": "buy-meetme-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1725045329_unnamed.png",
+      "product_count": "0"
+    },
+    {
+      "id": "38",
+      "name": "Protonmail Accounts",
+      "slug": "buy-protonmail-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1768854284_images.jfif",
+      "product_count": "0"
+    },
+    {
+      "id": "29",
+      "name": "Apple",
+      "slug": "apple-gift-card-digital-code",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1749416013_apple.png",
+      "product_count": "0"
+    },
+    {
+      "id": "15",
+      "name": "Etsy-accounts",
+      "slug": "etsy-accounts-1",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1773264192_etsy-vector-logo-small.png",
+      "product_count": "0"
+    },
+    {
+      "id": "12",
+      "name": "Telegram Accounts",
+      "slug": "buy-telegram-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1721025076_ttt.jpg",
+      "product_count": "0"
+    },
+    {
+      "id": "5",
+      "name": "Instagram Accounts",
+      "slug": "buy-instagram-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1695830338-instagram-transparent-png-14.jpg",
+      "product_count": "0"
+    },
+    {
+      "id": "3",
+      "name": "YouTube Accounts & Channels",
+      "slug": "buy-youtube-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1767862811_Accszoneyoutube.jpg",
+      "product_count": "0"
+    },
+    {
+      "id": "28",
+      "name": "Netflix Accounts & Gift Cards",
+      "slug": "buy-netflix-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1764514139_Buy Netflix.png",
+      "product_count": "0"
+    },
+    {
+      "id": "40",
+      "name": "Windows VPS / RDP Server",
+      "slug": "buy-windows-vps",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1768042840_vps-logo.png",
+      "product_count": "0"
+    },
+    {
+      "id": "21",
+      "name": "Bumble Dating Accounts",
+      "slug": "buy-bumble-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1714941813_1000_F_541678145_edxEtzfXH39WNbj2dIpMSZwgGuMzzF9D.jpg",
+      "product_count": "0"
+    },
+    {
+      "id": "32",
+      "name": "Amazon Gift Cards",
+      "slug": "buy-amazon-gift-cards",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1765023363_Amazon-accszone.png",
+      "product_count": "0"
+    },
+    {
+      "id": "14",
+      "name": "CashApp Accounts",
+      "slug": "buy-cashapp-accounts",
+      "parentId": "NULL",
+      "imageUrl": "https://accszone.com/uploads/1743516637_IMG_4233.png",
+      "product_count": "0"
+    },
+    {
+      "id": "79",
+      "name": "Dating",
+      "slug": "facebook-dating-accounts",
+      "parentId": "1",
+      "imageUrl": "NULL",
+      "product_count": "6"
+    },
+    {
+      "id": "82",
+      "name": "Ads Accounts",
+      "slug": "facebook-ads-accounts",
+      "parentId": "1",
+      "imageUrl": "NULL",
+      "product_count": "28"
+    },
+    {
+      "id": "91",
+      "name": "UK & Europe Facebook Accounts",
+      "slug": "buy-uk-europe-facebook-accounts",
+      "parentId": "1",
+      "imageUrl": "NULL",
+      "product_count": "24"
+    },
+    {
+      "id": "51",
+      "name": "Followers",
+      "slug": "facebook-followers",
+      "parentId": "1",
+      "imageUrl": "NULL",
+      "product_count": "4"
+    },
+    {
+      "id": "87",
+      "name": "North America & Oceania Facebook Accounts",
+      "slug": "buy-north-america-oceania-facebook-accounts-1",
+      "parentId": "1",
+      "imageUrl": "NULL",
+      "product_count": "6"
+    },
+    {
+      "id": "90",
+      "name": "Asia & Pacific Facebook Accounts",
+      "slug": "buy-asia-pacific-facebook-accounts",
+      "parentId": "1",
+      "imageUrl": "NULL",
+      "product_count": "11"
+    },
+    {
+      "id": "45",
+      "name": "Aged & Friends",
+      "slug": "aged-facebook-friends",
+      "parentId": "1",
+      "imageUrl": "NULL",
+      "product_count": "67"
+    },
+    {
+      "id": "58",
+      "name": "Aged & Cookies",
+      "slug": "buy-aged-facebook-accounts",
+      "parentId": "1",
+      "imageUrl": "NULL",
+      "product_count": "20"
+    },
+    {
+      "id": "86",
+      "name": "USA Facebook Accounts",
+      "slug": "buy-usa-facebook-accounts",
+      "parentId": "1",
+      "imageUrl": "NULL",
+      "product_count": "6"
+    },
+    {
+      "id": "89",
+      "name": "Middle East & Africa Facebook Accounts",
+      "slug": "buy-middle-east-africa-facebook-accounts",
+      "parentId": "1",
+      "imageUrl": "NULL",
+      "product_count": "7"
+    },
+    {
+      "id": "88",
+      "name": "Latin America Facebook Accounts",
+      "slug": "buy-latin-america-facebook-accounts",
+      "parentId": "1",
+      "imageUrl": "NULL",
+      "product_count": "5"
+    },
+    {
+      "id": "73",
+      "name": "SMTP",
+      "slug": "smtp",
+      "parentId": "2",
+      "imageUrl": "NULL",
+      "product_count": "11"
+    },
+    {
+      "id": "60",
+      "name": "Youtube",
+      "slug": "youtube",
+      "parentId": "2",
+      "imageUrl": "NULL",
+      "product_count": "5"
+    },
+    {
+      "id": "63",
+      "name": "Aged",
+      "slug": "buy-aged-gmail-accounts",
+      "parentId": "2",
+      "imageUrl": "NULL",
+      "product_count": "9"
+    },
+    {
+      "id": "81",
+      "name": "Monetized Channels",
+      "slug": "youtube-monetized-channels",
+      "parentId": "3",
+      "imageUrl": "NULL",
+      "product_count": "5"
+    },
+    {
+      "id": "75",
+      "name": "Premium Subscriptions",
+      "slug": "youtube-premium-subscription",
+      "parentId": "3",
+      "imageUrl": "NULL",
+      "product_count": "4"
+    },
+    {
+      "id": "97",
+      "name": "Channels",
+      "slug": "buy-youtube-channels-aged-new-with-videos",
+      "parentId": "3",
+      "imageUrl": "NULL",
+      "product_count": "16"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tslug\tparentId\timageUrl\tproduct_count\n18\tDiscord Accounts\tbuy-discord-accounts\tNULL\thttps://accszone.com/uploads/1732550407_discord-logo-icon-editorial-free-vector.jpg\t0\n24\tBadoo Dating Accounts\tbuy-badoo-accounts\tNULL\thttps://accszone.com/uploads/1714942391_Badoo_-_2017_Logo.svg.png\t0\n39\tGMX Email Accounts\tbuy-gmx-accounts\tNULL\thttps://accszone.com/uploads/1699469258-images.png\t0\n23\tDating App Accounts\tbuy-dating-accounts\tNULL\thttps://accszone.com/uploads/1726699202_ds.png\t0\n8\tLinkedIn Accounts\tbuy-linkedin-accounts\tNULL\thttps://accszone.com/uploads/1695434753-download.png\t0\n2\tGmail Accounts\tbuy-gmail-accounts\tNULL\thttps://accszone.com/uploads/1695668135-Gmail.jpeg\t0\n26\tQuora Accounts\tbuy-quora-accounts\tNULL\thttps://accszone.com/uploads/1767898651_Quora_logo accsbulk.png\t0\n33\tPlayStation Gift Cards\tbuy-playstation-gift-cards\tNULL\thttps://accszone.com/uploads/1765024357_playstation-accszone.png\t0\n35\tMobile Proxies\tbuy-mobile-proxies\tNULL\thttps://accszone.com/uploads/1765570353_accszone-proxy.jpg\t0\n30\tApple ID & Gift Cards\tbuy-apple-accounts\tNULL\thttps://accszone.com/uploads/1721025041_aa.png\t0\n17\tCr🅰️igsList Ads Accounts\tcrigslist-ads-accounts\tNULL\thttps://accszone.com/uploads/1771425930_peace-symbol.png\t0\n13\tReddit Accounts\tbuy-reddit-accounts\tNULL\thttps://accszone.com/uploads/1699252587-reddit-logo-23F13F6A6A-seeklogo.com.png\t0\n6\tGoogle Voice Accounts\tbuy-google-voice-accounts\tNULL\thttps://accszone.com/uploads/1703626430-Google_Voice_icon_(2018-2020).svg.png\t0\n11\tTrustpilot Accounts\tbuy-trustpilot-accounts\tNULL\thttps://accszone.com/uploads/1750836436_trustpilot.png\t0\n27\tPinterest Accounts\tbuy-pinterest-accounts\tNULL\thttps://accszone.com/uploads/1770064949_WhatsApp Image 2026-02-03 at 1.37.13 AM.jpeg\t0\n16\tAmazon Accounts\tamazon-accounts\tNULL\thttps://accszone.com/uploads/1772913453_download.jpg\t0\n9\tIndeed Accounts\tbuy-indeed-accounts\tNULL\thttps://accszone.com/uploads/1748840541_logo-indeed-min.png\t31\n31\tGoogle Play Gift Cards\tbuy-google-play-gift-cards\tNULL\thttps://accszone.com/uploads/1763910036_google-play-gift-card.png\t0\n37\tOutlook Email Accounts\tbuy-outlook-accounts\tNULL\thttps://accszone.com/uploads/1697380588-jpeg.jpg\t0\n42\tGoogle Ads Accounts\tbuy-google-ads-accounts\tNULL\thttps://accszone.com/uploads/1769446920_accsbulk google ads.png\t0\n43\tnnd\tnnd\tNULL\tNULL\t0\n36\tVPN Premium\tbuy-vpn-accounts\tNULL\thttps://accszone.com/uploads/1745917740_pngimg.com - vpn_PNG18.png\t0\n19\tTaimi Dating Accounts\tbuy-taimi-accounts\tNULL\thttps://accszone.com/uploads/1746203323_unnamed.png\t0\n34\tSteam Gift Cards\tbuy-steam-gift-cards\tNULL\thttps://accszone.com/uploads/1765022037_steam-accszone.png\t0\n1\tFacebook Accounts\tbuy-facebook-accounts\tNULL\thttps://accszone.com/uploads/1695414345-facebook-png-transparent-background-14.jpg\t0\n20\tGrindr Dating Accounts\tbuy-grindr-accounts\tNULL\thttps://accszone.com/uploads/1707606070_unnamed.png\t0\n4\tWhatsApp Accounts\tbuy-whatsapp-accounts\tNULL\thttps://accszone.com/uploads/1760008147_WhatsApp.jpg\t0\n10\tTwitter/X Accounts\tbuy-twitter-x-accounts\tNULL\thttps://accszone.com/uploads/1708020906_images.png\t0\n25\tSnapchat Accounts\tbuy-snapchat-accounts\tNULL\thttps://accszone.com/uploads/1708020288_snapchat-logo-messenger-icon-realistic-social-vector-46321140.jpg\t0\n41\tUSA Email & Phone Leads\tbuy-usa-leads\tNULL\thttps://accszone.com/uploads/1767699330_accszone b2b leads.jpg\t0\n7\tTikTok Accounts & Followers\tbuy-tiktok-accounts\tNULL\thttps://accszone.com/uploads/1699253604-png-transparent-tiktok-social-media-logos-brands-icon-thumbnail.png\t0\n22\tMeetMe Dating Accounts\tbuy-meetme-accounts\tNULL\thttps://accszone.com/uploads/1725045329_unnamed.png\t0\n38\tProtonmail Accounts\tbuy-protonmail-accounts\tNULL\thttps://accszone.com/uploads/1768854284_images.jfif\t0\n29\tApple\tapple-gift-card-digital-code\tNULL\thttps://accszone.com/uploads/1749416013_apple.png\t0\n15\tEtsy-accounts\tetsy-accounts-1\tNULL\thttps://accszone.com/uploads/1773264192_etsy-vector-logo-small.png\t0\n12\tTelegram Accounts\tbuy-telegram-accounts\tNULL\thttps://accszone.com/uploads/1721025076_ttt.jpg\t0\n5\tInstagram Accounts\tbuy-instagram-accounts\tNULL\thttps://accszone.com/uploads/1695830338-instagram-transparent-png-14.jpg\t0\n3\tYouTube Accounts & Channels\tbuy-youtube-accounts\tNULL\thttps://accszone.com/uploads/1767862811_Accszoneyoutube.jpg\t0\n28\tNetflix Accounts & Gift Cards\tbuy-netflix-accounts\tNULL\thttps://accszone.com/uploads/1764514139_Buy Netflix.png\t0\n40\tWindows VPS / RDP Server\tbuy-windows-vps\tNULL\thttps://accszone.com/uploads/1768042840_vps-logo.png\t0\n21\tBumble Dating Accounts\tbuy-bumble-accounts\tNULL\thttps://accszone.com/uploads/1714941813_1000_F_541678145_edxEtzfXH39WNbj2dIpMSZwgGuMzzF9D.jpg\t0\n32\tAmazon Gift Cards\tbuy-amazon-gift-cards\tNULL\thttps://accszone.com/uploads/1765023363_Amazon-accszone.png\t0\n14\tCashApp Accounts\tbuy-cashapp-accounts\tNULL\thttps://accszone.com/uploads/1743516637_IMG_4233.png\t0\n79\tDating\tfacebook-dating-accounts\t1\tNULL\t6\n82\tAds Accounts\tfacebook-ads-accounts\t1\tNULL\t28\n91\tUK & Europe Facebook Accounts\tbuy-uk-europe-facebook-accounts\t1\tNULL\t24\n51\tFollowers\tfacebook-followers\t1\tNULL\t4\n87\tNorth America & Oceania Facebook Accounts\tbuy-north-america-oceania-facebook-accounts-1\t1\tNULL\t6\n90\tAsia & Pacific Facebook Accounts\tbuy-asia-pacific-facebook-accounts\t1\tNULL\t11\n45\tAged & Friends\taged-facebook-friends\t1\tNULL\t67\n58\tAged & Cookies\tbuy-aged-facebook-accounts\t1\tNULL\t20\n86\tUSA Facebook Accounts\tbuy-usa-facebook-accounts\t1\tNULL\t6\n89\tMiddle East & Africa Facebook Accounts\tbuy-middle-east-africa-facebook-accounts\t1\tNULL\t7\n88\tLatin America Facebook Accounts\tbuy-latin-america-facebook-accounts\t1\tNULL\t5\n73\tSMTP\tsmtp\t2\tNULL\t11\n60\tYoutube\tyoutube\t2\tNULL\t5\n63\tAged\tbuy-aged-gmail-accounts\t2\tNULL\t9\n81\tMonetized Channels\tyoutube-monetized-channels\t3\tNULL\t5\n75\tPremium Subscriptions\tyoutube-premium-subscription\t3\tNULL\t4\n97\tChannels\tbuy-youtube-channels-aged-new-with-videos\t3\tNULL\t16\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

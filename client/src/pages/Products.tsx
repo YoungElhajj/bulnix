@@ -45,6 +45,13 @@ export default function Products() {
     { slug: params.slug ?? "" },
     { enabled: !!params.slug, retry: false }
   );
+  // Fetch subcategories if this is a parent category (no parentId)
+  const catId = (category as any)?.id;
+  const isParentCat = !!(category as any)?.id && !(category as any)?.parentId;
+  const { data: subcategories } = trpc.categories.getSubcategories.useQuery(
+    { parentId: catId ?? 0 },
+    { enabled: !!catId && isParentCat, retry: false }
+  );
 
   const { data, isLoading } = trpc.products.list.useQuery({
     categorySlug: params.slug,
@@ -101,6 +108,30 @@ export default function Products() {
           <p className="text-slate-500">{total} products available</p>
         </div>
       </div>
+
+      {/* ── Subcategory Grid (shown when viewing a parent category) ── */}
+      {isParentCat && subcategories && subcategories.length > 0 && (
+        <div className="container py-6 border-b border-white/5">
+          <h2 className="text-base font-semibold text-slate-400 mb-4">Browse subcategories</h2>
+          <div className="flex flex-wrap gap-3">
+            {(subcategories as any[]).map((sub: any) => (
+              <Link key={sub.id} href={`/categories/${sub.slug}`}>
+                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl glass-card cursor-pointer hover:border-[#00B9E9]/40 hover:text-[#00B9E9] transition-all group">
+                  {sub.imageUrl ? (
+                    <img src={sub.imageUrl} alt={sub.name} className="w-6 h-6 object-contain rounded" />
+                  ) : (
+                    <span className="text-base">📦</span>
+                  )}
+                  <span className="text-sm font-medium text-white group-hover:text-[#00B9E9] transition-colors">{sub.name}</span>
+                  {(sub.productCount ?? 0) > 0 && (
+                    <span className="text-xs text-slate-500 ml-1">({sub.productCount})</span>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="container py-8">
         {/* Filter Bar */}

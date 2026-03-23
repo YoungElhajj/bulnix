@@ -1,0 +1,9 @@
+{
+  "query": "SELECT c.id, c.name, c.parentId, p.id as parent_exists FROM categories c LEFT JOIN categories p ON p.id = c.parentId WHERE c.parentId IS NOT NULL AND p.id IS NULL LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xomvQyHT3Pc2eM.33c921a427fa --database 6qKkSV9dybS3AerhXhrTfQ --execute SELECT c.id, c.name, c.parentId, p.id as parent_exists FROM categories c LEFT JOIN categories p ON p.id = c.parentId WHERE c.parentId IS NOT NULL AND p.id IS NULL LIMIT 10;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 60
+}

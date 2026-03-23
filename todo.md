@@ -164,3 +164,23 @@
 - [x] Fix admin logs page showing no data (was already using correct data.items field)
 - [x] Fix admin users detail view showing orderRef (changed to orderNumber)
 - [x] Fix sync history showing wrong status colors (success vs completed)
+
+## Category & Product System Overhaul (Mar 23, 2026)
+- [ ] Fix AccsZone sync to correctly map parent→subcategory hierarchy (Facebook Accounts → Ads Accounts, Aged & Cookies, etc.)
+- [ ] Pin social media categories (Facebook, Instagram, TikTok, Twitter, WhatsApp, YouTube, etc.) to top of homepage
+- [ ] Fix categories page to show subcategories when a parent category is clicked
+- [ ] Add product listing under each subcategory page
+- [ ] Add live product count per category on homepage and categories page
+- [ ] Add real-time stock badge on product cards (In Stock / Low Stock / Out of Stock)
+- [ ] Admin dashboard: live product count that updates after each sync
+
+## Category & Product System Overhaul (Mar 23, 2026)
+- [x] Pin social media categories (Facebook, Instagram, TikTok, WhatsApp, YouTube, Twitter/X, Telegram, Snapchat, LinkedIn, Google Voice, Gmail, Discord) to top of homepage and categories page
+- [x] Show 12 categories on homepage (up from 6) with live product counts
+- [x] Add getCategoriesWithCounts DB function returning productCount per category (including subcategory rollup)
+- [x] Add getSubcategoriesByParentId DB function with per-subcategory product counts
+- [x] Add listWithCounts and getSubcategories tRPC procedures
+- [x] Fix getProducts to include products from all subcategories when a parent category is selected (inArray)
+- [x] Add subcategory grid to category product page - shows clickable subcategory pills below header
+- [x] Show product count and subcategory count on each category card in Categories page
+- [x] Fix getAdminStats to return totalProducts and visibleProducts for admin dashboard

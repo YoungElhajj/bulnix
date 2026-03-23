@@ -1,0 +1,142 @@
+{
+  "query": "SELECT c.id, c.name, c.parentId, COUNT(p.id) as product_count FROM categories c LEFT JOIN products p ON p.categoryId = c.id WHERE c.parentId IN (1,5,3,7,4,10,12) GROUP BY c.id, c.name, c.parentId ORDER BY c.parentId, c.name;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xomvQyHT3Pc2eM.33c921a427fa --database 6qKkSV9dybS3AerhXhrTfQ --execute SELECT c.id, c.name, c.parentId, COUNT(p.id) as product_count FROM categories c LEFT JOIN products p ON p.categoryId = c.id WHERE c.parentId IN (1,5,3,7,4,10,12) GROUP BY c.id, c.name, c.parentId ORDER BY c.parentId, c.name;",
+  "rows": [
+    {
+      "id": "82",
+      "name": "Ads Accounts",
+      "parentId": "1",
+      "product_count": "28"
+    },
+    {
+      "id": "58",
+      "name": "Aged & Cookies",
+      "parentId": "1",
+      "product_count": "20"
+    },
+    {
+      "id": "45",
+      "name": "Aged & Friends",
+      "parentId": "1",
+      "product_count": "67"
+    },
+    {
+      "id": "90",
+      "name": "Asia & Pacific Facebook Accounts",
+      "parentId": "1",
+      "product_count": "11"
+    },
+    {
+      "id": "79",
+      "name": "Dating",
+      "parentId": "1",
+      "product_count": "6"
+    },
+    {
+      "id": "51",
+      "name": "Followers",
+      "parentId": "1",
+      "product_count": "4"
+    },
+    {
+      "id": "88",
+      "name": "Latin America Facebook Accounts",
+      "parentId": "1",
+      "product_count": "5"
+    },
+    {
+      "id": "89",
+      "name": "Middle East & Africa Facebook Accounts",
+      "parentId": "1",
+      "product_count": "7"
+    },
+    {
+      "id": "87",
+      "name": "North America & Oceania Facebook Accounts",
+      "parentId": "1",
+      "product_count": "6"
+    },
+    {
+      "id": "91",
+      "name": "UK & Europe Facebook Accounts",
+      "parentId": "1",
+      "product_count": "24"
+    },
+    {
+      "id": "86",
+      "name": "USA Facebook Accounts",
+      "parentId": "1",
+      "product_count": "6"
+    },
+    {
+      "id": "97",
+      "name": "Channels",
+      "parentId": "3",
+      "product_count": "16"
+    },
+    {
+      "id": "81",
+      "name": "Monetized Channels",
+      "parentId": "3",
+      "product_count": "5"
+    },
+    {
+      "id": "75",
+      "name": "Premium Subscriptions",
+      "parentId": "3",
+      "product_count": "4"
+    },
+    {
+      "id": "70",
+      "name": "Accounts",
+      "parentId": "4",
+      "product_count": "2"
+    },
+    {
+      "id": "94",
+      "name": "Europe",
+      "parentId": "5",
+      "product_count": "9"
+    },
+    {
+      "id": "71",
+      "name": "Followers",
+      "parentId": "5",
+      "product_count": "5"
+    },
+    {
+      "id": "95",
+      "name": "North America & Latin America",
+      "parentId": "5",
+      "product_count": "2"
+    },
+    {
+      "id": "93",
+      "name": "USA",
+      "parentId": "5",
+      "product_count": "7"
+    },
+    {
+      "id": "57",
+      "name": "Followers",
+      "parentId": "7",
+      "product_count": "12"
+    },
+    {
+      "id": "44",
+      "name": "Aged",
+      "parentId": "10",
+      "product_count": "66"
+    },
+    {
+      "id": "78",
+      "name": "Softreg",
+      "parentId": "10",
+      "product_count": "2"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tparentId\tproduct_count\n82\tAds Accounts\t1\t28\n58\tAged & Cookies\t1\t20\n45\tAged & Friends\t1\t67\n90\tAsia & Pacific Facebook Accounts\t1\t11\n79\tDating\t1\t6\n51\tFollowers\t1\t4\n88\tLatin America Facebook Accounts\t1\t5\n89\tMiddle East & Africa Facebook Accounts\t1\t7\n87\tNorth America & Oceania Facebook Accounts\t1\t6\n91\tUK & Europe Facebook Accounts\t1\t24\n86\tUSA Facebook Accounts\t1\t6\n97\tChannels\t3\t16\n81\tMonetized Channels\t3\t5\n75\tPremium Subscriptions\t3\t4\n70\tAccounts\t4\t2\n94\tEurope\t5\t9\n71\tFollowers\t5\t5\n95\tNorth America & Latin America\t5\t2\n93\tUSA\t5\t7\n57\tFollowers\t7\t12\n44\tAged\t10\t66\n78\tSoftreg\t10\t2\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}
