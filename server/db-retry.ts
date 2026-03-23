@@ -32,6 +32,9 @@ export function isRetryableDbError(error: unknown): boolean {
     "econnreset",
     "econnrefused",
     "etimedout",
+    "tiproxy fails to connect",
+    "tidb server is busy",
+    "server is overloaded",
   ];
   const check = (e: unknown): boolean => {
     if (!e || typeof e !== "object") return false;

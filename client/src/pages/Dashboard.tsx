@@ -10,9 +10,9 @@ import { getLoginUrl } from "@/const";
 
 export default function Dashboard() {
   const { user, isAuthenticated, loading } = useAuth();
-  const { data: orders } = trpc.orders.list.useQuery({ limit: 5 }, { enabled: isAuthenticated, retry: false });
-  const { data: tickets } = trpc.tickets.list.useQuery(undefined, { enabled: isAuthenticated, retry: false });
-  const { data: wallet } = trpc.wallet.get.useQuery(undefined, { enabled: isAuthenticated, retry: false });
+  const { data: orders } = trpc.orders.list.useQuery({ limit: 5 }, { enabled: isAuthenticated, retry: 2, retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000) });
+  const { data: tickets } = trpc.tickets.list.useQuery(undefined, { enabled: isAuthenticated, retry: 2, retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000) });
+  const { data: wallet } = trpc.wallet.get.useQuery(undefined, { enabled: isAuthenticated, retry: 2, retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000) });
 
   if (loading) return <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center"><div className="w-8 h-8 border-2 border-[#00B9E9] border-t-transparent rounded-full animate-spin"/></div>;
   if (!isAuthenticated) return (

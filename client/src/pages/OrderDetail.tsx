@@ -12,8 +12,8 @@ export default function OrderDetail() {
   const params = useParams<{ id: string }>();
   const { isAuthenticated } = useAuth();
   const orderId = parseInt(params.id ?? "0");
-  const { data: order, isLoading } = trpc.orders.getById.useQuery({ id: orderId }, { enabled: isAuthenticated && !!orderId, retry: false });
-  const { data: delivery } = trpc.orders.getDelivery.useQuery({ orderId }, { enabled: isAuthenticated && !!orderId, retry: false });
+  const { data: order, isLoading } = trpc.orders.getById.useQuery({ id: orderId }, { enabled: isAuthenticated && !!orderId, retry: 2, retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000) });
+  const { data: delivery } = trpc.orders.getDelivery.useQuery({ orderId }, { enabled: isAuthenticated && !!orderId, retry: 2, retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000) });
   const copyToClipboard = (text: string) => { navigator.clipboard.writeText(text); toast.success("Copied!"); };
 
   if (isLoading) return <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center"><div className="w-8 h-8 border-2 border-[#00B9E9] border-t-transparent rounded-full animate-spin"/></div>;

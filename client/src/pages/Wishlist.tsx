@@ -13,7 +13,7 @@ export default function Wishlist() {
   const { isAuthenticated, loading } = useAuth();
   const { addItem } = useCart();
   const utils = trpc.useUtils();
-  const { data: saved, isLoading } = trpc.user.getSavedProducts.useQuery(undefined, { enabled: isAuthenticated, retry: false });
+  const { data: saved, isLoading } = trpc.user.getSavedProducts.useQuery(undefined, { enabled: isAuthenticated, retry: 2, retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000) });
   const toggle = trpc.user.toggleSavedProduct.useMutation({ onSuccess: () => utils.user.getSavedProducts.invalidate() });
 
   if (loading || !isAuthenticated) return (

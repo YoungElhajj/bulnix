@@ -13,7 +13,7 @@ export default function ProductDetail() {
   const params = useParams<{ slug: string }>();
   const [qty, setQty] = useState(1);
   const { addItem } = useCart();
-  const { data: product, isLoading } = trpc.products.getBySlug.useQuery({ slug: params.slug ?? "" }, { retry: false });
+  const { data: product, isLoading } = trpc.products.getBySlug.useQuery({ slug: params.slug ?? "" }, { retry: 2, retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000) });
 
   if (isLoading) return (
     <div className="min-h-screen bg-[#0B0F19] text-white"><Navbar />

@@ -34,7 +34,7 @@ const SOCIAL_SLUGS = ["facebook-accounts", "instagram-accounts", "tiktok-account
 
 export default function Categories() {
   const [search, setSearch] = useState("");
-  const { data: categories, isLoading } = trpc.categories.listWithCounts.useQuery(undefined, { retry: false });
+  const { data: categories, isLoading } = trpc.categories.listWithCounts.useQuery(undefined, { retry: 2, retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000) });
 
   const allCats = (categories as any[] | undefined) ?? [];
   // Only show top-level (parentId null) categories, social media pinned to top

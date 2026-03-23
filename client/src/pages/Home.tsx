@@ -44,10 +44,12 @@ const FAQ_ITEMS = [
 
 export default function Home() {
   const { data: featuredProducts } = trpc.products.getFeatured.useQuery(undefined, {
-    retry: false,
+    retry: 2,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
   });
   const { data: categoriesData } = trpc.categories.listWithCounts.useQuery(undefined, {
-    retry: false,
+    retry: 2,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
   });
   const SOCIAL_SLUGS = ["facebook-accounts", "instagram-accounts", "tiktok-accounts-followers", "whatsapp-accounts", "youtube-accounts-channels", "twitter-x-accounts", "telegram-accounts", "snapchat-accounts", "linkedin-accounts", "google-voice-accounts", "gmail-accounts", "discord-accounts"];
 

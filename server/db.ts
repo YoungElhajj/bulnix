@@ -94,7 +94,10 @@ export async function upsertUser(user: InsertUser): Promise<void> {
 export async function getUserByOpenId(openId: string) {
   const db = await getDb();
   if (!db) return undefined;
-  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+  const result = await withDbRetry(
+    () => db!.select().from(users).where(eq(users.openId, openId)).limit(1),
+    "getUserByOpenId"
+  );
   return result.length > 0 ? result[0] : undefined;
 }
 
@@ -120,14 +123,23 @@ export async function updateUserProfile(userId: number, data: {
 export async function getCategories() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(categories).where(eq(categories.isVisible, true)).orderBy(categories.sortOrder, categories.name);
+  return withDbRetry(
+    () => db!.select().from(categories).where(eq(categories.isVisible, true)).orderBy(categories.sortOrder, categories.name),
+    "getCategories"
+  );
 }
 
 export async function getCategoriesWithCounts() {
   const db = await getDb();
   if (!db) return [];
-  const cats = await db.select().from(categories).where(eq(categories.isVisible, true)).orderBy(categories.sortOrder, categories.name);
-  const counts = await db.select({ categoryId: products.categoryId, count: sql<number>`count(*)` }).from(products).where(eq(products.isVisible, true)).groupBy(products.categoryId);
+  const cats = await withDbRetry(
+    () => db!.select().from(categories).where(eq(categories.isVisible, true)).orderBy(categories.sortOrder, categories.name),
+    "getCategoriesWithCounts:cats"
+  );
+  const counts = await withDbRetry(
+    () => db!.select({ categoryId: products.categoryId, count: sql<number>`count(*)` }).from(products).where(eq(products.isVisible, true)).groupBy(products.categoryId),
+    "getCategoriesWithCounts:counts"
+  );
   const countMap = new Map<number, number>();
   for (const row of counts) {
     if (row.categoryId != null) countMap.set(row.categoryId, Number(row.count));
@@ -141,10 +153,16 @@ export async function getCategoriesWithCounts() {
 export async function getSubcategoriesByParentId(parentId: number) {
   const db = await getDb();
   if (!db) return [];
-  const subs = await db.select().from(categories).where(and(eq(categories.parentId, parentId), eq(categories.isVisible, true))).orderBy(categories.sortOrder, categories.name);
+  const subs = await withDbRetry(
+    () => db!.select().from(categories).where(and(eq(categories.parentId, parentId), eq(categories.isVisible, true))).orderBy(categories.sortOrder, categories.name),
+    "getSubcategoriesByParentId:subs"
+  );
   if (subs.length === 0) return [];
   const subIds = subs.map(s => s.id);
-  const counts = await db.select({ categoryId: products.categoryId, count: sql<number>`count(*)` }).from(products).where(and(eq(products.isVisible, true), inArray(products.categoryId, subIds))).groupBy(products.categoryId);
+  const counts = await withDbRetry(
+    () => db!.select({ categoryId: products.categoryId, count: sql<number>`count(*)` }).from(products).where(and(eq(products.isVisible, true), inArray(products.categoryId, subIds))).groupBy(products.categoryId),
+    "getSubcategoriesByParentId:counts"
+  );
   const countMap = new Map<number, number>();
   for (const row of counts) {
     if (row.categoryId != null) countMap.set(row.categoryId, Number(row.count));
@@ -154,7 +172,10 @@ export async function getSubcategoriesByParentId(parentId: number) {
 export async function getCategoryBySlug(slug: string) {
   const db = await getDb();
   if (!db) return null;
-  const result = await db.select().from(categories).where(eq(categories.slug, slug)).limit(1);
+  const result = await withDbRetry(
+    () => db!.select().from(categories).where(eq(categories.slug, slug)).limit(1),
+    "getCategoryBySlug"
+  );
   return result[0] ?? null;
 }
 
@@ -199,10 +220,13 @@ export async function deleteCategory(id: number) {
 export async function getFeaturedProducts() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(products)
-    .where(and(eq(products.isVisible, true), eq(products.isFeatured, true)))
-    .orderBy(desc(products.updatedAt))
-    .limit(8);
+  return withDbRetry(
+    () => db!.select().from(products)
+      .where(and(eq(products.isVisible, true), eq(products.isFeatured, true)))
+      .orderBy(desc(products.updatedAt))
+      .limit(8),
+    "getFeaturedProducts"
+  );
 }
 
 export async function getProducts(input: {
@@ -242,8 +266,14 @@ export async function getProducts(input: {
     }
   }
 
-  const items = await db.select().from(products).where(and(...conditions)).orderBy(orderByClause).limit(input.limit).offset(offset);
-  const countResult = await db.select({ count: sql<number>`count(*)` }).from(products).where(and(...conditions));
+  const items = await withDbRetry(
+    () => db!.select().from(products).where(and(...conditions)).orderBy(orderByClause).limit(input.limit).offset(offset),
+    "getProducts:items"
+  );
+  const countResult = await withDbRetry(
+    () => db!.select({ count: sql<number>`count(*)` }).from(products).where(and(...conditions)),
+    "getProducts:count"
+  );
   const total = Number(countResult[0]?.count ?? 0);
 
   return { items, total, page: input.page, limit: input.limit };
@@ -252,14 +282,20 @@ export async function getProducts(input: {
 export async function getProductBySlug(slug: string) {
   const db = await getDb();
   if (!db) return null;
-  const result = await db.select().from(products).where(and(eq(products.slug, slug), eq(products.isVisible, true))).limit(1);
+  const result = await withDbRetry(
+    () => db!.select().from(products).where(and(eq(products.slug, slug), eq(products.isVisible, true))).limit(1),
+    "getProductBySlug"
+  );
   return result[0] ?? null;
 }
 
 export async function getProductById(id: number) {
   const db = await getDb();
   if (!db) return null;
-  const result = await db.select().from(products).where(eq(products.id, id)).limit(1);
+  const result = await withDbRetry(
+    () => db!.select().from(products).where(eq(products.id, id)).limit(1),
+    "getProductById"
+  );
   return result[0] ?? null;
 }
 
@@ -488,7 +524,10 @@ export async function createTicket(userId: number, input: {
 export async function getUserTickets(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(supportTickets).where(eq(supportTickets.userId, userId)).orderBy(desc(supportTickets.updatedAt));
+  return withDbRetry(
+    () => db!.select().from(supportTickets).where(eq(supportTickets.userId, userId)).orderBy(desc(supportTickets.updatedAt)),
+    "getUserTickets"
+  );
 }
 
 export async function getTicketById(userId: number, ticketId: number) {
@@ -556,7 +595,10 @@ export async function toggleSavedProduct(userId: number, productId: number) {
 export async function getUserNotifications(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(notifications).where(eq(notifications.userId, userId)).orderBy(desc(notifications.createdAt)).limit(50);
+  return withDbRetry(
+    () => db!.select().from(notifications).where(eq(notifications.userId, userId)).orderBy(desc(notifications.createdAt)).limit(50),
+    "getUserNotifications"
+  );
 }
 
 export async function markNotificationRead(userId: number, notifId: number) {
@@ -577,7 +619,10 @@ export async function createNotification(userId: number, type: string, title: st
 export async function getExchangeRates() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(exchangeRates);
+  return withDbRetry(
+    () => db!.select().from(exchangeRates),
+    "getExchangeRates"
+  );
 }
 
 export async function updateExchangeRate(input: { fromCurrency: string; toCurrency: string; rate: number }) {
@@ -594,7 +639,10 @@ export async function updateExchangeRate(input: { fromCurrency: string; toCurren
 export async function getProviderConfigs() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(providerConfigs);
+  return withDbRetry(
+    () => db!.select().from(providerConfigs),
+    "getProviderConfigs"
+  );
 }
 
 export async function updateProviderConfig(input: {
@@ -626,7 +674,10 @@ export async function triggerProviderSync(providerKey: string, syncType: "catego
 export async function getProviderSyncLogs() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(providerSyncLogs).orderBy(desc(providerSyncLogs.startedAt)).limit(50);
+  return withDbRetry(
+    () => db!.select().from(providerSyncLogs).orderBy(desc(providerSyncLogs.startedAt)).limit(50),
+    "getProviderSyncLogs"
+  );
 }
 
 // ─── System Logs ──────────────────────────────────────────────────────────────

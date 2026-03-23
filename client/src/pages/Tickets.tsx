@@ -19,7 +19,7 @@ export default function Tickets() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ subject: "", message: "", priority: "medium" });
   const utils = trpc.useUtils();
-  const { data: tickets, isLoading } = trpc.tickets.list.useQuery(undefined, { enabled: isAuthenticated, retry: false });
+  const { data: tickets, isLoading } = trpc.tickets.list.useQuery(undefined, { enabled: isAuthenticated, retry: 2, retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000) });
   const createTicket = trpc.tickets.create.useMutation({
     onSuccess: () => { toast.success("Ticket created!"); setOpen(false); setForm({ subject: "", message: "", priority: "medium" }); utils.tickets.list.invalidate(); },
     onError: (e) => toast.error(e.message),

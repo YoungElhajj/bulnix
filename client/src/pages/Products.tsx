@@ -43,14 +43,14 @@ export default function Products() {
 
   const { data: category } = trpc.categories.getBySlug.useQuery(
     { slug: params.slug ?? "" },
-    { enabled: !!params.slug, retry: false }
+    { enabled: !!params.slug, retry: 2, retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000) }
   );
   // Fetch subcategories if this is a parent category (no parentId)
   const catId = (category as any)?.id;
   const isParentCat = !!(category as any)?.id && !(category as any)?.parentId;
   const { data: subcategories } = trpc.categories.getSubcategories.useQuery(
     { parentId: catId ?? 0 },
-    { enabled: !!catId && isParentCat, retry: false }
+    { enabled: !!catId && isParentCat, retry: 2, retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000) }
   );
 
   const { data, isLoading } = trpc.products.list.useQuery({
@@ -59,7 +59,7 @@ export default function Products() {
     sort,
     page,
     limit: 24,
-  }, { retry: false });
+  }, { retry: 2, retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000) });
 
   const products = (data as any)?.items ?? [];
   const total = (data as any)?.total ?? 0;

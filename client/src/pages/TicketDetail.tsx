@@ -15,7 +15,7 @@ export default function TicketDetail() {
   const [reply, setReply] = useState("");
   const ticketId = parseInt(params.id ?? "0");
   const utils = trpc.useUtils();
-  const { data: ticket, isLoading } = trpc.tickets.getById.useQuery({ id: ticketId }, { enabled: isAuthenticated && !!ticketId, retry: false });
+  const { data: ticket, isLoading } = trpc.tickets.getById.useQuery({ id: ticketId }, { enabled: isAuthenticated && !!ticketId, retry: 2, retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000) });
   const replyMutation = trpc.tickets.reply.useMutation({
     onSuccess: () => { setReply(""); utils.tickets.getById.invalidate({ id: ticketId }); toast.success("Reply sent"); },
     onError: (e) => toast.error(e.message),
