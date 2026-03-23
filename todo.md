@@ -131,3 +131,10 @@
 - [ ] Link supplier claims to tickets and orders in admin panel
 - [ ] Write vitest tests for supplier refund claim procedures
 - [ ] Checkpoint and deliver
+
+## Raise Supplier Claim from Tickets (Mar 23 2026)
+
+- [ ] Add "Raise Supplier Claim" button inside Admin Tickets detail view
+- [ ] Pre-fill claim form with ticket ID, order ID, and customer info
+- [ ] Show existing supplier claims linked to the ticket
+- [ ] Checkpoint and deliver
