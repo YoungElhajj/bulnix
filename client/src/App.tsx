@@ -44,6 +44,7 @@ import AdminTickets from "./pages/admin/AdminTickets";
 import AdminProviders from "./pages/admin/AdminProviders";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminLogs from "./pages/admin/AdminLogs";
+import AdminSupplierRefunds from "./pages/admin/AdminSupplierRefunds";
 
 function Router() {
   return (
@@ -87,6 +88,7 @@ function Router() {
       <Route path="/admin/providers" component={AdminProviders} />
       <Route path="/admin/categories" component={AdminCategories} />
       <Route path="/admin/logs" component={AdminLogs} />
+      <Route path="/admin/supplier-refunds" component={AdminSupplierRefunds} />
 
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />

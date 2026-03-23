@@ -22,7 +22,9 @@ import {
   users,
   wallets,
   walletTransactions,
+  supplierRefundClaims,
   type InsertUser,
+  type InsertSupplierRefundClaim,
 } from "../drizzle/schema";
 import { nanoid } from "nanoid";
 
@@ -854,4 +856,197 @@ export async function adminProcessRefund(adminId: number, input: { userId: numbe
   }
 
   return { success: true, newBalance };
+}
+
+
+// ─── Supplier Refund Claims ──────────────────────────────────────────────────
+
+export async function createSupplierRefundClaim(
+  adminId: number,
+  input: {
+    ticketId?: number;
+    orderId?: number;
+    providerKey: string;
+    supplierOrderId?: string;
+    claimAmountUSD: number;
+    reason: string;
+    adminNotes?: string;
+  }
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const [result] = await db.insert(supplierRefundClaims).values({
+    raisedByAdminId: adminId,
+    ticketId: input.ticketId ?? null,
+    orderId: input.orderId ?? null,
+    providerKey: input.providerKey,
+    supplierOrderId: input.supplierOrderId ?? null,
+    claimAmountUSD: String(input.claimAmountUSD),
+    reason: input.reason,
+    adminNotes: input.adminNotes ?? null,
+    status: "draft",
+    communicationLog: JSON.stringify([]),
+    creditedToCustomer: false,
+  });
+
+  await logSystem("info", "supplier_refund", `Supplier refund claim created for provider ${input.providerKey}`, { adminId, claimAmountUSD: input.claimAmountUSD, orderId: input.orderId, ticketId: input.ticketId });
+
+  return { success: true, claimId: (result as any).insertId };
+}
+
+export async function submitSupplierRefundClaim(
+  adminId: number,
+  claimId: number
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const [claim] = await db.select().from(supplierRefundClaims).where(eq(supplierRefundClaims.id, claimId)).limit(1);
+  if (!claim) throw new Error("Claim not found");
+  if (claim.status !== "draft") throw new Error("Only draft claims can be submitted");
+
+  // Build a formatted refund request message for AccsZone support
+  const requestMessage = buildSupplierRefundMessage(claim);
+
+  // Log the submission in the communication log
+  const log = JSON.parse((claim.communicationLog as string) || "[]");
+  log.push({
+    direction: "outbound",
+    timestamp: new Date().toISOString(),
+    message: requestMessage,
+    actor: `Admin #${adminId}`,
+    type: "submission",
+  });
+
+  await db.update(supplierRefundClaims)
+    .set({
+      status: "submitted",
+      submittedAt: new Date(),
+      communicationLog: JSON.stringify(log),
+    })
+    .where(eq(supplierRefundClaims.id, claimId));
+
+  await logSystem("info", "supplier_refund", `Supplier refund claim #${claimId} submitted`, { adminId, claimId, providerKey: claim.providerKey });
+
+  return { success: true, requestMessage };
+}
+
+export async function updateSupplierRefundClaim(
+  adminId: number,
+  input: {
+    claimId: number;
+    status?: "acknowledged" | "approved" | "partially_approved" | "rejected" | "resolved" | "cancelled";
+    approvedAmountUSD?: number;
+    supplierResponse?: string;
+    supplierRefundRef?: string;
+    adminNotes?: string;
+    addLogEntry?: { message: string; direction: "inbound" | "outbound"; type: string };
+    creditToCustomer?: boolean;
+    customerUserId?: number;
+  }
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const [claim] = await db.select().from(supplierRefundClaims).where(eq(supplierRefundClaims.id, input.claimId)).limit(1);
+  if (!claim) throw new Error("Claim not found");
+
+  const log = JSON.parse((claim.communicationLog as string) || "[]");
+  if (input.addLogEntry) {
+    log.push({
+      direction: input.addLogEntry.direction,
+      timestamp: new Date().toISOString(),
+      message: input.addLogEntry.message,
+      actor: input.addLogEntry.direction === "inbound" ? claim.providerKey : `Admin #${adminId}`,
+      type: input.addLogEntry.type,
+    });
+  }
+
+  const updateData: Record<string, unknown> = {
+    communicationLog: JSON.stringify(log),
+  };
+  if (input.status) updateData.status = input.status;
+  if (input.approvedAmountUSD !== undefined) updateData.approvedAmountUSD = String(input.approvedAmountUSD);
+  if (input.supplierResponse !== undefined) updateData.supplierResponse = input.supplierResponse;
+  if (input.supplierRefundRef !== undefined) updateData.supplierRefundRef = input.supplierRefundRef;
+  if (input.adminNotes !== undefined) updateData.adminNotes = input.adminNotes;
+  if (input.status === "resolved" || input.status === "approved") updateData.resolvedAt = new Date();
+
+  await db.update(supplierRefundClaims).set(updateData).where(eq(supplierRefundClaims.id, input.claimId));
+
+  // If admin wants to credit the approved amount to the customer's wallet
+  if (input.creditToCustomer && input.customerUserId && input.approvedAmountUSD) {
+    const creditAmount = input.approvedAmountUSD;
+    const wallet = await getOrCreateWallet(input.customerUserId);
+    const newBalance = parseFloat(wallet.balanceUSD as string) + creditAmount;
+    await db.update(wallets).set({ balanceUSD: String(newBalance), totalDeposited: String(parseFloat(wallet.totalDeposited as string) + creditAmount) }).where(eq(wallets.userId, input.customerUserId));
+    await db.insert(walletTransactions).values({
+      userId: input.customerUserId,
+      type: "refund",
+      amountUSD: String(creditAmount),
+      balanceAfterUSD: String(newBalance),
+      description: `Supplier refund credited (Claim #${input.claimId})`,
+      reference: `supplier-refund-${input.claimId}`,
+      status: "completed",
+    });
+    await db.update(supplierRefundClaims).set({ creditedToCustomer: true }).where(eq(supplierRefundClaims.id, input.claimId));
+  }
+
+  await logSystem("info", "supplier_refund", `Supplier refund claim #${input.claimId} updated to status: ${input.status ?? "unchanged"}`, { adminId, claimId: input.claimId });
+
+  return { success: true };
+}
+
+export async function listSupplierRefundClaims(input: {
+  page: number;
+  limit: number;
+  status?: string;
+  providerKey?: string;
+}) {
+  const db = await getDb();
+  if (!db) return { items: [], total: 0 };
+
+  const conditions = [];
+  if (input.status) conditions.push(eq(supplierRefundClaims.status, input.status as any));
+  if (input.providerKey) conditions.push(eq(supplierRefundClaims.providerKey, input.providerKey));
+
+  const offset = (input.page - 1) * input.limit;
+  const query = db.select().from(supplierRefundClaims);
+  const items = conditions.length > 0
+    ? await query.where(and(...conditions)).limit(input.limit).offset(offset)
+    : await query.limit(input.limit).offset(offset);
+
+  return { items, total: items.length };
+}
+
+export async function getSupplierRefundClaim(claimId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [claim] = await db.select().from(supplierRefundClaims).where(eq(supplierRefundClaims.id, claimId)).limit(1);
+  if (!claim) throw new Error("Claim not found");
+  return { ...claim, communicationLog: JSON.parse((claim.communicationLog as string) || "[]") };
+}
+
+function buildSupplierRefundMessage(claim: any): string {
+  return `REFUND REQUEST — Bulnix Marketplace
+
+Dear ${claim.providerKey.charAt(0).toUpperCase() + claim.providerKey.slice(1)} Support Team,
+
+We are writing to formally request a refund for the following order placed through your platform.
+
+Order Reference: ${claim.supplierOrderId ?? "N/A"}
+Claim Amount: $${parseFloat(claim.claimAmountUSD).toFixed(2)} USD
+Internal Claim ID: #${claim.id}
+
+Reason for Refund:
+${claim.reason}
+
+Please confirm receipt of this request and provide a refund reference number at your earliest convenience. We expect a response within 2 business days.
+
+Thank you for your cooperation.
+
+Best regards,
+Bulnix Support Team
+support@bulnix.com`;
 }

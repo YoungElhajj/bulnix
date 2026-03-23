@@ -425,3 +425,53 @@ export const walletTransactions = mysqlTable("wallet_transactions", {
 });
 
 export type WalletTransaction = typeof walletTransactions.$inferSelect;
+
+
+// ─── Supplier Refund Claims ──────────────────────────────────────────────────
+
+export const supplierRefundClaims = mysqlTable("supplier_refund_claims", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Admin who raised the claim */
+  raisedByAdminId: int("raisedByAdminId").notNull(),
+  /** The customer ticket this claim was raised from */
+  ticketId: int("ticketId"),
+  /** The order this claim relates to */
+  orderId: int("orderId"),
+  /** The supplier provider key (e.g. "accszone") */
+  providerKey: varchar("providerKey", { length: 64 }).notNull(),
+  /** The supplier's own order/transaction ID to reference in the claim */
+  supplierOrderId: varchar("supplierOrderId", { length: 256 }),
+  /** Amount being claimed back from the supplier (in USD) */
+  claimAmountUSD: decimal("claimAmountUSD", { precision: 18, scale: 6 }).notNull(),
+  /** Admin's reason for the claim */
+  reason: text("reason").notNull(),
+  /** Current status of the claim */
+  status: mysqlEnum("status", [
+    "draft",
+    "submitted",
+    "acknowledged",
+    "approved",
+    "partially_approved",
+    "rejected",
+    "resolved",
+    "cancelled",
+  ]).default("draft").notNull(),
+  /** Amount the supplier actually approved (may differ from claim amount) */
+  approvedAmountUSD: decimal("approvedAmountUSD", { precision: 18, scale: 6 }),
+  /** Supplier's response message or reference number */
+  supplierResponse: text("supplierResponse"),
+  /** Supplier's refund reference/ticket number */
+  supplierRefundRef: varchar("supplierRefundRef", { length: 256 }),
+  /** Internal admin notes (not sent to supplier) */
+  adminNotes: text("adminNotes"),
+  /** Full log of all communications with supplier as JSON array */
+  communicationLog: json("communicationLog"),
+  /** Whether the approved amount has been credited back to the customer's wallet */
+  creditedToCustomer: boolean("creditedToCustomer").default(false).notNull(),
+  submittedAt: timestamp("submittedAt"),
+  resolvedAt: timestamp("resolvedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type SupplierRefundClaim = typeof supplierRefundClaims.$inferSelect;
+export type InsertSupplierRefundClaim = typeof supplierRefundClaims.$inferInsert;

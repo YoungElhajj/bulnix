@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Package, ShoppingCart, Users, Ticket, Settings, Activity, Tag, LogOut, Menu, X, Shield } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Users, Ticket, Settings, Activity, Tag, LogOut, Menu, X, Shield, DollarSign } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -16,6 +16,7 @@ const navItems = [
   { label: "Tickets", href: "/admin/tickets", icon: Ticket },
   { label: "Providers", href: "/admin/providers", icon: Settings },
   { label: "Logs", href: "/admin/logs", icon: Activity },
+  { label: "Supplier Refunds", href: "/admin/supplier-refunds", icon: DollarSign },
 ];
 
 interface AdminLayoutProps {

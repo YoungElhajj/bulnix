@@ -1,0 +1,22 @@
+CREATE TABLE `supplier_refund_claims` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`raisedByAdminId` int NOT NULL,
+	`ticketId` int,
+	`orderId` int,
+	`providerKey` varchar(64) NOT NULL,
+	`supplierOrderId` varchar(256),
+	`claimAmountUSD` decimal(18,6) NOT NULL,
+	`reason` text NOT NULL,
+	`status` enum('draft','submitted','acknowledged','approved','partially_approved','rejected','resolved','cancelled') NOT NULL DEFAULT 'draft',
+	`approvedAmountUSD` decimal(18,6),
+	`supplierResponse` text,
+	`supplierRefundRef` varchar(256),
+	`adminNotes` text,
+	`communicationLog` json,
+	`creditedToCustomer` boolean NOT NULL DEFAULT false,
+	`submittedAt` timestamp,
+	`resolvedAt` timestamp,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `supplier_refund_claims_id` PRIMARY KEY(`id`)
+);

@@ -293,6 +293,43 @@ export const appRouter = router({
         .mutation(({ input }) => db.deleteCategory(input.id)),
     }),
 
+    // Supplier Refund Claims
+    supplierRefunds: router({
+      list: adminProcedure
+        .input(z.object({ page: z.number().default(1), limit: z.number().default(50), status: z.string().optional(), providerKey: z.string().optional() }))
+        .query(({ input }) => db.listSupplierRefundClaims(input)),
+      get: adminProcedure
+        .input(z.object({ claimId: z.number() }))
+        .query(({ input }) => db.getSupplierRefundClaim(input.claimId)),
+      create: adminProcedure
+        .input(z.object({
+          ticketId: z.number().optional(),
+          orderId: z.number().optional(),
+          providerKey: z.string().default("accszone"),
+          supplierOrderId: z.string().optional(),
+          claimAmountUSD: z.number().min(0.01),
+          reason: z.string().min(10),
+          adminNotes: z.string().optional(),
+        }))
+        .mutation(({ input, ctx }) => db.createSupplierRefundClaim(ctx.user.id, input)),
+      submit: adminProcedure
+        .input(z.object({ claimId: z.number() }))
+        .mutation(({ input, ctx }) => db.submitSupplierRefundClaim(ctx.user.id, input.claimId)),
+      update: adminProcedure
+        .input(z.object({
+          claimId: z.number(),
+          status: z.enum(["acknowledged", "approved", "partially_approved", "rejected", "resolved", "cancelled"]).optional(),
+          approvedAmountUSD: z.number().optional(),
+          supplierResponse: z.string().optional(),
+          supplierRefundRef: z.string().optional(),
+          adminNotes: z.string().optional(),
+          addLogEntry: z.object({ message: z.string(), direction: z.enum(["inbound", "outbound"]), type: z.string() }).optional(),
+          creditToCustomer: z.boolean().optional(),
+          customerUserId: z.number().optional(),
+        }))
+        .mutation(({ input, ctx }) => db.updateSupplierRefundClaim(ctx.user.id, input)),
+    }),
+
     // System logs
     logs: router({
       list: adminProcedure

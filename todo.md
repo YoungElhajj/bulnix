@@ -121,3 +121,13 @@
 - [ ] Admin: refund processing for open support tickets
 - [ ] Admin: supplier refund claim workflow
 - [ ] Admin: product icon/logo upload when adding or editing products
+
+## Supplier Refund Request Feature (Mar 23 2026)
+
+- [ ] Add supplier_refund_claims table to schema
+- [ ] Add AccsZone refund API integration (submit claim, check status)
+- [ ] Add backend tRPC procedures for creating and tracking supplier claims
+- [ ] Build admin UI: raise claim from ticket, view claim status, log supplier response
+- [ ] Link supplier claims to tickets and orders in admin panel
+- [ ] Write vitest tests for supplier refund claim procedures
+- [ ] Checkpoint and deliver
