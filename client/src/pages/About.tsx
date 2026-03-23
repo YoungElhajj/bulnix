@@ -13,12 +13,12 @@ export default function About() {
         <div className="container max-w-4xl mx-auto text-center">
           <img src={LOGO_URL} alt="Bulnix" className="h-16 w-auto mx-auto mb-8"/>
           <h1 className="text-4xl font-bold text-white mb-4">The Central Hub for Bulk Digital Supply</h1>
-          <p className="text-xl text-slate-400 leading-relaxed">Bulnix (Bulk + Nexus) connects buyers to thousands of verified digital products — social media accounts, streaming services, gaming credits, and more — with instant delivery and global payment support.</p>
+          <p className="text-xl text-slate-400 leading-relaxed">Bulnix (Bulk + Nexus) connects buyers to thousands of verified digital products including social media accounts, streaming services, gaming credits, and more, with instant delivery and global payment support.</p>
         </div>
       </div>
       <div className="container max-w-5xl mx-auto py-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-          {[{icon:Target,title:"Our Mission",desc:"To make digital product procurement fast, secure, and accessible to everyone — from individual buyers to enterprise resellers."},{icon:Shield,title:"Our Values",desc:"Trust, transparency, and security are at the core of everything we do. Every supplier is vetted. Every payment is protected."},{icon:Globe,title:"Our Reach",desc:"Serving customers across Africa, Europe, and globally with support for NGN, USD, EUR, and GBP currencies."}].map((v,i)=>(
+          {[{icon:Target,title:"Our Mission",desc:"To make digital product procurement fast, secure, and accessible to everyone from individual buyers to enterprise resellers."},{icon:Shield,title:"Our Values",desc:"Trust, transparency, and security are at the core of everything we do. Every supplier is vetted. Every payment is protected."},{icon:Globe,title:"Our Reach",desc:"Serving customers across Africa, Europe, and globally with support for NGN, USD, EUR, and GBP currencies."}].map((v,i)=>(
             <div key={i} className="glass-card rounded-xl p-6 text-center">
               <div className="w-12 h-12 rounded-xl bg-[#00B9E9]/10 flex items-center justify-center mx-auto mb-4"><v.icon className="h-6 w-6 text-[#00B9E9]"/></div>
               <h3 className="font-bold text-white mb-2">{v.title}</h3>

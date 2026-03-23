@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Edit, Eye, EyeOff, Loader2, Trash2, Image, ChevronRight } from "lucide-react";
+import { Plus, Edit, Eye, EyeOff, Loader2, Trash2, Image, ChevronRight, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +20,25 @@ export default function AdminCategories() {
   const [form, setForm] = useState({ name: "", slug: "", description: "", imageUrl: "", parentId: "" });
   const [editForm, setEditForm] = useState<any>({});
   const [showSubs, setShowSubs] = useState<Record<number, boolean>>({});
+
+  const [uploading, setUploading] = useState(false);
+
+  const uploadImage = async (file: File, onSuccess: (url: string) => void) => {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload/image", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Upload failed");
+      onSuccess(data.url);
+      toast.success("Image uploaded!");
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const utils = trpc.useUtils();
   const { data: categories, isLoading } = trpc.admin.categories.list.useQuery(undefined, {
@@ -243,16 +262,22 @@ export default function AdminCategories() {
                 <Input value={editForm.description} onChange={e => setEditForm((f: any) => ({ ...f, description: e.target.value }))} placeholder="Optional description" className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
               </div>
               <div>
-                <Label className="text-slate-300 text-sm mb-1.5 block">Icon / Image URL</Label>
-                <div className="flex gap-2 items-center">
-                  <Input value={editForm.imageUrl} onChange={e => setEditForm((f: any) => ({ ...f, imageUrl: e.target.value }))} placeholder="https://..." className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10 flex-1" />
-                  {editForm.imageUrl && (
-                    <div className="w-10 h-10 rounded-lg bg-[#0B0F19] border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
-                      <img src={editForm.imageUrl} alt="preview" className="w-8 h-8 object-contain" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                    </div>
-                  )}
+                <Label className="text-slate-300 text-sm mb-1.5 block">Category Icon / Image</Label>
+                <div className="flex gap-2 items-start">
+                  <div className="flex-1 space-y-2">
+                    <Input value={editForm.imageUrl} onChange={e => setEditForm((f: any) => ({ ...f, imageUrl: e.target.value }))} placeholder="Paste URL or upload file" className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
+                    <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-white/20 hover:border-[#00B9E9]/50 cursor-pointer transition-colors bg-[#0B0F19] text-xs text-slate-400 hover:text-[#00B9E9]">
+                      {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                      {uploading ? "Uploading..." : "Upload icon (PNG, JPG, SVG, max 5MB)"}
+                      <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(f, url => setEditForm((fm: any) => ({ ...fm, imageUrl: url }))); }} />
+                    </label>
+                  </div>
+                  <div className="w-16 h-16 rounded-xl bg-[#0B0F19] border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {editForm.imageUrl
+                      ? <img src={editForm.imageUrl} alt="preview" className="w-full h-full object-contain p-1" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                      : <Image className="h-6 w-6 text-slate-700" />}
+                  </div>
                 </div>
-                <p className="text-xs text-slate-600 mt-1">Paste an image URL from AccsZone or any CDN</p>
               </div>
               <div>
                 <Label className="text-slate-300 text-sm mb-1.5 block">Parent Category</Label>

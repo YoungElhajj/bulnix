@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Package, Settings, Shield } from "lucide-react";
+import { ShoppingCart, Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Package, Settings, Shield, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -97,6 +97,12 @@ export default function Navbar() {
                     <Link href="/orders" className="flex items-center gap-2 cursor-pointer">
                       <Package className="h-4 w-4 text-slate-400" />
                       <span>My Orders</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/wallet" className="flex items-center gap-2 cursor-pointer">
+                      <Wallet className="h-4 w-4 text-[#22C55E]" />
+                      <span>My Wallet</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>

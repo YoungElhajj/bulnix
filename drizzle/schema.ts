@@ -393,3 +393,35 @@ export const exchangeRates = mysqlTable("exchange_rates", {
   source: varchar("source", { length: 64 }).default("manual").notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
+
+// ─── Wallet ───────────────────────────────────────────────────────────────────
+
+export const wallets = mysqlTable("wallets", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  balanceUSD: decimal("balanceUSD", { precision: 18, scale: 6 }).default("0.000000").notNull(),
+  totalDeposited: decimal("totalDeposited", { precision: 18, scale: 6 }).default("0.000000").notNull(),
+  totalSpent: decimal("totalSpent", { precision: 18, scale: 6 }).default("0.000000").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Wallet = typeof wallets.$inferSelect;
+
+export const walletTransactions = mysqlTable("wallet_transactions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  type: mysqlEnum("type", ["deposit", "spend", "refund", "adjustment"]).notNull(),
+  amountUSD: decimal("amountUSD", { precision: 18, scale: 6 }).notNull(),
+  balanceAfterUSD: decimal("balanceAfterUSD", { precision: 18, scale: 6 }).notNull(),
+  description: varchar("description", { length: 512 }).notNull(),
+  reference: varchar("reference", { length: 256 }),
+  orderId: int("orderId"),
+  paymentId: int("paymentId"),
+  status: mysqlEnum("status", ["pending", "completed", "failed", "reversed"]).default("completed").notNull(),
+  gateway: varchar("gateway", { length: 64 }),
+  gatewayRef: varchar("gatewayRef", { length: 256 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type WalletTransaction = typeof walletTransactions.$inferSelect;

@@ -74,7 +74,7 @@ export default function Home() {
             </h1>
 
             <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-              Bulnix connects you to thousands of verified digital products — social media, streaming, gaming, and more. Instant delivery, global payments, enterprise-grade security.
+              Bulnix connects you to thousands of verified digital products including social media accounts, streaming services, gaming credits, and more. Instant delivery, global payments, enterprise-grade security.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
@@ -241,7 +241,7 @@ export default function Home() {
               </p>
               <div className="space-y-4">
                 {[
-                  { title: "Verified Supplier Network", desc: "Products sourced from AccsZone and AccsBulk — industry-leading suppliers." },
+                  { title: "Verified Product Network", desc: "Every product is sourced from vetted, trusted suppliers and quality-checked before listing." },
                   { title: "Real-time Stock Sync", desc: "Inventory updated every 30 minutes. No overselling, no disappointments." },
                   { title: "Multi-Currency Support", desc: "Pay in NGN, USD, EUR, GBP, or crypto. We handle the conversion." },
                   { title: "24/7 Support", desc: "Ticket-based support with fast response times for every order." },
@@ -289,7 +289,7 @@ export default function Home() {
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-white mb-3">Global Payment Options</h2>
-            <p className="text-slate-500">Pay your way — cards, bank transfer, or crypto</p>
+            <p className="text-slate-500">Pay your way with cards, bank transfer, or crypto</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -360,7 +360,7 @@ export default function Home() {
                 Become a <span className="text-[#00B9E9]">Bulnix</span> Supplier
               </h2>
               <p className="text-slate-400 text-lg mb-8 leading-relaxed">
-                Have digital products to sell? Partner with Bulnix and reach thousands of buyers across Africa and globally. We handle payments, delivery, and customer support — you focus on supply.
+                Have digital products to sell? Partner with Bulnix and reach thousands of buyers across Africa and globally. We handle payments, delivery, and customer support so you can focus on supply.
               </p>
               <div className="space-y-4 mb-8">
                 {[

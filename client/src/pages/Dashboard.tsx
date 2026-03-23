@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Package, ShoppingCart, Ticket, User, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { Package, ShoppingCart, Ticket, User, CheckCircle, Clock, AlertCircle, Wallet, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
@@ -12,6 +12,7 @@ export default function Dashboard() {
   const { user, isAuthenticated, loading } = useAuth();
   const { data: orders } = trpc.orders.list.useQuery({ limit: 5 }, { enabled: isAuthenticated, retry: false });
   const { data: tickets } = trpc.tickets.list.useQuery(undefined, { enabled: isAuthenticated, retry: false });
+  const { data: wallet } = trpc.wallet.get.useQuery(undefined, { enabled: isAuthenticated, retry: false });
 
   if (loading) return <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center"><div className="w-8 h-8 border-2 border-[#00B9E9] border-t-transparent rounded-full animate-spin"/></div>;
   if (!isAuthenticated) return (
@@ -21,7 +22,7 @@ export default function Dashboard() {
     </div>
   );
 
-  const recentOrders = (orders as any)?.orders ?? [];
+  const recentOrders = (orders as any)?.items ?? (orders as any)?.orders ?? [];
   const openTickets = ((tickets as any[]) ?? []).filter((t: any) => t.status !== "closed").length;
   const statusColor = (s: string) => ({ pending: "text-yellow-400", processing: "text-blue-400", completed: "text-[#22C55E]", failed: "text-red-400" }[s] ?? "text-slate-400");
   const statusBadge = (s: string) => ({ pending: "bg-yellow-500/10 text-yellow-400", processing: "bg-blue-500/10 text-blue-400", completed: "bg-[#22C55E]/10 text-[#22C55E]", failed: "bg-red-500/10 text-red-400" }[s] ?? "bg-slate-500/10 text-slate-400");
@@ -32,6 +33,24 @@ export default function Dashboard() {
         <div className="container"><h1 className="text-3xl font-bold text-white">Dashboard</h1><p className="text-slate-500 mt-1">Welcome back, {user?.name ?? "User"}</p></div>
       </div>
       <div className="container py-8">
+        {/* Wallet Balance Banner */}
+        <Link href="/wallet">
+          <div className="glass-card rounded-xl p-5 mb-6 flex items-center justify-between cursor-pointer hover:border-[#22C55E]/40 transition-all group">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-[#22C55E]/10 flex items-center justify-center">
+                <Wallet className="h-6 w-6 text-[#22C55E]" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-500">Wallet Balance</p>
+                <p className="text-2xl font-bold text-white">${Number(wallet?.balanceUSD ?? 0).toFixed(2)} <span className="text-sm text-slate-500 font-normal">USD</span></p>
+              </div>
+            </div>
+            <Button size="sm" className="bg-[#22C55E] hover:bg-[#16a34a] text-white gap-1.5 group-hover:scale-105 transition-transform">
+              <Plus className="h-4 w-4" /> Add Funds
+            </Button>
+          </div>
+        </Link>
+
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
             { icon: Package, label: "Total Orders", value: (orders as any)?.total ?? 0, color: "#00B9E9", link: "/orders" },

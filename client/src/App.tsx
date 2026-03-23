@@ -33,6 +33,7 @@ import Profile from "./pages/Profile";
 import Tickets from "./pages/Tickets";
 import TicketDetail from "./pages/TicketDetail";
 import Wishlist from "./pages/Wishlist";
+import WalletPage from "./pages/Wallet";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -75,6 +76,7 @@ function Router() {
       <Route path="/tickets" component={Tickets} />
       <Route path="/tickets/:id" component={TicketDetail} />
       <Route path="/wishlist" component={Wishlist} />
+      <Route path="/wallet" component={WalletPage} />
 
       {/* Admin */}
       <Route path="/admin" component={AdminDashboard} />

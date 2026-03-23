@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link, useParams } from "wouter";
-import { Search, SlidersHorizontal, Package, ShoppingCart, X } from "lucide-react";
+import { Search, SlidersHorizontal, Package, ShoppingCart, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -11,10 +11,33 @@ import Footer from "@/components/Footer";
 import { trpc } from "@/lib/trpc";
 import { useCart } from "@/contexts/CartContext";
 
+const CURRENCIES = [
+  { code: "USD", symbol: "$", label: "USD" },
+  { code: "NGN", symbol: "₦", label: "NGN" },
+  { code: "EUR", symbol: "€", label: "EUR" },
+  { code: "GBP", symbol: "£", label: "GBP" },
+];
+
+// Approximate exchange rates (in production these come from DB/API)
+const RATES: Record<string, number> = {
+  USD: 1,
+  NGN: 1600,
+  EUR: 0.92,
+  GBP: 0.79,
+};
+
+function formatPrice(usd: number, currency: string): string {
+  const cur = CURRENCIES.find(c => c.code === currency) ?? CURRENCIES[0];
+  const converted = usd * (RATES[currency] ?? 1);
+  if (currency === "NGN") return `${cur.symbol}${converted.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
+  return `${cur.symbol}${converted.toFixed(2)}`;
+}
+
 export default function Products() {
   const params = useParams<{ slug?: string }>();
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<"newest" | "price_asc" | "price_desc" | "popular">("newest");
+  const [currency, setCurrency] = useState("USD");
   const [page, setPage] = useState(1);
   const { addItem } = useCart();
 
@@ -80,14 +103,25 @@ export default function Products() {
       </div>
 
       <div className="container py-8">
+        {/* Filter Bar */}
         <div className="flex flex-col sm:flex-row gap-3 mb-8">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-            <Input placeholder="Search products..." value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
-              className="pl-9 bg-[#0F172A] border-white/10 text-white placeholder:text-slate-600 focus:border-[#00B9E9] h-10" />
-            {search && <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"><X className="h-4 w-4" /></button>}
+            <Input
+              placeholder="Search products..."
+              value={search}
+              onChange={e => { setSearch(e.target.value); setPage(1); }}
+              className="pl-9 bg-[#0F172A] border-white/10 text-white placeholder:text-slate-600 focus:border-[#00B9E9] h-10"
+            />
+            {search && (
+              <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
-          <Select value={sort} onValueChange={(v: any) => setSort(v)}>
+
+          {/* Sort */}
+          <Select value={sort} onValueChange={(v: any) => { setSort(v); setPage(1); }}>
             <SelectTrigger className="w-[180px] bg-[#0F172A] border-white/10 text-white h-10">
               <SlidersHorizontal className="h-4 w-4 mr-2 text-slate-500" />
               <SelectValue />
@@ -97,6 +131,18 @@ export default function Products() {
               <SelectItem value="price_asc">Price: Low to High</SelectItem>
               <SelectItem value="price_desc">Price: High to Low</SelectItem>
               <SelectItem value="popular">Most Popular</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Currency */}
+          <Select value={currency} onValueChange={setCurrency}>
+            <SelectTrigger className="w-[110px] bg-[#0F172A] border-white/10 text-white h-10">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-[#0F172A] border-white/10">
+              {CURRENCIES.map(c => (
+                <SelectItem key={c.code} value={c.code}>{c.symbol} {c.label}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -119,7 +165,9 @@ export default function Products() {
             <Package className="h-16 w-16 text-slate-700 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">No products found</h3>
             <p className="text-slate-500 mb-6">Try adjusting your search or browse all categories</p>
-            <Link href="/categories"><Button className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white">Browse Categories</Button></Link>
+            <Link href="/categories">
+              <Button className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white">Browse Categories</Button>
+            </Link>
           </div>
         ) : (
           <>
@@ -133,8 +181,12 @@ export default function Products() {
                       ) : (
                         <Package className="h-12 w-12 text-slate-600" />
                       )}
-                      {product.isFeatured && <Badge className="absolute top-2 left-2 bg-[#00B9E9] text-white text-xs border-0">Featured</Badge>}
-                      {!product.stockUnlimited && product.stockQuantity <= 5 && product.stockQuantity > 0 && <Badge className="absolute top-2 right-2 bg-orange-500/90 text-white text-xs border-0">Low Stock</Badge>}
+                      {product.isFeatured && (
+                        <Badge className="absolute top-2 left-2 bg-[#00B9E9] text-white text-xs border-0">Featured</Badge>
+                      )}
+                      {!product.stockUnlimited && product.stockQuantity <= 5 && product.stockQuantity > 0 && (
+                        <Badge className="absolute top-2 right-2 bg-orange-500/90 text-white text-xs border-0">Low Stock</Badge>
+                      )}
                       {!product.stockUnlimited && product.stockQuantity === 0 && (
                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                           <span className="text-white font-semibold text-sm">Out of Stock</span>
@@ -144,11 +196,19 @@ export default function Products() {
                     <div className="p-4">
                       <h3 className="text-sm font-semibold text-white line-clamp-2 mb-3 group-hover:text-[#00B9E9] transition-colors">{product.title}</h3>
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-[#22C55E] font-bold text-lg">${Number(product.customerPriceUSD).toFixed(2)}</span>
-                        <span className="text-xs text-slate-500">{product.stockUnlimited ? "∞ In Stock" : `${product.stockQuantity} left`}</span>
+                        <span className="text-[#22C55E] font-bold text-lg">
+                          {formatPrice(Number(product.customerPriceUSD), currency)}
+                        </span>
+                        <span className="text-xs text-slate-500">
+                          {product.stockUnlimited ? "In Stock" : `${product.stockQuantity} left`}
+                        </span>
                       </div>
-                      <Button size="sm" className="w-full bg-[#00B9E9]/10 hover:bg-[#00B9E9] text-[#00B9E9] hover:text-white border border-[#00B9E9]/20 hover:border-[#00B9E9] transition-all duration-200 text-xs"
-                        onClick={(e) => handleAddToCart(product, e)} disabled={!product.stockUnlimited && product.stockQuantity === 0}>
+                      <Button
+                        size="sm"
+                        className="w-full bg-[#00B9E9]/10 hover:bg-[#00B9E9] text-[#00B9E9] hover:text-white border border-[#00B9E9]/20 hover:border-[#00B9E9] transition-all duration-200 text-xs"
+                        onClick={(e) => handleAddToCart(product, e)}
+                        disabled={!product.stockUnlimited && product.stockQuantity === 0}
+                      >
                         <ShoppingCart className="h-3.5 w-3.5 mr-1.5" /> Add to Cart
                       </Button>
                     </div>
@@ -156,11 +216,26 @@ export default function Products() {
                 </Link>
               ))}
             </div>
+
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-10">
-                <Button variant="outline" className="border-white/10 text-slate-400 hover:text-white hover:bg-white/5" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Previous</Button>
+                <Button
+                  variant="outline"
+                  className="border-white/10 text-slate-400 hover:text-white hover:bg-white/5"
+                  disabled={page === 1}
+                  onClick={() => setPage(p => p - 1)}
+                >
+                  Previous
+                </Button>
                 <span className="text-slate-500 text-sm px-4">Page {page} of {totalPages}</span>
-                <Button variant="outline" className="border-white/10 text-slate-400 hover:text-white hover:bg-white/5" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>Next</Button>
+                <Button
+                  variant="outline"
+                  className="border-white/10 text-slate-400 hover:text-white hover:bg-white/5"
+                  disabled={page === totalPages}
+                  onClick={() => setPage(p => p + 1)}
+                >
+                  Next
+                </Button>
               </div>
             )}
           </>

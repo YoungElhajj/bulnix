@@ -1,4 +1,4 @@
-import { and, desc, eq, ilike, like, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, like, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   adminActions,
@@ -20,6 +20,8 @@ import {
   systemLogs,
   ticketMessages,
   users,
+  wallets,
+  walletTransactions,
   type InsertUser,
 } from "../drizzle/schema";
 import { nanoid } from "nanoid";
@@ -170,9 +172,21 @@ export async function getProducts(input: {
   }
 
   const offset = (input.page - 1) * input.limit;
-  let query = db.select().from(products).where(and(...conditions)).limit(input.limit).offset(offset);
 
-  const items = await query;
+  // Apply sort ordering
+  let orderByClause;
+  if (input.sort === "price_asc") orderByClause = asc(products.customerPriceUSD);
+  else if (input.sort === "price_desc") orderByClause = desc(products.customerPriceUSD);
+  else if (input.sort === "popular") orderByClause = desc(products.stockQuantity);
+  else orderByClause = desc(products.updatedAt); // newest
+
+  // Handle categorySlug lookup
+  if (input.categorySlug && !input.categoryId) {
+    const cat = await getCategoryBySlug(input.categorySlug);
+    if (cat) conditions.push(eq(products.categoryId, cat.id));
+  }
+
+  const items = await db.select().from(products).where(and(...conditions)).orderBy(orderByClause).limit(input.limit).offset(offset);
   const countResult = await db.select({ count: sql<number>`count(*)` }).from(products).where(and(...conditions));
   const total = Number(countResult[0]?.count ?? 0);
 
@@ -740,4 +754,104 @@ export async function adminReplyToTicket(adminId: number, input: { ticketId: num
   const newStatus = input.closeTicket ? "resolved" : "pending";
   await db.update(supportTickets).set({ status: newStatus, resolvedAt: input.closeTicket ? new Date() : null }).where(eq(supportTickets.id, input.ticketId));
   return { success: true };
+}
+
+// ─── Wallet ───────────────────────────────────────────────────────────────────
+
+export async function getOrCreateWallet(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await db.select().from(wallets).where(eq(wallets.userId, userId)).limit(1);
+  if (existing[0]) return existing[0];
+  await db.insert(wallets).values({ userId, balanceUSD: "0.000000", totalDeposited: "0.000000", totalSpent: "0.000000" });
+  const created = await db.select().from(wallets).where(eq(wallets.userId, userId)).limit(1);
+  return created[0]!;
+}
+
+export async function getWalletTransactions(userId: number, page: number = 1, limit: number = 20) {
+  const db = await getDb();
+  if (!db) return { items: [], total: 0 };
+  const offset = (page - 1) * limit;
+  const items = await db.select().from(walletTransactions).where(eq(walletTransactions.userId, userId)).orderBy(desc(walletTransactions.createdAt)).limit(limit).offset(offset);
+  const [countRow] = await db.select({ count: sql<number>`count(*)` }).from(walletTransactions).where(eq(walletTransactions.userId, userId));
+  return { items, total: Number(countRow?.count ?? 0) };
+}
+
+export async function initiateWalletTopup(userId: number, amountUSD: number, gateway: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  if (amountUSD < 3) throw new Error("Minimum deposit is $3.00");
+  const reference = `TOPUP-${userId}-${Date.now()}`;
+  // Create a pending transaction record
+  await db.insert(walletTransactions).values({
+    userId,
+    type: "deposit",
+    amountUSD: amountUSD.toFixed(6),
+    balanceAfterUSD: "0.000000", // will be updated on confirmation
+    description: `Wallet top-up via ${gateway}`,
+    reference,
+    status: "pending",
+    gateway,
+  });
+  return { reference, amountUSD };
+}
+
+export async function confirmWalletTopup(reference: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [txn] = await db.select().from(walletTransactions).where(eq(walletTransactions.reference, reference)).limit(1);
+  if (!txn) throw new Error("Transaction not found");
+  if (txn.status === "completed") return { success: true, alreadyProcessed: true };
+
+  const wallet = await getOrCreateWallet(txn.userId);
+  const newBalance = Number(wallet.balanceUSD) + Number(txn.amountUSD);
+  const newDeposited = Number(wallet.totalDeposited) + Number(txn.amountUSD);
+
+  await db.update(wallets).set({
+    balanceUSD: newBalance.toFixed(6),
+    totalDeposited: newDeposited.toFixed(6),
+  }).where(eq(wallets.userId, txn.userId));
+
+  await db.update(walletTransactions).set({
+    status: "completed",
+    balanceAfterUSD: newBalance.toFixed(6),
+  }).where(eq(walletTransactions.id, txn.id));
+
+  return { success: true, newBalance };
+}
+
+export async function adminProcessRefund(adminId: number, input: { userId: number; amountUSD: number; reason: string; orderId?: number; ticketId?: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const wallet = await getOrCreateWallet(input.userId);
+  const newBalance = Number(wallet.balanceUSD) + input.amountUSD;
+  const reference = `REFUND-${input.orderId ?? "MANUAL"}-${Date.now()}`;
+
+  await db.update(wallets).set({ balanceUSD: newBalance.toFixed(6) }).where(eq(wallets.userId, input.userId));
+  await db.insert(walletTransactions).values({
+    userId: input.userId,
+    type: "refund",
+    amountUSD: input.amountUSD.toFixed(6),
+    balanceAfterUSD: newBalance.toFixed(6),
+    description: `Refund: ${input.reason}`,
+    reference,
+    orderId: input.orderId ?? null,
+    status: "completed",
+  });
+
+  // Log admin action
+  await db.insert(adminActions).values({
+    adminId,
+    action: `Processed refund of $${input.amountUSD} to user ${input.userId}`,
+    targetType: "user",
+    targetId: input.userId,
+    details: { reason: input.reason, amountUSD: input.amountUSD, orderId: input.orderId, ticketId: input.ticketId },
+  });
+
+  // Update ticket status if provided
+  if (input.ticketId) {
+    await db.update(supportTickets).set({ status: "resolved", resolvedAt: new Date() }).where(eq(supportTickets.id, input.ticketId));
+  }
+
+  return { success: true, newBalance };
 }

@@ -15,6 +15,13 @@
       "when": 1773976684333,
       "tag": "0001_melted_christian_walker",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1774237784356,
+      "tag": "0002_lyrical_annihilus",
+      "breakpoints": true
     }
   ]
 }

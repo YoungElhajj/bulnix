@@ -230,6 +230,19 @@ export const appRouter = router({
         .mutation(({ input }) => db.adminReactivateUser(input.userId)),
     }),
 
+    // Refunds
+    refunds: router({
+      process: adminProcedure
+        .input(z.object({
+          userId: z.number(),
+          amountUSD: z.number().min(0.01),
+          reason: z.string().min(5),
+          orderId: z.number().optional(),
+          ticketId: z.number().optional(),
+        }))
+        .mutation(({ input, ctx }) => db.adminProcessRefund(ctx.user.id, input)),
+    }),
+
     // Tickets
     tickets: router({
       list: adminProcedure
@@ -293,6 +306,23 @@ export const appRouter = router({
         .input(z.object({ fromCurrency: z.string(), toCurrency: z.string(), rate: z.number() }))
         .mutation(({ input }) => db.updateExchangeRate(input)),
     }),
+  }),
+
+  // ── Wallet ──────────────────────────────────────────────────────────────
+  wallet: router({
+    get: protectedProcedure.query(({ ctx }) => db.getOrCreateWallet(ctx.user.id)),
+    transactions: protectedProcedure
+      .input(z.object({ page: z.number().default(1), limit: z.number().default(20) }))
+      .query(({ input, ctx }) => db.getWalletTransactions(ctx.user.id, input.page, input.limit)),
+    initiateTopup: protectedProcedure
+      .input(z.object({
+        amountUSD: z.number().min(3),
+        gateway: z.enum(["paystack", "monnify", "nowpayments"]),
+      }))
+      .mutation(({ input, ctx }) => db.initiateWalletTopup(ctx.user.id, input.amountUSD, input.gateway)),
+    confirmTopup: protectedProcedure
+      .input(z.object({ reference: z.string() }))
+      .mutation(({ input }) => db.confirmWalletTopup(input.reference)),
   }),
 
   // ── Supplier Sync (internal) ────────────────────────────────────────────

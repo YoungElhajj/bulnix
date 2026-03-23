@@ -110,3 +110,14 @@
 - [ ] Admin: edit individual categories (name, slug, icon, visibility, sort order)
 - [ ] Admin: edit individual product listings (title, description, price, image, visibility, featured)
 - [ ] Homepage: add "Become a Supplier" section
+
+## User Requests - Round 3 (Mar 23 2026)
+
+- [ ] Remove AI-style em-dashes and hyphens from all page text across the site
+- [ ] Remove "Verified Supplier Network" section exposing AccsZone/AccsBulk names
+- [ ] Fix product page filters: currency switcher, sort (price low-high, high-low), category filter
+- [ ] Build user wallet: balance display in dashboard, top-up page, minimum $3 deposit, transaction history
+- [ ] Fix notification/verification emails to use Bulnix branding and send active codes
+- [ ] Admin: refund processing for open support tickets
+- [ ] Admin: supplier refund claim workflow
+- [ ] Admin: product icon/logo upload when adding or editing products

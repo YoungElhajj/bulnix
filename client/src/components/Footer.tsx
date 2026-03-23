@@ -116,7 +116,7 @@ export default function Footer() {
             </div>
           </div>
           <div className="mt-6 text-center text-slate-600 text-xs">
-            &copy; {new Date().getFullYear()} Bulnix. All rights reserved. Bulnix is a reseller marketplace — not affiliated with any product brands.
+            &copy; {new Date().getFullYear()} Bulnix. All rights reserved. Bulnix is a reseller marketplace and is not affiliated with any product brands.
           </div>
         </div>
       </div>
