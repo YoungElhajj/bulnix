@@ -25,10 +25,11 @@ export default function AdminTickets() {
   const [reply, setReply] = useState("");
   const [closeTicket, setCloseTicket] = useState(false);
 
-  // Customer refund state
+  // Customer refund state — quick inline refund (no dialog needed for small amounts)
   const [showRefund, setShowRefund] = useState(false);
   const [refundAmount, setRefundAmount] = useState("");
   const [refundReason, setRefundReason] = useState("");
+  const [processingRefundId, setProcessingRefundId] = useState<number | null>(null);
 
   // Supplier claim state
   const [showSupplierClaim, setShowSupplierClaim] = useState(false);
@@ -62,13 +63,14 @@ export default function AdminTickets() {
 
   const refundMutation = trpc.admin.refunds.process.useMutation({
     onSuccess: (data: any) => {
-      toast.success(`Refund of $${refundAmount} processed. New balance: $${Number(data.newBalance).toFixed(2)}`);
+      toast.success(`Refund of $${refundAmount} processed instantly. Customer wallet credited $${Number(data.newBalance).toFixed(2)} total.`);
       setShowRefund(false);
       setRefundAmount("");
       setRefundReason("");
+      setProcessingRefundId(null);
       utils.admin.tickets.list.invalidate();
     },
-    onError: e => toast.error(e.message),
+    onError: e => { toast.error(e.message); setProcessingRefundId(null); },
   });
 
   const createClaimMutation = trpc.admin.supplierRefunds.create.useMutation({
@@ -91,11 +93,12 @@ export default function AdminTickets() {
   const handleRefund = () => {
     const amount = parseFloat(refundAmount);
     if (isNaN(amount) || amount <= 0) { toast.error("Enter a valid refund amount"); return; }
-    if (!refundReason.trim() || refundReason.length < 5) { toast.error("Please provide a reason (at least 5 characters)"); return; }
+    const reason = refundReason.trim() || `Admin refund for ticket #${selected?.ticketNumber ?? selected?.id}`;
+    setProcessingRefundId(selected.id);
     refundMutation.mutate({
       userId: selected.userId,
       amountUSD: amount,
-      reason: refundReason,
+      reason,
       orderId: selected.orderId ?? undefined,
       ticketId: selected.id,
     });

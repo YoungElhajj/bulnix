@@ -84,3 +84,26 @@ async function startServer() {
 }
 
 startServer().catch(console.error);
+
+// ─── Auto-Sync Scheduler ────────────────────────────────────────────────────
+// Runs a stock+price sync every 15 minutes to keep inventory up to date
+// and prevent overselling. Full sync runs once per hour.
+let syncCycleCount = 0;
+async function runAutoSync() {
+  try {
+    const { syncProvider } = await import("../connectors/accszone");
+    syncCycleCount++;
+    // Every 4th cycle (1 hour) do a full sync; otherwise just stock+prices
+    const syncType = syncCycleCount % 4 === 0 ? "full" : "stock";
+    console.log(`[AutoSync] Running ${syncType} sync (cycle ${syncCycleCount})...`);
+    await syncProvider("accszone", syncType);
+    console.log(`[AutoSync] ${syncType} sync complete.`);
+  } catch (err) {
+    console.error("[AutoSync] Error:", err);
+  }
+}
+// Start auto-sync after 2 minutes (allow server to fully boot), then every 15 min
+setTimeout(() => {
+  runAutoSync();
+  setInterval(runAutoSync, 15 * 60 * 1000);
+}, 2 * 60 * 1000);

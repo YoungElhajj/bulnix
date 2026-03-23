@@ -1050,3 +1050,18 @@ Best regards,
 Bulnix Support Team
 support@bulnix.com`;
 }
+
+export async function adminGetUserDetail(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  if (!user) throw new Error("User not found");
+
+  const userOrders = await db.select().from(orders).where(eq(orders.userId, userId)).orderBy(desc(orders.createdAt)).limit(20);
+  const userTickets = await db.select().from(supportTickets).where(eq(supportTickets.userId, userId)).orderBy(desc(supportTickets.createdAt)).limit(10);
+  const [wallet] = await db.select().from(wallets).where(eq(wallets.userId, userId)).limit(1);
+  const walletTxns = await db.select().from(walletTransactions).where(eq(walletTransactions.userId, userId)).orderBy(desc(walletTransactions.createdAt)).limit(10);
+
+  return { user, orders: userOrders, tickets: userTickets, wallet: wallet ?? null, walletTransactions: walletTxns };
+}

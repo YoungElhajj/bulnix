@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Package, Settings, Shield, Wallet } from "lucide-react";
+import { ShoppingCart, Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Package, Settings, Shield, Wallet, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -32,6 +33,7 @@ export default function Navbar() {
     onSuccess: () => { window.location.href = "/"; }
   });
 
+  const { theme, toggleTheme } = useTheme();
   const isActive = (href: string) => location === href || location.startsWith(href + "/");
 
   return (
@@ -62,6 +64,17 @@ export default function Navbar() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-3">
+            {/* Theme Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="text-slate-400 hover:text-white hover:bg-white/5"
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
+
             {/* Cart */}
             <Link href="/cart">
               <Button variant="ghost" size="icon" className="relative text-slate-400 hover:text-white hover:bg-white/5">

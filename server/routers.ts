@@ -222,6 +222,9 @@ export const appRouter = router({
       list: adminProcedure
         .input(z.object({ page: z.number().default(1), limit: z.number().default(50), search: z.string().optional() }))
         .query(({ input }) => db.adminGetUsers(input)),
+      getDetail: adminProcedure
+        .input(z.object({ userId: z.number() }))
+        .query(({ input }) => db.adminGetUserDetail(input.userId)),
       suspend: adminProcedure
         .input(z.object({ userId: z.number(), reason: z.string().optional() }))
         .mutation(({ input }) => db.adminSuspendUser(input.userId, input.reason)),
@@ -268,6 +271,7 @@ export const appRouter = router({
       triggerSync: adminProcedure
         .input(z.object({ providerKey: z.string(), syncType: z.enum(["categories", "products", "stock", "prices", "full"]) }))
         .mutation(({ input }) => db.triggerProviderSync(input.providerKey, input.syncType)),
+      syncLogs: adminProcedure.query(() => db.getProviderSyncLogs()),
     }),
 
     // Categories

@@ -138,3 +138,14 @@
 - [ ] Pre-fill claim form with ticket ID, order ID, and customer info
 - [ ] Show existing supplier claims linked to the ticket
 - [ ] Checkpoint and deliver
+
+## Round 4 Features (Mar 23 2026)
+
+- [ ] Instant customer refund: one-click wallet credit without extra confirmation steps
+- [ ] Light/dark theme toggle button in navbar with localStorage persistence
+- [ ] Fix and verify admin sync button works correctly
+- [ ] Auto-sync scheduler: background stock/price sync every 15 minutes
+- [ ] Manual sync button in admin providers page
+- [ ] Real-time stock deduction on order placement to prevent overselling
+- [ ] Fix admin user details page: show orders, order IDs, wallet balance, tickets
+- [ ] Seed demo orders and demo data for admin panel preview

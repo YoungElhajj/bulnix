@@ -1,0 +1,46 @@
+{
+  "query": "\n-- Check existing orders\nSELECT id, orderNumber, status, totalUSD FROM orders WHERE userId = 1;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xomvQyHT3Pc2eM.33c921a427fa --database 6qKkSV9dybS3AerhXhrTfQ --execute \n-- Check existing orders\nSELECT id, orderNumber, status, totalUSD FROM orders WHERE userId = 1;\n",
+  "rows": [
+    {
+      "id": "1",
+      "orderNumber": "BLX-1773981388453-4QUDUJ",
+      "status": "pending_payment",
+      "totalUSD": "6.78"
+    },
+    {
+      "id": "30001",
+      "orderNumber": "BLX-1773985987001-BIZVGO",
+      "status": "pending_payment",
+      "totalUSD": "5.40"
+    },
+    {
+      "id": "60001",
+      "orderNumber": "BLX-2026-0001",
+      "status": "fulfilled",
+      "totalUSD": "12.99"
+    },
+    {
+      "id": "60002",
+      "orderNumber": "BLX-2026-0002",
+      "status": "fulfilled",
+      "totalUSD": "22.50"
+    },
+    {
+      "id": "60003",
+      "orderNumber": "BLX-2026-0003",
+      "status": "processing",
+      "totalUSD": "8.99"
+    },
+    {
+      "id": "60004",
+      "orderNumber": "BLX-2026-0004",
+      "status": "pending_payment",
+      "totalUSD": "15.00"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\torderNumber\tstatus\ttotalUSD\n1\tBLX-1773981388453-4QUDUJ\tpending_payment\t6.78\n30001\tBLX-1773985987001-BIZVGO\tpending_payment\t5.40\n60001\tBLX-2026-0001\tfulfilled\t12.99\n60002\tBLX-2026-0002\tfulfilled\t22.50\n60003\tBLX-2026-0003\tprocessing\t8.99\n60004\tBLX-2026-0004\tpending_payment\t15.00\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}
