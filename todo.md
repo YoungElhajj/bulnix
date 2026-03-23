@@ -217,3 +217,9 @@
 ## Domain & SSL Fix (Mar 23, 2026)
 - [x] Add HTTPS redirect in server so HTTP requests are forced to HTTPS
 - [x] Update favicon with Bulnix logo
+
+## Link Preview & Branding Fix (Mar 23, 2026)
+- [x] Remove sensitive internal description (AccsZone, AccsBulk, payment gateways) from link preview
+- [x] Update OG image to use Bulnix logo instead of Manus logo
+- [ ] Update app title in Manus settings to remove "Branded Reseller Marketplace" (manual step - see instructions)
+- [ ] Update VITE_APP_LOGO to use Bulnix logo CDN URL (manual step - see instructions)
