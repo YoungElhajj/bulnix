@@ -23,6 +23,15 @@ export function isRetryableDbError(error: unknown): boolean {
     "try again",
     "deadlock",
     "lock wait timeout",
+    "pd server timeout",
+    "tikv server timeout",
+    "tidb server timeout",
+    "region is unavailable",
+    "hy000",
+    "connection lost",
+    "econnreset",
+    "econnrefused",
+    "etimedout",
   ];
   const check = (e: unknown): boolean => {
     if (!e || typeof e !== "object") return false;

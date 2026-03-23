@@ -1,6 +1,7 @@
 import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import type { Express, Request, Response } from "express";
 import * as db from "../db";
+import { withDbRetry } from "../db-retry";
 import { safeSendEmail, sendWelcomeEmail } from "../email";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
@@ -29,8 +30,11 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
-      // Check if this is a brand-new user before upsert
-      const existingUser = await db.getUserByOpenId(userInfo.openId);
+      // Check if this is a brand-new user before upsert (with retry for PD/TiKV transient errors)
+      const existingUser = await withDbRetry(
+        () => db.getUserByOpenId(userInfo.openId),
+        "oauth:getUserByOpenId"
+      );
       const isNewUser = !existingUser;
 
       await db.upsertUser({
