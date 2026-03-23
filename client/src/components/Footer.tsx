@@ -1,8 +1,8 @@
 import { Link } from "wouter";
 import { Twitter, Mail, Shield, Zap, Globe, Send } from "lucide-react";
 
-const WHATSAPP_URL = "https://wa.me/message/BULNIX"; // TODO: replace with real WhatsApp link
-const TELEGRAM_URL = "https://t.me/bulnix"; // TODO: replace with real Telegram channel link
+const WHATSAPP_URL = "https://wa.me/447916699429";
+const TELEGRAM_URL = "https://t.me/bulnix";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663404004095/6qKkSV9dybS3AerhXhrTfQ/bulnix-logo_f53aba21.png";
 

@@ -11,7 +11,8 @@ function getResend(): Resend | null {
   if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY);
   return _resend;
 }
-const FROM_EMAIL = process.env.EMAIL_FROM ?? "onboarding@resend.dev";
+const FROM_EMAIL = process.env.EMAIL_FROM ?? "noreply@bulnix.com";
+const REPLY_TO = process.env.EMAIL_REPLY_TO ?? "support@bulnix.com";
 const FROM_NAME = process.env.EMAIL_FROM_NAME ?? "Bulnix";
 const FROM = `${FROM_NAME} <${FROM_EMAIL}>`;
 
@@ -65,9 +66,9 @@ function baseTemplate(title: string, body: string): string {
       <p style="margin-bottom:8px;">© ${new Date().getFullYear()} Bulnix. All rights reserved.</p>
       <div class="social-row">
         <a href="https://t.me/bulnix">Telegram</a>
-        <a href="https://wa.me/message/bulnix">WhatsApp</a>
-        <a href="https://bulnixshop.com/privacy">Privacy</a>
-        <a href="https://bulnixshop.com/terms">Terms</a>
+        <a href="https://wa.me/447916699429">WhatsApp</a>
+        <a href="https://bulnix.com/privacy">Privacy</a>
+        <a href="https://bulnix.com/terms">Terms</a>
       </div>
     </div>
   </div>
@@ -85,15 +86,16 @@ export async function sendWelcomeEmail(opts: {
   const body = `
     <h1>Welcome to Bulnix, ${opts.name || "there"}! 🎉</h1>
     <p>Your account is ready. You now have access to thousands of premium digital products — social media accounts, streaming services, gaming credits, VPNs, and more.</p>
-    <a href="https://bulnixshop.com/categories" class="btn">Browse Products →</a>
+    <a href="https://bulnix.com/categories" class="btn">Browse Products →</a>
     <hr class="divider" />
-    <p style="font-size:13px;">Need help getting started? Our support team is available 24/7 via <a href="https://wa.me/message/bulnix" style="color:#00B9E9;">WhatsApp</a> or by opening a <a href="https://bulnixshop.com/support" style="color:#00B9E9;">support ticket</a>.</p>
+    <p style="font-size:13px;">Need help getting started? Our support team is available 24/7 via <a href="https://wa.me/447916699429" style="color:#00B9E9;">WhatsApp</a> or by opening a <a href="https://bulnix.com/support" style="color:#00B9E9;">support ticket</a>.</p>
     <p style="font-size:13px;">Join our Telegram channel for exclusive deals and updates: <a href="https://t.me/bulnix" style="color:#00B9E9;">t.me/bulnix</a></p>`;
 
   const client = getResend();
   if (!client) { console.warn("[email] RESEND_API_KEY not set — skipping welcome email"); return; }
   await client.emails.send({
     from: FROM,
+    replyTo: REPLY_TO,
     to: opts.to,
     subject: "Welcome to Bulnix — Your account is ready",
     html: baseTemplate("Welcome to Bulnix", body),
@@ -131,14 +133,15 @@ export async function sendOrderConfirmationEmail(opts: {
     </table>
     <div class="total-row"><span>Total</span><span style="color:#22C55E;">$${opts.totalUSD.toFixed(2)}</span></div>
     <hr class="divider" />
-    <a href="https://bulnixshop.com/orders/${opts.orderId}" class="btn">View Order Details →</a>
+    <a href="https://bulnix.com/orders/${opts.orderId}" class="btn">View Order Details →</a>
     <p style="font-size:13px;">Digital products are delivered automatically once payment is confirmed. Check your order page for delivery details.</p>
-    <p style="font-size:13px;">Questions? Contact us on <a href="https://wa.me/message/bulnix" style="color:#00B9E9;">WhatsApp</a> or open a <a href="https://bulnixshop.com/support" style="color:#00B9E9;">support ticket</a>.</p>`;
+    <p style="font-size:13px;">Questions? Contact us on <a href="https://wa.me/447916699429" style="color:#00B9E9;">WhatsApp</a> or open a <a href="https://bulnix.com/support" style="color:#00B9E9;">support ticket</a>.</p>`;
 
   const client = getResend();
   if (!client) { console.warn("[email] RESEND_API_KEY not set — skipping order confirmation email"); return; }
   await client.emails.send({
     from: FROM,
+    replyTo: REPLY_TO,
     to: opts.to,
     subject: `Order ${opts.orderNumber} confirmed — Bulnix`,
     html: baseTemplate("Order Confirmed", body),
@@ -179,13 +182,14 @@ export async function sendOrderStatusEmail(opts: {
       <div style="text-align:center;margin-top:8px;"><span class="status-badge ${cls}">${label}</span></div>
     </div>
     ${opts.message ? `<p>${opts.message}</p>` : ""}
-    <a href="https://bulnixshop.com/orders/${opts.orderId}" class="btn">View Order →</a>
-    <p style="font-size:13px;">Need help? Contact us on <a href="https://wa.me/message/bulnix" style="color:#00B9E9;">WhatsApp</a> or open a <a href="https://bulnixshop.com/support" style="color:#00B9E9;">support ticket</a>.</p>`;
+    <a href="https://bulnix.com/orders/${opts.orderId}" class="btn">View Order →</a>
+    <p style="font-size:13px;">Need help? Contact us on <a href="https://wa.me/447916699429" style="color:#00B9E9;">WhatsApp</a> or open a <a href="https://bulnix.com/support" style="color:#00B9E9;">support ticket</a>.</p>`;
 
   const client = getResend();
   if (!client) { console.warn("[email] RESEND_API_KEY not set — skipping order status email"); return; }
   await client.emails.send({
     from: FROM,
+    replyTo: REPLY_TO,
     to: opts.to,
     subject: `Order ${opts.orderNumber} — ${label} | Bulnix`,
     html: baseTemplate("Order Update", body),
@@ -209,12 +213,13 @@ export async function sendTicketReplyEmail(opts: {
       <div class="label">Reply Preview</div>
       <div style="color:#94a3b8;font-size:14px;line-height:1.6;">${opts.replyPreview.slice(0, 200)}${opts.replyPreview.length > 200 ? "…" : ""}</div>
     </div>
-    <a href="https://bulnixshop.com/support/${opts.ticketId}" class="btn">View Full Reply →</a>`;
+    <a href="https://bulnix.com/support/${opts.ticketId}" class="btn">View Full Reply →</a>`;
 
   const client = getResend();
   if (!client) { console.warn("[email] RESEND_API_KEY not set — skipping ticket reply email"); return; }
   await client.emails.send({
     from: FROM,
+    replyTo: REPLY_TO,
     to: opts.to,
     subject: `Re: ${opts.ticketSubject} — Bulnix Support`,
     html: baseTemplate("Support Reply", body),
@@ -238,6 +243,7 @@ export async function sendPasswordResetEmail(opts: {
   if (!client) { console.warn("[email] RESEND_API_KEY not set — skipping password reset email"); return; }
   await client.emails.send({
     from: FROM,
+    replyTo: REPLY_TO,
     to: opts.to,
     subject: "Reset your Bulnix password",
     html: baseTemplate("Password Reset", body),

@@ -28,7 +28,7 @@ import {
   type InsertSupplierRefundClaim,
 } from "../drizzle/schema";
 import { nanoid } from "nanoid";
-import { safeSendEmail, sendOrderConfirmationEmail, sendTicketReplyEmail } from "./email";
+import { safeSendEmail, sendOrderConfirmationEmail, sendOrderStatusEmail, sendTicketReplyEmail } from "./email";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -833,6 +833,21 @@ export async function adminUpdateOrder(input: { id: number; status?: string; adm
   if (input.fraudFlag !== undefined) updateData.fraudFlag = input.fraudFlag;
   if (Object.keys(updateData).length > 0) {
     await withDbRetry(() => db!.update(orders).set(updateData).where(eq(orders.id, input.id)), "adminUpdateOrder");
+    if (input.status) {
+      const updatedOrder = await withDbRetry(() => db!.select().from(orders).where(eq(orders.id, input.id)).limit(1), "adminUpdateOrder-fetch");
+      if (updatedOrder[0]) {
+        const user = await withDbRetry(() => db!.select().from(users).where(eq(users.id, updatedOrder[0].userId)).limit(1), "adminUpdateOrder-user");
+        if (user[0]?.email) {
+          safeSendEmail(() => sendOrderStatusEmail({
+            to: user[0].email!,
+            name: user[0].name ?? "there",
+            orderNumber: updatedOrder[0].orderNumber,
+            orderId: updatedOrder[0].id,
+            status: input.status!,
+          }));
+        }
+      }
+    }
   }
   return { success: true };
 }

@@ -6,8 +6,8 @@
 import { useState } from "react";
 import { MessageCircle, Send, X } from "lucide-react";
 
-const WHATSAPP_URL = "https://wa.me/message/BULNIX"; // TODO: replace with real WhatsApp link
-const TELEGRAM_URL = "https://t.me/bulnix"; // TODO: replace with real Telegram channel link
+const WHATSAPP_URL = "https://wa.me/447916699429";
+const TELEGRAM_URL = "https://t.me/bulnix";
 
 export default function SocialFloatingWidgets() {
   const [open, setOpen] = useState(false);

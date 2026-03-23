@@ -223,3 +223,14 @@
 - [x] Update OG image to use Bulnix logo instead of Manus logo
 - [ ] Update app title in Manus settings to remove "Branded Reseller Marketplace" (manual step - see instructions)
 - [ ] Update VITE_APP_LOGO to use Bulnix logo CDN URL (manual step - see instructions)
+
+## Email & Contact Channels (Mar 23, 2026)
+- [x] Add RESEND_API_KEY secret
+- [x] Update WhatsApp link to https://wa.me/447916699429
+- [x] Update Telegram link to https://t.me/bulnix
+- [x] Build branded HTML email templates (welcome, OTP, order confirmation, ticket confirmation)
+- [x] Wire welcome email on new user sign up
+- [x] Wire OTP/verification email on sign in (handled via Manus OAuth)
+- [x] Wire order confirmation email after successful order
+- [x] Wire support ticket reply notification email
+- [x] Wire order status update email when admin changes order status

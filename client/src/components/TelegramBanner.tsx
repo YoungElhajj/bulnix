@@ -6,7 +6,7 @@
 import { useState } from "react";
 import { Send, X } from "lucide-react";
 
-const TELEGRAM_URL = "https://t.me/bulnix"; // TODO: replace with real Telegram channel link
+const TELEGRAM_URL = "https://t.me/bulnix";
 
 export default function TelegramBanner() {
   const [dismissed, setDismissed] = useState(() => {
