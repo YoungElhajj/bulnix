@@ -198,3 +198,18 @@
 - [x] Add Telegram/WhatsApp social icons to footer brand row
 - [ ] PENDING: Update TELEGRAM_URL and WHATSAPP_URL with real links (in SocialFloatingWidgets.tsx, TelegramBanner.tsx, Footer.tsx)
 - [ ] PENDING: Add RESEND_API_KEY, EMAIL_FROM, EMAIL_FROM_NAME secrets once domain verified
+
+## DB Retry Resilience (Mar 23, 2026)
+- [x] Extract withDbRetry/isRetryableDbError to shared server/db-retry.ts utility
+- [x] Apply retry to upsertUser (auth login)
+- [x] Apply retry to createOrder (order insert + order items)
+- [x] Apply retry to initiatePayment (payment insert + order lock)
+- [x] Apply retry to createTicket (ticket + first message)
+- [x] Apply retry to replyToTicket (message insert + status update)
+- [x] Apply retry to adminReplyToTicket (message insert + status update)
+- [x] Apply retry to adminUpdateOrder (order status update)
+- [x] Apply retry to adminProcessRefund (wallet update + txn insert + action log + ticket close)
+- [x] Apply retry to initiateWalletTopup (txn insert)
+- [x] Apply retry to confirmWalletTopup (wallet update + txn update)
+- [x] Apply retry to createNotification (notification insert)
+- [x] Run all 30 tests - all pass, 0 TypeScript errors

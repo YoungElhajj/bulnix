@@ -1,4 +1,5 @@
 import { and, asc, desc, eq, ilike, inArray, like, or, sql } from "drizzle-orm";
+import { isRetryableDbError, sleep, withDbRetry } from "./db-retry";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   adminActions,
@@ -45,28 +46,6 @@ export async function getDb() {
 
 // ─── Users ────────────────────────────────────────────────────────────────────
 
-/** Sleep helper for retry backoff */
-function sleep(ms: number) { return new Promise(resolve => setTimeout(resolve, ms)); }
-
-/** Returns true if the error is a transient TiDB schema-sync issue that is safe to retry */
-function isRetryableDbError(error: unknown): boolean {
-  const RETRYABLE = [
-    "Information schema is out of date",
-    "schema failed to update",
-    "try again",
-    "deadlock",
-  ];
-  const check = (e: unknown): boolean => {
-    if (!e || typeof e !== "object") return false;
-    const err = e as { sqlMessage?: string; message?: string; cause?: unknown };
-    const text = (err.sqlMessage ?? err.message ?? "").toLowerCase();
-    if (RETRYABLE.some(s => text.includes(s.toLowerCase()))) return true;
-    // Drizzle wraps the original MySQL error in `cause`
-    if (err.cause) return check(err.cause);
-    return false;
-  };
-  return check(error);
-}
 
 export async function upsertUser(user: InsertUser): Promise<void> {
   if (!user.openId) throw new Error("User openId is required for upsert");
@@ -348,7 +327,7 @@ export async function createOrder(userId: number, input: {
 
   const orderNumber = `BLX-${Date.now()}-${nanoid(6).toUpperCase()}`;
 
-  await db.insert(orders).values({
+  await withDbRetry(() => db!.insert(orders).values({
     orderNumber,
     userId,
     status: "pending_payment",
@@ -362,14 +341,14 @@ export async function createOrder(userId: number, input: {
     couponDiscountUSD: couponDiscountUSD.toFixed(2) as any,
     billingEmail: input.billingEmail ?? null,
     billingCountry: input.billingCountry ?? null,
-  });
+  }), "createOrder:insertOrder");
 
   const newOrder = await db.select().from(orders).where(eq(orders.orderNumber, orderNumber)).limit(1);
   const orderId = newOrder[0]!.id;
 
   // Insert order items
   for (const item of itemsWithProducts) {
-    await db.insert(orderItems).values({
+    await withDbRetry(() => db!.insert(orderItems).values({
       orderId,
       productId: item.productId,
       productTitle: item.product.title,
@@ -378,7 +357,7 @@ export async function createOrder(userId: number, input: {
       totalPriceUSD: (item.unitPrice * item.quantity).toFixed(2) as any,
       supplierProductId: item.product.supplierProductId?.toString() ?? null,
       providerKey: item.product.providerKey,
-    });
+    }), "createOrder:insertItem");
   }
 
   await logSystem("info", "order", `Order ${orderNumber} created for user ${userId}`, { orderId, totalUSD });
@@ -450,7 +429,7 @@ export async function initiatePayment(userId: number, input: {
   const exchangeRate = rate ? Number(rate.rate) : 1;
   const amount = Number(order[0].totalUSD) * exchangeRate;
 
-  await db.insert(payments).values({
+   await withDbRetry(() => db!.insert(payments).values({
     orderId: input.orderId,
     userId,
     gateway: input.gateway,
@@ -460,10 +439,9 @@ export async function initiatePayment(userId: number, input: {
     currency: input.currency,
     amountUSD: order[0].totalUSD,
     exchangeRate: exchangeRate.toFixed(6) as any,
-  });
-
+  }), "initiatePayment:insertPayment");
   // Lock the order
-  await db.update(orders).set({ isLocked: true }).where(eq(orders.id, input.orderId));
+  await withDbRetry(() => db!.update(orders).set({ isLocked: true }).where(eq(orders.id, input.orderId)), "initiatePayment:lockOrder");
 
   await logSystem("info", "payment", `Payment initiated for order ${input.orderId}`, { gateway: input.gateway, amount, currency: input.currency });
 
@@ -493,17 +471,17 @@ export async function createTicket(userId: number, input: {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const ticketNumber = `TKT-${Date.now()}-${nanoid(4).toUpperCase()}`;
-  await db.insert(supportTickets).values({
+  await withDbRetry(() => db!.insert(supportTickets).values({
     ticketNumber,
     userId,
     orderId: input.orderId ?? null,
     subject: input.subject,
     priority: input.priority,
     status: "open",
-  });
+  }), "createTicket:insertTicket");
   const ticket = await db.select().from(supportTickets).where(eq(supportTickets.ticketNumber, ticketNumber)).limit(1);
   const ticketId = ticket[0]!.id;
-  await db.insert(ticketMessages).values({ ticketId, senderId: userId, senderRole: "user", message: input.message });
+  await withDbRetry(() => db!.insert(ticketMessages).values({ ticketId, senderId: userId, senderRole: "user", message: input.message }), "createTicket:insertMessage");
   return { ticketId, ticketNumber };
 }
 
@@ -525,8 +503,8 @@ export async function getTicketById(userId: number, ticketId: number) {
 export async function replyToTicket(userId: number, role: "user" | "admin", input: { ticketId: number; message: string }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.insert(ticketMessages).values({ ticketId: input.ticketId, senderId: userId, senderRole: role, message: input.message });
-  await db.update(supportTickets).set({ status: role === "admin" ? "pending" : "open", updatedAt: new Date() }).where(eq(supportTickets.id, input.ticketId));
+  await withDbRetry(() => db!.insert(ticketMessages).values({ ticketId: input.ticketId, senderId: userId, senderRole: role, message: input.message }), "replyToTicket:insertMessage");
+  await withDbRetry(() => db!.update(supportTickets).set({ status: role === "admin" ? "pending" : "open", updatedAt: new Date() }).where(eq(supportTickets.id, input.ticketId)), "replyToTicket:updateStatus");
 
   // Notify user by email when admin replies
   if (role === "admin") {
@@ -591,7 +569,7 @@ export async function markNotificationRead(userId: number, notifId: number) {
 export async function createNotification(userId: number, type: string, title: string, message: string, relatedOrderId?: number) {
   const db = await getDb();
   if (!db) return;
-  await db.insert(notifications).values({ userId, type, title, message, relatedOrderId: relatedOrderId ?? null });
+  await withDbRetry(() => db!.insert(notifications).values({ userId, type, title, message, relatedOrderId: relatedOrderId ?? null }), "createNotification");
 }
 
 // ─── Exchange Rates ───────────────────────────────────────────────────────────
@@ -803,11 +781,10 @@ export async function adminUpdateOrder(input: { id: number; status?: string; adm
   if (input.adminNotes !== undefined) updateData.adminNotes = input.adminNotes;
   if (input.fraudFlag !== undefined) updateData.fraudFlag = input.fraudFlag;
   if (Object.keys(updateData).length > 0) {
-    await db.update(orders).set(updateData).where(eq(orders.id, input.id));
+    await withDbRetry(() => db!.update(orders).set(updateData).where(eq(orders.id, input.id)), "adminUpdateOrder");
   }
   return { success: true };
 }
-
 export async function adminRetryFulfillment(orderId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -865,9 +842,9 @@ export async function adminGetTickets(input: { page: number; limit: number; stat
 export async function adminReplyToTicket(adminId: number, input: { ticketId: number; message: string; closeTicket?: boolean }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.insert(ticketMessages).values({ ticketId: input.ticketId, senderId: adminId, senderRole: "admin", message: input.message });
+  await withDbRetry(() => db!.insert(ticketMessages).values({ ticketId: input.ticketId, senderId: adminId, senderRole: "admin", message: input.message }), "adminReplyToTicket:insertMessage");
   const newStatus = input.closeTicket ? "resolved" : "pending";
-  await db.update(supportTickets).set({ status: newStatus, resolvedAt: input.closeTicket ? new Date() : null }).where(eq(supportTickets.id, input.ticketId));
+  await withDbRetry(() => db!.update(supportTickets).set({ status: newStatus, resolvedAt: input.closeTicket ? new Date() : null }).where(eq(supportTickets.id, input.ticketId)), "adminReplyToTicket:updateStatus");
   return { success: true };
 }
 
@@ -898,7 +875,7 @@ export async function initiateWalletTopup(userId: number, amountUSD: number, gat
   if (amountUSD < 3) throw new Error("Minimum deposit is $3.00");
   const reference = `TOPUP-${userId}-${Date.now()}`;
   // Create a pending transaction record
-  await db.insert(walletTransactions).values({
+  await withDbRetry(() => db!.insert(walletTransactions).values({
     userId,
     type: "deposit",
     amountUSD: amountUSD.toFixed(6),
@@ -907,7 +884,7 @@ export async function initiateWalletTopup(userId: number, amountUSD: number, gat
     reference,
     status: "pending",
     gateway,
-  });
+  }), "initiateWalletTopup");
   return { reference, amountUSD };
 }
 
@@ -922,16 +899,14 @@ export async function confirmWalletTopup(reference: string) {
   const newBalance = Number(wallet.balanceUSD) + Number(txn.amountUSD);
   const newDeposited = Number(wallet.totalDeposited) + Number(txn.amountUSD);
 
-  await db.update(wallets).set({
+    await withDbRetry(() => db!.update(wallets).set({
     balanceUSD: newBalance.toFixed(6),
     totalDeposited: newDeposited.toFixed(6),
-  }).where(eq(wallets.userId, txn.userId));
-
-  await db.update(walletTransactions).set({
+  }).where(eq(wallets.userId, txn.userId)), "confirmWalletTopup:updateWallet");
+  await withDbRetry(() => db!.update(walletTransactions).set({
     status: "completed",
     balanceAfterUSD: newBalance.toFixed(6),
-  }).where(eq(walletTransactions.id, txn.id));
-
+  }).where(eq(walletTransactions.id, txn.id)), "confirmWalletTopup:updateTxn");
   return { success: true, newBalance };
 }
 
@@ -942,8 +917,8 @@ export async function adminProcessRefund(adminId: number, input: { userId: numbe
   const newBalance = Number(wallet.balanceUSD) + input.amountUSD;
   const reference = `REFUND-${input.orderId ?? "MANUAL"}-${Date.now()}`;
 
-  await db.update(wallets).set({ balanceUSD: newBalance.toFixed(6) }).where(eq(wallets.userId, input.userId));
-  await db.insert(walletTransactions).values({
+  await withDbRetry(() => db!.update(wallets).set({ balanceUSD: newBalance.toFixed(6) }).where(eq(wallets.userId, input.userId)), "adminProcessRefund:updateWallet");
+  await withDbRetry(() => db!.insert(walletTransactions).values({
     userId: input.userId,
     type: "refund",
     amountUSD: input.amountUSD.toFixed(6),
@@ -952,20 +927,19 @@ export async function adminProcessRefund(adminId: number, input: { userId: numbe
     reference,
     orderId: input.orderId ?? null,
     status: "completed",
-  });
-
+  }), "adminProcessRefund:insertTxn");
   // Log admin action
-  await db.insert(adminActions).values({
+   await withDbRetry(() => db!.insert(adminActions).values({
     adminId,
     action: `Processed refund of $${input.amountUSD} to user ${input.userId}`,
     targetType: "user",
     targetId: input.userId,
     details: { reason: input.reason, amountUSD: input.amountUSD, orderId: input.orderId, ticketId: input.ticketId },
-  });
+  }), "adminProcessRefund:logAction");
 
   // Update ticket status if provided
   if (input.ticketId) {
-    await db.update(supportTickets).set({ status: "resolved", resolvedAt: new Date() }).where(eq(supportTickets.id, input.ticketId));
+    await withDbRetry(() => db!.update(supportTickets).set({ status: "resolved", resolvedAt: new Date() }).where(eq(supportTickets.id, input.ticketId!)), "adminProcessRefund:closeTicket");
   }
 
   return { success: true, newBalance };
