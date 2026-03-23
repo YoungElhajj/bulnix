@@ -213,3 +213,7 @@
 - [x] Apply retry to confirmWalletTopup (wallet update + txn update)
 - [x] Apply retry to createNotification (notification insert)
 - [x] Run all 30 tests - all pass, 0 TypeScript errors
+
+## Domain & SSL Fix (Mar 23, 2026)
+- [x] Add HTTPS redirect in server so HTTP requests are forced to HTTPS
+- [x] Update favicon with Bulnix logo
