@@ -114,8 +114,8 @@ export default function AdminProviders() {
         <h3 className="text-base font-bold text-white mb-1">Manual Sync</h3>
         <p className="text-xs text-slate-500 mb-4">Trigger an immediate sync to pull the latest products, stock, and prices from your supplier right now.</p>
         <div className="flex items-center gap-3 flex-wrap">
-          <Select value={syncType} onValueChange={(v: any) => setSyncType(v)}>
-            <SelectTrigger className="w-[160px] bg-[#0F172A] border-white/10 text-white h-9">
+          <Select value={syncType} onValueChange={(v: any) => setSyncType(v)} disabled={!!syncing}>
+            <SelectTrigger className="w-[160px] bg-[#0F172A] border-white/10 text-white h-9 disabled:opacity-50 disabled:cursor-not-allowed">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-[#0F172A] border-white/10">
@@ -127,29 +127,41 @@ export default function AdminProviders() {
             </SelectContent>
           </Select>
           <Button
-            className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white h-9 min-w-[160px]"
+            className="relative overflow-hidden bg-[#00B9E9] hover:bg-[#00a8d4] text-white h-9 min-w-[200px] disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-200"
             onClick={() => handleSync("accszone")}
             disabled={!!syncing}
           >
             {syncing === "accszone" ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Syncing... {elapsed > 0 && `(${formatElapsed(elapsed)})`}
-              </>
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+                <span>Syncing{elapsed > 0 ? ` (${formatElapsed(elapsed)})` : "..."}</span>
+              </span>
             ) : (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Sync AccsZone Now
-              </>
+              <span className="flex items-center gap-2">
+                <RefreshCw className="h-4 w-4 shrink-0" />
+                <span>Sync AccsZone Now</span>
+              </span>
             )}
           </Button>
-          {syncing && (
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <Zap className="h-3 w-3 text-[#00B9E9] animate-pulse" />
-              Fetching latest inventory from supplier. Products will update automatically when complete.
-            </div>
-          )}
         </div>
+
+        {/* Progress bar + status message shown while syncing */}
+        {syncing === "accszone" && (
+          <div className="mt-4 space-y-2">
+            {/* Animated progress bar */}
+            <div className="h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[#00B9E9] to-[#22C55E] animate-pulse"
+                style={{ width: `${Math.min(100, (elapsed / 45) * 100)}%`, transition: "width 1s linear" }}
+              />
+            </div>
+            <div className="flex items-center gap-2 text-xs text-slate-400">
+              <Zap className="h-3 w-3 text-[#00B9E9] animate-pulse shrink-0" />
+              <span>Fetching latest inventory from supplier. Products will update automatically when complete.</span>
+              <span className="ml-auto text-[#00B9E9] font-mono shrink-0">{formatElapsed(elapsed)}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Provider Cards */}
@@ -208,6 +220,28 @@ export default function AdminProviders() {
                     className="bg-[#0F172A] border-white/10 text-white focus:border-[#00B9E9] h-9 text-sm"
                   />
                 </div>
+              </div>
+              {/* Quick sync shortcut inside provider card */}
+              <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-3">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 text-xs border-[#00B9E9]/30 text-[#00B9E9] hover:bg-[#00B9E9]/10 bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => handleSync(provider.providerKey)}
+                  disabled={!!syncing}
+                >
+                  {syncing === provider.providerKey ? (
+                    <><Loader2 className="h-3 w-3 animate-spin mr-1.5" />Syncing...</>
+                  ) : (
+                    <><RefreshCw className="h-3 w-3 mr-1.5" />Quick Sync</>  
+                  )}
+                </Button>
+                {syncing === provider.providerKey && (
+                  <span className="text-xs text-slate-400 flex items-center gap-1">
+                    <Loader2 className="h-3 w-3 animate-spin text-[#00B9E9]" />
+                    Running {syncType} sync — {formatElapsed(elapsed)}
+                  </span>
+                )}
               </div>
             </div>
           ))}

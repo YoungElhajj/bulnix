@@ -150,6 +150,12 @@
 - [ ] Fix admin user details page: show orders, order IDs, wallet balance, tickets
 - [ ] Seed demo orders and demo data for admin panel preview
 
+## Sync Button UX (Mar 23, 2026)
+- [x] Add loading spinner and disabled state to sync button while sync is in progress
+- [x] Add animated progress bar below sync button showing elapsed time
+- [x] Disable sync type selector while sync is running
+- [x] Add Quick Sync shortcut button inside each provider card with spinner
+
 ## Bug Fixes Round 5 (Mar 23, 2026)
 - [x] Fix dark/light theme toggle button not working in navbar
 - [x] Verify and fix sync button to actually update products/stock counts
