@@ -45,12 +45,35 @@ export async function getDb() {
 
 // ─── Users ────────────────────────────────────────────────────────────────────
 
+/** Sleep helper for retry backoff */
+function sleep(ms: number) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+/** Returns true if the error is a transient TiDB schema-sync issue that is safe to retry */
+function isRetryableDbError(error: unknown): boolean {
+  const RETRYABLE = [
+    "Information schema is out of date",
+    "schema failed to update",
+    "try again",
+    "deadlock",
+  ];
+  const check = (e: unknown): boolean => {
+    if (!e || typeof e !== "object") return false;
+    const err = e as { sqlMessage?: string; message?: string; cause?: unknown };
+    const text = (err.sqlMessage ?? err.message ?? "").toLowerCase();
+    if (RETRYABLE.some(s => text.includes(s.toLowerCase()))) return true;
+    // Drizzle wraps the original MySQL error in `cause`
+    if (err.cause) return check(err.cause);
+    return false;
+  };
+  return check(error);
+}
+
 export async function upsertUser(user: InsertUser): Promise<void> {
   if (!user.openId) throw new Error("User openId is required for upsert");
   const db = await getDb();
   if (!db) { console.warn("[Database] Cannot upsert user: database not available"); return; }
 
-  try {
+  const buildPayload = () => {
     const values: InsertUser = { openId: user.openId };
     const updateSet: Record<string, unknown> = {};
     const textFields = ["name", "email", "loginMethod"] as const;
@@ -67,10 +90,25 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     if (user.role !== undefined) { values.role = user.role; updateSet.role = user.role; }
     if (!values.lastSignedIn) values.lastSignedIn = new Date();
     if (Object.keys(updateSet).length === 0) updateSet.lastSignedIn = new Date();
-    await db.insert(users).values(values).onDuplicateKeyUpdate({ set: updateSet });
-  } catch (error) {
-    console.error("[Database] Failed to upsert user:", error);
-    throw error;
+    return { values, updateSet };
+  };
+
+  const MAX_RETRIES = 3;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const { values, updateSet } = buildPayload();
+      await db.insert(users).values(values).onDuplicateKeyUpdate({ set: updateSet });
+      return; // success
+    } catch (error) {
+      if (attempt < MAX_RETRIES && isRetryableDbError(error)) {
+        const delay = attempt * 1500; // 1.5s, 3s
+        console.warn(`[Database] upsertUser transient error (attempt ${attempt}/${MAX_RETRIES}), retrying in ${delay}ms...`);
+        await sleep(delay);
+      } else {
+        console.error("[Database] Failed to upsert user:", error);
+        throw error;
+      }
+    }
   }
 }
 
