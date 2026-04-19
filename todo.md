@@ -284,3 +284,10 @@
 - [x] Fix ForgotPassword page to redirect to /login instead of Manus OAuth
 - [x] Remove all unused getLoginUrl imports from Dashboard, Orders, Profile, Tickets, Wallet, Wishlist, Checkout, DashboardLayout
 - [x] Checkpoint saved — user must click Publish to push fix to bulnix.com
+
+## Signup & Login Page Redesign — XeroSMS Style (Apr 19, 2026)
+- [x] Signup page: illustration left panel, form right — Full Name, Email, Password, Confirm Password, Terms checkbox, Sign Up button
+- [x] Login page: matching split layout — Email, Password, Forgot Password link, Sign In button
+- [x] Add confirm password validation (must match password, live error feedback)
+- [x] Add terms & conditions checkbox (must be checked to submit)
+- [x] Run tests, save checkpoint
