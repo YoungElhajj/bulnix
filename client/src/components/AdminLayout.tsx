@@ -44,7 +44,7 @@ export default function AdminLayout({ children, title }: AdminLayoutProps) {
           <Shield className="h-12 w-12 text-slate-700 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2">Admin Access Required</h2>
           <p className="text-slate-500 mb-6">Please sign in with an admin account.</p>
-          <Button className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white" onClick={() => { window.location.href = getLoginUrl(); }}>Sign In</Button>
+          <Button className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white" onClick={() => { window.location.href = '/login'; }}>Sign In</Button>
         </div>
       </div>
     );

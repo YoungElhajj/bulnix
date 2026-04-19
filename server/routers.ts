@@ -1,4 +1,5 @@
 import { COOKIE_NAME } from "../shared/const";
+import { customAuthRouter } from "./routers/customAuth";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
@@ -25,6 +26,13 @@ export const appRouter = router({
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
     }),
+    register: customAuthRouter.register,
+    verifyOtp: customAuthRouter.verifyOtp,
+    loginRequest: customAuthRouter.loginRequest,
+    resendOtp: customAuthRouter.resendOtp,
+    forgotPassword: customAuthRouter.forgotPassword,
+    resetPassword: customAuthRouter.resetPassword,
+    changePassword: customAuthRouter.changePassword,
   }),
 
   // ── Categories ──────────────────────────────────────────────────────────

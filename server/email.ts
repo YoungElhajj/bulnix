@@ -102,6 +102,52 @@ export async function sendWelcomeEmail(opts: {
   });
 }
 
+/** Send OTP verification code email for register/login/reset */
+export async function sendOtpEmail(opts: {
+  to: string;
+  name: string;
+  otp: string;
+  purpose: "register" | "login" | "reset";
+}): Promise<void> {
+  const purposeLabels = {
+    register: {
+      subject: "Verify your email \u2014 Bulnix",
+      heading: "Verify your email address",
+      desc: "You're almost there! Enter the code below to verify your email and activate your Bulnix account.",
+    },
+    login: {
+      subject: "Your Bulnix sign-in code",
+      heading: "Sign-in verification code",
+      desc: "Use the code below to complete your sign-in. This code expires in 10 minutes.",
+    },
+    reset: {
+      subject: "Reset your Bulnix password",
+      heading: "Password reset code",
+      desc: "Use the code below to reset your password. This code expires in 10 minutes.",
+    },
+  };
+  const { subject, heading, desc } = purposeLabels[opts.purpose];
+  const body = `
+    <h1>${heading}</h1>
+    <p>Hi ${opts.name || "there"},</p>
+    <p>${desc}</p>
+    <div class="highlight" style="text-align:center;">
+      <div class="code" style="font-size:40px;font-weight:800;letter-spacing:14px;color:#00B9E9;font-family:monospace;">${opts.otp}</div>
+    </div>
+    <p style="font-size:13px;color:#94a3b8;">This code expires in <strong style="color:#e2e8f0;">10 minutes</strong>. If you didn't request this, you can safely ignore this email.</p>
+    <hr class="divider" />
+    <p style="font-size:13px;">Need help? Contact us on <a href="https://wa.me/447916699429" style="color:#00B9E9;">WhatsApp</a> or open a <a href="https://bulnix.com/support" style="color:#00B9E9;">support ticket</a>.</p>`;
+  const client = getResend();
+  if (!client) { console.warn("[email] RESEND_API_KEY not set \u2014 skipping OTP email"); return; }
+  await client.emails.send({
+    from: FROM,
+    replyTo: REPLY_TO,
+    to: opts.to,
+    subject,
+    html: baseTemplate(subject, body),
+  });
+}
+
 /** Send order confirmation email */
 export async function sendOrderConfirmationEmail(opts: {
   to: string;

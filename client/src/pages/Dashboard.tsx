@@ -18,7 +18,7 @@ export default function Dashboard() {
   if (!isAuthenticated) return (
     <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center">
       <div className="text-center"><h2 className="text-2xl font-bold text-white mb-4">Sign in to access your dashboard</h2>
-        <Button className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white" onClick={() => { window.location.href = getLoginUrl(); }}>Sign In</Button></div>
+        <Button className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white" onClick={() => { window.location.href = '/login'; }}>Sign In</Button></div>
     </div>
   );
 

@@ -42,7 +42,7 @@ export default function Checkout() {
         <Lock className="h-12 w-12 text-[#00B9E9] mx-auto mb-4"/>
         <h2 className="text-2xl font-bold mb-2">Sign in to Checkout</h2>
         <p className="text-slate-400 mb-6">You need an account to complete your purchase</p>
-        <Button className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white" onClick={() => { window.location.href = getLoginUrl(); }}>Sign In</Button>
+        <Button className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white" onClick={() => { window.location.href = '/login'; }}>Sign In</Button>
       </div>
     </div>
   );

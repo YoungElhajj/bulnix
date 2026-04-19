@@ -237,3 +237,13 @@
 
 ## Email Domain Fix (Mar 23, 2026)
 - [x] Update EMAIL_FROM to noreply@support.bulnix.com (Resend verified subdomain)
+
+## Custom Authentication System (Mar 23, 2026)
+- [x] Add OTP columns (otpCode, otpExpiry, otpPurpose) to users table in DB and schema
+- [x] Install bcryptjs for password hashing
+- [x] Build custom auth server router (register, verifyOtp, loginRequest, resendOtp, forgotPassword, resetPassword, changePassword)
+- [x] Add sendOtpEmail function to email.ts using Resend from noreply@support.bulnix.com
+- [x] Redesign Sign Up page with branded Bulnix design (dark theme, split layout, OTP step)
+- [x] Redesign Sign In page with branded Bulnix design (email+password+OTP+forgot password)
+- [x] Update all getLoginUrl() references to point to /login
+- [x] Remove Manus OAuth dependency from auth flow - users never leave bulnix.com
