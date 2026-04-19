@@ -59,8 +59,8 @@ export default function SocialFloatingWidgets() {
       {/* Main toggle button */}
       <button
         onClick={() => setOpen(prev => !prev)}
-        className="w-14 h-14 rounded-full flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00B9E9]"
-        style={{ background: open ? "#334155" : "#00B9E9", boxShadow: "0 0 24px rgba(0,185,233,0.4)" }}
+        className="w-14 h-14 rounded-full flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00C2FF]"
+        style={{ background: open ? "#334155" : "#00C2FF", boxShadow: "0 0 24px rgba(0,185,233,0.4)" }}
         aria-label={open ? "Close support menu" : "Open support menu"}
       >
         {open

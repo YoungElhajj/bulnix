@@ -29,18 +29,18 @@ export default function AdminLogs() {
         <div><h1 className="text-2xl font-bold text-white">System Logs</h1><p className="text-slate-500 text-sm mt-0.5">{total} log entries</p></div>
         <div className="flex items-center gap-3 flex-wrap">
           <Select value={level} onValueChange={v=>{setLevel(v);setPage(1);}}>
-            <SelectTrigger className="w-[120px] bg-[#0F172A] border-white/10 text-white h-9"><SelectValue/></SelectTrigger>
-            <SelectContent className="bg-[#0F172A] border-white/10">
+            <SelectTrigger className="w-[120px] bg-[#0A2540] border-[#0F3D5E] text-white h-9"><SelectValue/></SelectTrigger>
+            <SelectContent className="bg-[#0A2540] border-[#0F3D5E]">
               <SelectItem value="all">All Levels</SelectItem><SelectItem value="info">Info</SelectItem><SelectItem value="warn">Warn</SelectItem><SelectItem value="error">Error</SelectItem>
             </SelectContent>
           </Select>
           <Select value={category} onValueChange={v=>{setCategory(v);setPage(1);}}>
-            <SelectTrigger className="w-[140px] bg-[#0F172A] border-white/10 text-white h-9"><SelectValue/></SelectTrigger>
-            <SelectContent className="bg-[#0F172A] border-white/10">
+            <SelectTrigger className="w-[140px] bg-[#0A2540] border-[#0F3D5E] text-white h-9"><SelectValue/></SelectTrigger>
+            <SelectContent className="bg-[#0A2540] border-[#0F3D5E]">
               <SelectItem value="all">All Categories</SelectItem><SelectItem value="payment">Payment</SelectItem><SelectItem value="supplier">Supplier</SelectItem><SelectItem value="order">Order</SelectItem><SelectItem value="webhook">Webhook</SelectItem><SelectItem value="auth">Auth</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" className="border-white/10 text-slate-400 hover:text-white hover:bg-white/5 h-9" onClick={()=>refetch()}>
+          <Button variant="outline" className="border-[#0F3D5E] text-slate-400 hover:text-white hover:bg-[#0F3D5E]/30 h-9" onClick={()=>refetch()}>
             <RefreshCw className="h-4 w-4"/>
           </Button>
         </div>
@@ -58,7 +58,7 @@ export default function AdminLogs() {
         <div className="glass-card rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-xs font-mono">
-              <thead><tr className="border-b border-white/10 text-slate-500 text-xs uppercase font-sans">
+              <thead><tr className="border-b border-[#0F3D5E] text-slate-500 text-xs uppercase font-sans">
                 <th className="text-left p-3">Time</th>
                 <th className="text-center p-3">Level</th>
                 <th className="text-center p-3">Category</th>
@@ -77,10 +77,10 @@ export default function AdminLogs() {
             </table>
           </div>
           {total > 100 && (
-            <div className="flex items-center justify-center gap-2 p-4 border-t border-white/10">
-              <Button variant="outline" className="border-white/10 text-slate-400 hover:text-white hover:bg-white/5 h-8 text-xs" disabled={page===1} onClick={()=>setPage(p=>p-1)}>Previous</Button>
+            <div className="flex items-center justify-center gap-2 p-4 border-t border-[#0F3D5E]">
+              <Button variant="outline" className="border-[#0F3D5E] text-slate-400 hover:text-white hover:bg-[#0F3D5E]/30 h-8 text-xs" disabled={page===1} onClick={()=>setPage(p=>p-1)}>Previous</Button>
               <span className="text-slate-500 text-xs px-3">Page {page}</span>
-              <Button variant="outline" className="border-white/10 text-slate-400 hover:text-white hover:bg-white/5 h-8 text-xs" disabled={logs.length < 100} onClick={()=>setPage(p=>p+1)}>Next</Button>
+              <Button variant="outline" className="border-[#0F3D5E] text-slate-400 hover:text-white hover:bg-[#0F3D5E]/30 h-8 text-xs" disabled={logs.length < 100} onClick={()=>setPage(p=>p+1)}>Next</Button>
             </div>
           )}
         </div>

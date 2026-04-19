@@ -43,78 +43,79 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* Bulnix Dark Theme - Primary colors */
+/* Bulnix Brand Theme — #061A2B bg, #00C2FF cyan, #0319CB electric blue */
 :root {
-  --primary: oklch(0.65 0.18 210);          /* #00B9E9 Xero Blue */
-  --primary-foreground: oklch(0.98 0.005 250);
-  --sidebar-primary: oklch(0.65 0.18 210);
-  --sidebar-primary-foreground: oklch(0.98 0.005 250);
-  --chart-1: oklch(0.65 0.18 210);
-  --chart-2: oklch(0.72 0.19 142);
-  --chart-3: oklch(0.75 0.15 280);
+  /* Primary = #00C2FF electric cyan */
+  --primary: oklch(0.75 0.18 210);          /* #00C2FF */
+  --primary-foreground: oklch(0.08 0.02 250);
+  --sidebar-primary: oklch(0.75 0.18 210);
+  --sidebar-primary-foreground: oklch(0.08 0.02 250);
+  --chart-1: oklch(0.75 0.18 210);
+  --chart-2: oklch(0.45 0.28 264);          /* #0319CB electric blue */
+  --chart-3: oklch(0.72 0.19 142);
   --chart-4: oklch(0.80 0.18 60);
   --chart-5: oklch(0.65 0.22 25);
   --radius: 0.75rem;
-  /* Dark background always */
-  --background: oklch(0.12 0.02 250);       /* #0B0F19 */
-  --foreground: oklch(0.92 0.01 250);       /* Light text */
-  --card: oklch(0.16 0.025 250);            /* #0F172A */
-  --card-foreground: oklch(0.92 0.01 250);
-  --popover: oklch(0.16 0.025 250);
-  --popover-foreground: oklch(0.92 0.01 250);
-  --secondary: oklch(0.19 0.025 250);       /* Surface */
+  /* Dark navy backgrounds */
+  --background: oklch(0.10 0.03 248);       /* #061A2B deepest navy */
+  --foreground: oklch(0.95 0.005 250);      /* Near-white text */
+  --card: oklch(0.14 0.04 248);             /* #0A2540 card navy */
+  --card-foreground: oklch(0.95 0.005 250);
+  --popover: oklch(0.14 0.04 248);
+  --popover-foreground: oklch(0.95 0.005 250);
+  --secondary: oklch(0.18 0.04 248);        /* #0F3D5E medium navy */
   --secondary-foreground: oklch(0.85 0.01 250);
-  --muted: oklch(0.19 0.025 250);
-  --muted-foreground: oklch(0.55 0.02 250);
-  --accent: oklch(0.72 0.19 142);           /* #22C55E Green */
+  --muted: oklch(0.18 0.04 248);
+  --muted-foreground: oklch(0.58 0.03 250);
+  --accent: oklch(0.45 0.28 264);           /* #0319CB electric blue */
   --accent-foreground: oklch(0.98 0.005 250);
   --destructive: oklch(0.62 0.22 25);
   --destructive-foreground: oklch(0.98 0.005 250);
-  --border: oklch(0.25 0.025 250);
-  --input: oklch(0.19 0.025 250);
-  --ring: oklch(0.65 0.18 210);
-  --sidebar: oklch(0.14 0.022 250);
-  --sidebar-foreground: oklch(0.92 0.01 250);
-  --sidebar-accent: oklch(0.19 0.025 250);
-  --sidebar-accent-foreground: oklch(0.92 0.01 250);
-  --sidebar-border: oklch(0.22 0.025 250);
-  --sidebar-ring: oklch(0.65 0.18 210);
+  --border: oklch(0.22 0.05 248);           /* #0F3D5E border */
+  --input: oklch(0.18 0.04 248);
+  --ring: oklch(0.75 0.18 210);
+  --sidebar: oklch(0.12 0.04 248);          /* #0A2540 sidebar */
+  --sidebar-foreground: oklch(0.95 0.005 250);
+  --sidebar-accent: oklch(0.18 0.04 248);
+  --sidebar-accent-foreground: oklch(0.95 0.005 250);
+  --sidebar-border: oklch(0.20 0.05 248);
+  --sidebar-ring: oklch(0.75 0.18 210);
 }
 
-/* Dark theme class - same as :root since Bulnix defaults to dark */
+/* Dark theme class — same as :root (Bulnix is always dark) */
 .dark {
-  --primary: oklch(0.65 0.18 210);
-  --primary-foreground: oklch(0.98 0.005 250);
-  --sidebar-primary: oklch(0.65 0.18 210);
-  --sidebar-primary-foreground: oklch(0.98 0.005 250);
-  --background: oklch(0.12 0.02 250);
-  --foreground: oklch(0.92 0.01 250);
-  --card: oklch(0.16 0.025 250);
-  --card-foreground: oklch(0.92 0.01 250);
-  --popover: oklch(0.16 0.025 250);
-  --popover-foreground: oklch(0.92 0.01 250);
-  --secondary: oklch(0.19 0.025 250);
+  --primary: oklch(0.75 0.18 210);
+  --primary-foreground: oklch(0.08 0.02 250);
+  --sidebar-primary: oklch(0.75 0.18 210);
+  --sidebar-primary-foreground: oklch(0.08 0.02 250);
+  --background: oklch(0.10 0.03 248);
+  --foreground: oklch(0.95 0.005 250);
+  --card: oklch(0.14 0.04 248);
+  --card-foreground: oklch(0.95 0.005 250);
+  --popover: oklch(0.14 0.04 248);
+  --popover-foreground: oklch(0.95 0.005 250);
+  --secondary: oklch(0.18 0.04 248);
   --secondary-foreground: oklch(0.85 0.01 250);
-  --muted: oklch(0.19 0.025 250);
-  --muted-foreground: oklch(0.55 0.02 250);
-  --accent: oklch(0.72 0.19 142);
+  --muted: oklch(0.18 0.04 248);
+  --muted-foreground: oklch(0.58 0.03 250);
+  --accent: oklch(0.45 0.28 264);
   --accent-foreground: oklch(0.98 0.005 250);
   --destructive: oklch(0.62 0.22 25);
   --destructive-foreground: oklch(0.98 0.005 250);
-  --border: oklch(0.25 0.025 250);
-  --input: oklch(0.19 0.025 250);
-  --ring: oklch(0.65 0.18 210);
-  --chart-1: oklch(0.65 0.18 210);
-  --chart-2: oklch(0.72 0.19 142);
-  --chart-3: oklch(0.75 0.15 280);
+  --border: oklch(0.22 0.05 248);
+  --input: oklch(0.18 0.04 248);
+  --ring: oklch(0.75 0.18 210);
+  --chart-1: oklch(0.75 0.18 210);
+  --chart-2: oklch(0.45 0.28 264);
+  --chart-3: oklch(0.72 0.19 142);
   --chart-4: oklch(0.80 0.18 60);
   --chart-5: oklch(0.65 0.22 25);
-  --sidebar: oklch(0.14 0.022 250);
-  --sidebar-foreground: oklch(0.92 0.01 250);
-  --sidebar-accent: oklch(0.19 0.025 250);
-  --sidebar-accent-foreground: oklch(0.92 0.01 250);
-  --sidebar-border: oklch(0.22 0.025 250);
-  --sidebar-ring: oklch(0.65 0.18 210);
+  --sidebar: oklch(0.12 0.04 248);
+  --sidebar-foreground: oklch(0.95 0.005 250);
+  --sidebar-accent: oklch(0.18 0.04 248);
+  --sidebar-accent-foreground: oklch(0.95 0.005 250);
+  --sidebar-border: oklch(0.20 0.05 248);
+  --sidebar-ring: oklch(0.75 0.18 210);
 }
 
 /* Light theme - activated when .dark class is removed from <html> */
@@ -171,10 +172,10 @@ html:not(.dark) {
     letter-spacing: -0.02em;
   }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: #0F172A; }
-  ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: #00B9E9; }
-  ::selection { background: oklch(0.65 0.18 210 / 0.3); color: #fff; }
+  ::-webkit-scrollbar-track { background: #061A2B; }
+  ::-webkit-scrollbar-thumb { background: #0F3D5E; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #00C2FF; }
+  ::selection { background: #00C2FF44; color: #fff; }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
   [type="button"]:not(:disabled),
@@ -191,40 +192,40 @@ html:not(.dark) {
 @layer components {
   /* Bulnix utility classes */
   .text-gradient-primary {
-    background: linear-gradient(135deg, #00B9E9 0%, #0ea5e9 50%, #22C55E 100%);
+    background: linear-gradient(135deg, #00C2FF 0%, #0319CB 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .text-gradient-blue {
-    background: linear-gradient(135deg, #00B9E9 0%, #60a5fa 100%);
+    background: linear-gradient(135deg, #00C2FF 0%, #0319CB 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  .glow-primary { box-shadow: 0 0 20px oklch(0.65 0.18 210 / 0.3); }
-  .glow-accent { box-shadow: 0 0 20px oklch(0.72 0.19 142 / 0.3); }
+  .glow-primary { box-shadow: 0 0 24px #00C2FF44; }
+  .glow-accent { box-shadow: 0 0 24px #0319CB44; }
   .glass-card {
-    background: oklch(0.16 0.025 250 / 0.85);
+    background: oklch(0.14 0.04 248 / 0.85);
     backdrop-filter: blur(12px);
-    border: 1px solid oklch(0.25 0.025 250);
+    border: 1px solid oklch(0.22 0.05 248);
   }
   .bg-gradient-hero {
-    background: radial-gradient(ellipse 80% 60% at 50% -20%, oklch(0.65 0.18 210 / 0.15) 0%, transparent 60%),
-                radial-gradient(ellipse 60% 40% at 80% 80%, oklch(0.72 0.19 142 / 0.08) 0%, transparent 50%),
-                #0B0F19;
+    background: radial-gradient(ellipse 80% 60% at 50% -20%, #00C2FF22 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 80% 80%, #0319CB18 0%, transparent 50%),
+                #061A2B;
   }
   .product-card {
-    background: oklch(0.16 0.025 250 / 0.85);
-    border: 1px solid oklch(0.25 0.025 250);
+    background: oklch(0.14 0.04 248 / 0.85);
+    border: 1px solid oklch(0.22 0.05 248);
     border-radius: 0.75rem;
     overflow: hidden;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
   .product-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 32px oklch(0.65 0.18 210 / 0.2);
-    border-color: oklch(0.65 0.18 210 / 0.4);
+    box-shadow: 0 8px 32px #00C2FF33;
+    border-color: #00C2FF66;
   }
   .status-pending { background: rgb(234 179 8 / 0.1); color: rgb(250 204 21); border: 1px solid rgb(234 179 8 / 0.2); }
   .status-paid { background: rgb(59 130 246 / 0.1); color: rgb(96 165 250); border: 1px solid rgb(59 130 246 / 0.2); }

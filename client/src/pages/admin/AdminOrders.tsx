@@ -22,7 +22,7 @@ export default function AdminOrders() {
 
   const orders = (data as any)?.items ?? [];
   const total = (data as any)?.total ?? 0;
-  const statusBadge = (s: string) => ({ pending: "bg-yellow-500/10 text-yellow-400", processing: "bg-blue-500/10 text-blue-400", completed: "bg-[#22C55E]/10 text-[#22C55E]", failed: "bg-red-500/10 text-red-400", refunded: "bg-orange-500/10 text-orange-400" }[s] ?? "bg-slate-500/10 text-slate-400");
+  const statusBadge = (s: string) => ({ pending: "bg-yellow-500/10 text-yellow-400", processing: "bg-blue-500/10 text-blue-400", completed: "bg-[#00C2FF]/10 text-[#00C2FF]", failed: "bg-red-500/10 text-red-400", refunded: "bg-orange-500/10 text-orange-400" }[s] ?? "bg-slate-500/10 text-slate-400");
 
   return (
     <AdminLayout title="Orders">
@@ -30,8 +30,8 @@ export default function AdminOrders() {
         <div><h1 className="text-2xl font-bold text-white">Orders</h1><p className="text-slate-500 text-sm mt-0.5">{total} total orders</p></div>
         <div className="flex items-center gap-3">
           <Select value={status} onValueChange={v=>{setStatus(v);setPage(1);}}>
-            <SelectTrigger className="w-[140px] bg-[#0F172A] border-white/10 text-white h-9"><SelectValue/></SelectTrigger>
-            <SelectContent className="bg-[#0F172A] border-white/10">
+            <SelectTrigger className="w-[140px] bg-[#0A2540] border-[#0F3D5E] text-white h-9"><SelectValue/></SelectTrigger>
+            <SelectContent className="bg-[#0A2540] border-[#0F3D5E]">
               <SelectItem value="all">All</SelectItem><SelectItem value="pending">Pending</SelectItem><SelectItem value="processing">Processing</SelectItem><SelectItem value="completed">Completed</SelectItem><SelectItem value="failed">Failed</SelectItem>
             </SelectContent>
           </Select>
@@ -44,7 +44,7 @@ export default function AdminOrders() {
         <div className="glass-card rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-white/10 text-slate-500 text-xs uppercase">
+              <thead><tr className="border-b border-[#0F3D5E] text-slate-500 text-xs uppercase">
                 <th className="text-left p-4">Order ID</th>
                 <th className="text-left p-4">User</th>
                 <th className="text-right p-4">Total</th>
@@ -59,7 +59,7 @@ export default function AdminOrders() {
                   <tr key={order.id} className="border-b border-white/5 hover:bg-white/3 transition-colors">
                     <td className="p-4 font-mono text-white">#{order.id}</td>
                     <td className="p-4 text-slate-300">{order.billingEmail ?? "User #" + order.userId}</td>
-                    <td className="p-4 text-right font-semibold text-[#22C55E]">${Number(order.totalUSD).toFixed(2)}</td>
+                    <td className="p-4 text-right font-semibold text-[#00C2FF]">${Number(order.totalUSD).toFixed(2)}</td>
                     <td className="p-4 text-center text-slate-400">{order.currency}</td>
                     <td className="p-4 text-center"><Badge className={"text-xs border-0 " + statusBadge(order.status)}>{order.status}</Badge></td>
                     <td className="p-4 text-center text-slate-400 capitalize">{order.paymentGateway ?? "—"}</td>
@@ -67,7 +67,7 @@ export default function AdminOrders() {
                     <td className="p-4 text-center">
                       <div className="flex items-center gap-1 justify-center">
                         {order.status === "failed" && (
-                          <button onClick={()=>retryFulfillment.mutate({orderId:order.id})} className="px-2 py-1 rounded bg-[#00B9E9]/10 text-[#00B9E9] hover:bg-[#00B9E9]/20 text-xs transition-colors flex items-center gap-1">
+                          <button onClick={()=>retryFulfillment.mutate({orderId:order.id})} className="px-2 py-1 rounded bg-[#00C2FF]/10 text-[#00C2FF] hover:bg-[#00C2FF]/20 text-xs transition-colors flex items-center gap-1">
                             <RefreshCw className="h-3 w-3"/> Retry
                           </button>
                         )}
@@ -82,10 +82,10 @@ export default function AdminOrders() {
             </table>
           </div>
           {total > 50 && (
-            <div className="flex items-center justify-center gap-2 p-4 border-t border-white/10">
-              <Button variant="outline" className="border-white/10 text-slate-400 hover:text-white hover:bg-white/5 h-8 text-xs" disabled={page===1} onClick={()=>setPage(p=>p-1)}>Previous</Button>
+            <div className="flex items-center justify-center gap-2 p-4 border-t border-[#0F3D5E]">
+              <Button variant="outline" className="border-[#0F3D5E] text-slate-400 hover:text-white hover:bg-[#0F3D5E]/30 h-8 text-xs" disabled={page===1} onClick={()=>setPage(p=>p-1)}>Previous</Button>
               <span className="text-slate-500 text-xs px-3">Page {page}</span>
-              <Button variant="outline" className="border-white/10 text-slate-400 hover:text-white hover:bg-white/5 h-8 text-xs" disabled={orders.length < 50} onClick={()=>setPage(p=>p+1)}>Next</Button>
+              <Button variant="outline" className="border-[#0F3D5E] text-slate-400 hover:text-white hover:bg-[#0F3D5E]/30 h-8 text-xs" disabled={orders.length < 50} onClick={()=>setPage(p=>p+1)}>Next</Button>
             </div>
           )}
         </div>

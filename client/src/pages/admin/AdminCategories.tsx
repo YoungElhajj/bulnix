@@ -121,32 +121,32 @@ export default function AdminCategories() {
         </div>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white h-9">
+            <Button className="bg-[#00C2FF] hover:bg-[#00a8d4] text-white h-9">
               <Plus className="h-4 w-4 mr-2" /> Add Category
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-[#0F172A] border-white/10 text-white max-w-md">
+          <DialogContent className="bg-[#0A2540] border-[#0F3D5E] text-white max-w-md">
             <DialogHeader><DialogTitle className="text-white">Create Category</DialogTitle></DialogHeader>
             <div className="space-y-4 mt-2">
               <div>
                 <Label className="text-slate-300 text-sm mb-1.5 block">Name *</Label>
-                <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value, slug: e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") }))} placeholder="e.g. Social Media" className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
+                <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value, slug: e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") }))} placeholder="e.g. Social Media" className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
               </div>
               <div>
                 <Label className="text-slate-300 text-sm mb-1.5 block">Slug *</Label>
-                <Input value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} placeholder="e.g. social-media" className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
+                <Input value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} placeholder="e.g. social-media" className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
               </div>
               <div>
                 <Label className="text-slate-300 text-sm mb-1.5 block">Description</Label>
-                <Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Optional description" className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
+                <Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Optional description" className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
               </div>
               <div>
                 <Label className="text-slate-300 text-sm mb-1.5 block">Parent Category (for subcategory)</Label>
                 <Select value={form.parentId} onValueChange={v => setForm(f => ({ ...f, parentId: v }))}>
-                  <SelectTrigger className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10">
+                  <SelectTrigger className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10">
                     <SelectValue placeholder="None (top-level)" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#0F172A] border-white/10 text-white">
+                  <SelectContent className="bg-[#0A2540] border-[#0F3D5E] text-white">
                     <SelectItem value="none">None (top-level)</SelectItem>
                     {topLevel.map((c: any) => (
                       <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
@@ -154,7 +154,7 @@ export default function AdminCategories() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button className="w-full bg-[#00B9E9] hover:bg-[#00a8d4] text-white" onClick={handleCreate} disabled={createCat.isPending || !form.name || !form.slug}>
+              <Button className="w-full bg-[#00C2FF] hover:bg-[#00a8d4] text-white" onClick={handleCreate} disabled={createCat.isPending || !form.name || !form.slug}>
                 {createCat.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />} Create
               </Button>
             </div>
@@ -174,7 +174,7 @@ export default function AdminCategories() {
                 {/* Top-level row */}
                 <div className="glass-card rounded-xl px-4 py-3 flex items-center gap-3">
                   {/* Icon preview */}
-                  <div className="w-9 h-9 rounded-lg bg-[#0B0F19] border border-white/8 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  <div className="w-9 h-9 rounded-lg bg-[#061A2B] border border-white/8 flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {cat.imageUrl ? (
                       <img src={cat.imageUrl} alt={cat.name} className="w-7 h-7 object-contain" />
                     ) : (
@@ -186,7 +186,7 @@ export default function AdminCategories() {
                     <div className="flex items-center gap-2">
                       <span className="text-white font-medium text-sm">{cat.name}</span>
                       {subs.length > 0 && (
-                        <Badge className="bg-[#00B9E9]/10 text-[#00B9E9] border-0 text-xs">{subs.length} sub</Badge>
+                        <Badge className="bg-[#00C2FF]/10 text-[#00C2FF] border-0 text-xs">{subs.length} sub</Badge>
                       )}
                     </div>
                     <div className="text-xs text-slate-500 font-mono">{cat.slug}</div>
@@ -196,14 +196,14 @@ export default function AdminCategories() {
                   {/* Actions */}
                   <div className="flex items-center gap-2 ml-auto">
                     {subs.length > 0 && (
-                      <button onClick={() => setShowSubs(s => ({ ...s, [cat.id]: !s[cat.id] }))} className="w-7 h-7 rounded-lg bg-white/5 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
+                      <button onClick={() => setShowSubs(s => ({ ...s, [cat.id]: !s[cat.id] }))} className="w-7 h-7 rounded-lg bg-[#0F3D5E]/30 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
                         <ChevronRight className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-90" : ""}`} />
                       </button>
                     )}
-                    <button onClick={() => updateCat.mutate({ id: cat.id, isVisible: !cat.isVisible })} className={"w-7 h-7 rounded-lg flex items-center justify-center transition-colors " + (cat.isVisible ? "bg-[#22C55E]/10 text-[#22C55E] hover:bg-[#22C55E]/20" : "bg-slate-500/10 text-slate-500 hover:bg-slate-500/20")}>
+                    <button onClick={() => updateCat.mutate({ id: cat.id, isVisible: !cat.isVisible })} className={"w-7 h-7 rounded-lg flex items-center justify-center transition-colors " + (cat.isVisible ? "bg-[#00C2FF]/10 text-[#00C2FF] hover:bg-[#00C2FF]/20" : "bg-slate-500/10 text-slate-500 hover:bg-slate-500/20")}>
                       {cat.isVisible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                     </button>
-                    <button onClick={() => openEdit(cat)} className="w-7 h-7 rounded-lg bg-[#00B9E9]/10 text-[#00B9E9] hover:bg-[#00B9E9]/20 flex items-center justify-center transition-colors">
+                    <button onClick={() => openEdit(cat)} className="w-7 h-7 rounded-lg bg-[#00C2FF]/10 text-[#00C2FF] hover:bg-[#00C2FF]/20 flex items-center justify-center transition-colors">
                       <Edit className="h-3.5 w-3.5" />
                     </button>
                     <button onClick={() => { if (confirm(`Delete "${cat.name}"?`)) deleteCat.mutate({ id: cat.id }); }} className="w-7 h-7 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 flex items-center justify-center transition-colors">
@@ -214,8 +214,8 @@ export default function AdminCategories() {
 
                 {/* Subcategory rows */}
                 {expanded && subs.map((sub: any) => (
-                  <div key={sub.id} className="ml-8 mt-1 glass-card rounded-xl px-4 py-2.5 flex items-center gap-3 border-l-2 border-[#00B9E9]/20">
-                    <div className="w-7 h-7 rounded-lg bg-[#0B0F19] border border-white/8 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  <div key={sub.id} className="ml-8 mt-1 glass-card rounded-xl px-4 py-2.5 flex items-center gap-3 border-l-2 border-[#00C2FF]/20">
+                    <div className="w-7 h-7 rounded-lg bg-[#061A2B] border border-white/8 flex items-center justify-center flex-shrink-0 overflow-hidden">
                       {sub.imageUrl ? <img src={sub.imageUrl} alt={sub.name} className="w-5 h-5 object-contain" /> : <Image className="h-3 w-3 text-slate-600" />}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -223,10 +223,10 @@ export default function AdminCategories() {
                       <div className="text-xs text-slate-500 font-mono">{sub.slug}</div>
                     </div>
                     <div className="flex items-center gap-2 ml-auto">
-                      <button onClick={() => updateCat.mutate({ id: sub.id, isVisible: !sub.isVisible })} className={"w-7 h-7 rounded-lg flex items-center justify-center transition-colors " + (sub.isVisible ? "bg-[#22C55E]/10 text-[#22C55E] hover:bg-[#22C55E]/20" : "bg-slate-500/10 text-slate-500 hover:bg-slate-500/20")}>
+                      <button onClick={() => updateCat.mutate({ id: sub.id, isVisible: !sub.isVisible })} className={"w-7 h-7 rounded-lg flex items-center justify-center transition-colors " + (sub.isVisible ? "bg-[#00C2FF]/10 text-[#00C2FF] hover:bg-[#00C2FF]/20" : "bg-slate-500/10 text-slate-500 hover:bg-slate-500/20")}>
                         {sub.isVisible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                       </button>
-                      <button onClick={() => openEdit(sub)} className="w-7 h-7 rounded-lg bg-[#00B9E9]/10 text-[#00B9E9] hover:bg-[#00B9E9]/20 flex items-center justify-center transition-colors">
+                      <button onClick={() => openEdit(sub)} className="w-7 h-7 rounded-lg bg-[#00C2FF]/10 text-[#00C2FF] hover:bg-[#00C2FF]/20 flex items-center justify-center transition-colors">
                         <Edit className="h-3.5 w-3.5" />
                       </button>
                       <button onClick={() => { if (confirm(`Delete "${sub.name}"?`)) deleteCat.mutate({ id: sub.id }); }} className="w-7 h-7 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 flex items-center justify-center transition-colors">
@@ -243,36 +243,36 @@ export default function AdminCategories() {
 
       {/* Edit Dialog */}
       <Dialog open={editOpen} onOpenChange={v => { if (!v) { setEditOpen(false); setEditing(null); } }}>
-        <DialogContent className="bg-[#0F172A] border-white/10 text-white max-w-lg">
+        <DialogContent className="bg-[#0A2540] border-[#0F3D5E] text-white max-w-lg">
           <DialogHeader><DialogTitle className="text-white">Edit Category</DialogTitle></DialogHeader>
           {editing && (
             <div className="space-y-4 mt-2">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-slate-300 text-sm mb-1.5 block">Name</Label>
-                  <Input value={editForm.name} onChange={e => setEditForm((f: any) => ({ ...f, name: e.target.value }))} className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
+                  <Input value={editForm.name} onChange={e => setEditForm((f: any) => ({ ...f, name: e.target.value }))} className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
                 </div>
                 <div>
                   <Label className="text-slate-300 text-sm mb-1.5 block">Slug</Label>
-                  <Input value={editForm.slug} onChange={e => setEditForm((f: any) => ({ ...f, slug: e.target.value }))} className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
+                  <Input value={editForm.slug} onChange={e => setEditForm((f: any) => ({ ...f, slug: e.target.value }))} className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
                 </div>
               </div>
               <div>
                 <Label className="text-slate-300 text-sm mb-1.5 block">Description</Label>
-                <Input value={editForm.description} onChange={e => setEditForm((f: any) => ({ ...f, description: e.target.value }))} placeholder="Optional description" className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
+                <Input value={editForm.description} onChange={e => setEditForm((f: any) => ({ ...f, description: e.target.value }))} placeholder="Optional description" className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
               </div>
               <div>
                 <Label className="text-slate-300 text-sm mb-1.5 block">Category Icon / Image</Label>
                 <div className="flex gap-2 items-start">
                   <div className="flex-1 space-y-2">
-                    <Input value={editForm.imageUrl} onChange={e => setEditForm((f: any) => ({ ...f, imageUrl: e.target.value }))} placeholder="Paste URL or upload file" className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
-                    <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-white/20 hover:border-[#00B9E9]/50 cursor-pointer transition-colors bg-[#0B0F19] text-xs text-slate-400 hover:text-[#00B9E9]">
+                    <Input value={editForm.imageUrl} onChange={e => setEditForm((f: any) => ({ ...f, imageUrl: e.target.value }))} placeholder="Paste URL or upload file" className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
+                    <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-white/20 hover:border-[#00C2FF]/50 cursor-pointer transition-colors bg-[#061A2B] text-xs text-slate-400 hover:text-[#00C2FF]">
                       {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
                       {uploading ? "Uploading..." : "Upload icon (PNG, JPG, SVG, max 5MB)"}
                       <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(f, url => setEditForm((fm: any) => ({ ...fm, imageUrl: url }))); }} />
                     </label>
                   </div>
-                  <div className="w-16 h-16 rounded-xl bg-[#0B0F19] border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                  <div className="w-16 h-16 rounded-xl bg-[#061A2B] border border-[#0F3D5E] flex items-center justify-center overflow-hidden flex-shrink-0">
                     {editForm.imageUrl
                       ? <img src={editForm.imageUrl} alt="preview" className="w-full h-full object-contain p-1" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
                       : <Image className="h-6 w-6 text-slate-700" />}
@@ -282,10 +282,10 @@ export default function AdminCategories() {
               <div>
                 <Label className="text-slate-300 text-sm mb-1.5 block">Parent Category</Label>
                 <Select value={editForm.parentId || "none"} onValueChange={v => setEditForm((f: any) => ({ ...f, parentId: v === "none" ? "" : v }))}>
-                  <SelectTrigger className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10">
+                  <SelectTrigger className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10">
                     <SelectValue placeholder="None (top-level)" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#0F172A] border-white/10 text-white">
+                  <SelectContent className="bg-[#0A2540] border-[#0F3D5E] text-white">
                     <SelectItem value="none">None (top-level)</SelectItem>
                     {topLevel.filter((c: any) => c.id !== editing.id).map((c: any) => (
                       <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
@@ -296,7 +296,7 @@ export default function AdminCategories() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-slate-300 text-sm mb-1.5 block">Sort Order</Label>
-                  <Input type="number" value={editForm.sortOrder} onChange={e => setEditForm((f: any) => ({ ...f, sortOrder: e.target.value }))} className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
+                  <Input type="number" value={editForm.sortOrder} onChange={e => setEditForm((f: any) => ({ ...f, sortOrder: e.target.value }))} className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
                 </div>
                 <div className="flex items-end pb-1">
                   <div className="flex items-center justify-between w-full">
@@ -305,7 +305,7 @@ export default function AdminCategories() {
                   </div>
                 </div>
               </div>
-              <Button className="w-full bg-[#00B9E9] hover:bg-[#00a8d4] text-white" onClick={handleUpdate} disabled={updateCat.isPending}>
+              <Button className="w-full bg-[#00C2FF] hover:bg-[#00a8d4] text-white" onClick={handleUpdate} disabled={updateCat.isPending}>
                 {updateCat.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null} Save Changes
               </Button>
             </div>

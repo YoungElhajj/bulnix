@@ -136,9 +136,9 @@ export default function AdminProducts() {
         <div className="flex items-center gap-3">
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-            <Input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="Search products..." className="pl-9 bg-[#0F172A] border-white/10 text-white placeholder:text-slate-600 focus:border-[#00B9E9] h-9" />
+            <Input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="Search products..." className="pl-9 bg-[#0A2540] border-[#0F3D5E] text-white placeholder:text-slate-600 focus:border-[#00C2FF] h-9" />
           </div>
-          <Button className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white h-9" onClick={() => setAddOpen(true)}>
+          <Button className="bg-[#00C2FF] hover:bg-[#00a8d4] text-white h-9" onClick={() => setAddOpen(true)}>
             <Plus className="h-4 w-4 mr-2" /> Add Product
           </Button>
         </div>
@@ -156,7 +156,7 @@ export default function AdminProducts() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-slate-500 text-xs uppercase">
+                <tr className="border-b border-[#0F3D5E] text-slate-500 text-xs uppercase">
                   <th className="text-left p-4">Product</th>
                   <th className="text-left p-4 hidden md:table-cell">Category</th>
                   <th className="text-right p-4">Base</th>
@@ -173,7 +173,7 @@ export default function AdminProducts() {
                   <tr key={p.id} className="border-b border-white/5 hover:bg-white/3 transition-colors">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-[#1e293b] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        <div className="w-9 h-9 rounded-lg bg-[#0A2540] flex items-center justify-center flex-shrink-0 overflow-hidden">
                           {p.imageUrl
                             ? <img src={p.imageUrl} alt="" className="w-full h-full object-cover rounded-lg" />
                             : <Package className="h-4 w-4 text-slate-600" />}
@@ -185,14 +185,14 @@ export default function AdminProducts() {
                       </div>
                     </td>
                     <td className="p-4 hidden md:table-cell">
-                      <Badge className="bg-[#00B9E9]/10 text-[#00B9E9] border-0 text-xs">{p.providerKey ?? "manual"}</Badge>
+                      <Badge className="bg-[#00C2FF]/10 text-[#00C2FF] border-0 text-xs">{p.providerKey ?? "manual"}</Badge>
                     </td>
                     <td className="p-4 text-right text-slate-300">${Number(p.supplierPrice ?? 0).toFixed(2)}</td>
                     <td className="p-4 text-right text-slate-300">{p.markupPercent ?? 20}%</td>
-                    <td className="p-4 text-right font-semibold text-[#22C55E]">${Number(p.customerPriceUSD ?? 0).toFixed(2)}</td>
+                    <td className="p-4 text-right font-semibold text-[#00C2FF]">${Number(p.customerPriceUSD ?? 0).toFixed(2)}</td>
                     <td className="p-4 text-center text-slate-300">{p.stockUnlimited ? "∞" : p.stockQuantity}</td>
                     <td className="p-4 text-center">
-                      <button onClick={() => updateProduct.mutate({ id: p.id, isVisible: !p.isVisible })} className={"w-8 h-8 rounded-full flex items-center justify-center mx-auto transition-colors " + (p.isVisible ? "bg-[#22C55E]/10 text-[#22C55E] hover:bg-[#22C55E]/20" : "bg-slate-500/10 text-slate-500 hover:bg-slate-500/20")}>
+                      <button onClick={() => updateProduct.mutate({ id: p.id, isVisible: !p.isVisible })} className={"w-8 h-8 rounded-full flex items-center justify-center mx-auto transition-colors " + (p.isVisible ? "bg-[#00C2FF]/10 text-[#00C2FF] hover:bg-[#00C2FF]/20" : "bg-slate-500/10 text-slate-500 hover:bg-slate-500/20")}>
                         {p.isVisible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                       </button>
                     </td>
@@ -202,7 +202,7 @@ export default function AdminProducts() {
                       </button>
                     </td>
                     <td className="p-4 text-center">
-                      <button onClick={() => openEdit(p)} className="w-8 h-8 rounded-lg bg-[#00B9E9]/10 text-[#00B9E9] hover:bg-[#00B9E9]/20 flex items-center justify-center mx-auto transition-colors">
+                      <button onClick={() => openEdit(p)} className="w-8 h-8 rounded-lg bg-[#00C2FF]/10 text-[#00C2FF] hover:bg-[#00C2FF]/20 flex items-center justify-center mx-auto transition-colors">
                         <Edit className="h-4 w-4" />
                       </button>
                     </td>
@@ -212,10 +212,10 @@ export default function AdminProducts() {
             </table>
           </div>
           {total > 50 && (
-            <div className="flex items-center justify-center gap-2 p-4 border-t border-white/10">
-              <Button variant="outline" className="border-white/10 text-slate-400 hover:text-white hover:bg-white/5 h-8 text-xs" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Previous</Button>
+            <div className="flex items-center justify-center gap-2 p-4 border-t border-[#0F3D5E]">
+              <Button variant="outline" className="border-[#0F3D5E] text-slate-400 hover:text-white hover:bg-[#0F3D5E]/30 h-8 text-xs" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Previous</Button>
               <span className="text-slate-500 text-xs px-3">Page {page} of {Math.ceil(total / 50)}</span>
-              <Button variant="outline" className="border-white/10 text-slate-400 hover:text-white hover:bg-white/5 h-8 text-xs" disabled={products.length < 50} onClick={() => setPage(p => p + 1)}>Next</Button>
+              <Button variant="outline" className="border-[#0F3D5E] text-slate-400 hover:text-white hover:bg-[#0F3D5E]/30 h-8 text-xs" disabled={products.length < 50} onClick={() => setPage(p => p + 1)}>Next</Button>
             </div>
           )}
         </div>
@@ -223,30 +223,30 @@ export default function AdminProducts() {
 
       {/* Edit Dialog */}
       <Dialog open={!!editing} onOpenChange={v => !v && setEditing(null)}>
-        <DialogContent className="bg-[#0F172A] border-white/10 text-white max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-[#0A2540] border-[#0F3D5E] text-white max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle className="text-white">Edit Product</DialogTitle></DialogHeader>
           {editing && (
             <div className="space-y-4 mt-2">
               <div>
                 <Label className="text-slate-300 text-sm mb-1.5 block">Title Override</Label>
-                <Input value={editForm.title} onChange={e => setEditForm((f: any) => ({ ...f, title: e.target.value }))} className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
+                <Input value={editForm.title} onChange={e => setEditForm((f: any) => ({ ...f, title: e.target.value }))} className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
               </div>
               <div>
                 <Label className="text-slate-300 text-sm mb-1.5 block">Description Override</Label>
-                <Textarea value={editForm.description} onChange={e => setEditForm((f: any) => ({ ...f, description: e.target.value }))} rows={3} className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] resize-none" />
+                <Textarea value={editForm.description} onChange={e => setEditForm((f: any) => ({ ...f, description: e.target.value }))} rows={3} className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] resize-none" />
               </div>
               <div>
                 <Label className="text-slate-300 text-sm mb-1.5 block">Product Icon / Logo</Label>
                 <div className="flex gap-2 items-start">
                   <div className="flex-1 space-y-2">
-                    <Input value={editForm.imageUrl} onChange={e => setEditForm((f: any) => ({ ...f, imageUrl: e.target.value }))} placeholder="Paste URL or upload file below" className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
-                    <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-white/20 hover:border-[#00B9E9]/50 cursor-pointer transition-colors bg-[#0B0F19] text-xs text-slate-400 hover:text-[#00B9E9]">
+                    <Input value={editForm.imageUrl} onChange={e => setEditForm((f: any) => ({ ...f, imageUrl: e.target.value }))} placeholder="Paste URL or upload file below" className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
+                    <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-white/20 hover:border-[#00C2FF]/50 cursor-pointer transition-colors bg-[#061A2B] text-xs text-slate-400 hover:text-[#00C2FF]">
                       {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
                       {uploading ? "Uploading..." : "Upload image file (PNG, JPG, SVG, max 5MB)"}
                       <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(f, url => setEditForm((fm: any) => ({ ...fm, imageUrl: url }))); }} />
                     </label>
                   </div>
-                  <div className="w-16 h-16 rounded-xl bg-[#0B0F19] border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                  <div className="w-16 h-16 rounded-xl bg-[#061A2B] border border-[#0F3D5E] flex items-center justify-center overflow-hidden flex-shrink-0">
                     {editForm.imageUrl
                       ? <img src={editForm.imageUrl} alt="preview" className="w-full h-full object-contain p-1" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
                       : <Image className="h-6 w-6 text-slate-700" />}
@@ -256,10 +256,10 @@ export default function AdminProducts() {
               <div>
                 <Label className="text-slate-300 text-sm mb-1.5 block">Category</Label>
                 <Select value={editForm.categoryId || "none"} onValueChange={v => setEditForm((f: any) => ({ ...f, categoryId: v === "none" ? "" : v }))}>
-                  <SelectTrigger className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10">
+                  <SelectTrigger className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#0F172A] border-white/10 text-white max-h-48">
+                  <SelectContent className="bg-[#0A2540] border-[#0F3D5E] text-white max-h-48">
                     <SelectItem value="none">Uncategorized</SelectItem>
                     {categories.map((c: any) => (
                       <SelectItem key={c.id} value={String(c.id)}>{c.parentId ? "  └ " : ""}{c.name}</SelectItem>
@@ -269,15 +269,15 @@ export default function AdminProducts() {
               </div>
               <div>
                 <Label className="text-slate-300 text-sm mb-1.5 block">Markup % (applied to supplier price)</Label>
-                <Input type="number" value={editForm.markupPercent} onChange={e => setEditForm((f: any) => ({ ...f, markupPercent: Number(e.target.value) }))} className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
+                <Input type="number" value={editForm.markupPercent} onChange={e => setEditForm((f: any) => ({ ...f, markupPercent: Number(e.target.value) }))} className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
               </div>
               <div>
                 <Label className="text-slate-300 text-sm mb-1.5 block">Delivery Note</Label>
-                <Input value={editForm.deliveryNote} onChange={e => setEditForm((f: any) => ({ ...f, deliveryNote: e.target.value }))} placeholder="e.g. Delivered within 5 minutes" className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
+                <Input value={editForm.deliveryNote} onChange={e => setEditForm((f: any) => ({ ...f, deliveryNote: e.target.value }))} placeholder="e.g. Delivered within 5 minutes" className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
               </div>
               <div>
                 <Label className="text-slate-300 text-sm mb-1.5 block">Refund Policy</Label>
-                <Input value={editForm.refundPolicy} onChange={e => setEditForm((f: any) => ({ ...f, refundPolicy: e.target.value }))} placeholder="e.g. No refunds on digital goods" className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
+                <Input value={editForm.refundPolicy} onChange={e => setEditForm((f: any) => ({ ...f, refundPolicy: e.target.value }))} placeholder="e.g. No refunds on digital goods" className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
               </div>
               <div className="flex items-center justify-between py-1">
                 <div className="text-sm text-white">Visible to customers</div>
@@ -287,7 +287,7 @@ export default function AdminProducts() {
                 <div className="text-sm text-white">Featured product</div>
                 <Switch checked={editForm.isFeatured} onCheckedChange={v => setEditForm((f: any) => ({ ...f, isFeatured: v }))} />
               </div>
-              <Button className="w-full bg-[#00B9E9] hover:bg-[#00a8d4] text-white" onClick={handleUpdate} disabled={updateProduct.isPending}>
+              <Button className="w-full bg-[#00C2FF] hover:bg-[#00a8d4] text-white" onClick={handleUpdate} disabled={updateProduct.isPending}>
                 {updateProduct.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />} Save Changes
               </Button>
             </div>
@@ -297,35 +297,35 @@ export default function AdminProducts() {
 
       {/* Add Product Dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent className="bg-[#0F172A] border-white/10 text-white max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-[#0A2540] border-[#0F3D5E] text-white max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white">Add Product</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-2">
             <div>
               <Label className="text-slate-300 text-sm mb-1.5 block">Title *</Label>
-              <Input value={addForm.title} onChange={e => setAddForm(f => ({ ...f, title: e.target.value, slug: e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 80) }))} placeholder="Product title" className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
+              <Input value={addForm.title} onChange={e => setAddForm(f => ({ ...f, title: e.target.value, slug: e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 80) }))} placeholder="Product title" className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
             </div>
             <div>
               <Label className="text-slate-300 text-sm mb-1.5 block">Slug *</Label>
-              <Input value={addForm.slug} onChange={e => setAddForm(f => ({ ...f, slug: e.target.value }))} placeholder="product-slug" className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
+              <Input value={addForm.slug} onChange={e => setAddForm(f => ({ ...f, slug: e.target.value }))} placeholder="product-slug" className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
             </div>
             <div>
               <Label className="text-slate-300 text-sm mb-1.5 block">Description</Label>
-              <Textarea value={addForm.description} onChange={e => setAddForm(f => ({ ...f, description: e.target.value }))} rows={3} placeholder="Product description..." className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] resize-none" />
+              <Textarea value={addForm.description} onChange={e => setAddForm(f => ({ ...f, description: e.target.value }))} rows={3} placeholder="Product description..." className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] resize-none" />
             </div>
             <div>
               <Label className="text-slate-300 text-sm mb-1.5 block">Product Icon / Logo</Label>
               <div className="flex gap-2 items-start">
                 <div className="flex-1 space-y-2">
-                  <Input value={addForm.imageUrl} onChange={e => setAddForm(f => ({ ...f, imageUrl: e.target.value }))} placeholder="Paste URL or upload file below" className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
-                  <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-white/20 hover:border-[#00B9E9]/50 cursor-pointer transition-colors bg-[#0B0F19] text-xs text-slate-400 hover:text-[#00B9E9]">
+                  <Input value={addForm.imageUrl} onChange={e => setAddForm(f => ({ ...f, imageUrl: e.target.value }))} placeholder="Paste URL or upload file below" className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
+                  <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-white/20 hover:border-[#00C2FF]/50 cursor-pointer transition-colors bg-[#061A2B] text-xs text-slate-400 hover:text-[#00C2FF]">
                     {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
                     {uploading ? "Uploading..." : "Upload image file (PNG, JPG, SVG, max 5MB)"}
                     <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(f, url => setAddForm(fm => ({ ...fm, imageUrl: url }))); }} />
                   </label>
                 </div>
-                <div className="w-16 h-16 rounded-xl bg-[#0B0F19] border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                <div className="w-16 h-16 rounded-xl bg-[#061A2B] border border-[#0F3D5E] flex items-center justify-center overflow-hidden flex-shrink-0">
                   {addForm.imageUrl
                     ? <img src={addForm.imageUrl} alt="preview" className="w-full h-full object-contain p-1" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
                     : <Image className="h-6 w-6 text-slate-700" />}
@@ -335,10 +335,10 @@ export default function AdminProducts() {
             <div>
               <Label className="text-slate-300 text-sm mb-1.5 block">Category</Label>
               <Select value={addForm.categoryId || "none"} onValueChange={v => setAddForm(f => ({ ...f, categoryId: v === "none" ? "" : v }))}>
-                <SelectTrigger className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10">
+                <SelectTrigger className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#0F172A] border-white/10 text-white max-h-48">
+                <SelectContent className="bg-[#0A2540] border-[#0F3D5E] text-white max-h-48">
                   <SelectItem value="none">Uncategorized</SelectItem>
                   {categories.map((c: any) => (
                     <SelectItem key={c.id} value={String(c.id)}>{c.parentId ? "  └ " : ""}{c.name}</SelectItem>
@@ -349,20 +349,20 @@ export default function AdminProducts() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-slate-300 text-sm mb-1.5 block">Supplier Price (USD) *</Label>
-                <Input type="number" step="0.01" value={addForm.supplierPrice} onChange={e => setAddForm(f => ({ ...f, supplierPrice: e.target.value }))} placeholder="0.00" className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
+                <Input type="number" step="0.01" value={addForm.supplierPrice} onChange={e => setAddForm(f => ({ ...f, supplierPrice: e.target.value }))} placeholder="0.00" className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
               </div>
               <div>
                 <Label className="text-slate-300 text-sm mb-1.5 block">Markup %</Label>
-                <Input type="number" value={addForm.markupPercent} onChange={e => setAddForm(f => ({ ...f, markupPercent: e.target.value }))} className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
+                <Input type="number" value={addForm.markupPercent} onChange={e => setAddForm(f => ({ ...f, markupPercent: e.target.value }))} className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
               </div>
             </div>
             {addForm.supplierPrice && (
-              <p className="text-xs text-[#22C55E]">Customer price: ${(Number(addForm.supplierPrice) * (1 + Number(addForm.markupPercent) / 100)).toFixed(2)}</p>
+              <p className="text-xs text-[#00C2FF]">Customer price: ${(Number(addForm.supplierPrice) * (1 + Number(addForm.markupPercent) / 100)).toFixed(2)}</p>
             )}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-slate-300 text-sm mb-1.5 block">Stock Quantity</Label>
-                <Input type="number" value={addForm.stockQuantity} onChange={e => setAddForm(f => ({ ...f, stockQuantity: e.target.value }))} disabled={addForm.stockUnlimited} className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10 disabled:opacity-50" />
+                <Input type="number" value={addForm.stockQuantity} onChange={e => setAddForm(f => ({ ...f, stockQuantity: e.target.value }))} disabled={addForm.stockUnlimited} className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10 disabled:opacity-50" />
               </div>
               <div className="flex items-end pb-1">
                 <div className="flex items-center justify-between w-full">
@@ -373,7 +373,7 @@ export default function AdminProducts() {
             </div>
             <div>
               <Label className="text-slate-300 text-sm mb-1.5 block">Delivery Note</Label>
-              <Input value={addForm.deliveryNote} onChange={e => setAddForm(f => ({ ...f, deliveryNote: e.target.value }))} placeholder="e.g. Delivered within 5 minutes" className="bg-[#0B0F19] border-white/10 text-white focus:border-[#00B9E9] h-10" />
+              <Input value={addForm.deliveryNote} onChange={e => setAddForm(f => ({ ...f, deliveryNote: e.target.value }))} placeholder="e.g. Delivered within 5 minutes" className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
             </div>
             <div className="flex items-center justify-between py-1">
               <div className="text-sm text-white">Visible to customers</div>
@@ -383,7 +383,7 @@ export default function AdminProducts() {
               <div className="text-sm text-white">Featured product</div>
               <Switch checked={addForm.isFeatured} onCheckedChange={v => setAddForm(f => ({ ...f, isFeatured: v }))} />
             </div>
-            <Button className="w-full bg-[#00B9E9] hover:bg-[#00a8d4] text-white" onClick={handleAdd} disabled={addProduct.isPending}>
+            <Button className="w-full bg-[#00C2FF] hover:bg-[#00a8d4] text-white" onClick={handleAdd} disabled={addProduct.isPending}>
               {addProduct.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />} Add Product
             </Button>
           </div>

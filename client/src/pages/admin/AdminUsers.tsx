@@ -13,9 +13,9 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
   const d = data as any;
 
   const statusColor: Record<string, string> = {
-    fulfilled: "bg-[#22C55E]/10 text-[#22C55E]",
+    fulfilled: "bg-[#00C2FF]/10 text-[#00C2FF]",
     pending_payment: "bg-yellow-500/10 text-yellow-400",
-    processing: "bg-[#00B9E9]/10 text-[#00B9E9]",
+    processing: "bg-[#00C2FF]/10 text-[#00C2FF]",
     failed: "bg-red-500/10 text-red-400",
     refunded: "bg-purple-500/10 text-purple-400",
     cancelled: "bg-slate-500/10 text-slate-400",
@@ -23,15 +23,15 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-end bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div className="h-full w-full max-w-2xl bg-[#0B0F19] border-l border-white/10 overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+      <div className="h-full w-full max-w-2xl bg-[#061A2B] border-l border-[#0F3D5E] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
         {/* Header */}
-        <div className="sticky top-0 bg-[#0B0F19] border-b border-white/10 p-5 flex items-center justify-between z-10">
+        <div className="sticky top-0 bg-[#061A2B] border-b border-[#0F3D5E] p-5 flex items-center justify-between z-10">
           <h2 className="text-lg font-bold text-white">User Details</h2>
           <Button variant="ghost" size="icon" onClick={onClose} className="text-slate-400 hover:text-white"><X className="h-4 w-4" /></Button>
         </div>
 
         {isLoading ? (
-          <div className="p-6 space-y-4">{[...Array(4)].map((_, i) => <div key={i} className="h-24 rounded-xl bg-white/5 animate-pulse" />)}</div>
+          <div className="p-6 space-y-4">{[...Array(4)].map((_, i) => <div key={i} className="h-24 rounded-xl bg-[#0F3D5E]/30 animate-pulse" />)}</div>
         ) : !d ? (
           <div className="p-6 text-slate-500">User not found.</div>
         ) : (
@@ -39,30 +39,30 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
             {/* Profile */}
             <div className="glass-card rounded-xl p-5">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#00B9E9] to-[#22C55E] flex items-center justify-center text-xl font-bold text-white shrink-0">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#00C2FF] to-[#00C2FF] flex items-center justify-center text-xl font-bold text-white shrink-0">
                   {(d.user.name ?? d.user.email ?? "U")[0].toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-lg font-bold text-white truncate">{d.user.name ?? "No name"}</div>
                   <div className="text-sm text-slate-400 truncate">{d.user.email ?? "No email"}</div>
                   <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                    <Badge className={d.user.role === "admin" ? "bg-[#00B9E9]/10 text-[#00B9E9] border-0 text-xs" : "bg-slate-500/10 text-slate-400 border-0 text-xs"}>{d.user.role}</Badge>
-                    <Badge className={d.user.isSuspended ? "bg-red-500/10 text-red-400 border-0 text-xs" : "bg-[#22C55E]/10 text-[#22C55E] border-0 text-xs"}>{d.user.isSuspended ? "Suspended" : "Active"}</Badge>
+                    <Badge className={d.user.role === "admin" ? "bg-[#00C2FF]/10 text-[#00C2FF] border-0 text-xs" : "bg-slate-500/10 text-slate-400 border-0 text-xs"}>{d.user.role}</Badge>
+                    <Badge className={d.user.isSuspended ? "bg-red-500/10 text-red-400 border-0 text-xs" : "bg-[#00C2FF]/10 text-[#00C2FF] border-0 text-xs"}>{d.user.isSuspended ? "Suspended" : "Active"}</Badge>
                     <span className="text-xs text-slate-500">Joined {new Date(d.user.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-3 mt-4">
-                <div className="bg-white/5 rounded-lg p-3 text-center">
+                <div className="bg-[#0F3D5E]/30 rounded-lg p-3 text-center">
                   <div className="text-lg font-bold text-white">{d.orders.length}</div>
                   <div className="text-xs text-slate-500">Orders</div>
                 </div>
-                <div className="bg-white/5 rounded-lg p-3 text-center">
+                <div className="bg-[#0F3D5E]/30 rounded-lg p-3 text-center">
                   <div className="text-lg font-bold text-white">{d.tickets.length}</div>
                   <div className="text-xs text-slate-500">Tickets</div>
                 </div>
-                <div className="bg-white/5 rounded-lg p-3 text-center">
-                  <div className="text-lg font-bold text-[#22C55E]">${Number(d.wallet?.balanceUSD ?? 0).toFixed(2)}</div>
+                <div className="bg-[#0F3D5E]/30 rounded-lg p-3 text-center">
+                  <div className="text-lg font-bold text-[#00C2FF]">${Number(d.wallet?.balanceUSD ?? 0).toFixed(2)}</div>
                   <div className="text-xs text-slate-500">Wallet</div>
                 </div>
               </div>
@@ -71,7 +71,7 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
             {/* Orders */}
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Package className="h-4 w-4 text-[#00B9E9]" />
+                <Package className="h-4 w-4 text-[#00C2FF]" />
                 <h3 className="text-sm font-bold text-white">Orders ({d.orders.length})</h3>
               </div>
               {d.orders.length === 0 ? (
@@ -100,7 +100,7 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
             {/* Wallet Transactions */}
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Wallet className="h-4 w-4 text-[#22C55E]" />
+                <Wallet className="h-4 w-4 text-[#00C2FF]" />
                 <h3 className="text-sm font-bold text-white">Wallet Transactions ({d.walletTransactions.length})</h3>
               </div>
               {d.walletTransactions.length === 0 ? (
@@ -110,13 +110,13 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
                   {d.walletTransactions.map((txn: any) => (
                     <div key={txn.id} className="glass-card rounded-lg p-3 flex items-center gap-3">
                       <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: txn.type === "deposit" || txn.type === "refund" ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)" }}>
-                        <DollarSign className="h-3 w-3" style={{ color: txn.type === "deposit" || txn.type === "refund" ? "#22C55E" : "#ef4444" }} />
+                        <DollarSign className="h-3 w-3" style={{ color: txn.type === "deposit" || txn.type === "refund" ? "#00C2FF" : "#ef4444" }} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-xs text-white truncate">{txn.description}</div>
                         <div className="text-xs text-slate-500">{new Date(txn.createdAt).toLocaleString()}</div>
                       </div>
-                      <div className={`text-sm font-bold shrink-0 ${txn.type === "deposit" || txn.type === "refund" ? "text-[#22C55E]" : "text-red-400"}`}>
+                      <div className={`text-sm font-bold shrink-0 ${txn.type === "deposit" || txn.type === "refund" ? "text-[#00C2FF]" : "text-red-400"}`}>
                         {txn.type === "deposit" || txn.type === "refund" ? "+" : "-"}${Number(txn.amountUSD).toFixed(2)}
                       </div>
                     </div>
@@ -142,8 +142,8 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
                         <div className="text-xs text-slate-500 mt-0.5">{new Date(ticket.createdAt).toLocaleString()}</div>
                       </div>
                       <Badge className={
-                        ticket.status === "open" ? "bg-[#00B9E9]/10 text-[#00B9E9] border-0 text-xs" :
-                        ticket.status === "resolved" ? "bg-[#22C55E]/10 text-[#22C55E] border-0 text-xs" :
+                        ticket.status === "open" ? "bg-[#00C2FF]/10 text-[#00C2FF] border-0 text-xs" :
+                        ticket.status === "resolved" ? "bg-[#00C2FF]/10 text-[#00C2FF] border-0 text-xs" :
                         "bg-slate-500/10 text-slate-400 border-0 text-xs"
                       }>{ticket.status}</Badge>
                     </div>
@@ -194,7 +194,7 @@ export default function AdminUsers() {
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
             placeholder="Search users..."
-            className="pl-9 bg-[#0F172A] border-white/10 text-white placeholder:text-slate-600 focus:border-[#00B9E9] h-9"
+            className="pl-9 bg-[#0A2540] border-[#0F3D5E] text-white placeholder:text-slate-600 focus:border-[#00C2FF] h-9"
           />
         </div>
       </div>
@@ -212,7 +212,7 @@ export default function AdminUsers() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-slate-500 text-xs uppercase">
+                <tr className="border-b border-[#0F3D5E] text-slate-500 text-xs uppercase">
                   <th className="text-left p-4">User</th>
                   <th className="text-left p-4">Email</th>
                   <th className="text-center p-4">Role</th>
@@ -230,7 +230,7 @@ export default function AdminUsers() {
                   >
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00B9E9] to-[#22C55E] flex items-center justify-center text-xs font-bold text-white shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00C2FF] to-[#00C2FF] flex items-center justify-center text-xs font-bold text-white shrink-0">
                           {(u.name ?? u.email ?? "U")[0].toUpperCase()}
                         </div>
                         <span className="text-white font-medium">{u.name ?? "No name"}</span>
@@ -239,10 +239,10 @@ export default function AdminUsers() {
                     </td>
                     <td className="p-4 text-slate-300">{u.email ?? "—"}</td>
                     <td className="p-4 text-center">
-                      <Badge className={u.role === "admin" ? "bg-[#00B9E9]/10 text-[#00B9E9] border-0 text-xs" : "bg-slate-500/10 text-slate-400 border-0 text-xs"}>{u.role}</Badge>
+                      <Badge className={u.role === "admin" ? "bg-[#00C2FF]/10 text-[#00C2FF] border-0 text-xs" : "bg-slate-500/10 text-slate-400 border-0 text-xs"}>{u.role}</Badge>
                     </td>
                     <td className="p-4 text-center">
-                      <Badge className={u.isSuspended ? "bg-red-500/10 text-red-400 border-0 text-xs" : "bg-[#22C55E]/10 text-[#22C55E] border-0 text-xs"}>
+                      <Badge className={u.isSuspended ? "bg-red-500/10 text-red-400 border-0 text-xs" : "bg-[#00C2FF]/10 text-[#00C2FF] border-0 text-xs"}>
                         {u.isSuspended ? "Suspended" : "Active"}
                       </Badge>
                     </td>
@@ -251,7 +251,7 @@ export default function AdminUsers() {
                       {u.isSuspended ? (
                         <button
                           onClick={() => reactivate.mutate({ userId: u.id })}
-                          className="px-2 py-1 rounded bg-[#22C55E]/10 text-[#22C55E] hover:bg-[#22C55E]/20 text-xs transition-colors flex items-center gap-1 mx-auto"
+                          className="px-2 py-1 rounded bg-[#00C2FF]/10 text-[#00C2FF] hover:bg-[#00C2FF]/20 text-xs transition-colors flex items-center gap-1 mx-auto"
                         >
                           <UserCheck className="h-3 w-3" /> Reactivate
                         </button>

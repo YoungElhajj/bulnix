@@ -36,21 +36,21 @@ export default function Checkout() {
   const validateCoupon = trpc.cart.validateCoupon.useMutation();
 
   if (!isAuthenticated) return (
-    <div className="min-h-screen bg-[#0B0F19] text-white flex items-center justify-center">
+    <div className="min-h-screen bg-[#061A2B] text-white flex items-center justify-center">
       <div className="text-center">
-        <Lock className="h-12 w-12 text-[#00B9E9] mx-auto mb-4"/>
+        <Lock className="h-12 w-12 text-[#00C2FF] mx-auto mb-4"/>
         <h2 className="text-2xl font-bold mb-2">Sign in to Checkout</h2>
         <p className="text-slate-400 mb-6">You need an account to complete your purchase</p>
-        <Button className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white" onClick={() => { window.location.href = '/login'; }}>Sign In</Button>
+        <Button className="bg-[#00C2FF] hover:bg-[#00a8d4] text-white" onClick={() => { window.location.href = '/login'; }}>Sign In</Button>
       </div>
     </div>
   );
 
   if (items.length === 0) return (
-    <div className="min-h-screen bg-[#0B0F19] text-white flex items-center justify-center">
+    <div className="min-h-screen bg-[#061A2B] text-white flex items-center justify-center">
       <div className="text-center">
         <h2 className="text-2xl font-bold mb-4">Your cart is empty</h2>
-        <Link href="/products"><Button className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white">Browse Products</Button></Link>
+        <Link href="/products"><Button className="bg-[#00C2FF] hover:bg-[#00a8d4] text-white">Browse Products</Button></Link>
       </div>
     </div>
   );
@@ -88,18 +88,18 @@ export default function Checkout() {
   };
 
   if (step === "success") return (
-    <div className="min-h-screen bg-[#0B0F19] text-white flex items-center justify-center">
+    <div className="min-h-screen bg-[#061A2B] text-white flex items-center justify-center">
       <div className="text-center max-w-md">
-        <CheckCircle className="h-16 w-16 text-[#22C55E] mx-auto mb-4"/>
+        <CheckCircle className="h-16 w-16 text-[#00C2FF] mx-auto mb-4"/>
         <h2 className="text-2xl font-bold mb-2">Order Placed!</h2>
         <p className="text-slate-400 mb-6">Your order #{orderId} has been created. You will receive delivery details once payment is confirmed.</p>
-        <Link href="/orders"><Button className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white">View My Orders</Button></Link>
+        <Link href="/orders"><Button className="bg-[#00C2FF] hover:bg-[#00a8d4] text-white">View My Orders</Button></Link>
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-white"><Navbar/>
+    <div className="min-h-screen bg-[#061A2B] text-white"><Navbar/>
       <div className="pt-24 pb-8 border-b border-white/5">
         <div className="container"><h1 className="text-3xl font-bold text-white">Checkout</h1></div>
       </div>
@@ -112,11 +112,11 @@ export default function Checkout() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-slate-300 text-sm mb-1.5 block">Email Address *</Label>
-                  <Input value={email} onChange={e=>setEmail(e.target.value)} placeholder="your@email.com" className="bg-[#0F172A] border-white/10 text-white placeholder:text-slate-600 focus:border-[#00B9E9] h-10"/>
+                  <Input value={email} onChange={e=>setEmail(e.target.value)} placeholder="your@email.com" className="bg-[#0A2540] border-[#0F3D5E] text-white placeholder:text-slate-600 focus:border-[#00C2FF] h-10"/>
                 </div>
                 <div>
                   <Label className="text-slate-300 text-sm mb-1.5 block">Country</Label>
-                  <Input value={country} onChange={e=>setCountry(e.target.value)} placeholder="e.g. Nigeria" className="bg-[#0F172A] border-white/10 text-white placeholder:text-slate-600 focus:border-[#00B9E9] h-10"/>
+                  <Input value={country} onChange={e=>setCountry(e.target.value)} placeholder="e.g. Nigeria" className="bg-[#0A2540] border-[#0F3D5E] text-white placeholder:text-slate-600 focus:border-[#00C2FF] h-10"/>
                 </div>
               </div>
             </div>
@@ -126,7 +126,7 @@ export default function Checkout() {
               <h3 className="text-lg font-bold text-white mb-4">Currency</h3>
               <div className="grid grid-cols-4 gap-3">
                 {(["USD","NGN","EUR","GBP"] as const).map(c => (
-                  <button key={c} onClick={()=>setCurrency(c)} className={"rounded-lg p-3 border text-sm font-semibold transition-all " + (currency===c ? "border-[#00B9E9] bg-[#00B9E9]/10 text-[#00B9E9]" : "border-white/10 text-slate-400 hover:border-white/20")}>
+                  <button key={c} onClick={()=>setCurrency(c)} className={"rounded-lg p-3 border text-sm font-semibold transition-all " + (currency===c ? "border-[#00C2FF] bg-[#00C2FF]/10 text-[#00C2FF]" : "border-[#0F3D5E] text-slate-400 hover:border-white/20")}>
                     {c}
                   </button>
                 ))}
@@ -138,7 +138,7 @@ export default function Checkout() {
               <h3 className="text-lg font-bold text-white mb-4">Payment Method</h3>
               <div className="space-y-3">
                 {GATEWAYS.map(gw => (
-                  <button key={gw.id} onClick={()=>setGateway(gw.id)} className={"w-full flex items-center gap-4 p-4 rounded-xl border transition-all " + (gateway===gw.id ? "border-[#00B9E9] bg-[#00B9E9]/5" : "border-white/10 hover:border-white/20")}>
+                  <button key={gw.id} onClick={()=>setGateway(gw.id)} className={"w-full flex items-center gap-4 p-4 rounded-xl border transition-all " + (gateway===gw.id ? "border-[#00C2FF] bg-[#00C2FF]/5" : "border-[#0F3D5E] hover:border-white/20")}>
                     <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{background:gw.color+"20"}}>
                       <gw.icon className="h-5 w-5" style={{color:gw.color}}/>
                     </div>
@@ -146,8 +146,8 @@ export default function Checkout() {
                       <div className="font-semibold text-white text-sm">{gw.name}</div>
                       <div className="text-xs text-slate-500">{gw.desc}</div>
                     </div>
-                    <div className={"w-4 h-4 rounded-full border-2 flex items-center justify-center " + (gateway===gw.id ? "border-[#00B9E9]" : "border-slate-600")}>
-                      {gateway===gw.id && <div className="w-2 h-2 rounded-full bg-[#00B9E9]"/>}
+                    <div className={"w-4 h-4 rounded-full border-2 flex items-center justify-center " + (gateway===gw.id ? "border-[#00C2FF]" : "border-slate-600")}>
+                      {gateway===gw.id && <div className="w-2 h-2 rounded-full bg-[#00C2FF]"/>}
                     </div>
                   </button>
                 ))}
@@ -159,8 +159,8 @@ export default function Checkout() {
             <div className="glass-card rounded-xl p-6">
               <h3 className="text-lg font-bold text-white mb-4">Coupon Code</h3>
               <div className="flex gap-3">
-                <Input value={coupon} onChange={e=>setCoupon(e.target.value.toUpperCase())} placeholder="Enter coupon code" className="bg-[#0F172A] border-white/10 text-white placeholder:text-slate-600 focus:border-[#00B9E9] h-10 flex-1"/>
-                <Button variant="outline" className="border-white/10 text-slate-300 hover:text-white hover:bg-white/5 h-10">Apply</Button>
+                <Input value={coupon} onChange={e=>setCoupon(e.target.value.toUpperCase())} placeholder="Enter coupon code" className="bg-[#0A2540] border-[#0F3D5E] text-white placeholder:text-slate-600 focus:border-[#00C2FF] h-10 flex-1"/>
+                <Button variant="outline" className="border-[#0F3D5E] text-slate-300 hover:text-white hover:bg-[#0F3D5E]/30 h-10">Apply</Button>
               </div>
             </div>
           </div>
@@ -176,13 +176,13 @@ export default function Checkout() {
                 </div>
               ))}
             </div>
-            <div className="border-t border-white/10 pt-4 mb-6">
+            <div className="border-t border-[#0F3D5E] pt-4 mb-6">
               <div className="flex justify-between text-lg font-bold">
                 <span className="text-white">Total</span>
-                <span className="text-[#22C55E]">${subtotalUSD.toFixed(2)} {currency}</span>
+                <span className="text-[#00C2FF]">${subtotalUSD.toFixed(2)} {currency}</span>
               </div>
             </div>
-            <Button className="w-full h-12 bg-[#00B9E9] hover:bg-[#00a8d4] text-white font-semibold" onClick={handlePlaceOrder} disabled={loading} style={{boxShadow:"0 0 20px rgba(0,185,233,0.3)"}}>
+            <Button className="w-full h-12 bg-[#00C2FF] hover:bg-[#00a8d4] text-white font-semibold" onClick={handlePlaceOrder} disabled={loading} style={{boxShadow:"0 0 20px rgba(0,194,255,0.3)"}}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2"/> : <Lock className="h-4 w-4 mr-2"/>}
               Place Order
             </Button>

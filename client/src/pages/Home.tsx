@@ -7,12 +7,12 @@ import Footer from "@/components/Footer";
 import { trpc } from "@/lib/trpc";
 
 const HERO_CATEGORIES = [
-  { name: "Social Media", icon: "📱", count: "500+", color: "#00B9E9" },
-  { name: "Streaming", icon: "🎬", count: "200+", color: "#22C55E" },
-  { name: "Gaming", icon: "🎮", count: "300+", color: "#a855f7" },
-  { name: "Email Accounts", icon: "📧", count: "150+", color: "#f59e0b" },
-  { name: "VPN & Proxy", icon: "🔒", count: "100+", color: "#ef4444" },
-  { name: "Software Keys", icon: "🔑", count: "250+", color: "#06b6d4" },
+  { name: "Social Media", icon: "📱", count: "500+", color: "#00C2FF" },
+  { name: "Streaming", icon: "🎬", count: "200+", color: "#0319CB" },
+  { name: "Gaming", icon: "🎮", count: "300+", color: "#00C2FF" },
+  { name: "Email Accounts", icon: "📧", count: "150+", color: "#0F3D5E" },
+  { name: "VPN & Proxy", icon: "🔒", count: "100+", color: "#0319CB" },
+  { name: "Software Keys", icon: "🔑", count: "250+", color: "#00C2FF" },
 ];
 
 const HOW_IT_WORKS = [
@@ -32,7 +32,7 @@ const PAYMENT_METHODS = [
   { name: "Paystack", desc: "Cards & Bank Transfer", region: "Nigeria / Africa", color: "#00C3F7" },
   { name: "Monnify", desc: "Bank Transfer & USSD", region: "Nigeria", color: "#0066CC" },
   { name: "Crypto", desc: "BTC, ETH, USDT & more", region: "Global", color: "#F7931A" },
-  { name: "Card", desc: "Visa, Mastercard", region: "Global", color: "#22C55E" },
+  { name: "Card", desc: "Visa, Mastercard", region: "Global", color: "#00C2FF" },
 ];
 
 const FAQ_ITEMS = [
@@ -54,18 +54,18 @@ export default function Home() {
   const SOCIAL_SLUGS = ["facebook-accounts", "instagram-accounts", "tiktok-accounts-followers", "whatsapp-accounts", "youtube-accounts-channels", "twitter-x-accounts", "telegram-accounts", "snapchat-accounts", "linkedin-accounts", "google-voice-accounts", "gmail-accounts", "discord-accounts"];
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-white">
+    <div className="min-h-screen bg-[#061A2B] text-white">
       <Navbar />
 
       {/* ── Hero ────────────────────────────────────────────────────────────── */}
       <section className="relative pt-24 pb-20 overflow-hidden bg-gradient-hero">
         {/* Background glow orbs */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-[#00B9E9]/8 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#22C55E]/5 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-[#00C2FF]/8 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#0319CB]/10 rounded-full blur-[100px] pointer-events-none" />
 
         <div className="container relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <Badge className="mb-6 bg-[#00B9E9]/10 text-[#00B9E9] border border-[#00B9E9]/20 px-4 py-1.5 text-sm font-medium">
+            <Badge className="mb-6 bg-[#00C2FF]/10 text-[#00C2FF] border border-[#00C2FF]/25 px-4 py-1.5 text-sm font-medium">
               <Zap className="h-3.5 w-3.5 mr-1.5" />
               The Central Hub for Bulk Digital Supply
             </Badge>
@@ -82,13 +82,13 @@ export default function Home() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
               <Link href="/products">
-                <Button size="lg" className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white font-semibold px-8 h-12 text-base" style={{ boxShadow: "0 0 24px rgba(0,185,233,0.35)" }}>
+                <Button size="lg" className="bg-[#00C2FF] hover:bg-[#00aee0] text-[#061A2B] font-bold px-8 h-12 text-base" style={{ boxShadow: "0 0 28px rgba(0,194,255,0.40)" }}>
                   Browse Products
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link href="/signup">
-                <Button size="lg" variant="outline" className="border-white/15 text-slate-300 hover:text-white hover:bg-white/5 px-8 h-12 text-base">
+                <Button size="lg" variant="outline" className="border-[#0F3D5E] text-slate-300 hover:text-white hover:bg-[#0F3D5E]/40 px-8 h-12 text-base">
                   Create Free Account
                 </Button>
               </Link>
@@ -98,7 +98,7 @@ export default function Home() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {TRUST_STATS.map(stat => (
                 <div key={stat.label} className="glass-card rounded-xl p-4 text-center">
-                  <stat.icon className="h-5 w-5 text-[#00B9E9] mx-auto mb-2" />
+                  <stat.icon className="h-5 w-5 text-[#00C2FF] mx-auto mb-2" />
                   <div className="text-2xl font-bold text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{stat.value}</div>
                   <div className="text-xs text-slate-500 mt-0.5">{stat.label}</div>
                 </div>
@@ -117,7 +117,7 @@ export default function Home() {
               <p className="text-slate-500">Thousands of digital products across every category</p>
             </div>
             <Link href="/categories">
-              <Button variant="ghost" className="text-[#00B9E9] hover:text-[#00B9E9] hover:bg-[#00B9E9]/10 gap-1">
+              <Button variant="ghost" className="text-[#00C2FF] hover:text-[#00C2FF] hover:bg-[#00C2FF]/10 gap-1">
                 View All <ChevronRight className="h-4 w-4" />
               </Button>
             </Link>
@@ -134,15 +134,15 @@ export default function Home() {
               ];
               return sorted.slice(0, 12).map((cat: any, i: number) => (
                 <Link key={i} href={`/categories/${cat.slug}`}>
-                  <div className="glass-card rounded-xl p-5 text-center cursor-pointer group hover:border-[#00B9E9]/30 transition-all duration-200 hover:-translate-y-1">
-                    <div className="w-12 h-12 rounded-xl bg-[#0F172A] border border-white/8 flex items-center justify-center mx-auto mb-3 overflow-hidden">
+                  <div className="glass-card rounded-xl p-5 text-center cursor-pointer group hover:border-[#00C2FF]/40 transition-all duration-200 hover:-translate-y-1">
+                    <div className="w-12 h-12 rounded-xl bg-[#0A2540] border border-[#0F3D5E] flex items-center justify-center mx-auto mb-3 overflow-hidden">
                       {cat.imageUrl ? (
                         <img src={cat.imageUrl} alt={cat.name} className="w-9 h-9 object-contain" />
                       ) : (
                         <span className="text-2xl">📦</span>
                       )}
                     </div>
-                    <div className="text-sm font-semibold text-white group-hover:text-[#00B9E9] transition-colors line-clamp-2">{cat.name}</div>
+                    <div className="text-sm font-semibold text-white group-hover:text-[#00C2FF] transition-colors line-clamp-2">{cat.name}</div>
                     {(cat.productCount ?? 0) > 0 && (
                       <div className="text-xs text-slate-500 mt-1">{cat.productCount} items</div>
                     )}
@@ -155,7 +155,7 @@ export default function Home() {
       </section>
 
       {/* ── Featured Products ────────────────────────────────────────────────── */}
-      <section className="py-20 bg-[#080c14]">
+      <section className="py-20 bg-[#040f1a]">
         <div className="container">
           <div className="flex items-center justify-between mb-10">
             <div>
@@ -163,7 +163,7 @@ export default function Home() {
               <p className="text-slate-500">Hand-picked top sellers with instant delivery</p>
             </div>
             <Link href="/products?featured=true">
-              <Button variant="ghost" className="text-[#00B9E9] hover:text-[#00B9E9] hover:bg-[#00B9E9]/10 gap-1">
+              <Button variant="ghost" className="text-[#00C2FF] hover:text-[#00C2FF] hover:bg-[#00C2FF]/10 gap-1">
                 View All <ChevronRight className="h-4 w-4" />
               </Button>
             </Link>
@@ -174,7 +174,7 @@ export default function Home() {
               {featuredProducts.slice(0, 8).map((product: any) => (
                 <Link key={product.id} href={`/products/${product.slug}`}>
                   <div className="product-card cursor-pointer">
-                    <div className="aspect-[4/3] bg-gradient-to-br from-[#0F172A] to-[#1e293b] flex items-center justify-center">
+                    <div className="aspect-[4/3] bg-gradient-to-br from-[#0A2540] to-[#0F3D5E] flex items-center justify-center">
                       {product.imageUrl ? (
                         <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover" />
                       ) : (
@@ -184,8 +184,8 @@ export default function Home() {
                     <div className="p-4">
                       <h3 className="text-sm font-semibold text-white line-clamp-2 mb-2">{product.title}</h3>
                       <div className="flex items-center justify-between">
-                        <span className="text-[#22C55E] font-bold">${Number(product.customerPriceUSD).toFixed(2)}</span>
-                        <Badge className="bg-[#22C55E]/10 text-[#22C55E] border-[#22C55E]/20 text-xs">
+                        <span className="text-[#00C2FF] font-bold">${Number(product.customerPriceUSD).toFixed(2)}</span>
+                        <Badge className="bg-[#00C2FF]/10 text-[#00C2FF] border-[#00C2FF]/20 text-xs">
                           {product.stockUnlimited ? "In Stock" : `${product.stockQuantity} left`}
                         </Badge>
                       </div>
@@ -198,10 +198,10 @@ export default function Home() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="product-card animate-pulse">
-                  <div className="aspect-[4/3] bg-[#1e293b]" />
+                  <div className="aspect-[4/3] bg-[#0A2540]" />
                   <div className="p-4 space-y-2">
-                    <div className="h-4 bg-[#1e293b] rounded w-3/4" />
-                    <div className="h-4 bg-[#1e293b] rounded w-1/2" />
+                    <div className="h-4 bg-[#0A2540] rounded w-3/4" />
+                    <div className="h-4 bg-[#0A2540] rounded w-1/2" />
                   </div>
                 </div>
               ))}
@@ -220,14 +220,14 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
             {/* Connector line */}
-            <div className="hidden md:block absolute top-12 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-[#00B9E9]/30 to-transparent" />
+            <div className="hidden md:block absolute top-12 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-[#00C2FF]/30 to-transparent" />
 
             {HOW_IT_WORKS.map((step, i) => (
               <div key={i} className="relative text-center">
-                <div className="w-20 h-20 rounded-2xl bg-[#00B9E9]/10 border border-[#00B9E9]/20 flex items-center justify-center mx-auto mb-5" style={{ boxShadow: "0 0 20px rgba(0,185,233,0.1)" }}>
-                  <step.icon className="h-9 w-9 text-[#00B9E9]" />
+                <div className="w-20 h-20 rounded-2xl bg-[#00C2FF]/10 border border-[#00C2FF]/25 flex items-center justify-center mx-auto mb-5" style={{ boxShadow: "0 0 24px rgba(0,194,255,0.12)" }}>
+                  <step.icon className="h-9 w-9 text-[#00C2FF]" />
                 </div>
-                <div className="text-xs font-bold text-[#00B9E9] tracking-widest mb-2">STEP {step.step}</div>
+                <div className="text-xs font-bold text-[#00C2FF] tracking-widest mb-2">STEP {step.step}</div>
                 <h3 className="text-xl font-bold text-white mb-3">{step.title}</h3>
                 <p className="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto">{step.desc}</p>
               </div>
@@ -237,11 +237,11 @@ export default function Home() {
       </section>
 
       {/* ── Value Propositions ───────────────────────────────────────────────── */}
-      <section className="py-20 bg-[#080c14]">
+      <section className="py-20 bg-[#040f1a]">
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <Badge className="mb-5 bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/20 px-3 py-1 text-xs">
+              <Badge className="mb-5 bg-[#00C2FF]/10 text-[#00C2FF] border border-[#00C2FF]/20 px-3 py-1 text-xs">
                 Why Choose Bulnix
               </Badge>
               <h2 className="text-4xl font-bold text-white mb-6 leading-tight">
@@ -259,7 +259,7 @@ export default function Home() {
                   { title: "24/7 Support", desc: "Ticket-based support with fast response times for every order." },
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-[#22C55E] shrink-0 mt-0.5" />
+                    <CheckCircle className="h-5 w-5 text-[#00C2FF] shrink-0 mt-0.5" />
                     <div>
                       <div className="text-sm font-semibold text-white">{item.title}</div>
                       <div className="text-sm text-slate-500">{item.desc}</div>
@@ -269,7 +269,7 @@ export default function Home() {
               </div>
               <div className="mt-8">
                 <Link href="/signup">
-                  <Button className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white font-semibold px-6">
+                  <Button className="bg-[#00C2FF] hover:bg-[#00aee0] text-[#061A2B] font-bold px-6">
                     Start Buying Now <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
@@ -278,10 +278,10 @@ export default function Home() {
 
             <div className="grid grid-cols-2 gap-4">
               {[
-                { icon: Shield, title: "Secure Payments", desc: "All transactions verified via webhook", color: "#00B9E9" },
-                { icon: Zap, title: "Instant Delivery", desc: "Automated fulfillment in seconds", color: "#22C55E" },
-                { icon: Globe, title: "Global Access", desc: "Available in 150+ countries", color: "#a855f7" },
-                { icon: Star, title: "Premium Quality", desc: "Verified accounts, guaranteed", color: "#f59e0b" },
+                { icon: Shield, title: "Secure Payments", desc: "All transactions verified via webhook", color: "#00C2FF" },
+                { icon: Zap, title: "Instant Delivery", desc: "Automated fulfillment in seconds", color: "#0319CB" },
+                { icon: Globe, title: "Global Access", desc: "Available in 150+ countries", color: "#00C2FF" },
+                { icon: Star, title: "Premium Quality", desc: "Verified accounts, guaranteed", color: "#0319CB" },
               ].map((item, i) => (
                 <div key={i} className="glass-card rounded-xl p-5">
                   <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ background: `${item.color}15`, border: `1px solid ${item.color}25` }}>
@@ -328,7 +328,7 @@ export default function Home() {
       </section>
 
       {/* ── FAQ Preview ──────────────────────────────────────────────────────── */}
-      <section className="py-20 bg-[#080c14]">
+      <section className="py-20 bg-[#040f1a]">
         <div className="container">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-12">
@@ -340,7 +340,7 @@ export default function Home() {
               {FAQ_ITEMS.map((item, i) => (
                 <div key={i} className="glass-card rounded-xl p-5">
                   <h4 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-[#00B9E9]/10 border border-[#00B9E9]/20 flex items-center justify-center text-[#00B9E9] text-xs font-bold shrink-0">{i + 1}</span>
+                    <span className="w-5 h-5 rounded-full bg-[#00C2FF]/10 border border-[#00C2FF]/20 flex items-center justify-center text-[#00C2FF] text-xs font-bold shrink-0">{i + 1}</span>
                     {item.q}
                   </h4>
                   <p className="text-sm text-slate-400 pl-7">{item.a}</p>
@@ -350,7 +350,7 @@ export default function Home() {
 
             <div className="text-center mt-8">
               <Link href="/faq">
-                <Button variant="outline" className="border-white/10 text-slate-300 hover:text-white hover:bg-white/5">
+                <Button variant="outline" className="border-[#0F3D5E] text-slate-300 hover:text-white hover:bg-[#0F3D5E]/40">
                   View All FAQs <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
               </Link>
@@ -360,16 +360,16 @@ export default function Home() {
       </section>
 
       {/* ── Become a Supplier ──────────────────────────────────────────────── */}
-      <section className="py-20 bg-[#080c14]">
+      <section className="py-20 bg-[#040f1a]">
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left: Content */}
             <div>
-              <Badge className="mb-4 bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/20 text-xs font-semibold px-3 py-1">
+              <Badge className="mb-4 bg-[#0319CB]/15 text-[#00C2FF] border border-[#0319CB]/30 text-xs font-semibold px-3 py-1">
                 SUPPLIER PROGRAM
               </Badge>
               <h2 className="text-4xl font-bold text-white mb-5 leading-tight">
-                Become a <span className="text-[#00B9E9]">Bulnix</span> Supplier
+                Become a <span className="text-[#00C2FF]">Bulnix</span> Supplier
               </h2>
               <p className="text-slate-400 text-lg mb-8 leading-relaxed">
                 Have digital products to sell? Partner with Bulnix and reach thousands of buyers across Africa and globally. We handle payments, delivery, and customer support so you can focus on supply.
@@ -382,8 +382,8 @@ export default function Home() {
                   { icon: Zap, title: "Easy Integration", desc: "Simple API or dashboard-based product listing and management" },
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-4">
-                    <div className="w-9 h-9 rounded-lg bg-[#00B9E9]/10 border border-[#00B9E9]/20 flex items-center justify-center shrink-0 mt-0.5">
-                      <item.icon className="h-4 w-4 text-[#00B9E9]" />
+                    <div className="w-9 h-9 rounded-lg bg-[#00C2FF]/10 border border-[#00C2FF]/20 flex items-center justify-center shrink-0 mt-0.5">
+                      <item.icon className="h-4 w-4 text-[#00C2FF]" />
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-white">{item.title}</p>
@@ -393,7 +393,7 @@ export default function Home() {
                 ))}
               </div>
               <Link href="/contact">
-                <Button size="lg" className="bg-[#22C55E] hover:bg-[#16a34a] text-white font-semibold px-8 h-12" style={{ boxShadow: "0 0 24px rgba(34,197,94,0.25)" }}>
+                <Button size="lg" className="bg-[#0319CB] hover:bg-[#0215a8] text-white font-bold px-8 h-12" style={{ boxShadow: "0 0 28px rgba(3,25,203,0.40)" }}>
                   Apply to Become a Supplier
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
@@ -406,10 +406,10 @@ export default function Home() {
                 <h3 className="text-lg font-bold text-white mb-6">Why Suppliers Choose Bulnix</h3>
                 <div className="grid grid-cols-2 gap-5 mb-6">
                   {[
-                    { value: "50K+", label: "Active Buyers", color: "#00B9E9" },
-                    { value: "99.9%", label: "Platform Uptime", color: "#22C55E" },
-                    { value: "24h", label: "Onboarding Time", color: "#a855f7" },
-                    { value: "0%", label: "Setup Fee", color: "#f59e0b" },
+                    { value: "50K+", label: "Active Buyers", color: "#00C2FF" },
+                    { value: "99.9%", label: "Platform Uptime", color: "#00C2FF" },
+                    { value: "24h", label: "Onboarding Time", color: "#0319CB" },
+                    { value: "0%", label: "Setup Fee", color: "#0319CB" },
                   ].map((stat, i) => (
                     <div key={i} className="text-center p-4 rounded-xl" style={{ background: `${stat.color}08`, border: `1px solid ${stat.color}15` }}>
                       <p className="text-2xl font-bold mb-1" style={{ color: stat.color }}>{stat.value}</p>
@@ -425,14 +425,14 @@ export default function Home() {
                     "Priority support channel",
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-3">
-                      <CheckCircle className="h-4 w-4 text-[#22C55E] shrink-0" />
+                      <CheckCircle className="h-4 w-4 text-[#00C2FF] shrink-0" />
                       <span className="text-sm text-slate-300">{item}</span>
                     </div>
                   ))}
                 </div>
               </div>
               {/* Decorative glow */}
-              <div className="absolute -bottom-8 -right-8 w-48 h-48 bg-[#22C55E]/8 rounded-full blur-[60px] pointer-events-none" />
+              <div className="absolute -bottom-8 -right-8 w-48 h-48 bg-[#0319CB]/12 rounded-full blur-[60px] pointer-events-none" />
             </div>
           </div>
         </div>
@@ -441,8 +441,8 @@ export default function Home() {
       {/* ── CTA Banner ───────────────────────────────────────────────────────── */}
       <section className="py-20">
         <div className="container">
-          <div className="relative rounded-2xl overflow-hidden p-10 md:p-16 text-center" style={{ background: "linear-gradient(135deg, rgba(0,185,233,0.12) 0%, rgba(34,197,94,0.06) 100%)", border: "1px solid rgba(0,185,233,0.15)" }}>
-            <div className="absolute inset-0 bg-gradient-to-br from-[#00B9E9]/5 to-transparent pointer-events-none" />
+          <div className="relative rounded-2xl overflow-hidden p-10 md:p-16 text-center" style={{ background: "linear-gradient(135deg, rgba(0,194,255,0.12) 0%, rgba(3,25,203,0.10) 100%)", border: "1px solid rgba(0,194,255,0.20)" }}>
+            <div className="absolute inset-0 bg-gradient-to-br from-[#00C2FF]/5 to-[#0319CB]/5 pointer-events-none" />
             <div className="relative z-10">
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
                 Ready to Buy at Scale?
@@ -452,13 +452,13 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href="/signup">
-                  <Button size="lg" className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white font-semibold px-10 h-12" style={{ boxShadow: "0 0 24px rgba(0,185,233,0.35)" }}>
+                  <Button size="lg" className="bg-[#00C2FF] hover:bg-[#00aee0] text-[#061A2B] font-bold px-10 h-12" style={{ boxShadow: "0 0 28px rgba(0,194,255,0.40)" }}>
                     Create Free Account
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
                 <Link href="/products">
-                  <Button size="lg" variant="outline" className="border-white/15 text-slate-300 hover:text-white hover:bg-white/5 px-10 h-12">
+                  <Button size="lg" variant="outline" className="border-[#0F3D5E] text-slate-300 hover:text-white hover:bg-[#0F3D5E]/40 px-10 h-12">
                     Browse Products
                   </Button>
                 </Link>

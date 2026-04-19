@@ -291,3 +291,12 @@
 - [x] Add confirm password validation (must match password, live error feedback)
 - [x] Add terms & conditions checkbox (must be checked to submit)
 - [x] Run tests, save checkpoint
+
+## Full Site Rebrand — New Logo & Colour Palette (Apr 19, 2026)
+- [x] Upload primary logo (white+cyan on navy) and icon to CDN
+- [x] Update VITE_APP_LOGO to new primary logo URL
+- [x] Rewrite global CSS variables: #061A2B bg, #0A2540 card, #0F3D5E border, #00C2FF primary, #0319CB accent
+- [x] Redesign Home page hero, navbar, sections with new dark navy + cyan theme
+- [x] Update Login and Signup pages to use new brand colours
+- [x] Batch-update all remaining customer-facing pages (Products, Categories, Dashboard, Orders, Wallet, Profile, Tickets, Cart, Checkout, About, Contact, etc.)
+- [x] 0 TypeScript errors, 30/30 tests pass, checkpoint saved

@@ -9,7 +9,7 @@ export default function Cart() {
   const { items, removeItem, updateQuantity, subtotalUSD, clearCart } = useCart();
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-white"><Navbar/>
+    <div className="min-h-screen bg-[#061A2B] text-white"><Navbar/>
       <div className="pt-24 pb-8 border-b border-white/5">
         <div className="container"><h1 className="text-3xl font-bold text-white">Shopping Cart</h1><p className="text-slate-500 mt-1">{items.length} item{items.length !== 1 ? "s" : ""}</p></div>
       </div>
@@ -19,24 +19,24 @@ export default function Cart() {
             <ShoppingCart className="h-16 w-16 text-slate-700 mx-auto mb-4"/>
             <h3 className="text-xl font-semibold text-white mb-2">Your cart is empty</h3>
             <p className="text-slate-500 mb-6">Browse our products and add items to your cart</p>
-            <Link href="/products"><Button className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white">Browse Products</Button></Link>
+            <Link href="/products"><Button className="bg-[#00C2FF] hover:bg-[#00a8d4] text-white">Browse Products</Button></Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-4">
               {items.map(item => (
                 <div key={item.id} className="glass-card rounded-xl p-4 flex items-center gap-4">
-                  <div className="w-16 h-16 bg-[#1e293b] rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  <div className="w-16 h-16 bg-[#0A2540] rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {item.imageUrl ? <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover"/> : <Package className="h-8 w-8 text-slate-600"/>}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <Link href={"/products/" + item.slug}><h3 className="text-sm font-semibold text-white hover:text-[#00B9E9] line-clamp-2 transition-colors">{item.title}</h3></Link>
-                    <p className="text-[#22C55E] font-bold mt-1">${item.priceUSD.toFixed(2)} each</p>
+                    <Link href={"/products/" + item.slug}><h3 className="text-sm font-semibold text-white hover:text-[#00C2FF] line-clamp-2 transition-colors">{item.title}</h3></Link>
+                    <p className="text-[#00C2FF] font-bold mt-1">${item.priceUSD.toFixed(2)} each</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white"><Minus className="h-3 w-3"/></button>
+                    <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-7 h-7 rounded-lg bg-[#0F3D5E]/30 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white"><Minus className="h-3 w-3"/></button>
                     <span className="text-white font-semibold w-6 text-center">{item.quantity}</span>
-                    <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white"><Plus className="h-3 w-3"/></button>
+                    <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-7 h-7 rounded-lg bg-[#0F3D5E]/30 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white"><Plus className="h-3 w-3"/></button>
                   </div>
                   <div className="text-right">
                     <p className="text-white font-bold">${(item.priceUSD * item.quantity).toFixed(2)}</p>
@@ -56,15 +56,15 @@ export default function Cart() {
                   </div>
                 ))}
               </div>
-              <div className="border-t border-white/10 pt-4 mb-6">
+              <div className="border-t border-[#0F3D5E] pt-4 mb-6">
                 <div className="flex justify-between text-lg font-bold">
                   <span className="text-white">Total</span>
-                  <span className="text-[#22C55E]">${subtotalUSD.toFixed(2)}</span>
+                  <span className="text-[#00C2FF]">${subtotalUSD.toFixed(2)}</span>
                 </div>
                 <p className="text-xs text-slate-500 mt-1">Prices in USD. Local currency calculated at checkout.</p>
               </div>
               <Link href="/checkout">
-                <Button className="w-full h-12 bg-[#00B9E9] hover:bg-[#00a8d4] text-white font-semibold" style={{boxShadow:"0 0 20px rgba(0,185,233,0.3)"}}>
+                <Button className="w-full h-12 bg-[#00C2FF] hover:bg-[#00a8d4] text-white font-semibold" style={{boxShadow:"0 0 20px rgba(0,194,255,0.3)"}}>
                   Proceed to Checkout <ArrowRight className="ml-2 h-4 w-4"/>
                 </Button>
               </Link>

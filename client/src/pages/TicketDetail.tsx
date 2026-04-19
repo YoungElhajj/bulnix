@@ -21,19 +21,19 @@ export default function TicketDetail() {
     onError: (e) => toast.error(e.message),
   });
 
-  if (isLoading) return <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center"><div className="w-8 h-8 border-2 border-[#00B9E9] border-t-transparent rounded-full animate-spin"/></div>;
+  if (isLoading) return <div className="min-h-screen bg-[#061A2B] flex items-center justify-center"><div className="w-8 h-8 border-2 border-[#00C2FF] border-t-transparent rounded-full animate-spin"/></div>;
   if (!ticket) return (
-    <div className="min-h-screen bg-[#0B0F19] text-white flex items-center justify-center">
-      <div className="text-center"><h2 className="text-xl font-bold mb-2">Ticket not found</h2><Link href="/tickets"><Button className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white mt-3">Back to Tickets</Button></Link></div>
+    <div className="min-h-screen bg-[#061A2B] text-white flex items-center justify-center">
+      <div className="text-center"><h2 className="text-xl font-bold mb-2">Ticket not found</h2><Link href="/tickets"><Button className="bg-[#00C2FF] hover:bg-[#00a8d4] text-white mt-3">Back to Tickets</Button></Link></div>
     </div>
   );
 
   const t = ticket as any;
   const messages = t.messages ?? [];
-  const statusColor = { open: "bg-[#00B9E9]/10 text-[#00B9E9]", in_progress: "bg-yellow-500/10 text-yellow-400", resolved: "bg-[#22C55E]/10 text-[#22C55E]", closed: "bg-slate-500/10 text-slate-400" }[t.status as string] ?? "bg-slate-500/10 text-slate-400";
+  const statusColor = { open: "bg-[#00C2FF]/10 text-[#00C2FF]", in_progress: "bg-yellow-500/10 text-yellow-400", resolved: "bg-[#00C2FF]/10 text-[#00C2FF]", closed: "bg-slate-500/10 text-slate-400" }[t.status as string] ?? "bg-slate-500/10 text-slate-400";
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-white"><Navbar/>
+    <div className="min-h-screen bg-[#061A2B] text-white"><Navbar/>
       <div className="pt-24 pb-8 border-b border-white/5">
         <div className="container">
           <Link href="/tickets"><button className="flex items-center gap-2 text-slate-500 hover:text-white text-sm mb-4 transition-colors"><ArrowLeft className="h-4 w-4"/> Back to Tickets</button></Link>
@@ -45,7 +45,7 @@ export default function TicketDetail() {
         <div className="space-y-4 mb-6">
           {messages.map((msg: any, i: number) => (
             <div key={i} className={"flex gap-3 " + (msg.senderType === "user" ? "justify-end" : "justify-start")}>
-              <div className={"max-w-[80%] rounded-xl p-4 " + (msg.senderType === "user" ? "bg-[#00B9E9]/10 border border-[#00B9E9]/20" : "glass-card")}>
+              <div className={"max-w-[80%] rounded-xl p-4 " + (msg.senderType === "user" ? "bg-[#00C2FF]/10 border border-[#00C2FF]/20" : "glass-card")}>
                 <div className="text-xs text-slate-500 mb-1">{msg.senderType === "user" ? "You" : "Support Team"} · {new Date(msg.createdAt).toLocaleString()}</div>
                 <p className="text-sm text-white leading-relaxed">{msg.message}</p>
               </div>
@@ -57,7 +57,7 @@ export default function TicketDetail() {
           <div className="glass-card rounded-xl p-4">
             <textarea value={reply} onChange={e=>setReply(e.target.value)} rows={3} placeholder="Type your reply..." className="w-full bg-transparent text-white placeholder:text-slate-600 text-sm resize-none outline-none mb-3"/>
             <div className="flex justify-end">
-              <Button size="sm" className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white" onClick={()=>replyMutation.mutate({ticketId:t.id,message:reply})} disabled={!reply.trim() || replyMutation.isPending}>
+              <Button size="sm" className="bg-[#00C2FF] hover:bg-[#00a8d4] text-white" onClick={()=>replyMutation.mutate({ticketId:t.id,message:reply})} disabled={!reply.trim() || replyMutation.isPending}>
                 <Send className="h-3.5 w-3.5 mr-1.5"/> Send Reply
               </Button>
             </div>

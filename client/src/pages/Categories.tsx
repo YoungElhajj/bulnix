@@ -47,9 +47,9 @@ export default function Categories() {
     : sortedTopLevel;
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-white">
+    <div className="min-h-screen bg-[#061A2B] text-white">
       <Navbar />
-      <div className="pt-24 pb-8 bg-gradient-to-b from-[#0F172A] to-[#0B0F19] border-b border-white/5">
+      <div className="pt-24 pb-8 bg-gradient-to-b from-[#0A2540] to-[#061A2B] border-b border-white/5">
         <div className="container">
           <h1 className="text-3xl font-bold text-white mb-1">All Categories</h1>
           <p className="text-slate-500">Browse our full catalog of digital products</p>
@@ -64,7 +64,7 @@ export default function Categories() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search categories..."
-            className="pl-9 bg-[#0F172A] border-white/10 text-white placeholder:text-slate-600 focus:border-[#00B9E9]"
+            className="pl-9 bg-[#0A2540] border-[#0F3D5E] text-white placeholder:text-slate-600 focus:border-[#00C2FF]"
           />
         </div>
 
@@ -87,25 +87,25 @@ export default function Categories() {
               const subCount = allCats.filter((c: any) => c.parentId === cat.id).length;
               return (
                 <Link key={cat.id} href={"/categories/" + cat.slug}>
-                  <div className="glass-card rounded-xl p-6 cursor-pointer group hover:border-[#00B9E9]/30 transition-all duration-200 hover:-translate-y-1">
-                    <div className="w-14 h-14 rounded-xl bg-[#0F172A] border border-white/8 flex items-center justify-center mb-4 group-hover:border-[#00B9E9]/30 transition-colors overflow-hidden">
+                  <div className="glass-card rounded-xl p-6 cursor-pointer group hover:border-[#00C2FF]/30 transition-all duration-200 hover:-translate-y-1">
+                    <div className="w-14 h-14 rounded-xl bg-[#0A2540] border border-white/8 flex items-center justify-center mb-4 group-hover:border-[#00C2FF]/30 transition-colors overflow-hidden">
                       {iconUrl ? (
                         <img src={iconUrl} alt={cat.name} className="w-10 h-10 object-contain" />
                       ) : (
                         <span className="text-3xl">{emoji}</span>
                       )}
                     </div>
-                    <h3 className="font-semibold text-white group-hover:text-[#00B9E9] transition-colors mb-1 line-clamp-2">{cat.name}</h3>
+                    <h3 className="font-semibold text-white group-hover:text-[#00C2FF] transition-colors mb-1 line-clamp-2">{cat.name}</h3>
                     {subCount > 0 && (
                       <p className="text-xs text-slate-500 mb-0.5">{subCount} subcategories</p>
                     )}
                     {(cat.productCount ?? 0) > 0 && (
-                      <p className="text-xs text-[#00B9E9]/70">{cat.productCount} products</p>
+                      <p className="text-xs text-[#00C2FF]/70">{cat.productCount} products</p>
                     )}
                     {cat.description && !subCount && !(cat.productCount > 0) && (
                       <p className="text-xs text-slate-500 line-clamp-2">{cat.description}</p>
                     )}
-                    <div className="flex items-center gap-1 mt-3 text-xs text-[#00B9E9] opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1 mt-3 text-xs text-[#00C2FF] opacity-0 group-hover:opacity-100 transition-opacity">
                       Browse <ChevronRight className="h-3 w-3" />
                     </div>
                   </div>

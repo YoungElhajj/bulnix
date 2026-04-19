@@ -20,15 +20,15 @@ const GATEWAYS = [
 ];
 
 function TxIcon({ type }: { type: string }) {
-  if (type === "deposit") return <ArrowDownLeft className="h-4 w-4 text-[#22C55E]" />;
-  if (type === "refund") return <RefreshCw className="h-4 w-4 text-[#00B9E9]" />;
+  if (type === "deposit") return <ArrowDownLeft className="h-4 w-4 text-[#00C2FF]" />;
+  if (type === "refund") return <RefreshCw className="h-4 w-4 text-[#00C2FF]" />;
   if (type === "spend") return <ArrowUpRight className="h-4 w-4 text-red-400" />;
   return <Wallet className="h-4 w-4 text-slate-400" />;
 }
 
 function TxStatusBadge({ status }: { status: string }) {
   const map: Record<string, { color: string; icon: any; label: string }> = {
-    completed: { color: "text-[#22C55E] bg-[#22C55E]/10 border-[#22C55E]/20", icon: CheckCircle, label: "Completed" },
+    completed: { color: "text-[#00C2FF] bg-[#00C2FF]/10 border-[#00C2FF]/20", icon: CheckCircle, label: "Completed" },
     pending: { color: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20", icon: Clock, label: "Pending" },
     failed: { color: "text-red-400 bg-red-400/10 border-red-400/20", icon: XCircle, label: "Failed" },
     reversed: { color: "text-slate-400 bg-slate-400/10 border-slate-400/20", icon: AlertCircle, label: "Reversed" },
@@ -80,22 +80,22 @@ export default function WalletPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#00B9E9] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#061A2B] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#00C2FF] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#0B0F19] text-white">
+      <div className="min-h-screen bg-[#061A2B] text-white">
         <Navbar />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <Wallet className="h-16 w-16 text-slate-700 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-white mb-2">Sign in to access your wallet</h2>
             <p className="text-slate-400 mb-6">Top up your balance and pay for orders instantly.</p>
-            <a href="/login"><Button className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white">Sign In</Button></a>
+            <a href="/login"><Button className="bg-[#00C2FF] hover:bg-[#00a8d4] text-white">Sign In</Button></a>
           </div>
         </div>
         <Footer />
@@ -111,12 +111,12 @@ export default function WalletPage() {
   const totalPages = Math.ceil(totalTx / 15);
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-white">
+    <div className="min-h-screen bg-[#061A2B] text-white">
       <Navbar />
-      <div className="pt-24 pb-8 bg-gradient-to-b from-[#0F172A] to-[#0B0F19] border-b border-white/5">
+      <div className="pt-24 pb-8 bg-gradient-to-b from-[#0A2540] to-[#061A2B] border-b border-white/5">
         <div className="container">
           <div className="flex items-center gap-2 text-sm text-slate-500 mb-4">
-            <Link href="/dashboard" className="hover:text-[#00B9E9]">Dashboard</Link>
+            <Link href="/dashboard" className="hover:text-[#00C2FF]">Dashboard</Link>
             <span>/</span>
             <span className="text-white">Wallet</span>
           </div>
@@ -132,11 +132,11 @@ export default function WalletPage() {
           <div className="lg:col-span-1 space-y-5">
             {/* Balance Card */}
             <div className="glass-card rounded-2xl p-6 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#00B9E9]/5 to-[#22C55E]/5 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[#00C2FF]/5 to-[#00C2FF]/5 pointer-events-none" />
               <div className="relative">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-[#00B9E9]/10 flex items-center justify-center">
-                    <Wallet className="h-5 w-5 text-[#00B9E9]" />
+                  <div className="w-10 h-10 rounded-xl bg-[#00C2FF]/10 flex items-center justify-center">
+                    <Wallet className="h-5 w-5 text-[#00C2FF]" />
                   </div>
                   <div>
                     <p className="text-xs text-slate-500">Available Balance</p>
@@ -150,7 +150,7 @@ export default function WalletPage() {
                 <div className="grid grid-cols-2 gap-3 pt-4 border-t border-white/5">
                   <div>
                     <p className="text-xs text-slate-500 mb-0.5">Total Deposited</p>
-                    <p className="text-sm font-semibold text-[#22C55E]">${totalDeposited.toFixed(2)}</p>
+                    <p className="text-sm font-semibold text-[#00C2FF]">${totalDeposited.toFixed(2)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-500 mb-0.5">Total Spent</p>
@@ -163,7 +163,7 @@ export default function WalletPage() {
             {/* Top-up Form */}
             <div className="glass-card rounded-2xl p-6">
               <h3 className="text-base font-bold text-white mb-4 flex items-center gap-2">
-                <Plus className="h-4 w-4 text-[#22C55E]" /> Add Funds
+                <Plus className="h-4 w-4 text-[#00C2FF]" /> Add Funds
               </h3>
 
               {/* Preset amounts */}
@@ -174,8 +174,8 @@ export default function WalletPage() {
                     onClick={() => setAmount(String(preset))}
                     className={`py-2 rounded-lg text-sm font-semibold border transition-all ${
                       amount === String(preset)
-                        ? "bg-[#00B9E9] border-[#00B9E9] text-white"
-                        : "bg-white/5 border-white/10 text-slate-400 hover:border-[#00B9E9]/50 hover:text-white"
+                        ? "bg-[#00C2FF] border-[#00C2FF] text-white"
+                        : "bg-[#0F3D5E]/30 border-[#0F3D5E] text-slate-400 hover:border-[#00C2FF]/50 hover:text-white"
                     }`}
                   >
                     ${preset}
@@ -194,7 +194,7 @@ export default function WalletPage() {
                     step="0.01"
                     value={amount}
                     onChange={e => setAmount(e.target.value)}
-                    className="pl-7 bg-[#0F172A] border-white/10 text-white placeholder:text-slate-600 focus:border-[#00B9E9]"
+                    className="pl-7 bg-[#0A2540] border-[#0F3D5E] text-white placeholder:text-slate-600 focus:border-[#00C2FF]"
                     placeholder="0.00"
                   />
                 </div>
@@ -205,10 +205,10 @@ export default function WalletPage() {
               <div className="mb-5">
                 <label className="text-xs text-slate-500 mb-1.5 block">Payment Method</label>
                 <Select value={gateway} onValueChange={setGateway}>
-                  <SelectTrigger className="bg-[#0F172A] border-white/10 text-white">
+                  <SelectTrigger className="bg-[#0A2540] border-[#0F3D5E] text-white">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#0F172A] border-white/10">
+                  <SelectContent className="bg-[#0A2540] border-[#0F3D5E]">
                     {GATEWAYS.map(g => (
                       <SelectItem key={g.key} value={g.key}>
                         <div>
@@ -225,7 +225,7 @@ export default function WalletPage() {
               </div>
 
               <Button
-                className="w-full bg-[#22C55E] hover:bg-[#16a34a] text-white font-semibold"
+                className="w-full bg-[#00C2FF] hover:bg-[#0215a8] text-white font-semibold"
                 onClick={handleTopup}
                 disabled={initTopup.isPending}
               >
@@ -261,7 +261,7 @@ export default function WalletPage() {
                   <div className="divide-y divide-white/5">
                     {transactions.map((tx: any) => (
                       <div key={tx.id} className="flex items-center gap-4 p-4 hover:bg-white/2 transition-colors">
-                        <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+                        <div className="w-9 h-9 rounded-xl bg-[#0F3D5E]/30 flex items-center justify-center shrink-0">
                           <TxIcon type={tx.type} />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -272,7 +272,7 @@ export default function WalletPage() {
                           </p>
                         </div>
                         <div className="text-right shrink-0">
-                          <p className={`text-sm font-bold ${tx.type === "spend" ? "text-red-400" : "text-[#22C55E]"}`}>
+                          <p className={`text-sm font-bold ${tx.type === "spend" ? "text-red-400" : "text-[#00C2FF]"}`}>
                             {tx.type === "spend" ? "-" : "+"}${Number(tx.amountUSD).toFixed(2)}
                           </p>
                           <div className="mt-1">
@@ -284,9 +284,9 @@ export default function WalletPage() {
                   </div>
                   {totalPages > 1 && (
                     <div className="flex items-center justify-center gap-2 p-4 border-t border-white/5">
-                      <Button variant="outline" className="border-white/10 text-slate-400 hover:text-white hover:bg-white/5 h-8 text-xs" disabled={txPage === 1} onClick={() => setTxPage(p => p - 1)}>Previous</Button>
+                      <Button variant="outline" className="border-[#0F3D5E] text-slate-400 hover:text-white hover:bg-[#0F3D5E]/30 h-8 text-xs" disabled={txPage === 1} onClick={() => setTxPage(p => p - 1)}>Previous</Button>
                       <span className="text-slate-500 text-xs px-3">Page {txPage} of {totalPages}</span>
-                      <Button variant="outline" className="border-white/10 text-slate-400 hover:text-white hover:bg-white/5 h-8 text-xs" disabled={txPage === totalPages} onClick={() => setTxPage(p => p + 1)}>Next</Button>
+                      <Button variant="outline" className="border-[#0F3D5E] text-slate-400 hover:text-white hover:bg-[#0F3D5E]/30 h-8 text-xs" disabled={txPage === totalPages} onClick={() => setTxPage(p => p + 1)}>Next</Button>
                     </div>
                   )}
                 </>

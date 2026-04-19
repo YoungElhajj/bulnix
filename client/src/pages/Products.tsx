@@ -87,16 +87,16 @@ export default function Products() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-white">
+    <div className="min-h-screen bg-[#061A2B] text-white">
       <Navbar />
-      <div className="pt-24 pb-8 bg-gradient-to-b from-[#0F172A] to-[#0B0F19] border-b border-white/5">
+      <div className="pt-24 pb-8 bg-gradient-to-b from-[#0A2540] to-[#061A2B] border-b border-white/5">
         <div className="container">
           <div className="flex items-center gap-2 text-sm text-slate-500 mb-4">
-            <Link href="/" className="hover:text-[#00B9E9]">Home</Link>
+            <Link href="/" className="hover:text-[#00C2FF]">Home</Link>
             <span>/</span>
             {params.slug ? (
               <>
-                <Link href="/categories" className="hover:text-[#00B9E9]">Categories</Link>
+                <Link href="/categories" className="hover:text-[#00C2FF]">Categories</Link>
                 <span>/</span>
                 <span className="text-white">{category?.name ?? params.slug}</span>
               </>
@@ -116,13 +116,13 @@ export default function Products() {
           <div className="flex flex-wrap gap-3">
             {(subcategories as any[]).map((sub: any) => (
               <Link key={sub.id} href={`/categories/${sub.slug}`}>
-                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl glass-card cursor-pointer hover:border-[#00B9E9]/40 hover:text-[#00B9E9] transition-all group">
+                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl glass-card cursor-pointer hover:border-[#00C2FF]/40 hover:text-[#00C2FF] transition-all group">
                   {sub.imageUrl ? (
                     <img src={sub.imageUrl} alt={sub.name} className="w-6 h-6 object-contain rounded" />
                   ) : (
                     <span className="text-base">📦</span>
                   )}
-                  <span className="text-sm font-medium text-white group-hover:text-[#00B9E9] transition-colors">{sub.name}</span>
+                  <span className="text-sm font-medium text-white group-hover:text-[#00C2FF] transition-colors">{sub.name}</span>
                   {(sub.productCount ?? 0) > 0 && (
                     <span className="text-xs text-slate-500 ml-1">({sub.productCount})</span>
                   )}
@@ -142,7 +142,7 @@ export default function Products() {
               placeholder="Search products..."
               value={search}
               onChange={e => { setSearch(e.target.value); setPage(1); }}
-              className="pl-9 bg-[#0F172A] border-white/10 text-white placeholder:text-slate-600 focus:border-[#00B9E9] h-10"
+              className="pl-9 bg-[#0A2540] border-[#0F3D5E] text-white placeholder:text-slate-600 focus:border-[#00C2FF] h-10"
             />
             {search && (
               <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
@@ -153,11 +153,11 @@ export default function Products() {
 
           {/* Sort */}
           <Select value={sort} onValueChange={(v: any) => { setSort(v); setPage(1); }}>
-            <SelectTrigger className="w-[180px] bg-[#0F172A] border-white/10 text-white h-10">
+            <SelectTrigger className="w-[180px] bg-[#0A2540] border-[#0F3D5E] text-white h-10">
               <SlidersHorizontal className="h-4 w-4 mr-2 text-slate-500" />
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#0F172A] border-white/10">
+            <SelectContent className="bg-[#0A2540] border-[#0F3D5E]">
               <SelectItem value="newest">Newest First</SelectItem>
               <SelectItem value="price_asc">Price: Low to High</SelectItem>
               <SelectItem value="price_desc">Price: High to Low</SelectItem>
@@ -167,10 +167,10 @@ export default function Products() {
 
           {/* Currency */}
           <Select value={currency} onValueChange={setCurrency}>
-            <SelectTrigger className="w-[110px] bg-[#0F172A] border-white/10 text-white h-10">
+            <SelectTrigger className="w-[110px] bg-[#0A2540] border-[#0F3D5E] text-white h-10">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#0F172A] border-white/10">
+            <SelectContent className="bg-[#0A2540] border-[#0F3D5E]">
               {CURRENCIES.map(c => (
                 <SelectItem key={c.code} value={c.code}>{c.symbol} {c.label}</SelectItem>
               ))}
@@ -182,11 +182,11 @@ export default function Products() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[...Array(12)].map((_, i) => (
               <div key={i} className="glass-card rounded-xl overflow-hidden animate-pulse">
-                <div className="aspect-[4/3] bg-[#1e293b]" />
+                <div className="aspect-[4/3] bg-[#0A2540]" />
                 <div className="p-4 space-y-2">
-                  <div className="h-4 bg-[#1e293b] rounded w-3/4" />
-                  <div className="h-4 bg-[#1e293b] rounded w-1/2" />
-                  <div className="h-8 bg-[#1e293b] rounded mt-3" />
+                  <div className="h-4 bg-[#0A2540] rounded w-3/4" />
+                  <div className="h-4 bg-[#0A2540] rounded w-1/2" />
+                  <div className="h-8 bg-[#0A2540] rounded mt-3" />
                 </div>
               </div>
             ))}
@@ -197,7 +197,7 @@ export default function Products() {
             <h3 className="text-xl font-semibold text-white mb-2">No products found</h3>
             <p className="text-slate-500 mb-6">Try adjusting your search or browse all categories</p>
             <Link href="/categories">
-              <Button className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white">Browse Categories</Button>
+              <Button className="bg-[#00C2FF] hover:bg-[#00a8d4] text-white">Browse Categories</Button>
             </Link>
           </div>
         ) : (
@@ -206,14 +206,14 @@ export default function Products() {
               {products.map((product: any) => (
                 <Link key={product.id} href={`/products/${product.slug}`}>
                   <div className="product-card cursor-pointer group">
-                    <div className="aspect-[4/3] bg-gradient-to-br from-[#0F172A] to-[#1e293b] flex items-center justify-center overflow-hidden relative">
+                    <div className="aspect-[4/3] bg-gradient-to-br from-[#0A2540] to-[#1e293b] flex items-center justify-center overflow-hidden relative">
                       {product.imageUrl ? (
                         <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
                         <Package className="h-12 w-12 text-slate-600" />
                       )}
                       {product.isFeatured && (
-                        <Badge className="absolute top-2 left-2 bg-[#00B9E9] text-white text-xs border-0">Featured</Badge>
+                        <Badge className="absolute top-2 left-2 bg-[#00C2FF] text-white text-xs border-0">Featured</Badge>
                       )}
                       {!product.stockUnlimited && product.stockQuantity <= 5 && product.stockQuantity > 0 && (
                         <Badge className="absolute top-2 right-2 bg-orange-500/90 text-white text-xs border-0">Low Stock</Badge>
@@ -225,9 +225,9 @@ export default function Products() {
                       )}
                     </div>
                     <div className="p-4">
-                      <h3 className="text-sm font-semibold text-white line-clamp-2 mb-3 group-hover:text-[#00B9E9] transition-colors">{product.title}</h3>
+                      <h3 className="text-sm font-semibold text-white line-clamp-2 mb-3 group-hover:text-[#00C2FF] transition-colors">{product.title}</h3>
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-[#22C55E] font-bold text-lg">
+                        <span className="text-[#00C2FF] font-bold text-lg">
                           {formatPrice(Number(product.customerPriceUSD), currency)}
                         </span>
                         <span className="text-xs text-slate-500">
@@ -236,7 +236,7 @@ export default function Products() {
                       </div>
                       <Button
                         size="sm"
-                        className="w-full bg-[#00B9E9]/10 hover:bg-[#00B9E9] text-[#00B9E9] hover:text-white border border-[#00B9E9]/20 hover:border-[#00B9E9] transition-all duration-200 text-xs"
+                        className="w-full bg-[#00C2FF]/10 hover:bg-[#00C2FF] text-[#00C2FF] hover:text-white border border-[#00C2FF]/20 hover:border-[#00C2FF] transition-all duration-200 text-xs"
                         onClick={(e) => handleAddToCart(product, e)}
                         disabled={!product.stockUnlimited && product.stockQuantity === 0}
                       >
@@ -252,7 +252,7 @@ export default function Products() {
               <div className="flex items-center justify-center gap-2 mt-10">
                 <Button
                   variant="outline"
-                  className="border-white/10 text-slate-400 hover:text-white hover:bg-white/5"
+                  className="border-[#0F3D5E] text-slate-400 hover:text-white hover:bg-[#0F3D5E]/30"
                   disabled={page === 1}
                   onClick={() => setPage(p => p - 1)}
                 >
@@ -261,7 +261,7 @@ export default function Products() {
                 <span className="text-slate-500 text-sm px-4">Page {page} of {totalPages}</span>
                 <Button
                   variant="outline"
-                  className="border-white/10 text-slate-400 hover:text-white hover:bg-white/5"
+                  className="border-[#0F3D5E] text-slate-400 hover:text-white hover:bg-[#0F3D5E]/30"
                   disabled={page === totalPages}
                   onClick={() => setPage(p => p + 1)}
                 >

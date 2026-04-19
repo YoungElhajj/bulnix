@@ -15,7 +15,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 
-const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663404004095/6qKkSV9dybS3AerhXhrTfQ/bulnix-logo_f53aba21.png";
+const LOGO_URL = "/manus-storage/bulnix-primary-logo_0bd2bde3.jpeg";
 
 const navLinks = [
   { label: "Products", href: "/products" },
@@ -37,7 +37,7 @@ export default function Navbar() {
   const isActive = (href: string) => location === href || location.startsWith(href + "/");
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 border-b ${theme === 'dark' ? 'border-white/5' : 'border-slate-200'}`} style={{ background: theme === 'dark' ? 'rgba(11,15,25,0.95)' : 'rgba(248,250,252,0.95)', backdropFilter: "blur(12px)" }}>
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[#0F3D5E]/60" style={{ background: 'rgba(6,26,43,0.96)', backdropFilter: "blur(14px)" }}>
       <div className="container">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -53,8 +53,8 @@ export default function Navbar() {
                 href={link.href}
                 className={`text-sm font-medium transition-colors duration-200 ${
                   isActive(link.href)
-                    ? "text-[#00B9E9]"
-                    : theme === 'dark' ? "text-slate-400 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                    ? "text-[#00C2FF]"
+                    : "text-slate-400 hover:text-white"
                 }`}
               >
                 {link.label}
@@ -69,7 +69,7 @@ export default function Navbar() {
               variant="ghost"
               size="icon"
               onClick={toggleTheme}
-              className={theme === 'dark' ? "text-slate-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"}
+              className="text-slate-400 hover:text-white hover:bg-[#0F3D5E]/60"
               title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -77,10 +77,10 @@ export default function Navbar() {
 
             {/* Cart */}
             <Link href="/cart">
-              <Button variant="ghost" size="icon" className={`relative ${theme === 'dark' ? 'text-slate-400 hover:text-white hover:bg-white/5' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}`}>
+              <Button variant="ghost" size="icon" className="relative text-slate-400 hover:text-white hover:bg-[#0F3D5E]/60">
                 <ShoppingCart className="h-5 w-5" />
                 {totalItems > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-[#00B9E9] text-white border-0">
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-[#00C2FF] text-[#061A2B] border-0 font-bold">
                     {totalItems > 99 ? "99+" : totalItems}
                   </Badge>
                 )}
@@ -91,18 +91,18 @@ export default function Navbar() {
             {isAuthenticated && user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className={`hidden md:flex items-center gap-2 px-3 ${theme === 'dark' ? 'text-slate-300 hover:text-white hover:bg-white/5' : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'}`}>
-                    <div className="w-7 h-7 rounded-full bg-[#00B9E9]/20 border border-[#00B9E9]/30 flex items-center justify-center text-xs font-semibold text-[#00B9E9]">
+                  <Button variant="ghost" className="hidden md:flex items-center gap-2 px-3 text-slate-300 hover:text-white hover:bg-[#0F3D5E]/60">
+                    <div className="w-7 h-7 rounded-full bg-[#00C2FF]/20 border border-[#00C2FF]/40 flex items-center justify-center text-xs font-semibold text-[#00C2FF]">
                       {(user.name || user.email || "U")[0].toUpperCase()}
                     </div>
                     <span className="text-sm font-medium max-w-24 truncate">{user.name || user.email}</span>
                     <ChevronDown className="h-3.5 w-3.5 text-slate-500" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className={`w-52 ${theme === 'dark' ? 'bg-[#0F172A] border-white/10' : 'bg-white border-slate-200'}`}>
+                <DropdownMenuContent align="end" className="w-52 bg-[#0A2540] border-[#0F3D5E]">
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer">
-                      <LayoutDashboard className="h-4 w-4 text-[#00B9E9]" />
+                      <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer">
+                      <LayoutDashboard className="h-4 w-4 text-[#00C2FF]" />
                       <span>Dashboard</span>
                     </Link>
                   </DropdownMenuItem>
@@ -114,7 +114,7 @@ export default function Navbar() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/wallet" className="flex items-center gap-2 cursor-pointer">
-                      <Wallet className="h-4 w-4 text-[#22C55E]" />
+                      <Wallet className="h-4 w-4 text-[#00C2FF]" />
                       <span>My Wallet</span>
                     </Link>
                   </DropdownMenuItem>
@@ -126,16 +126,16 @@ export default function Navbar() {
                   </DropdownMenuItem>
                   {user.role === "admin" && (
                     <>
-                      <DropdownMenuSeparator className={theme === 'dark' ? 'bg-white/10' : 'bg-slate-200'} />
+                      <DropdownMenuSeparator className="bg-[#0F3D5E]" />
                       <DropdownMenuItem asChild>
                         <Link href="/admin" className="flex items-center gap-2 cursor-pointer">
-                          <Shield className="h-4 w-4 text-[#22C55E]" />
-                          <span className="text-[#22C55E]">Admin Panel</span>
+                          <Shield className="h-4 w-4 text-[#00C2FF]" />
+                          <span className="text-[#00C2FF]">Admin Panel</span>
                         </Link>
                       </DropdownMenuItem>
                     </>
                   )}
-                  <DropdownMenuSeparator className={theme === 'dark' ? 'bg-white/10' : 'bg-slate-200'} />
+                  <DropdownMenuSeparator className="bg-[#0F3D5E]" />
                   <DropdownMenuItem
                     onClick={() => logoutMutation.mutate()}
                     className="flex items-center gap-2 cursor-pointer text-red-400 focus:text-red-400 focus:bg-red-500/10"
@@ -148,12 +148,12 @@ export default function Navbar() {
             ) : (
               <div className="hidden md:flex items-center gap-2">
                   <Link href="/login">
-                    <Button variant="ghost" size="sm" className={theme === 'dark' ? 'text-slate-300 hover:text-white hover:bg-white/5' : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'}>
+                    <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-[#0F3D5E]/60">
                       Sign In
                     </Button>
                   </Link>
                 <Link href="/signup">
-                  <Button size="sm" className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white font-semibold">
+                  <Button size="sm" className="bg-[#00C2FF] hover:bg-[#00aee0] text-[#061A2B] font-bold">
                     Get Started
                   </Button>
                 </Link>
@@ -164,7 +164,7 @@ export default function Navbar() {
             <Button
               variant="ghost"
               size="icon"
-              className={`md:hidden ${theme === 'dark' ? 'text-slate-400 hover:text-white hover:bg-white/5' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}`}
+              className="md:hidden text-slate-400 hover:text-white hover:bg-[#0F3D5E]/60"
               onClick={() => setMobileOpen(!mobileOpen)}
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -174,7 +174,7 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {mobileOpen && (
-          <div className={`md:hidden border-t py-4 space-y-1 ${theme === 'dark' ? 'border-white/5' : 'border-slate-200'}`}>
+          <div className="md:hidden border-t border-[#0F3D5E]/60 py-4 space-y-1 bg-[#061A2B]">
             {navLinks.map(link => (
               <Link
                 key={link.href}
@@ -182,18 +182,18 @@ export default function Navbar() {
                 onClick={() => setMobileOpen(false)}
                 className={`block px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${
                   isActive(link.href)
-                    ? "text-[#00B9E9] bg-[#00B9E9]/10"
-                    : theme === 'dark' ? "text-slate-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                    ? "text-[#00C2FF] bg-[#00C2FF]/10"
+                    : "text-slate-400 hover:text-white hover:bg-[#0F3D5E]/60"
                 }`}
               >
                 {link.label}
               </Link>
             ))}
-            <div className={`pt-3 px-4 flex flex-col gap-2 border-t mt-3 ${theme === 'dark' ? 'border-white/5' : 'border-slate-200'}`}>
+              <div className="pt-3 px-4 flex flex-col gap-2 border-t border-[#0F3D5E]/60 mt-3">
               {isAuthenticated ? (
                 <>
                   <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" size="sm" className={`w-full ${theme === 'dark' ? 'border-white/10 text-slate-300' : 'border-slate-300 text-slate-700'}`}>
+                    <Button variant="outline" size="sm" className="w-full border-[#0F3D5E] text-slate-300 hover:text-white hover:bg-[#0F3D5E]/60">
                       <LayoutDashboard className="h-4 w-4 mr-2" /> Dashboard
                     </Button>
                   </Link>
@@ -209,10 +209,10 @@ export default function Navbar() {
               ) : (
                 <>
                   <Link href="/login" onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" size="sm" className={`w-full ${theme === 'dark' ? 'border-white/10 text-slate-300' : 'border-slate-300 text-slate-700'}`}>Sign In</Button>
+                    <Button variant="outline" size="sm" className="w-full border-[#0F3D5E] text-slate-300 hover:text-white">Sign In</Button>
                   </Link>
                   <Link href="/signup" onClick={() => setMobileOpen(false)}>
-                    <Button size="sm" className="w-full bg-[#00B9E9] hover:bg-[#00a8d4] text-white">Get Started</Button>
+                    <Button size="sm" className="w-full bg-[#00C2FF] hover:bg-[#00aee0] text-[#061A2B] font-bold">Get Started</Button>
                   </Link>
                 </>
               )}

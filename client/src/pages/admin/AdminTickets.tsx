@@ -152,9 +152,9 @@ export default function AdminTickets() {
   const totalPages = Math.ceil(total / 50);
 
   const statusColor = (s: string) => ({
-    open: "bg-[#00B9E9]/10 text-[#00B9E9] border-[#00B9E9]/20",
+    open: "bg-[#00C2FF]/10 text-[#00C2FF] border-[#00C2FF]/20",
     pending: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-    resolved: "bg-[#22C55E]/10 text-[#22C55E] border-[#22C55E]/20",
+    resolved: "bg-[#00C2FF]/10 text-[#00C2FF] border-[#00C2FF]/20",
     closed: "bg-slate-500/10 text-slate-400 border-slate-500/20",
   }[s] ?? "bg-slate-500/10 text-slate-400 border-slate-500/20");
 
@@ -170,10 +170,10 @@ export default function AdminTickets() {
           <p className="text-slate-500 text-sm mt-0.5">{total} total tickets</p>
         </div>
         <Select value={status} onValueChange={v => { setStatus(v); setPage(1); }}>
-          <SelectTrigger className="w-[150px] bg-[#0F172A] border-white/10 text-white h-9">
+          <SelectTrigger className="w-[150px] bg-[#0A2540] border-[#0F3D5E] text-white h-9">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="bg-[#0F172A] border-white/10">
+          <SelectContent className="bg-[#0A2540] border-[#0F3D5E]">
             <SelectItem value="all">All Tickets</SelectItem>
             <SelectItem value="open">Open</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
@@ -195,7 +195,7 @@ export default function AdminTickets() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-slate-500 text-xs uppercase">
+                <tr className="border-b border-[#0F3D5E] text-slate-500 text-xs uppercase">
                   <th className="text-left p-4">Ticket</th>
                   <th className="text-left p-4">User</th>
                   <th className="text-center p-4">Priority</th>
@@ -226,13 +226,13 @@ export default function AdminTickets() {
                       <div className="flex items-center gap-1.5 justify-center flex-wrap">
                         <button
                           onClick={() => { setSelected(ticket); setReply(""); setCloseTicket(false); setShowRefund(false); setShowSupplierClaim(false); }}
-                          className="px-2 py-1 rounded bg-[#00B9E9]/10 text-[#00B9E9] hover:bg-[#00B9E9]/20 text-xs transition-colors flex items-center gap-1"
+                          className="px-2 py-1 rounded bg-[#00C2FF]/10 text-[#00C2FF] hover:bg-[#00C2FF]/20 text-xs transition-colors flex items-center gap-1"
                         >
                           <MessageSquare className="h-3 w-3" /> Reply
                         </button>
                         <button
                           onClick={() => { setSelected(ticket); setShowRefund(true); setReply(""); setShowSupplierClaim(false); }}
-                          className="px-2 py-1 rounded bg-[#22C55E]/10 text-[#22C55E] hover:bg-[#22C55E]/20 text-xs transition-colors flex items-center gap-1"
+                          className="px-2 py-1 rounded bg-[#00C2FF]/10 text-[#00C2FF] hover:bg-[#00C2FF]/20 text-xs transition-colors flex items-center gap-1"
                         >
                           <DollarSign className="h-3 w-3" /> Refund
                         </button>
@@ -251,9 +251,9 @@ export default function AdminTickets() {
           </div>
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 p-4 border-t border-white/5">
-              <Button variant="outline" className="border-white/10 text-slate-400 h-8 text-xs" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Previous</Button>
+              <Button variant="outline" className="border-[#0F3D5E] text-slate-400 h-8 text-xs" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Previous</Button>
               <span className="text-slate-500 text-xs px-3">Page {page} of {totalPages}</span>
-              <Button variant="outline" className="border-white/10 text-slate-400 h-8 text-xs" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>Next</Button>
+              <Button variant="outline" className="border-[#0F3D5E] text-slate-400 h-8 text-xs" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>Next</Button>
             </div>
           )}
         </div>
@@ -261,16 +261,16 @@ export default function AdminTickets() {
 
       {/* Reply Dialog */}
       <Dialog open={!!selected && !showRefund && !showSupplierClaim} onOpenChange={v => !v && setSelected(null)}>
-        <DialogContent className="bg-[#0F172A] border-white/10 text-white max-w-lg">
+        <DialogContent className="bg-[#0A2540] border-[#0F3D5E] text-white max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 text-[#00B9E9]" />
+              <MessageSquare className="h-5 w-5 text-[#00C2FF]" />
               Reply to Ticket #{selected?.ticketNumber ?? selected?.id}
             </DialogTitle>
           </DialogHeader>
           {selected && (
             <div className="space-y-4 mt-2">
-              <div className="p-3 bg-white/5 rounded-lg">
+              <div className="p-3 bg-[#0F3D5E]/30 rounded-lg">
                 <div className="text-xs text-slate-500 mb-1">Subject</div>
                 <div className="text-sm text-white">{selected.subject}</div>
                 {selected.orderId && <div className="text-xs text-slate-500 mt-1">Order #{selected.orderId}</div>}
@@ -282,7 +282,7 @@ export default function AdminTickets() {
                   onChange={e => setReply(e.target.value)}
                   rows={5}
                   placeholder="Type your reply to the customer..."
-                  className="w-full bg-[#0B0F19] border border-white/10 text-white placeholder:text-slate-600 focus:border-[#00B9E9] rounded-lg p-3 text-sm resize-none outline-none transition-colors"
+                  className="w-full bg-[#061A2B] border border-[#0F3D5E] text-white placeholder:text-slate-600 focus:border-[#00C2FF] rounded-lg p-3 text-sm resize-none outline-none transition-colors"
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -290,9 +290,9 @@ export default function AdminTickets() {
                 <label htmlFor="close" className="text-sm text-slate-300">Mark as resolved after reply</label>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" className="border-white/10 text-slate-400 flex-1" onClick={() => setSelected(null)}>Cancel</Button>
+                <Button variant="outline" className="border-[#0F3D5E] text-slate-400 flex-1" onClick={() => setSelected(null)}>Cancel</Button>
                 <Button
-                  className="bg-[#00B9E9] hover:bg-[#00a8d4] text-white flex-1"
+                  className="bg-[#00C2FF] hover:bg-[#00a8d4] text-white flex-1"
                   onClick={() => replyMutation.mutate({ ticketId: selected.id, message: reply, closeTicket })}
                   disabled={!reply.trim() || replyMutation.isPending}
                 >
@@ -307,16 +307,16 @@ export default function AdminTickets() {
 
       {/* Customer Refund Dialog */}
       <Dialog open={!!selected && showRefund} onOpenChange={v => { if (!v) { setSelected(null); setShowRefund(false); } }}>
-        <DialogContent className="bg-[#0F172A] border-white/10 text-white max-w-md">
+        <DialogContent className="bg-[#0A2540] border-[#0F3D5E] text-white max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-[#22C55E]" />
+              <DollarSign className="h-5 w-5 text-[#00C2FF]" />
               Process Customer Refund
             </DialogTitle>
           </DialogHeader>
           {selected && (
             <div className="space-y-4 mt-2">
-              <div className="p-3 bg-white/5 rounded-lg text-sm">
+              <div className="p-3 bg-[#0F3D5E]/30 rounded-lg text-sm">
                 <div className="text-slate-500 text-xs mb-1">Ticket</div>
                 <div className="text-white">{selected.subject}</div>
                 <div className="text-slate-500 text-xs mt-1">User #{selected.userId}{selected.orderId ? ` · Order #${selected.orderId}` : ""}</div>
@@ -328,7 +328,7 @@ export default function AdminTickets() {
                   <Input
                     type="number" min="0.01" step="0.01"
                     value={refundAmount} onChange={e => setRefundAmount(e.target.value)}
-                    className="pl-7 bg-[#0B0F19] border-white/10 text-white focus:border-[#22C55E]"
+                    className="pl-7 bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF]"
                     placeholder="0.00"
                   />
                 </div>
@@ -338,16 +338,16 @@ export default function AdminTickets() {
                 <textarea
                   value={refundReason} onChange={e => setRefundReason(e.target.value)} rows={3}
                   placeholder="Describe the reason for this refund..."
-                  className="w-full bg-[#0B0F19] border border-white/10 text-white placeholder:text-slate-600 focus:border-[#22C55E] rounded-lg p-3 text-sm resize-none outline-none transition-colors"
+                  className="w-full bg-[#061A2B] border border-[#0F3D5E] text-white placeholder:text-slate-600 focus:border-[#00C2FF] rounded-lg p-3 text-sm resize-none outline-none transition-colors"
                 />
               </div>
-              <div className="p-3 bg-[#22C55E]/5 border border-[#22C55E]/20 rounded-lg text-xs text-slate-400">
+              <div className="p-3 bg-[#00C2FF]/5 border border-[#00C2FF]/20 rounded-lg text-xs text-slate-400">
                 The refund will be credited to the customer's Bulnix wallet balance. The ticket will be automatically marked as resolved.
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" className="border-white/10 text-slate-400 flex-1" onClick={() => { setSelected(null); setShowRefund(false); }}>Cancel</Button>
+                <Button variant="outline" className="border-[#0F3D5E] text-slate-400 flex-1" onClick={() => { setSelected(null); setShowRefund(false); }}>Cancel</Button>
                 <Button
-                  className="bg-[#22C55E] hover:bg-[#16a34a] text-white flex-1"
+                  className="bg-[#00C2FF] hover:bg-[#0215a8] text-white flex-1"
                   onClick={handleRefund} disabled={refundMutation.isPending}
                 >
                   {refundMutation.isPending ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <DollarSign className="h-4 w-4 mr-2" />}
@@ -361,7 +361,7 @@ export default function AdminTickets() {
 
       {/* Supplier Claim Dialog */}
       <Dialog open={showSupplierClaim} onOpenChange={v => !v && closeSupplierClaim()}>
-        <DialogContent className="bg-[#0F172A] border-white/10 text-white max-w-xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-[#0A2540] border-[#0F3D5E] text-white max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-orange-400" />
@@ -385,14 +385,14 @@ export default function AdminTickets() {
               {/* Claim already created */}
               {createdClaimId ? (
                 <div className="space-y-4">
-                  <div className="p-4 bg-[#00B9E9]/5 border border-[#00B9E9]/20 rounded-lg">
-                    <p className="text-[#00B9E9] font-medium text-sm mb-1">Claim #{createdClaimId} created as draft</p>
+                  <div className="p-4 bg-[#00C2FF]/5 border border-[#00C2FF]/20 rounded-lg">
+                    <p className="text-[#00C2FF] font-medium text-sm mb-1">Claim #{createdClaimId} created as draft</p>
                     <p className="text-slate-400 text-xs">Click below to generate the formatted refund request message to send to AccsZone support.</p>
                   </div>
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
-                      className="flex-1 border-white/10 text-slate-300 hover:text-white hover:bg-white/5"
+                      className="flex-1 border-[#0F3D5E] text-slate-300 hover:text-white hover:bg-[#0F3D5E]/30"
                       onClick={() => { closeSupplierClaim(); navigate("/admin/supplier-refunds"); }}
                     >
                       <ExternalLink className="h-4 w-4 mr-2" /> View in Supplier Refunds
@@ -413,10 +413,10 @@ export default function AdminTickets() {
                     <div>
                       <Label className="text-slate-400 text-xs mb-1.5 block">Supplier</Label>
                       <Select value={claimForm.providerKey} onValueChange={v => setClaimForm(f => ({ ...f, providerKey: v }))}>
-                        <SelectTrigger className="bg-[#0B0F19] border-white/10 text-white h-9 text-sm">
+                        <SelectTrigger className="bg-[#061A2B] border-[#0F3D5E] text-white h-9 text-sm">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#0F172A] border-white/10 text-white">
+                        <SelectContent className="bg-[#0A2540] border-[#0F3D5E] text-white">
                           <SelectItem value="accszone">AccsZone</SelectItem>
                           <SelectItem value="accsbulk">AccsBulk</SelectItem>
                         </SelectContent>
@@ -430,7 +430,7 @@ export default function AdminTickets() {
                           type="number" min="0.01" step="0.01"
                           value={claimForm.claimAmountUSD}
                           onChange={e => setClaimForm(f => ({ ...f, claimAmountUSD: e.target.value }))}
-                          className="pl-7 bg-[#0B0F19] border-white/10 text-white h-9 text-sm focus:border-orange-400"
+                          className="pl-7 bg-[#061A2B] border-[#0F3D5E] text-white h-9 text-sm focus:border-orange-400"
                           placeholder="0.00"
                         />
                       </div>
@@ -443,7 +443,7 @@ export default function AdminTickets() {
                       value={claimForm.supplierOrderId}
                       onChange={e => setClaimForm(f => ({ ...f, supplierOrderId: e.target.value }))}
                       placeholder="e.g. AZ-123456"
-                      className="bg-[#0B0F19] border-white/10 text-white h-9 text-sm focus:border-orange-400"
+                      className="bg-[#061A2B] border-[#0F3D5E] text-white h-9 text-sm focus:border-orange-400"
                     />
                   </div>
 
@@ -454,7 +454,7 @@ export default function AdminTickets() {
                       onChange={e => setClaimForm(f => ({ ...f, reason: e.target.value }))}
                       rows={5}
                       placeholder="Describe the issue clearly. This will be included in the message sent to the supplier."
-                      className="bg-[#0B0F19] border-white/10 text-white focus:border-orange-400 resize-none text-sm"
+                      className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-orange-400 resize-none text-sm"
                     />
                     <p className="text-slate-600 text-xs mt-1">Pre-filled from ticket subject. Edit as needed before submitting to supplier.</p>
                   </div>
@@ -466,12 +466,12 @@ export default function AdminTickets() {
                       onChange={e => setClaimForm(f => ({ ...f, adminNotes: e.target.value }))}
                       rows={2}
                       placeholder="Private notes for your team..."
-                      className="bg-[#0B0F19] border-white/10 text-white focus:border-orange-400 resize-none text-sm"
+                      className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-orange-400 resize-none text-sm"
                     />
                   </div>
 
                   <div className="flex gap-2 pt-1">
-                    <Button variant="outline" className="flex-1 border-white/10 text-slate-300 hover:text-white hover:bg-white/5" onClick={closeSupplierClaim}>
+                    <Button variant="outline" className="flex-1 border-[#0F3D5E] text-slate-300 hover:text-white hover:bg-[#0F3D5E]/30" onClick={closeSupplierClaim}>
                       Cancel
                     </Button>
                     <Button
@@ -495,12 +495,12 @@ export default function AdminTickets() {
                 <p className="text-green-400 font-medium text-sm mb-1">Claim submitted successfully</p>
                 <p className="text-slate-400 text-xs">Copy the message below and send it to AccsZone via their support dashboard or email.</p>
               </div>
-              <div className="bg-[#0B0F19] rounded-lg p-4 border border-white/5">
+              <div className="bg-[#061A2B] rounded-lg p-4 border border-white/5">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-slate-400 text-xs font-medium uppercase tracking-wide">Refund Request Message</p>
                   <button
                     onClick={() => { navigator.clipboard.writeText(submittedMessage); toast.success("Copied to clipboard"); }}
-                    className="text-xs text-[#00B9E9] hover:text-white transition-colors px-2 py-0.5 rounded bg-[#00B9E9]/10"
+                    className="text-xs text-[#00C2FF] hover:text-white transition-colors px-2 py-0.5 rounded bg-[#00C2FF]/10"
                   >
                     Copy
                   </button>
@@ -510,12 +510,12 @@ export default function AdminTickets() {
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  className="flex-1 border-white/10 text-slate-300 hover:text-white hover:bg-white/5"
+                  className="flex-1 border-[#0F3D5E] text-slate-300 hover:text-white hover:bg-[#0F3D5E]/30"
                   onClick={() => { closeSupplierClaim(); navigate("/admin/supplier-refunds"); }}
                 >
                   <FileText className="h-4 w-4 mr-2" /> View All Claims
                 </Button>
-                <Button className="flex-1 bg-[#00B9E9] hover:bg-[#00a8d4] text-white" onClick={closeSupplierClaim}>
+                <Button className="flex-1 bg-[#00C2FF] hover:bg-[#00a8d4] text-white" onClick={closeSupplierClaim}>
                   Done
                 </Button>
               </div>

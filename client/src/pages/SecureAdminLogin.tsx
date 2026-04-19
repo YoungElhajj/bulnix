@@ -45,7 +45,7 @@ export default function SecureAdminLogin() {
 
       <div className="relative w-full max-w-md">
         {/* Card */}
-        <div className="bg-[#111118] border border-white/10 rounded-2xl p-8 shadow-2xl">
+        <div className="bg-[#111118] border border-[#0F3D5E] rounded-2xl p-8 shadow-2xl">
           {/* Header */}
           <div className="flex flex-col items-center mb-8">
             <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-4">
@@ -67,7 +67,7 @@ export default function SecureAdminLogin() {
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 required
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/25 focus:border-cyan-500/50 focus:ring-cyan-500/20 h-11"
+                className="bg-[#0F3D5E]/30 border-[#0F3D5E] text-white placeholder:text-white/25 focus:border-cyan-500/50 focus:ring-cyan-500/20 h-11"
               />
             </div>
 
@@ -82,7 +82,7 @@ export default function SecureAdminLogin() {
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete="current-password"
                   required
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/25 focus:border-cyan-500/50 focus:ring-cyan-500/20 h-11 pr-10"
+                  className="bg-[#0F3D5E]/30 border-[#0F3D5E] text-white placeholder:text-white/25 focus:border-cyan-500/50 focus:ring-cyan-500/20 h-11 pr-10"
                 />
                 <button
                   type="button"
