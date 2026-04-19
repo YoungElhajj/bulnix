@@ -1,3 +1,5 @@
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { useState } from "react";
 import { Link } from "wouter";
 import { Package, ChevronRight, Search } from "lucide-react";
@@ -41,6 +43,7 @@ export default function Categories() {
 
   return (
     <div className="min-h-screen bg-[#F5F9FF]">
+      <Navbar/>
       {/* Header */}
       <div className="bg-[#0F3D5E] pt-24 pb-10">
         <div className="container">
@@ -118,6 +121,7 @@ export default function Categories() {
           </div>
         )}
       </div>
+      <Footer/>
     </div>
   );
 }

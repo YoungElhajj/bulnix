@@ -1,3 +1,5 @@
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { useState } from "react";
 import { Link, useParams } from "wouter";
 import {
@@ -29,6 +31,7 @@ export default function ProductDetail() {
 
   if (isLoading) return (
     <div className="min-h-screen bg-[#F5F9FF]">
+      <Navbar/>
       <div className="bg-[#0F3D5E] h-24" />
       <div className="container pt-10 pb-16 animate-pulse">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -428,6 +431,7 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
+      <Footer/>
     </div>
   );
 }

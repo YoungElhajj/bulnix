@@ -1,3 +1,5 @@
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { Link } from "wouter";
 import { ShoppingCart, Trash2, Plus, Minus, Package, ArrowRight, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +10,7 @@ export default function Cart() {
 
   return (
     <div className="min-h-screen bg-[#F5F9FF]">
+      <Navbar/>
       {/* Header */}
       <div className="bg-[#0F3D5E] pt-24 pb-8">
         <div className="container">
@@ -118,6 +121,7 @@ export default function Cart() {
           </div>
         )}
       </div>
+      <Footer/>
     </div>
   );
 }

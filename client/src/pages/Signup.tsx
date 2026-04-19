@@ -1,3 +1,4 @@
+import Navbar from "@/components/Navbar";
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -139,6 +140,7 @@ export default function SignUp() {
 
   return (
     <div className="min-h-screen bg-white flex">
+      <Navbar/>
       {/* ── Left panel — illustration ── */}
       <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center bg-gradient-to-br from-[#0F3D5E] to-[#0050D0] p-12 relative overflow-hidden">
         {/* Logo */}

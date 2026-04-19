@@ -1,3 +1,5 @@
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { useState } from "react";
 import { Link, useParams } from "wouter";
 import { Search, SlidersHorizontal, Package, ShoppingCart, X, ChevronRight } from "lucide-react";
@@ -79,6 +81,7 @@ export default function Products() {
 
   return (
     <div className="min-h-screen bg-[#F5F9FF]">
+      <Navbar/>
       {/* Page Header */}
       <div className="bg-[#0F3D5E] pt-24 pb-10">
         <div className="container">
@@ -267,6 +270,7 @@ export default function Products() {
           </>
         )}
       </div>
+      <Footer/>
     </div>
   );
 }

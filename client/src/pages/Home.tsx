@@ -1,3 +1,5 @@
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { Link } from "wouter";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -141,6 +143,7 @@ export default function Home() {
 
   return (
     <div className="bg-[#F5F9FF] min-h-screen">
+      <Navbar/>
 
       {/* ══ HERO ══════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden pt-24 pb-20 md:pt-32 md:pb-28">
@@ -540,7 +543,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-
+      <Footer/>
     </div>
   );
 }

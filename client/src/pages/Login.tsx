@@ -1,3 +1,4 @@
+import Navbar from "@/components/Navbar";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Eye, EyeOff, Loader2, ShieldCheck, ArrowLeft, Lock } from "lucide-react";
@@ -155,6 +156,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-white flex">
+      <Navbar/>
       {/* ── Left panel — illustration ── */}
       <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center bg-gradient-to-br from-[#0F3D5E] to-[#0050D0] p-12 relative overflow-hidden">
         {/* Logo */}

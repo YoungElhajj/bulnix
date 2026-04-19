@@ -1,3 +1,5 @@
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { CreditCard, Bitcoin, Banknote, Shield, Lock, ArrowLeft, CheckCircle, Loader2, ChevronRight } from "lucide-react";
@@ -34,6 +36,7 @@ export default function Checkout() {
 
   if (!isAuthenticated) return (
     <div className="min-h-screen bg-[#F5F9FF] flex items-center justify-center">
+      <Navbar/>
       <div className="text-center bg-white rounded-2xl p-10 border border-[#D8E8F5] shadow-sm max-w-sm w-full mx-4">
         <div className="w-16 h-16 rounded-2xl bg-[#F0F8FF] border border-[#D8E8F5] flex items-center justify-center mx-auto mb-4">
           <Lock className="h-8 w-8 text-[#0050D0]"/>
@@ -225,6 +228,7 @@ export default function Checkout() {
           </div>
         </div>
       </div>
+      <Footer/>
     </div>
   );
 }
