@@ -15,7 +15,7 @@ vi.mock("./db", () => ({
   getProductBySlug: vi.fn().mockResolvedValue({ id: 1, title: "Instagram Accounts", slug: "instagram-accounts", customerPriceUSD: "4.99", isVisible: true }),
   validateCoupon: vi.fn().mockResolvedValue({ valid: false, message: "Invalid coupon code" }),
   createOrder: vi.fn().mockResolvedValue({ orderId: 1, orderNumber: "BLX-123456-ABCDEF", totalUSD: "9.99" }),
-  getUserOrders: vi.fn().mockResolvedValue({ orders: [], total: 0 }),
+  getUserOrders: vi.fn().mockResolvedValue({ items: [], total: 0 }),
   getUserOrderById: vi.fn().mockResolvedValue({ id: 1, status: "pending_payment", totalUSD: "9.99" }),
   getOrderDelivery: vi.fn().mockResolvedValue([]),
   initiatePayment: vi.fn().mockResolvedValue({ success: true, paymentUrl: null, reference: "ref_123" }),
@@ -164,7 +164,7 @@ describe("orders", () => {
   it("lists user orders", async () => {
     const caller = appRouter.createCaller(makeUserCtx());
     const result = await caller.orders.list({ page: 1, limit: 20 });
-    expect(result).toHaveProperty("orders");
+    expect(result).toHaveProperty("items");
   });
 });
 

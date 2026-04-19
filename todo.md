@@ -471,3 +471,17 @@
 - [x] Auto-trigger fulfillment on webhook payment confirmation (Paystack/Flutterwave/NowPayments)
 - [x] Update Order Detail page to show delivered credentials to customer
 - [x] Test end-to-end: pay → fulfill → delivered status with credentials shown
+
+## Critical Bug Fixes (Apr 19, 2026 - Round 4)
+- [ ] Fix orders stuck on processing - diagnose AccsZone fulfillment failure
+- [ ] Fix user Orders page showing "No orders found" despite orders existing
+- [ ] Retry fulfillment for 3 stuck orders (#120002, #150001, #150002)
+
+## Critical Bug Fixes Round 5 (Apr 19, 2026)
+- [x] Fix autoFulfillOrder JOIN bug: item.supplierProductId is the AccsZone product ID directly, not a FK to supplier_products.id — remove wrong DB lookup
+- [x] Fix AccsZone connector: POST /purchase with ad_id (not POST /orders with product_id) — correct endpoint and param name per API docs
+- [x] Apply 5% promo code "5%OFF" when placing AccsZone orders (promo_code field in /purchase)
+- [x] Fix Orders.tsx "No orders found" — was reading data.orders instead of data.items (getUserOrders returns { items, total })
+- [x] Retry 3 stuck orders (#120002, #150001, #150002) — all fail with "Insufficient balance" (AccsZone account has $0.00 balance, not a code bug)
+- [x] Reset stuck orders back to "processing" status so they retry when AccsZone account is funded
+- [x] All 41 tests passing

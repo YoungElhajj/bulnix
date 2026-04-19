@@ -43,7 +43,7 @@ export default function Orders() {
     </div>
   );
 
-  const orders = (data as any)?.orders ?? [];
+  const orders = (data as any)?.items ?? [];
   const total = (data as any)?.total ?? 0;
   const totalPages = Math.ceil(total / 20);
   const statusBadge = (s: string) => ({ pending: "bg-yellow-500/10 text-yellow-400", processing: "bg-blue-500/10 text-blue-400", completed: "bg-[#EEF4FF] text-[#0050D0]", failed: "bg-red-500/10 text-red-400", refunded: "bg-orange-500/10 text-orange-400" }[s] ?? "bg-slate-500/10 text-[#4A6080]");

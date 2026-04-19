@@ -357,22 +357,27 @@ export async function placeSupplierOrder(
   const client = createClient(apiKey);
 
   try {
-    const response = await client.post("/orders", {
-      product_id: supplierProductId,
+    // AccsZone uses POST /purchase with ad_id (not POST /orders with product_id)
+    const response = await client.post("/purchase", {
+      ad_id: Number(supplierProductId),
       quantity,
-      reference: `BULNIX-${orderId}`,
+      promo_code: "5%OFF", // Apply 5% discount promo code
     });
 
-    const data: AccsZoneOrderResponse = response.data;
+    // Response is wrapped in data: { order_id, accounts, ... }
+    const responseData = response.data;
+    const data: AccsZoneOrderResponse = responseData?.data ?? responseData;
+    const isSuccess = responseData?.success === true || response.status === 201 || response.status === 200;
 
-    if (data.error || data.message?.toLowerCase().includes("error")) {
-      await logSystem("error", "fulfillment", `AccsZone order failed for order ${orderId}`, { error: data.error ?? data.message });
-      return { success: false, error: data.error ?? data.message ?? "Unknown error" };
+    if (!isSuccess || data.error || (responseData?.message && !responseData?.success)) {
+      const errMsg = data.error ?? responseData?.message ?? "Unknown error";
+      await logSystem("error", "fulfillment", `AccsZone order failed for order ${orderId}`, { error: errMsg });
+      return { success: false, error: errMsg };
     }
 
     await logSystem("info", "fulfillment", `AccsZone order placed for order ${orderId}`, {
       supplierOrderId: data.order_id,
-      accountCount: data.accounts?.length ?? 0,
+      accountCount: Array.isArray(data.accounts) ? data.accounts.length : 0,
     });
 
     return {
@@ -397,9 +402,11 @@ export async function checkSupplierOrderStatus(
 
   try {
     const response = await client.get(`/orders/${supplierOrderId}`);
-    const data = response.data;
+    const responseData = response.data;
+    // AccsZone wraps response in data field
+    const data = responseData?.data ?? responseData;
     return {
-      status: data.status ?? "unknown",
+      status: data.status ?? (responseData?.success ? "completed" : "unknown"),
       deliveryData: data.accounts ?? data.data ?? null,
     };
   } catch (err: unknown) {

@@ -680,14 +680,11 @@ export async function autoFulfillOrder(orderId: number): Promise<void> {
     let failCount = 0;
 
     for (const item of items) {
-      // orderItems.supplierProductId stores the FK int to supplierProducts.id as a string
-      // We need to look up the real AccsZone product ID from supplierProducts.supplierProductId
+      // orderItems.supplierProductId stores the AccsZone product ID string directly (e.g. "879", "1402")
+      // NOT a FK to supplier_products.id — use it directly as the AccsZone product ID
       let accsZoneProductId: string | null = null;
       if (item.supplierProductId && item.providerKey === "accszone") {
-        const [sp] = await db.select().from(supplierProducts)
-          .where(eq(supplierProducts.id, Number(item.supplierProductId)))
-          .limit(1);
-        accsZoneProductId = sp?.supplierProductId ?? null;
+        accsZoneProductId = item.supplierProductId;
       }
 
       if (!accsZoneProductId) {
