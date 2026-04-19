@@ -19,7 +19,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 
-const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663404004095/6qKkSV9dybS3AerhXhrTfQ/bulnix-logo_9d63016d.png";
+const LOGO_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663404004095/UEAuHoiEheGEUEnr.jpg";
 
 // Primary nav links (always visible on desktop)
 const primaryLinks = [
@@ -118,8 +118,7 @@ export default function Navbar() {
             <img
               src={LOGO_URL}
               alt="Bulnix"
-              className="h-9 w-auto object-contain"
-              style={{ background: "transparent" }}
+              className="h-10 w-auto object-contain rounded-lg"
             />
           </Link>
 

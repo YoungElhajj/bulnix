@@ -4,7 +4,7 @@ import { ArrowRight, Shield, Zap, Globe } from "lucide-react";
 
 const WHATSAPP_URL = "https://wa.me/447916699429";
 const TELEGRAM_URL = "https://t.me/bulnix";
-const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663404004095/6qKkSV9dybS3AerhXhrTfQ/bulnix-logo_9d63016d.png";
+const LOGO_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663404004095/UEAuHoiEheGEUEnr.jpg";
 
 const socialLinks = [
   {
@@ -92,8 +92,8 @@ export default function Footer() {
               {[
                 { label: "Who We Are", href: "/about" },
                 { label: "What We Provide", href: "/about#services" },
-                { label: "Become a Partner", href: "/contact" },
-                { label: "Careers", href: "/contact" },
+                { label: "Become a Partner", href: "/contact#partner" },
+                { label: "Careers", href: "/contact#careers" },
               ].map(l => (
                 <li key={l.href}>
                   <Link href={l.href} className="text-white/50 hover:text-white text-sm transition-colors">
@@ -131,7 +131,7 @@ export default function Footer() {
           {/* Col 4: Brand + Newsletter */}
           <div>
             <Link href="/" className="inline-flex items-center mb-4">
-              <img src={LOGO_URL} alt="Bulnix" className="h-9 w-auto object-contain" />
+              <img src={LOGO_URL} alt="Bulnix" className="h-10 w-auto object-contain rounded-lg" />
             </Link>
             <p className="text-white/50 text-sm leading-relaxed mb-5">
               Your go-to platform for premium digital accounts, social media services, streaming subscriptions, and gaming credits. Instant delivery, secure payments, trusted worldwide.

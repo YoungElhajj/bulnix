@@ -7,7 +7,7 @@ import {
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 
-const LOGO_URL = "https://cdn-us2.manus.computer/uploads/webdev/bulnix/ChatGPTImageMar20,2026,04_01_00AM.png";
+const LOGO_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663404004095/UEAuHoiEheGEUEnr.jpg";
 
 const navItems = [
   { label: "Dashboard",        href: "/admin",                    icon: LayoutDashboard },
