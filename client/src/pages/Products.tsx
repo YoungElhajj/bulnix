@@ -27,86 +27,18 @@ function formatPrice(usd: number, currency: string): string {
   return `${cur.symbol}${converted.toFixed(2)}`;
 }
 
-// Detect brand from product title/image and render a styled icon background
+// Simple image area — show supplier image as-is on a neutral background
 function ProductImageArea({ product }: { product: any }) {
-  const title = (product.title ?? "").toLowerCase();
-  const hasImage = !!product.imageUrl;
-
-  // Brand color mapping for products without images or with transparent PNGs
-  const getBrandStyle = () => {
-    if (title.includes("instagram") || title.includes("ig account")) {
-      return { bg: "from-[#833ab4] via-[#fd1d1d] to-[#fcb045]", label: "IG" };
-    }
-    if (title.includes("facebook") || title.includes("fb account")) {
-      return { bg: "from-[#1877F2] to-[#0d5db8]", label: "FB" };
-    }
-    if (title.includes("twitter") || title.includes("x account") || title.includes("tweet")) {
-      return { bg: "from-[#111] to-[#333]", label: "𝕏" };
-    }
-    if (title.includes("tiktok")) {
-      return { bg: "from-[#010101] to-[#2d2d2d]", label: "TT" };
-    }
-    if (title.includes("youtube") || title.includes("yt ")) {
-      return { bg: "from-[#FF0000] to-[#cc0000]", label: "YT" };
-    }
-    if (title.includes("spotify")) {
-      return { bg: "from-[#1DB954] to-[#158a3e]", label: "SP" };
-    }
-    if (title.includes("netflix")) {
-      return { bg: "from-[#E50914] to-[#b00710]", label: "NF" };
-    }
-    if (title.includes("discord")) {
-      return { bg: "from-[#5865F2] to-[#3a47d5]", label: "DC" };
-    }
-    if (title.includes("linkedin")) {
-      return { bg: "from-[#0077B5] to-[#005885]", label: "LI" };
-    }
-    if (title.includes("snapchat")) {
-      return { bg: "from-[#FFFC00] to-[#e6e300]", label: "SC" };
-    }
-    if (title.includes("pinterest")) {
-      return { bg: "from-[#E60023] to-[#b0001b]", label: "PI" };
-    }
-    if (title.includes("reddit")) {
-      return { bg: "from-[#FF4500] to-[#cc3700]", label: "RD" };
-    }
-    if (title.includes("gmail") || title.includes("google")) {
-      return { bg: "from-[#4285F4] to-[#2c6fd1]", label: "GM" };
-    }
-    if (title.includes("amazon") || title.includes("aws")) {
-      return { bg: "from-[#FF9900] to-[#cc7a00]", label: "AZ" };
-    }
-    if (title.includes("paypal")) {
-      return { bg: "from-[#003087] to-[#001f5a]", label: "PP" };
-    }
-    return null;
-  };
-
-  const brand = getBrandStyle();
-
   return (
-    <div className="relative h-36 sm:h-44 overflow-hidden flex items-center justify-center">
-      {hasImage ? (
-        // Use a dark/brand background behind the image to avoid white checkered look
-        <div className={`absolute inset-0 ${brand ? `bg-gradient-to-br ${brand.bg}` : "bg-[#0A2540]"} opacity-90`} />
-      ) : brand ? (
-        <div className={`absolute inset-0 bg-gradient-to-br ${brand.bg}`} />
-      ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0A2540] to-[#0F3060]" />
-      )}
-
-      {hasImage ? (
+    <div className="relative h-36 sm:h-44 overflow-hidden flex items-center justify-center bg-white">
+      {product.imageUrl ? (
         <img
           src={product.imageUrl}
           alt={product.title}
-          className="relative z-10 h-20 sm:h-28 max-w-[80%] object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-lg"
+          className="h-20 sm:h-32 max-w-full object-contain group-hover:scale-105 transition-transform duration-300 p-2"
         />
-      ) : brand ? (
-        <span className="relative z-10 text-white font-black text-3xl sm:text-4xl tracking-tight drop-shadow-lg select-none">
-          {brand.label}
-        </span>
       ) : (
-        <Package className="relative z-10 h-12 w-12 text-white/40" />
+        <Package className="h-12 w-12 text-[#0050D0]/30" />
       )}
 
       {/* Badges */}

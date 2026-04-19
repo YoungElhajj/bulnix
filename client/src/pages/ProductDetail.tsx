@@ -250,33 +250,16 @@ function getLoginInstructions(title: string): {
   };
 }
 
-// Brand-aware image area (same logic as Products.tsx)
+// Simple image area — show supplier image as-is on a white background
 function ProductImageArea({ product }: { product: any }) {
-  const title = (product.title ?? "").toLowerCase();
-  const hasImage = !!product.imageUrl;
-
-  const getBrandStyle = () => {
-    if (title.includes("instagram") || title.includes("ig account")) return { bg: "from-[#833ab4] via-[#fd1d1d] to-[#fcb045]" };
-    if (title.includes("facebook") || title.includes("fb account")) return { bg: "from-[#1877F2] to-[#0d5db8]" };
-    if (title.includes("twitter") || title.includes("x account")) return { bg: "from-[#111] to-[#333]" };
-    if (title.includes("tiktok")) return { bg: "from-[#010101] to-[#2d2d2d]" };
-    if (title.includes("youtube") || title.includes("yt ")) return { bg: "from-[#FF0000] to-[#cc0000]" };
-    if (title.includes("spotify")) return { bg: "from-[#1DB954] to-[#158a3e]" };
-    if (title.includes("netflix")) return { bg: "from-[#E50914] to-[#b00710]" };
-    if (title.includes("discord")) return { bg: "from-[#5865F2] to-[#3a47d5]" };
-    return null;
-  };
-
-  const brand = getBrandStyle();
-
   return (
-    <div className={`aspect-square rounded-2xl flex items-center justify-center overflow-hidden border border-border shadow-sm max-h-[480px] w-full relative ${brand ? `bg-gradient-to-br ${brand.bg}` : "bg-gradient-to-br from-[#0A2540] to-[#0F3060]"}`}>
-      {hasImage ? (
-        <img src={product.imageUrl} alt={product.title} className="w-full h-full object-contain p-8 drop-shadow-2xl" />
+    <div className="aspect-square rounded-2xl flex items-center justify-center overflow-hidden border border-border shadow-sm max-h-[480px] w-full bg-white">
+      {product.imageUrl ? (
+        <img src={product.imageUrl} alt={product.title} className="w-full h-full object-contain p-8" />
       ) : (
-        <div className="flex flex-col items-center gap-3 text-white/30">
+        <div className="flex flex-col items-center gap-3 text-[#0050D0]/30">
           <Package className="h-20 w-20"/>
-          <span className="text-sm font-medium text-white/50">Digital Product</span>
+          <span className="text-sm font-medium text-[#4A6080]">Digital Product</span>
         </div>
       )}
     </div>
