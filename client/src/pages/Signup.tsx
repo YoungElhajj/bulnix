@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Eye, EyeOff, Loader2, ShieldCheck, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, ShieldCheck, ArrowLeft, CheckCircle2, ShieldIcon, Truck, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,20 +14,42 @@ const LOGO_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/
 
 type Step = "signup" | "otp";
 
-const socialIcons = [
-  { name: "Netflix", bg: "#E50914", letter: "N", top: "10%", left: "10%", delay: "0s" },
-  { name: "Spotify", bg: "#1DB954", letter: "S", top: "8%", left: "60%", delay: "0.7s" },
-  { name: "YouTube", bg: "#FF0000", letter: "▶", top: "40%", left: "5%", delay: "1.4s" },
-  { name: "Disney+", bg: "#0063E5", letter: "D", top: "72%", left: "65%", delay: "0.4s" },
-  { name: "Instagram", bg: "linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)", letter: "📷", top: "75%", left: "20%", delay: "1.1s" },
-  { name: "TikTok", bg: "#010101", letter: "♪", top: "30%", left: "72%", delay: "0.2s" },
+const whyBulnix = [
+  {
+    icon: <Truck className="w-5 h-5 text-[#00C2FF]" />,
+    title: "Instant Delivery",
+    desc: "Account credentials sent to your email within minutes of payment confirmation.",
+  },
+  {
+    icon: <ShieldIcon className="w-5 h-5 text-[#00C2FF]" />,
+    title: "Verified Products",
+    desc: "Every product is tested and verified before listing. Quality guaranteed.",
+  },
+  {
+    icon: <CreditCard className="w-5 h-5 text-[#00C2FF]" />,
+    title: "Secure Payments",
+    desc: "Pay via Paystack, Monnify, or crypto. All transactions are SSL-encrypted.",
+  },
+  {
+    icon: <CheckCircle2 className="w-5 h-5 text-[#00C2FF]" />,
+    title: "Refund Protection",
+    desc: "Not satisfied? Raise a support ticket and we'll resolve it within 24 hours.",
+  },
 ];
 
-const perks = [
-  "200+ premium digital accounts available",
-  "Instant delivery to your email",
-  "Secure payments — Paystack & crypto",
-  "24/7 live support via WhatsApp & Telegram",
+const platforms = [
+  { name: "Facebook", color: "#1877F2" },
+  { name: "Instagram", color: "#E1306C" },
+  { name: "Netflix", color: "#E50914" },
+  { name: "Spotify", color: "#1DB954" },
+  { name: "Discord", color: "#5865F2" },
+  { name: "Gmail", color: "#EA4335" },
+  { name: "YouTube", color: "#FF0000" },
+  { name: "Telegram", color: "#229ED9" },
+  { name: "Reddit", color: "#FF4500" },
+  { name: "Twitter/X", color: "#000000" },
+  { name: "WhatsApp", color: "#25D366" },
+  { name: "TikTok", color: "#010101" },
 ];
 
 export default function SignUp() {
@@ -45,6 +67,7 @@ export default function SignUp() {
   const [agreed, setAgreed] = useState(false);
   const [otp, setOtp] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [passwordError, setPasswordError] = useState("");
 
   useEffect(() => {
     if (isAuthenticated) navigate("/dashboard");
@@ -66,7 +89,7 @@ export default function SignUp() {
   });
 
   const verifyMutation = trpc.auth.verifyOtp.useMutation({
-    onSuccess: async () => { await utils.auth.me.invalidate(); toast.success("Account created! Welcome to Bulnix!"); navigate("/dashboard"); },
+    onSuccess: async () => { await utils.auth.me.invalidate(); toast.success("Account created! Welcome to Bulnix."); navigate("/dashboard"); },
     onError: (err) => toast.error(err.message),
   });
 
@@ -77,8 +100,10 @@ export default function SignUp() {
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirmPassword) { toast.error("Passwords do not match"); return; }
+    if (password !== confirmPassword) { setPasswordError("Passwords do not match."); return; }
+    if (password.length < 8) { setPasswordError("Password must be at least 8 characters."); return; }
     if (!agreed) { toast.error("Please agree to the Terms & Conditions"); return; }
+    setPasswordError("");
     registerMutation.mutate({ name, email, password });
   };
 
@@ -90,102 +115,90 @@ export default function SignUp() {
   const handleGoogleSignup = () => { window.location.href = getLoginUrl("/dashboard"); };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-[#F8FAFF] flex flex-col">
       <Navbar />
       <div className="flex flex-1 pt-16">
 
-        {/* LEFT PANEL */}
-        <div className="hidden lg:flex lg:w-[48%] flex-col justify-between relative overflow-hidden"
-          style={{ background: "linear-gradient(160deg, #0a0f1e 0%, #0d1f3c 40%, #0a2a5e 70%, #0050D0 100%)" }}>
+        {/* ══════════════ LEFT PANEL ══════════════ */}
+        <div className="hidden lg:flex lg:w-[52%] flex-col relative overflow-hidden bg-[#0F3D5E]">
+          {/* Subtle diagonal stripe overlay */}
+          <div className="absolute inset-0 opacity-5"
+            style={{ backgroundImage: "repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 50%)", backgroundSize: "20px 20px" }} />
 
-          <div className="absolute inset-0 opacity-20"
-            style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+          {/* Top accent bar */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00C2FF] via-[#0050D0] to-[#00C2FF]" />
 
-          <div className="absolute top-[-10%] right-[-10%] w-[55%] h-[55%] rounded-full opacity-20"
+          {/* Glow accents */}
+          <div className="absolute top-[-80px] right-[-80px] w-[300px] h-[300px] rounded-full opacity-10"
             style={{ background: "radial-gradient(circle, #00C2FF, transparent 70%)" }} />
-          <div className="absolute bottom-[-5%] left-[-5%] w-[45%] h-[45%] rounded-full opacity-15"
+          <div className="absolute bottom-[-60px] left-[-60px] w-[260px] h-[260px] rounded-full opacity-8"
             style={{ background: "radial-gradient(circle, #0050D0, transparent 70%)" }} />
 
-          <div className="absolute inset-0 pointer-events-none">
-            {socialIcons.map((s) => (
-              <div key={s.name}
-                className="absolute flex items-center justify-center rounded-full shadow-2xl text-white font-bold text-sm"
-                style={{
-                  top: s.top, left: s.left,
-                  width: 52, height: 52,
-                  background: s.bg,
-                  animation: "float 4s ease-in-out infinite",
-                  animationDelay: s.delay,
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-                }}>
-                {s.letter}
-              </div>
-            ))}
-          </div>
-
-          <div className="relative z-10 flex flex-col justify-center flex-1 px-10 py-12">
+          {/* Content */}
+          <div className="relative z-10 flex flex-col h-full px-10 py-10">
+            {/* Logo */}
             <Link href="/" className="inline-block mb-10">
-              <img src={LOGO_URL} alt="Bulnix" className="h-12 w-auto rounded-xl shadow-xl" />
+              <img src={LOGO_URL} alt="Bulnix" className="h-10 w-auto" />
             </Link>
 
-            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 w-fit mb-6">
-              <span className="w-2 h-2 rounded-full bg-[#00C2FF] animate-pulse" />
-              <span className="text-white/80 text-xs font-medium tracking-wider uppercase">Join the elite 1%</span>
+            {/* Headline */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-white leading-snug mb-3" style={{ fontFamily: "'Poppins', sans-serif" }}>
+                Create your free account<br />
+                <span className="text-[#00C2FF]">and start buying today</span>
+              </h2>
+              <p className="text-white/55 text-sm leading-relaxed max-w-sm">
+                Join thousands of customers who trust Bulnix for premium digital accounts. No subscription, no hidden fees.
+              </p>
             </div>
 
-            <h2 className="text-4xl font-extrabold text-white leading-tight mb-4" style={{ fontFamily: "'Poppins', sans-serif" }}>
-              Elevate your<br />
-              <span className="text-[#00C2FF]">digital access.</span>
-            </h2>
-            <p className="text-white/50 text-sm leading-relaxed max-w-xs mb-10">
-              The world's most trusted marketplace for premium digital accounts. Verified products, instant delivery, and unparalleled reach.
-            </p>
-
-            <div className="space-y-3 mb-10">
-              {perks.map((p, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-[#00C2FF]/20 border border-[#00C2FF]/40 flex items-center justify-center flex-shrink-0">
-                    <CheckCircle2 className="w-3 h-3 text-[#00C2FF]" />
+            {/* Why Bulnix feature list */}
+            <div className="space-y-5 mb-8">
+              {whyBulnix.map((item) => (
+                <div key={item.title} className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-white/8 border border-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    {item.icon}
                   </div>
-                  <span className="text-white/70 text-sm">{p}</span>
+                  <div>
+                    <div className="text-white text-sm font-semibold">{item.title}</div>
+                    <div className="text-white/45 text-xs leading-relaxed mt-0.5">{item.desc}</div>
+                  </div>
                 </div>
               ))}
             </div>
 
-            <div className="bg-white/8 border border-white/15 rounded-2xl p-4 flex items-center gap-4">
-              <div className="flex -space-x-2">
-                {["#E50914","#1DB954","#FF0000","#0063E5"].map((c, i) => (
-                  <div key={i} className="w-8 h-8 rounded-full border-2 border-white/20 flex items-center justify-center text-white text-xs font-bold"
-                    style={{ background: c }}>
-                    {["N","S","▶","D"][i]}
-                  </div>
+            {/* Platform tags */}
+            <div className="mt-auto">
+              <p className="text-white/35 text-xs uppercase tracking-wider font-medium mb-3">Platforms available</p>
+              <div className="flex flex-wrap gap-2">
+                {platforms.map((p) => (
+                  <span key={p.name}
+                    className="inline-flex items-center gap-1.5 bg-white/8 border border-white/10 rounded-full px-2.5 py-1 text-white/60 text-xs">
+                    <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: p.color }} />
+                    {p.name}
+                  </span>
                 ))}
-              </div>
-              <div>
-                <div className="flex items-center gap-1">
-                  {[1,2,3,4,5].map(i => <span key={i} className="text-yellow-400 text-xs">★</span>)}
-                  <span className="text-white font-bold text-sm ml-1">4.9/5</span>
-                </div>
-                <div className="text-white/50 text-xs">Trusted by 50K+ customers worldwide</div>
               </div>
             </div>
           </div>
 
-          <p className="relative z-10 text-center text-xs text-white/25 pb-6">© {new Date().getFullYear()} Bulnix. All rights reserved.</p>
+          <p className="relative z-10 text-center text-xs text-white/20 pb-5">© {new Date().getFullYear()} Bulnix. All rights reserved.</p>
         </div>
 
-        {/* RIGHT PANEL */}
+        {/* ══════════════ RIGHT PANEL ══════════════ */}
         <div className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-[#F8FAFF]">
           <div className="w-full max-w-md">
+            {/* Mobile logo */}
             <div className="lg:hidden mb-8">
               <Link href="/"><img src={LOGO_URL} alt="Bulnix" className="h-9 w-auto rounded-lg" /></Link>
             </div>
 
+            {/* ── Register step ── */}
             {step === "signup" && (
               <>
                 <div className="mb-7">
-                  <h1 className="text-3xl font-extrabold text-slate-900" style={{ fontFamily: "'Poppins', sans-serif" }}>Create Account</h1>
-                  <p className="text-slate-500 mt-1.5 text-sm">It's not late — let's start your journey now.</p>
+                  <h1 className="text-3xl font-extrabold text-[#0F3D5E]" style={{ fontFamily: "'Poppins', sans-serif" }}>Create Account</h1>
+                  <p className="text-slate-500 mt-1.5 text-sm">It's free — let's get you started.</p>
                 </div>
 
                 <button type="button" onClick={handleGoogleSignup}
@@ -221,7 +234,7 @@ export default function SignUp() {
                   <div className="space-y-1.5">
                     <Label htmlFor="password" className="text-slate-700 text-sm font-medium">Password</Label>
                     <div className="relative">
-                      <Input id="password" type={showPassword ? "text" : "password"} placeholder="Create password (min. 8 chars)"
+                      <Input id="password" type={showPassword ? "text" : "password"} placeholder="Min. 8 characters"
                         value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8}
                         className="h-12 border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 pr-10 focus:border-[#0050D0] focus:ring-[#0050D0]/20 rounded-xl shadow-sm" />
                       <button type="button" onClick={() => setShowPassword(!showPassword)}
@@ -231,33 +244,31 @@ export default function SignUp() {
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="confirm" className="text-slate-700 text-sm font-medium">Confirm Password</Label>
+                    <Label htmlFor="confirmPassword" className="text-slate-700 text-sm font-medium">Confirm Password</Label>
                     <div className="relative">
-                      <Input id="confirm" type={showConfirm ? "text" : "password"} placeholder="Confirm your password"
-                        value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required
-                        className={"h-12 border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 pr-10 focus:border-[#0050D0] focus:ring-[#0050D0]/20 rounded-xl shadow-sm" + (confirmPassword && password !== confirmPassword ? " border-red-300" : "")} />
+                      <Input id="confirmPassword" type={showConfirm ? "text" : "password"} placeholder="Re-enter your password"
+                        value={confirmPassword} onChange={(e) => { setConfirmPassword(e.target.value); setPasswordError(""); }} required
+                        className={`h-12 border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 pr-10 focus:border-[#0050D0] focus:ring-[#0050D0]/20 rounded-xl shadow-sm ${passwordError ? "border-red-400" : ""}`} />
                       <button type="button" onClick={() => setShowConfirm(!showConfirm)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                         {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
-                    {confirmPassword && password !== confirmPassword && (
-                      <p className="text-xs text-red-500">Passwords do not match</p>
-                    )}
+                    {passwordError && <p className="text-red-500 text-xs mt-1">{passwordError}</p>}
                   </div>
                   <div className="flex items-start gap-2.5 pt-1">
-                    <input id="agree" type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)}
-                      className="mt-0.5 w-4 h-4 rounded border-slate-300 accent-[#0050D0]" />
-                    <label htmlFor="agree" className="text-sm text-slate-600 leading-relaxed cursor-pointer">
+                    <input type="checkbox" id="terms" checked={agreed} onChange={(e) => setAgreed(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 rounded border-slate-300 text-[#0050D0] focus:ring-[#0050D0]/20 cursor-pointer" />
+                    <label htmlFor="terms" className="text-slate-500 text-sm leading-relaxed cursor-pointer">
                       I agree to the{" "}
                       <Link href="/terms" className="text-[#0050D0] hover:underline font-medium">Terms & Conditions</Link>
                       {" "}and{" "}
                       <Link href="/privacy" className="text-[#0050D0] hover:underline font-medium">Privacy Policy</Link>
                     </label>
                   </div>
-                  <Button type="submit" disabled={registerMutation.isPending}
-                    className="w-full h-12 bg-gradient-to-r from-[#0F3D5E] to-[#0050D0] hover:from-[#0a2d47] hover:to-[#003db5] text-white font-semibold text-base rounded-xl shadow-lg shadow-[#0050D0]/25">
-                    {registerMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating account...</> : "Create Account"}
+                  <Button type="submit" disabled={registerMutation.isPending || !agreed}
+                    className="w-full h-12 bg-[#0F3D5E] hover:bg-[#0a2d47] text-white font-semibold text-base rounded-xl shadow-md disabled:opacity-60">
+                    {registerMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating account...</> : "Sign Up"}
                   </Button>
                   <p className="text-center text-sm text-slate-500 pt-1">
                     Already have an account?{" "}
@@ -267,6 +278,7 @@ export default function SignUp() {
               </>
             )}
 
+            {/* ── OTP step ── */}
             {step === "otp" && (
               <>
                 <button onClick={() => setStep("signup")} className="flex items-center gap-1.5 text-slate-500 hover:text-slate-800 text-sm mb-8 transition-colors">
@@ -276,7 +288,7 @@ export default function SignUp() {
                   <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
                     <ShieldCheck className="w-7 h-7 text-[#0050D0]" />
                   </div>
-                  <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: "'Poppins', sans-serif" }}>Verify your email</h1>
+                  <h1 className="text-2xl font-bold text-[#0F3D5E]" style={{ fontFamily: "'Poppins', sans-serif" }}>Verify your email</h1>
                   <p className="text-slate-500 mt-1 text-sm">We sent a 6-digit code to <span className="text-slate-800 font-medium">{email}</span></p>
                 </div>
                 <form onSubmit={handleVerify} className="space-y-5">
@@ -287,7 +299,7 @@ export default function SignUp() {
                       className="h-14 border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 text-center text-2xl font-mono tracking-[0.5em] focus:border-[#0050D0] focus:ring-[#0050D0]/20 rounded-xl shadow-sm" />
                   </div>
                   <Button type="submit" disabled={verifyMutation.isPending || otp.length !== 6}
-                    className="w-full h-12 bg-gradient-to-r from-[#0F3D5E] to-[#0050D0] hover:from-[#0a2d47] hover:to-[#003db5] text-white font-semibold rounded-xl shadow-lg shadow-[#0050D0]/25">
+                    className="w-full h-12 bg-[#0F3D5E] hover:bg-[#0a2d47] text-white font-semibold rounded-xl shadow-md">
                     {verifyMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Verifying...</> : "Verify & Create Account"}
                   </Button>
                   <div className="text-center">

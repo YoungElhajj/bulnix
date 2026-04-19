@@ -389,3 +389,7 @@
 - [x] Redesign Signup left panel with same rich visual design
 - [x] Fix product card image sizing on mobile (too large, no aspect ratio constraint)
 - [x] Fix categories with 0 products (hidden from customer-facing page; API returns correct counts)
+
+## Auth Page Original Redesign (Apr 19 2026)
+- [ ] Rewrite Login.tsx with original Bulnix design (blue/navy, no Goviraa/Lanxa copying)
+- [ ] Rewrite Signup.tsx with original Bulnix design (blue/navy, no Goviraa/Lanxa copying)

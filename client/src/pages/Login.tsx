@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Eye, EyeOff, Loader2, ShieldCheck, ArrowLeft, Lock } from "lucide-react";
+import { Eye, EyeOff, Loader2, ShieldCheck, ArrowLeft, Lock, Package, Zap, Globe, HeadphonesIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,47 +14,34 @@ const LOGO_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/
 
 type Step = "login" | "otp" | "forgot" | "reset";
 
-// Social platform icons (circle style like Lanxa)
-const socialIcons = [
-  { name: "Instagram", bg: "linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)", icon: (
-    <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-  ), top: "12%", left: "8%", delay: "0s" },
-  { name: "TikTok", bg: "#010101", icon: (
-    <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/></svg>
-  ), top: "8%", left: "62%", delay: "0.6s" },
-  { name: "Facebook", bg: "#1877F2", icon: (
+// Bulnix-specific product categories shown as showcase cards
+const productCategories = [
+  { name: "Facebook Accounts", count: "192+", color: "#1877F2", icon: (
     <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-  ), top: "42%", left: "5%", delay: "1.2s" },
-  { name: "WhatsApp", bg: "#25D366", icon: (
-    <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-  ), top: "70%", left: "68%", delay: "0.9s" },
-  { name: "YouTube", bg: "#FF0000", icon: (
-    <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-  ), top: "78%", left: "22%", delay: "0.3s" },
-  { name: "Telegram", bg: "#229ED9", icon: (
-    <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-  ), top: "30%", left: "75%", delay: "1.5s" },
+  )},
+  { name: "Instagram Accounts", count: "150+", color: "#E1306C", icon: (
+    <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+  )},
+  { name: "Netflix Accounts", count: "80+", color: "#E50914", icon: (
+    <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5"><path d="M5.398 0v.006c3.028 8.556 5.37 15.175 8.348 23.596 2.344.058 4.85.398 4.854.398-2.8-7.924-5.923-16.747-8.487-24zm8.489 0v9.63L18.6 22.951c-.043-7.86-.004-15.913.002-22.95zM5.398 1.05V24c1.873-.225 2.81-.312 4.715-.398v-9.22z"/></svg>
+  )},
+  { name: "Gmail Accounts", count: "37+", color: "#EA4335", icon: (
+    <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
+  )},
+  { name: "Discord Accounts", count: "27+", color: "#5865F2", icon: (
+    <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.032.054a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+  )},
+  { name: "Spotify Accounts", count: "60+", color: "#1DB954", icon: (
+    <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+  )},
 ];
 
-// Feature cards shown on the left panel
-const featureCards = [
-  {
-    title: "Instant Delivery",
-    desc: "Account credentials delivered to your email within minutes of purchase.",
-    icon: "⚡",
-    color: "from-blue-500/20 to-cyan-500/20",
-    border: "border-blue-400/30",
-    top: "18%", left: "5%", width: "42%",
-  },
-  {
-    title: "Earn from Bulnix",
-    value: "$4,210",
-    desc: "Resellers earn monthly",
-    icon: "💰",
-    color: "from-emerald-500/20 to-teal-500/20",
-    border: "border-emerald-400/30",
-    top: "18%", left: "52%", width: "42%",
-  },
+// Key stats for Bulnix
+const stats = [
+  { label: "Products", value: "449+" },
+  { label: "Orders", value: "45K+" },
+  { label: "Customers", value: "9K+" },
+  { label: "Countries", value: "72+" },
 ];
 
 export default function Login() {
@@ -117,105 +104,91 @@ export default function Login() {
   const handleGoogleLogin = () => { window.location.href = getLoginUrl("/dashboard"); };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-[#F8FAFF] flex flex-col">
       <Navbar />
       <div className="flex flex-1 pt-16">
 
         {/* ══════════════ LEFT PANEL ══════════════ */}
-        <div className="hidden lg:flex lg:w-[48%] flex-col justify-between relative overflow-hidden"
-          style={{ background: "linear-gradient(160deg, #0a0f1e 0%, #0d1f3c 40%, #0a2a5e 70%, #0050D0 100%)" }}>
+        <div className="hidden lg:flex lg:w-[52%] flex-col relative overflow-hidden bg-[#0F3D5E]">
+          {/* Subtle diagonal stripe overlay */}
+          <div className="absolute inset-0 opacity-5"
+            style={{ backgroundImage: "repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 50%)", backgroundSize: "20px 20px" }} />
 
-          {/* Dot-grid overlay */}
-          <div className="absolute inset-0 opacity-20"
-            style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+          {/* Top gradient accent */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00C2FF] via-[#0050D0] to-[#00C2FF]" />
 
-          {/* Organic blobs */}
-          <div className="absolute top-[-10%] left-[-10%] w-[55%] h-[55%] rounded-full opacity-20"
+          {/* Glow accents */}
+          <div className="absolute top-[-80px] right-[-80px] w-[320px] h-[320px] rounded-full opacity-10"
             style={{ background: "radial-gradient(circle, #00C2FF, transparent 70%)" }} />
-          <div className="absolute bottom-[-5%] right-[-5%] w-[45%] h-[45%] rounded-full opacity-15"
+          <div className="absolute bottom-[-60px] left-[-60px] w-[280px] h-[280px] rounded-full opacity-8"
             style={{ background: "radial-gradient(circle, #0050D0, transparent 70%)" }} />
-          <div className="absolute top-[40%] left-[30%] w-[40%] h-[40%] rounded-full opacity-10"
-            style={{ background: "radial-gradient(circle, #00C2FF, transparent 70%)" }} />
 
-          {/* Floating social icons */}
-          <div className="absolute inset-0 pointer-events-none">
-            {socialIcons.map((s) => (
-              <div key={s.name}
-                className="absolute flex items-center justify-center rounded-full shadow-2xl"
-                style={{
-                  top: s.top, left: s.left,
-                  width: 52, height: 52,
-                  background: s.bg,
-                  animation: "float 4s ease-in-out infinite",
-                  animationDelay: s.delay,
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-                }}>
-                {s.icon}
-              </div>
-            ))}
-          </div>
-
-          {/* Main content area */}
-          <div className="relative z-10 flex flex-col justify-center flex-1 px-10 py-12">
+          {/* Content */}
+          <div className="relative z-10 flex flex-col h-full px-10 py-10">
             {/* Logo */}
             <Link href="/" className="inline-block mb-10">
-              <img src={LOGO_URL} alt="Bulnix" className="h-12 w-auto rounded-xl shadow-xl" />
+              <img src={LOGO_URL} alt="Bulnix" className="h-10 w-auto" />
             </Link>
 
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 w-fit mb-6">
-              <span className="w-2 h-2 rounded-full bg-[#00C2FF] animate-pulse" />
-              <span className="text-white/80 text-xs font-medium tracking-wider uppercase">Join 50,000+ customers</span>
-            </div>
-
             {/* Headline */}
-            <h2 className="text-4xl font-extrabold text-white leading-tight mb-4" style={{ fontFamily: "'Poppins', sans-serif" }}>
-              Buy premium<br />
-              <span className="text-[#00C2FF]">digital accounts.</span>
-            </h2>
-            <p className="text-white/50 text-sm leading-relaxed max-w-xs mb-10">
-              Netflix, Spotify, YouTube Premium, Disney+, and 200+ more. Secure payments, instant delivery, worldwide access.
-            </p>
-
-            {/* Feature cards row */}
-            <div className="flex gap-4 mb-8">
-              {/* Earnings card */}
-              <div className="flex-1 bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl p-4">
-                <div className="text-2xl mb-1">💰</div>
-                <div className="text-xs text-white/50 mb-0.5">Earn from Bulnix</div>
-                <div className="text-xl font-bold text-white">$4,210</div>
-                <div className="text-xs text-emerald-400 mt-1">↑ Top resellers monthly</div>
-              </div>
-              {/* Delivery card */}
-              <div className="flex-1 bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl p-4">
-                <div className="text-2xl mb-1">⚡</div>
-                <div className="text-xs text-white/50 mb-0.5">Delivery time</div>
-                <div className="text-xl font-bold text-white">&lt;4 min</div>
-                <div className="text-xs text-[#00C2FF] mt-1">Instant to your email</div>
-              </div>
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-white leading-snug mb-3" style={{ fontFamily: "'Poppins', sans-serif" }}>
+                Your one-stop shop for<br />
+                <span className="text-[#00C2FF]">premium digital accounts</span>
+              </h2>
+              <p className="text-white/55 text-sm leading-relaxed max-w-sm">
+                Browse 449+ verified products across social media, streaming, gaming, and software. Instant delivery, secure payments.
+              </p>
             </div>
 
-            {/* Trust row */}
-            <div className="bg-white/8 border border-white/15 rounded-2xl p-4 flex items-center gap-4">
-              <div className="flex -space-x-2">
-                {["#E50914","#1DB954","#FF0000","#0063E5"].map((c, i) => (
-                  <div key={i} className="w-8 h-8 rounded-full border-2 border-white/20 flex items-center justify-center text-white text-xs font-bold"
-                    style={{ background: c }}>
-                    {["N","S","▶","D"][i]}
+            {/* Stats row */}
+            <div className="grid grid-cols-4 gap-3 mb-8">
+              {stats.map((s) => (
+                <div key={s.label} className="bg-white/8 border border-white/10 rounded-xl p-3 text-center">
+                  <div className="text-[#00C2FF] font-bold text-lg leading-tight">{s.value}</div>
+                  <div className="text-white/45 text-xs mt-0.5">{s.label}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Product category grid */}
+            <div className="mb-8">
+              <p className="text-white/40 text-xs uppercase tracking-wider font-medium mb-3">Available categories</p>
+              <div className="grid grid-cols-2 gap-2.5">
+                {productCategories.map((cat) => (
+                  <div key={cat.name}
+                    className="flex items-center gap-3 bg-white/8 border border-white/10 rounded-xl px-3 py-2.5 hover:bg-white/12 transition-colors">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                      style={{ background: cat.color }}>
+                      {cat.icon}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-white text-xs font-medium truncate">{cat.name}</div>
+                      <div className="text-white/40 text-xs">{cat.count} products</div>
+                    </div>
                   </div>
                 ))}
               </div>
-              <div>
-                <div className="flex items-center gap-1">
-                  {[1,2,3,4,5].map(i => <span key={i} className="text-yellow-400 text-xs">★</span>)}
-                  <span className="text-white font-bold text-sm ml-1">4.9/5</span>
+            </div>
+
+            {/* Feature pills */}
+            <div className="flex flex-wrap gap-2 mt-auto">
+              {[
+                { icon: <Zap className="w-3.5 h-3.5" />, text: "Instant delivery" },
+                { icon: <Globe className="w-3.5 h-3.5" />, text: "72+ countries" },
+                { icon: <HeadphonesIcon className="w-3.5 h-3.5" />, text: "24/7 support" },
+                { icon: <Package className="w-3.5 h-3.5" />, text: "449+ products" },
+              ].map((pill) => (
+                <div key={pill.text}
+                  className="flex items-center gap-1.5 bg-white/8 border border-white/10 rounded-full px-3 py-1.5 text-white/60 text-xs">
+                  {pill.icon}
+                  {pill.text}
                 </div>
-                <div className="text-white/50 text-xs">Trusted by 50K+ customers worldwide</div>
-              </div>
+              ))}
             </div>
           </div>
 
-          <p className="relative z-10 text-center text-xs text-white/25 pb-6">© {new Date().getFullYear()} Bulnix. All rights reserved.</p>
+          <p className="relative z-10 text-center text-xs text-white/20 pb-5">© {new Date().getFullYear()} Bulnix. All rights reserved.</p>
         </div>
 
         {/* ══════════════ RIGHT PANEL ══════════════ */}
@@ -230,7 +203,7 @@ export default function Login() {
             {step === "login" && (
               <>
                 <div className="mb-7">
-                  <h1 className="text-3xl font-extrabold text-slate-900" style={{ fontFamily: "'Poppins', sans-serif" }}>Sign In</h1>
+                  <h1 className="text-3xl font-extrabold text-[#0F3D5E]" style={{ fontFamily: "'Poppins', sans-serif" }}>Sign In</h1>
                   <p className="text-slate-500 mt-1.5 text-sm">Welcome back! Enter your details to continue.</p>
                 </div>
 
@@ -276,7 +249,7 @@ export default function Login() {
                     </div>
                   </div>
                   <Button type="submit" disabled={loginMutation.isPending}
-                    className="w-full h-12 bg-gradient-to-r from-[#0F3D5E] to-[#0050D0] hover:from-[#0a2d47] hover:to-[#003db5] text-white font-semibold text-base rounded-xl shadow-lg shadow-[#0050D0]/25">
+                    className="w-full h-12 bg-[#0F3D5E] hover:bg-[#0a2d47] text-white font-semibold text-base rounded-xl shadow-md">
                     {loginMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Signing in...</> : "Sign In"}
                   </Button>
                   <p className="text-center text-sm text-slate-500 pt-1">
@@ -297,7 +270,7 @@ export default function Login() {
                   <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
                     <ShieldCheck className="w-7 h-7 text-[#0050D0]" />
                   </div>
-                  <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: "'Poppins', sans-serif" }}>Check your email</h1>
+                  <h1 className="text-2xl font-bold text-[#0F3D5E]" style={{ fontFamily: "'Poppins', sans-serif" }}>Check your email</h1>
                   <p className="text-slate-500 mt-1 text-sm">We sent a 6-digit code to <span className="text-slate-800 font-medium">{email}</span></p>
                 </div>
                 <form onSubmit={handleVerify} className="space-y-5">
@@ -308,7 +281,7 @@ export default function Login() {
                       className="h-14 border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 text-center text-2xl font-mono tracking-[0.5em] focus:border-[#0050D0] focus:ring-[#0050D0]/20 rounded-xl shadow-sm" />
                   </div>
                   <Button type="submit" disabled={verifyMutation.isPending || otp.length !== 6}
-                    className="w-full h-12 bg-gradient-to-r from-[#0F3D5E] to-[#0050D0] hover:from-[#0a2d47] hover:to-[#003db5] text-white font-semibold rounded-xl shadow-lg shadow-[#0050D0]/25">
+                    className="w-full h-12 bg-[#0F3D5E] hover:bg-[#0a2d47] text-white font-semibold rounded-xl shadow-md">
                     {verifyMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Verifying...</> : "Verify & Sign In"}
                   </Button>
                   <div className="text-center">
@@ -336,7 +309,7 @@ export default function Login() {
                   <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
                     <Lock className="w-7 h-7 text-[#0050D0]" />
                   </div>
-                  <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: "'Poppins', sans-serif" }}>Forgot password?</h1>
+                  <h1 className="text-2xl font-bold text-[#0F3D5E]" style={{ fontFamily: "'Poppins', sans-serif" }}>Forgot password?</h1>
                   <p className="text-slate-500 mt-1 text-sm">Enter your email and we'll send you a reset code.</p>
                 </div>
                 <form onSubmit={handleForgot} className="space-y-5">
@@ -347,7 +320,7 @@ export default function Login() {
                       className="h-12 border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 focus:border-[#0050D0] focus:ring-[#0050D0]/20 rounded-xl shadow-sm" />
                   </div>
                   <Button type="submit" disabled={forgotMutation.isPending}
-                    className="w-full h-12 bg-gradient-to-r from-[#0F3D5E] to-[#0050D0] hover:from-[#0a2d47] hover:to-[#003db5] text-white font-semibold rounded-xl shadow-lg shadow-[#0050D0]/25">
+                    className="w-full h-12 bg-[#0F3D5E] hover:bg-[#0a2d47] text-white font-semibold rounded-xl shadow-md">
                     {forgotMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Sending...</> : "Send Reset Code"}
                   </Button>
                 </form>
@@ -364,7 +337,7 @@ export default function Login() {
                   <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
                     <ShieldCheck className="w-7 h-7 text-[#0050D0]" />
                   </div>
-                  <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: "'Poppins', sans-serif" }}>Reset password</h1>
+                  <h1 className="text-2xl font-bold text-[#0F3D5E]" style={{ fontFamily: "'Poppins', sans-serif" }}>Reset password</h1>
                   <p className="text-slate-500 mt-1 text-sm">Enter the code sent to <span className="text-slate-800 font-medium">{email}</span> and your new password.</p>
                 </div>
                 <form onSubmit={handleReset} className="space-y-4">
@@ -372,12 +345,12 @@ export default function Login() {
                     <Label htmlFor="reset-otp" className="text-slate-700 text-sm font-medium">Reset code</Label>
                     <Input id="reset-otp" type="text" inputMode="numeric" pattern="[0-9]{6}" maxLength={6}
                       placeholder="000000" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} required
-                      className="h-14 border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 text-center text-2xl font-mono tracking-[0.5em] focus:border-[#0050D0] focus:ring-[#0050D0]/20 rounded-xl shadow-sm" />
+                      className="h-14 border-slate-200 bg-white text-slate-800 text-center text-2xl font-mono tracking-[0.5em] focus:border-[#0050D0] focus:ring-[#0050D0]/20 rounded-xl shadow-sm" />
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="new-password" className="text-slate-700 text-sm font-medium">New Password</Label>
                     <div className="relative">
-                      <Input id="new-password" type={showNewPassword ? "text" : "password"} placeholder="Create new password (min. 8 chars)"
+                      <Input id="new-password" type={showNewPassword ? "text" : "password"} placeholder="Enter new password"
                         value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={8}
                         className="h-12 border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 pr-10 focus:border-[#0050D0] focus:ring-[#0050D0]/20 rounded-xl shadow-sm" />
                       <button type="button" onClick={() => setShowNewPassword(!showNewPassword)}
@@ -386,8 +359,8 @@ export default function Login() {
                       </button>
                     </div>
                   </div>
-                  <Button type="submit" disabled={resetMutation.isPending || otp.length !== 6}
-                    className="w-full h-12 bg-gradient-to-r from-[#0F3D5E] to-[#0050D0] hover:from-[#0a2d47] hover:to-[#003db5] text-white font-semibold rounded-xl shadow-lg shadow-[#0050D0]/25">
+                  <Button type="submit" disabled={resetMutation.isPending}
+                    className="w-full h-12 bg-[#0F3D5E] hover:bg-[#0a2d47] text-white font-semibold rounded-xl shadow-md">
                     {resetMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Resetting...</> : "Reset Password"}
                   </Button>
                 </form>
