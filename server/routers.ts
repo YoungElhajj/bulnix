@@ -33,6 +33,7 @@ export const appRouter = router({
     forgotPassword: customAuthRouter.forgotPassword,
     resetPassword: customAuthRouter.resetPassword,
     changePassword: customAuthRouter.changePassword,
+    adminLogin: customAuthRouter.adminLogin,
   }),
 
   // ── Categories ──────────────────────────────────────────────────────────

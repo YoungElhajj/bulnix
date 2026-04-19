@@ -358,4 +358,55 @@ export const customAuthRouter = router({
 
       return { success: true };
     }),
+
+  /**
+   * Admin-only direct login (email + password, no OTP, admin role required)
+   * Used exclusively at /secure-admin — never linked from the public site
+   */
+  adminLogin: publicProcedure
+    .input(z.object({
+      email: z.string().email(),
+      password: z.string().min(1),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+
+      const rows = await db.select({
+        id: users.id,
+        openId: users.openId,
+        email: users.email,
+        name: users.name,
+        role: users.role,
+        passwordHash: users.passwordHash,
+        emailVerified: users.emailVerified,
+        isSuspended: users.isSuspended,
+      })
+        .from(users)
+        .where(eq(users.email, input.email.toLowerCase().trim()))
+        .limit(1);
+
+      const user = rows[0];
+
+      // Generic error to prevent email enumeration
+      const invalidErr = new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
+
+      if (!user) throw invalidErr;
+      if (user.role !== "admin") throw invalidErr; // Only admins allowed
+      if (!user.passwordHash) throw invalidErr;
+      if (user.isSuspended) throw new TRPCError({ code: "FORBIDDEN", message: "Account suspended" });
+
+      const valid = await bcrypt.compare(input.password, user.passwordHash);
+      if (!valid) throw invalidErr;
+
+      const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+      const sessionToken = await sdk.createSessionToken(user.openId, {
+        expiresInMs: ONE_YEAR_MS,
+        name: user.name || "",
+      });
+      const cookieOptions = getSessionCookieOptions(ctx.req);
+      ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+
+      return { success: true, name: user.name };
+    }),
 });

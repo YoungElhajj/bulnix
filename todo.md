@@ -247,3 +247,9 @@
 - [x] Redesign Sign In page with branded Bulnix design (email+password+OTP+forgot password)
 - [x] Update all getLoginUrl() references to point to /login
 - [x] Remove Manus OAuth dependency from auth flow - users never leave bulnix.com
+
+## Secure Admin Login (Apr 19, 2026)
+- [x] Add adminLogin tRPC procedure (email+password, admin-only, no OTP)
+- [x] Create admin account in database (qazeemayobami@gmail.com, role=admin)
+- [x] Build /secure-admin login page (hidden, no public link)
+- [x] Register /secure-admin route in App.tsx

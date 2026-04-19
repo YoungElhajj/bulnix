@@ -45,6 +45,7 @@ import AdminProviders from "./pages/admin/AdminProviders";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminLogs from "./pages/admin/AdminLogs";
 import AdminSupplierRefunds from "./pages/admin/AdminSupplierRefunds";
+import SecureAdminLogin from "./pages/SecureAdminLogin";
 import SocialFloatingWidgets from "./components/SocialFloatingWidgets";
 import TelegramBanner from "./components/TelegramBanner";
 
@@ -81,7 +82,8 @@ function Router() {
       <Route path="/wishlist" component={Wishlist} />
       <Route path="/wallet" component={WalletPage} />
 
-      {/* Admin */}
+      {/* Admin — hidden login, not linked from public site */}
+      <Route path="/secure-admin" component={SecureAdminLogin} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/products" component={AdminProducts} />
       <Route path="/admin/orders" component={AdminOrders} />
