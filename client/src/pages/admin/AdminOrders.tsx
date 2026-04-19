@@ -22,16 +22,16 @@ export default function AdminOrders() {
 
   const orders = (data as any)?.items ?? [];
   const total = (data as any)?.total ?? 0;
-  const statusBadge = (s: string) => ({ pending: "bg-yellow-500/10 text-yellow-400", processing: "bg-blue-500/10 text-blue-400", completed: "bg-[#EEF4FF] text-[#0050D0]", failed: "bg-red-500/10 text-red-400", refunded: "bg-orange-500/10 text-orange-400" }[s] ?? "bg-slate-500/10 text-[#4A6080]");
+  const statusBadge = (s: string) => ({ pending: "bg-yellow-500/10 text-yellow-400", processing: "bg-blue-500/10 text-blue-400", completed: "bg-emerald-500/10 text-emerald-400", failed: "bg-red-500/10 text-red-400", refunded: "bg-orange-500/10 text-orange-400" }[s] ?? "bg-slate-500/10 text-slate-400");
 
   return (
     <AdminLayout title="Orders">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-        <div><h1 className="text-2xl font-bold text-[#0D2137]">Orders</h1><p className="text-[#4A6080] text-sm mt-0.5">{total} total orders</p></div>
+        <div><h1 className="text-2xl font-bold text-white">Orders</h1><p className="text-slate-400 text-sm mt-0.5">{total} total orders</p></div>
         <div className="flex items-center gap-3">
           <Select value={status} onValueChange={v=>{setStatus(v);setPage(1);}}>
-            <SelectTrigger className="w-[140px] bg-white border-[#D8E8F5] text-[#0D2137] h-9"><SelectValue/></SelectTrigger>
-            <SelectContent className="bg-white border-[#D8E8F5]">
+            <SelectTrigger className="w-[140px] bg-[#0d1117] border-emerald-900/40 text-white h-9"><SelectValue/></SelectTrigger>
+            <SelectContent className="bg-[#161b22] border-emerald-900/30">
               <SelectItem value="all">All</SelectItem><SelectItem value="pending">Pending</SelectItem><SelectItem value="processing">Processing</SelectItem><SelectItem value="completed">Completed</SelectItem><SelectItem value="failed">Failed</SelectItem>
             </SelectContent>
           </Select>
@@ -39,12 +39,12 @@ export default function AdminOrders() {
       </div>
 
       {isLoading ? (
-        <div className="space-y-2">{[...Array(10)].map((_,i)=><div key={i} className="bg-white border border-[#D8E8F5] shadow-sm rounded-xl h-14 animate-pulse"/>)}</div>
+        <div className="space-y-2">{[...Array(10)].map((_,i)=><div key={i} className="bg-[#161b22] border border-emerald-900/30 rounded-xl h-14 animate-pulse"/>)}</div>
       ) : (
-        <div className="bg-white border border-[#D8E8F5] shadow-sm rounded-xl overflow-hidden">
+        <div className="bg-[#161b22] border border-emerald-900/30 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-[#D8E8F5] text-[#4A6080] text-xs uppercase">
+              <thead><tr className="border-b border-emerald-900/30 text-slate-400 text-xs uppercase">
                 <th className="text-left p-4">Order ID</th>
                 <th className="text-left p-4">User</th>
                 <th className="text-right p-4">Total</th>
@@ -56,22 +56,22 @@ export default function AdminOrders() {
               </tr></thead>
               <tbody>
                 {orders.map((order: any) => (
-                  <tr key={order.id} className="border-b border-[#D8E8F5] hover:bg-white/3 transition-colors">
-                    <td className="p-4 font-mono text-[#0D2137]">#{order.id}</td>
-                    <td className="p-4 text-[#4A6080]">{order.billingEmail ?? "User #" + order.userId}</td>
-                    <td className="p-4 text-right font-semibold text-[#0050D0]">${Number(order.totalUSD).toFixed(2)}</td>
-                    <td className="p-4 text-center text-[#4A6080]">{order.currency}</td>
+                  <tr key={order.id} className="border-b border-emerald-900/30 hover:bg-white/5 transition-colors">
+                    <td className="p-4 font-mono text-white">#{order.id}</td>
+                    <td className="p-4 text-slate-400">{order.billingEmail ?? "User #" + order.userId}</td>
+                    <td className="p-4 text-right font-semibold text-emerald-400">${Number(order.totalUSD).toFixed(2)}</td>
+                    <td className="p-4 text-center text-slate-400">{order.currency}</td>
                     <td className="p-4 text-center"><Badge className={"text-xs border-0 " + statusBadge(order.status)}>{order.status}</Badge></td>
-                    <td className="p-4 text-center text-[#4A6080] capitalize">{order.paymentGateway ?? "—"}</td>
-                    <td className="p-4 text-[#4A6080] text-xs">{new Date(order.createdAt).toLocaleString()}</td>
+                    <td className="p-4 text-center text-slate-400 capitalize">{order.paymentGateway ?? "—"}</td>
+                    <td className="p-4 text-slate-400 text-xs">{new Date(order.createdAt).toLocaleString()}</td>
                     <td className="p-4 text-center">
                       <div className="flex items-center gap-1 justify-center">
                         {order.status === "failed" && (
-                          <button onClick={()=>retryFulfillment.mutate({orderId:order.id})} className="px-2 py-1 rounded bg-[#EEF4FF] text-[#0050D0] hover:bg-[#00C2FF]/20 text-xs transition-colors flex items-center gap-1">
+                          <button onClick={()=>retryFulfillment.mutate({orderId:order.id})} className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 hover:bg-[#00C2FF]/20 text-xs transition-colors flex items-center gap-1">
                             <RefreshCw className="h-3 w-3"/> Retry
                           </button>
                         )}
-                        <button onClick={()=>updateOrder.mutate({id:order.id,fraudFlag:!order.fraudFlag})} className={"px-2 py-1 rounded text-xs transition-colors " + (order.fraudFlag ? "bg-red-500/20 text-red-400 hover:bg-red-500/30" : "bg-slate-500/10 text-[#4A6080] hover:bg-slate-500/20")}>
+                        <button onClick={()=>updateOrder.mutate({id:order.id,fraudFlag:!order.fraudFlag})} className={"px-2 py-1 rounded text-xs transition-colors " + (order.fraudFlag ? "bg-red-500/20 text-red-400 hover:bg-red-500/30" : "bg-slate-500/10 text-slate-400 hover:bg-slate-500/20")}>
                           {order.fraudFlag ? "Unflag" : "Flag"}
                         </button>
                       </div>
@@ -82,10 +82,10 @@ export default function AdminOrders() {
             </table>
           </div>
           {total > 50 && (
-            <div className="flex items-center justify-center gap-2 p-4 border-t border-[#D8E8F5]">
-              <Button variant="outline" className="border-[#D8E8F5] text-[#4A6080] hover:text-[#0D2137] hover:bg-[#F5F9FF] h-8 text-xs" disabled={page===1} onClick={()=>setPage(p=>p-1)}>Previous</Button>
-              <span className="text-[#4A6080] text-xs px-3">Page {page}</span>
-              <Button variant="outline" className="border-[#D8E8F5] text-[#4A6080] hover:text-[#0D2137] hover:bg-[#F5F9FF] h-8 text-xs" disabled={orders.length < 50} onClick={()=>setPage(p=>p+1)}>Next</Button>
+            <div className="flex items-center justify-center gap-2 p-4 border-t border-emerald-900/30">
+              <Button variant="outline" className="border-emerald-900/30 text-slate-400 hover:text-white hover:bg-[#0d1117] h-8 text-xs" disabled={page===1} onClick={()=>setPage(p=>p-1)}>Previous</Button>
+              <span className="text-slate-400 text-xs px-3">Page {page}</span>
+              <Button variant="outline" className="border-emerald-900/30 text-slate-400 hover:text-white hover:bg-[#0d1117] h-8 text-xs" disabled={orders.length < 50} onClick={()=>setPage(p=>p+1)}>Next</Button>
             </div>
           )}
         </div>

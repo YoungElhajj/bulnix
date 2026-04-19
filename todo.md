@@ -406,3 +406,6 @@
 
 ## Text Cleanup (Apr 19 2026)
 - [x] Remove unnecessary hyphens, em-dashes, and AI-sounding phrasing from all customer-facing pages
+
+## Admin Panel Colour Fix (Apr 19 2026)
+- [x] Restore admin panel stat cards to dark slate background with emerald accents (remove white/light card backgrounds)
