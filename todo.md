@@ -375,3 +375,11 @@
 - [x] Update new Bulnix logo on Login and Signup pages (both desktop left panel and mobile)
 - [x] Update Footer logo size to match Navbar
 - [x] Fix Navbar logo size and rounded corners
+
+## Auth & Email Improvements (Apr 19 2026)
+- [x] Redesign Login page with premium split-panel layout (floating platform icons, stats, gradient left panel)
+- [x] Redesign Signup page with premium split-panel layout matching Login
+- [x] Add "Continue with Google" button to Login and Signup pages
+- [x] Add delivery email with account credentials + per-product login instructions when order is fulfilled
+- [x] Fix TypeScript errors in db.ts (orderItems.productTitle, fulfillmentRecords.orderItemId)
+- [x] Supplier API auto-sync confirmed working (15min stock sync, 1hr full sync)

@@ -28,7 +28,7 @@ import {
   type InsertSupplierRefundClaim,
 } from "../drizzle/schema";
 import { nanoid } from "nanoid";
-import { safeSendEmail, sendOrderConfirmationEmail, sendOrderStatusEmail, sendTicketReplyEmail } from "./email";
+import { safeSendEmail, sendOrderConfirmationEmail, sendOrderStatusEmail, sendTicketReplyEmail, sendDeliveryEmail } from "./email";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -845,6 +845,46 @@ export async function adminUpdateOrder(input: { id: number; status?: string; adm
             orderId: updatedOrder[0].id,
             status: input.status!,
           }));
+          // Send delivery email with credentials when order is fulfilled
+          if (input.status === "fulfilled") {
+            try {
+              const items = await withDbRetry(() => db!.select({
+                title: orderItems.productTitle,
+                quantity: orderItems.quantity,
+                productId: orderItems.productId,
+                itemId: orderItems.id,
+              }).from(orderItems).where(eq(orderItems.orderId, input.id)), "adminUpdateOrder-items");
+              const fulfillments = await withDbRetry(() => db!.select().from(fulfillmentRecords).where(eq(fulfillmentRecords.orderId, input.id)), "adminUpdateOrder-fulfillments");
+              // Get product categories for login instructions
+              const productIds = items.map(i => i.productId).filter(Boolean) as number[];
+              const productDetails = productIds.length > 0 ? await withDbRetry(() => db!.select({ id: products.id, deliveryNote: products.deliveryNote, categoryId: products.categoryId }).from(products).where(inArray(products.id, productIds)), "adminUpdateOrder-products") : [];
+              const categoryIds = productDetails.map(p => p.categoryId).filter(Boolean) as number[];
+              const categoryDetails = categoryIds.length > 0 ? await withDbRetry(() => db!.select({ id: categories.id, name: categories.name }).from(categories).where(inArray(categories.id, categoryIds)), "adminUpdateOrder-categories") : [];
+              const catMap = new Map(categoryDetails.map(c => [c.id, c.name]));
+              const prodMap = new Map(productDetails.map(p => [p.id, p]));
+              const deliveryItems = items.map(item => {
+                const prod = item.productId ? prodMap.get(item.productId) : undefined;
+                const catName = prod?.categoryId ? catMap.get(prod.categoryId) : undefined;
+                const creds = fulfillments
+                  .filter(f => f.orderItemId === item.itemId)
+                  .map(f => {
+                    try { return typeof f.deliveryData === "string" ? JSON.parse(f.deliveryData) : f.deliveryData; } catch { return f.deliveryData; }
+                  })
+                  .flat()
+                  .filter(Boolean) as Array<{ login?: string; password?: string; email?: string; data?: string }>;
+                return { title: item.title, quantity: item.quantity, categoryName: catName, deliveryNote: prod?.deliveryNote ?? undefined, credentials: creds };
+              });
+              safeSendEmail(() => sendDeliveryEmail({
+                to: user[0].email!,
+                name: user[0].name ?? "there",
+                orderNumber: updatedOrder[0].orderNumber,
+                orderId: updatedOrder[0].id,
+                items: deliveryItems,
+              }));
+            } catch (err) {
+              console.error("[adminUpdateOrder] Failed to build delivery email:", err);
+            }
+          }
         }
       }
     }

@@ -296,6 +296,152 @@ export async function sendPasswordResetEmail(opts: {
   });
 }
 
+/** Send delivery email with account credentials and login instructions */
+export async function sendDeliveryEmail(opts: {
+  to: string;
+  name: string;
+  orderNumber: string;
+  orderId: number;
+  items: Array<{
+    title: string;
+    quantity: number;
+    categoryName?: string;
+    description?: string;
+    deliveryNote?: string;
+    credentials?: Array<{ login?: string; password?: string; email?: string; data?: string; [key: string]: unknown }>;
+  }>;
+}): Promise<void> {
+  const itemSections = opts.items.map(item => {
+    // Build credentials block
+    const credRows = (item.credentials ?? []).map((cred, idx) => {
+      const fields = Object.entries(cred)
+        .filter(([k, v]) => v && typeof v === "string" && v.trim() !== "")
+        .map(([k, v]) => `<tr><td class="label" style="padding:4px 0;width:120px;">${k.charAt(0).toUpperCase() + k.slice(1)}</td><td style="padding:4px 0;color:#e2e8f0;font-family:monospace;font-size:13px;word-break:break-all;">${v}</td></tr>`)
+        .join("");
+      return `<div style="background:rgba(0,185,233,0.06);border:1px solid rgba(0,185,233,0.15);border-radius:8px;padding:14px 18px;margin:8px 0;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#00B9E9;margin-bottom:8px;">Account ${idx + 1}</div>
+        <table style="width:100%;border-collapse:collapse;">${fields}</table>
+      </div>`;
+    }).join("");
+
+    // Build login instructions block
+    const loginGuide = getLoginInstructions(item.categoryName ?? "", item.title);
+    const deliveryNote = item.deliveryNote ? `<p style="font-size:13px;color:#94a3b8;margin:8px 0;">${item.deliveryNote}</p>` : "";
+
+    return `
+      <div style="margin:20px 0;padding:20px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.07);">
+        <h3 style="font-size:16px;font-weight:700;color:#ffffff;margin:0 0 8px;">${item.title} ×${item.quantity}</h3>
+        ${deliveryNote}
+        ${credRows ? `<div style="margin:12px 0;"><div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#475569;margin-bottom:8px;">Your Account Credentials</div>${credRows}</div>` : ""}
+        ${loginGuide}
+      </div>`;
+  }).join("");
+
+  const body = `
+    <h1>🎉 Your Order Has Been Delivered!</h1>
+    <p>Hi ${opts.name || "there"}, great news — your Bulnix order is ready. Your account credentials are below.</p>
+    <div class="highlight">
+      <div class="label" style="text-align:center;">Order Number</div>
+      <div class="code">${opts.orderNumber}</div>
+    </div>
+    ${itemSections}
+    <hr class="divider" />
+    <p style="font-size:13px;color:#94a3b8;">⚠️ <strong style="color:#e2e8f0;">Keep these credentials safe.</strong> Do not share them with anyone. If you have any issues accessing your account, please open a support ticket.</p>
+    <a href="https://bulnix.com/orders/${opts.orderId}" class="btn">View Full Order →</a>
+    <p style="font-size:13px;">Need help? Contact us on <a href="https://wa.me/447916699429" style="color:#00B9E9;">WhatsApp</a> or open a <a href="https://bulnix.com/tickets" style="color:#00B9E9;">support ticket</a>.</p>`;
+
+  const client = getResend();
+  if (!client) { console.warn("[email] RESEND_API_KEY not set — skipping delivery email"); return; }
+  await client.emails.send({
+    from: FROM,
+    replyTo: REPLY_TO,
+    to: opts.to,
+    subject: `✅ Your Bulnix order ${opts.orderNumber} has been delivered`,
+    html: baseTemplate("Order Delivered", body),
+  });
+}
+
+/** Per-category / per-product login instructions */
+function getLoginInstructions(categoryName: string, productTitle: string): string {
+  const cat = (categoryName + " " + productTitle).toLowerCase();
+  let steps: string[] = [];
+
+  if (cat.includes("netflix")) {
+    steps = [
+      "Go to <a href='https://netflix.com' style='color:#00B9E9;'>netflix.com</a> and click <strong>Sign In</strong>.",
+      "Enter the email and password provided above.",
+      "If prompted, choose <strong>Use a sign-in link</strong> or enter the password directly.",
+      "Go to <strong>Account → Profile & Parental Controls</strong> to set up your profile.",
+      "⚠️ Do NOT change the email or password — this will lock out other users on the account.",
+    ];
+  } else if (cat.includes("spotify")) {
+    steps = [
+      "Go to <a href='https://spotify.com' style='color:#00B9E9;'>spotify.com</a> and click <strong>Log In</strong>.",
+      "Enter the email and password provided above.",
+      "Download the Spotify app on your device for the best experience.",
+      "⚠️ Do NOT change the account password or email.",
+    ];
+  } else if (cat.includes("youtube") || cat.includes("google")) {
+    steps = [
+      "Open a browser and go to <a href='https://accounts.google.com' style='color:#00B9E9;'>accounts.google.com</a>.",
+      "Sign in with the email and password provided above.",
+      "If asked for 2FA, check the <strong>data</strong> field above for the recovery code.",
+      "Go to YouTube and click your profile icon to confirm Premium is active.",
+      "⚠️ Do NOT change the password or recovery email.",
+    ];
+  } else if (cat.includes("disney") || cat.includes("hulu") || cat.includes("hbo") || cat.includes("max")) {
+    steps = [
+      "Go to the streaming service website or app.",
+      "Click <strong>Log In</strong> and enter the email and password above.",
+      "Create your own profile within the account.",
+      "⚠️ Do NOT change the main account password or email.",
+    ];
+  } else if (cat.includes("instagram") || cat.includes("facebook") || cat.includes("tiktok") || cat.includes("twitter") || cat.includes("x.com")) {
+    steps = [
+      "Open the app or website and click <strong>Log In</strong>.",
+      "Enter the username/email and password provided above.",
+      "If asked for 2FA, use the code in the <strong>data</strong> field above.",
+      "Update your profile name and bio as desired.",
+      "⚠️ Do NOT change the account email or phone number.",
+    ];
+  } else if (cat.includes("amazon") || cat.includes("prime")) {
+    steps = [
+      "Go to <a href='https://amazon.com' style='color:#00B9E9;'>amazon.com</a> and click <strong>Sign In</strong>.",
+      "Enter the email and password provided above.",
+      "Go to <strong>Prime Video</strong> to access your subscription.",
+      "⚠️ Do NOT change the account password.",
+    ];
+  } else if (cat.includes("vpn") || cat.includes("nordvpn") || cat.includes("expressvpn")) {
+    steps = [
+      "Download the VPN app from the official website.",
+      "Open the app and click <strong>Sign In</strong>.",
+      "Enter the email and password provided above.",
+      "Choose a server location and click <strong>Connect</strong>.",
+    ];
+  } else if (cat.includes("gaming") || cat.includes("steam") || cat.includes("xbox") || cat.includes("playstation") || cat.includes("psn")) {
+    steps = [
+      "Open the gaming platform app or website.",
+      "Click <strong>Sign In</strong> and enter the credentials above.",
+      "If prompted for 2FA, use the code in the <strong>data</strong> field.",
+      "⚠️ Do NOT change the password or linked email.",
+    ];
+  } else {
+    steps = [
+      "Use the credentials above to log in to the service.",
+      "Visit the official website or app and click <strong>Sign In / Log In</strong>.",
+      "Enter the email/username and password exactly as shown.",
+      "If 2FA is required, check the <strong>data</strong> field for the recovery code.",
+      "⚠️ Do NOT change the account password, email, or phone number.",
+    ];
+  }
+
+  const stepsHtml = steps.map((s, i) => `<li style="padding:5px 0;font-size:13px;color:#94a3b8;">${s}</li>`).join("");
+  return `<div style="margin-top:14px;">
+    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#475569;margin-bottom:8px;">How to Login</div>
+    <ol style="margin:0;padding-left:20px;">${stepsHtml}</ol>
+  </div>`;
+}
+
 /** Generic safe wrapper — logs errors but never throws */
 export async function safeSendEmail(fn: () => Promise<void>): Promise<void> {
   try {
