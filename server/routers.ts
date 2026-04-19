@@ -40,6 +40,7 @@ export const appRouter = router({
     verifyTotp: adminAccountRouter.verifyTotp,
     disableTotp: adminAccountRouter.disableTotp,
     getTotpStatus: adminAccountRouter.getTotpStatus,
+    getSessionInfo: adminAccountRouter.getSessionInfo,
   }),
 
   // ── Categories ──────────────────────────────────────────────────────────

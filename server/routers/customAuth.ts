@@ -390,6 +390,15 @@ export const customAuthRouter = router({
       const valid = await bcrypt.compare(input.password, user.passwordHash);
       if (!valid) throw invalidErr;
 
+      // Record login timestamp and IP address
+      const loginIp =
+        (ctx.req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ??
+        ctx.req.socket?.remoteAddress ??
+        null;
+      await db.update(users)
+        .set({ lastSignedIn: new Date(), lastLoginIp: loginIp })
+        .where(eq(users.id, user.id));
+
       const sessionToken = await sdk.createSessionToken(user.openId, {
         expiresInMs: ONE_YEAR_MS,
         name: user.name || "",
@@ -529,5 +538,26 @@ export const adminAccountRouter = router({
       const rows = await db.select({ twoFactorEnabled: users.twoFactorEnabled })
         .from(users).where(eq(users.id, ctx.user.id)).limit(1);
       return { enabled: rows[0]?.twoFactorEnabled ?? false };
+    }),
+
+  /**
+   * Get last login date and IP for the admin account settings page
+   */
+  getSessionInfo: protectedProcedure
+    .query(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+
+      const rows = await db
+        .select({ lastSignedIn: users.lastSignedIn, lastLoginIp: users.lastLoginIp })
+        .from(users)
+        .where(eq(users.id, ctx.user.id))
+        .limit(1);
+
+      return {
+        lastSignedIn: rows[0]?.lastSignedIn ?? null,
+        lastLoginIp: rows[0]?.lastLoginIp ?? null,
+      };
     }),
 });

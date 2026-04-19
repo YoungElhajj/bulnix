@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import AdminLayout from "@/components/AdminLayout";
-import { KeyRound, ShieldCheck, ShieldOff, Eye, EyeOff, Copy, Check, RefreshCw } from "lucide-react";
+import { KeyRound, ShieldCheck, ShieldOff, Eye, EyeOff, Copy, Check, RefreshCw, Clock, Globe, MonitorSmartphone } from "lucide-react";
 
 export default function AdminAccountSettings() {
   // ── Change Password state ──────────────────────────────────────────────────
@@ -75,9 +75,85 @@ export default function AdminAccountSettings() {
 
   const is2FAEnabled = totpStatusQuery.data?.enabled ?? false;
 
+  // ── Session info ───────────────────────────────────────────────────────────
+  const sessionInfoQuery = trpc.auth.getSessionInfo.useQuery();
+  const sessionInfo = sessionInfoQuery.data;
+
+  function formatDate(date: Date | string | null | undefined): string {
+    if (!date) return "Never";
+    return new Date(date).toLocaleString(undefined, {
+      year: "numeric", month: "short", day: "numeric",
+      hour: "2-digit", minute: "2-digit", second: "2-digit",
+    });
+  }
+
+  function timeAgo(date: Date | string | null | undefined): string {
+    if (!date) return "";
+    const diff = Date.now() - new Date(date).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins}m ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  }
+
   return (
     <AdminLayout title="Account Settings">
       <div className="max-w-2xl space-y-6">
+
+        {/* ── Last Login Info ──────────────────────────────────────────────── */}
+        <div className="bg-[#161b22] border border-emerald-900/30 rounded-xl p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+              <MonitorSmartphone className="h-4 w-4 text-emerald-400" />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-white">Last Login</h2>
+              <p className="text-xs text-slate-500">Most recent successful admin sign-in</p>
+            </div>
+          </div>
+
+          {sessionInfoQuery.isLoading ? (
+            <div className="flex items-center gap-2 text-slate-500 text-sm">
+              <div className="w-4 h-4 border border-emerald-500/40 border-t-emerald-500 rounded-full animate-spin" />
+              Loading...
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Date & time */}
+              <div className="flex items-start gap-3 p-3.5 bg-[#0d1117] border border-emerald-900/20 rounded-lg">
+                <Clock className="h-4 w-4 text-emerald-400/70 mt-0.5 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1">Date &amp; Time</p>
+                  <p className="text-sm text-white font-medium">
+                    {formatDate(sessionInfo?.lastSignedIn)}
+                  </p>
+                  {sessionInfo?.lastSignedIn && (
+                    <p className="text-[11px] text-emerald-400/60 mt-0.5">{timeAgo(sessionInfo.lastSignedIn)}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* IP address */}
+              <div className="flex items-start gap-3 p-3.5 bg-[#0d1117] border border-emerald-900/20 rounded-lg">
+                <Globe className="h-4 w-4 text-emerald-400/70 mt-0.5 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mb-1">IP Address</p>
+                  <p className="text-sm text-white font-mono font-medium break-all">
+                    {sessionInfo?.lastLoginIp ?? (
+                      <span className="text-slate-500 font-sans font-normal">Not recorded yet</span>
+                    )}
+                  </p>
+                  {sessionInfo?.lastLoginIp && (
+                    <p className="text-[11px] text-slate-500 mt-0.5">Login origin</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* ── Change Password ──────────────────────────────────────────────── */}
         <div className="bg-[#161b22] border border-emerald-900/30 rounded-xl p-6">

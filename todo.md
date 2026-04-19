@@ -267,3 +267,11 @@
 - [x] Add server procedures: changeAdminPassword, setupTotp, verifyTotp, disableTotp, getTotpStatus
 - [x] Wrap all existing admin pages with new AdminLayout — all pages already use AdminLayout
 - [x] Register /admin/account route in App.tsx with AdminRoute guard
+
+## Last Login Info on Account Settings (Apr 19, 2026)
+- [x] Add lastLoginIp column to users table (DB migration + schema update)
+- [x] Record IP on every successful adminLogin call
+- [x] Add getSessionInfo server procedure (returns lastSignedIn + lastLoginIp)
+- [x] Wire procedure into routers.ts under auth namespace
+- [x] Display "Last Login" card on AdminAccountSettings page (date/time + IP, relative time)
+- [x] Run tests, save checkpoint
