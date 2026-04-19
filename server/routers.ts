@@ -122,15 +122,20 @@ export const appRouter = router({
         currency: z.enum(["NGN", "USD", "EUR", "GBP"]),
       }))
       .mutation(({ input, ctx }) => {
-        const host = ctx.req.headers["x-forwarded-host"] ?? ctx.req.headers.host ?? "localhost:3000";
-        const proto = ctx.req.headers["x-forwarded-proto"] ?? (process.env.NODE_ENV === "production" ? "https" : "http");
-        const origin = `${proto}://${host}`;
+        // Use the real public domain in production — never trust x-forwarded-host as it may be an internal proxy
+        const origin = process.env.NODE_ENV === "production"
+          ? "https://bulnix.com"
+          : `http://${ctx.req.headers.host ?? "localhost:3000"}`;
         return db.initiatePayment(ctx.user.id, input, origin);
       }),
 
     getStatus: protectedProcedure
       .input(z.object({ orderId: z.number() }))
       .query(({ input, ctx }) => db.getPaymentStatus(ctx.user.id, input.orderId)),
+
+    payWithWallet: protectedProcedure
+      .input(z.object({ orderId: z.number() }))
+      .mutation(({ input, ctx }) => db.payOrderWithWallet(ctx.user.id, input.orderId)),
   }),
 
   // ── Support Tickets ─────────────────────────────────────────────────────
@@ -386,9 +391,10 @@ export const appRouter = router({
         gateway: z.enum(["paystack", "flutterwave", "nowpayments"]),
       }))
       .mutation(({ input, ctx }) => {
-        const host = ctx.req.headers["x-forwarded-host"] ?? ctx.req.headers.host ?? "localhost:3000";
-        const proto = ctx.req.headers["x-forwarded-proto"] ?? (process.env.NODE_ENV === "production" ? "https" : "http");
-        const origin = `${proto}://${host}`;
+        // Use the real public domain in production — never trust x-forwarded-host as it may be an internal proxy
+        const origin = process.env.NODE_ENV === "production"
+          ? "https://bulnix.com"
+          : `http://${ctx.req.headers.host ?? "localhost:3000"}`;
         return db.initiateWalletTopup(ctx.user.id, input.amountUSD, input.gateway, origin);
       }),
     confirmTopup: protectedProcedure

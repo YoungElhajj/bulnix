@@ -586,6 +586,66 @@ export async function fulfillOrderByReference(reference: string, gateway: string
   return { success: true, orderId: payment.orderId };
 }
 
+/**
+ * Pay for an order directly from the user's wallet balance.
+ * Deducts the order total in USD from the wallet and marks the order as processing.
+ */
+export async function payOrderWithWallet(userId: number, orderId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Get the order and verify it belongs to this user
+  const [order] = await db.select().from(orders).where(and(eq(orders.id, orderId), eq(orders.userId, userId))).limit(1);
+  if (!order) throw new Error("Order not found");
+  if (order.status !== "pending_payment") throw new Error("Order is not pending payment");
+
+  const totalUSD = Number(order.totalUSD);
+
+  // Get wallet and check balance
+  const wallet = await getOrCreateWallet(userId);
+  const currentBalance = Number(wallet.balanceUSD);
+  if (currentBalance < totalUSD) {
+    throw new Error(`Insufficient wallet balance. You have $${currentBalance.toFixed(2)} but need $${totalUSD.toFixed(2)}`);
+  }
+
+  // Deduct from wallet
+  const newBalance = (currentBalance - totalUSD).toFixed(6);
+  const newSpent = (Number(wallet.totalSpent) + totalUSD).toFixed(6);
+  await withDbRetry(() => db!.update(wallets).set({ balanceUSD: newBalance, totalSpent: newSpent }).where(eq(wallets.userId, userId)), "payOrderWithWallet:deductWallet");
+
+  // Record wallet transaction
+  const txRef = `WALLET-ORDER-${orderId}-${Date.now()}`;
+  await withDbRetry(() => db!.insert(walletTransactions).values({
+    userId,
+    type: "spend",
+    amountUSD: totalUSD.toFixed(6) as any,
+    balanceAfterUSD: newBalance as any,
+    reference: txRef,
+    gateway: "wallet",
+    status: "completed",
+    description: `Payment for order #${order.orderNumber}`,
+    orderId,
+  }), "payOrderWithWallet:insertTx");
+
+  // Mark order as processing
+  await withDbRetry(() => db!.update(orders).set({ status: "processing" }).where(eq(orders.id, orderId)), "payOrderWithWallet:updateOrder");
+
+  // Record in payments table (gateway = 'manual' since it's a wallet deduction)
+  await withDbRetry(() => db!.insert(payments).values({
+    orderId,
+    userId,
+    gateway: "manual",
+    gatewayReference: txRef,
+    amount: totalUSD.toFixed(2) as any,
+    currency: "USD",
+    status: "success",
+    webhookVerified: true,
+  }), "payOrderWithWallet:insertPayment");
+
+  await logSystem("info", "payment", `Order ${order.orderNumber} paid with wallet by user ${userId}`, { orderId, totalUSD });
+  return { success: true, orderId, orderNumber: order.orderNumber, amountDeducted: totalUSD, newBalance: Number(newBalance) };
+}
+
 export async function getPaymentStatus(userId: number, orderId: number) {
   const db = await getDb();
   if (!db) return null;
