@@ -11,7 +11,6 @@ import Footer from "@/components/Footer";
 import { trpc } from "@/lib/trpc";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
 
 const GATEWAYS = [
   { id: "paystack", name: "Paystack", desc: "Cards & Bank Transfer (NGN/Africa)", icon: CreditCard, color: "#00C3F7", currencies: ["NGN"] },

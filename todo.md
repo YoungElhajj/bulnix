@@ -275,3 +275,12 @@
 - [x] Wire procedure into routers.ts under auth namespace
 - [x] Display "Last Login" card on AdminAccountSettings page (date/time + IP, relative time)
 - [x] Run tests, save checkpoint
+
+## Auth Page Cleanup — Remove Manus OAuth (Apr 19, 2026)
+- [x] Remove "Continue with Manus" button from Login page — was only on published site (old build), not in code
+- [x] Remove Manus OAuth "Create Free Account" button from Signup page — already clean in code
+- [x] Fix getLoginUrl() in const.ts to return /login instead of Manus OAuth portal URL
+- [x] Fix useAuth hook default redirect to /login instead of Manus OAuth portal
+- [x] Fix ForgotPassword page to redirect to /login instead of Manus OAuth
+- [x] Remove all unused getLoginUrl imports from Dashboard, Orders, Profile, Tickets, Wallet, Wishlist, Checkout, DashboardLayout
+- [x] Checkpoint saved — user must click Publish to push fix to bulnix.com

@@ -7,7 +7,6 @@ import Footer from "@/components/Footer";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useCart } from "@/contexts/CartContext";
-import { getLoginUrl } from "@/const";
 
 export default function Wishlist() {
   const { isAuthenticated, loading } = useAuth();
