@@ -253,3 +253,30 @@ setTimeout(() => {
   runAutoSync();
   setInterval(runAutoSync, 15 * 60 * 1000);
 }, 2 * 60 * 1000);
+
+// ─── Auto-Retry Scheduler ────────────────────────────────────────────────────
+// Every 5 minutes: check AccsZone balance. If > $0, retry all processing orders.
+let lastRetryBalance = 0;
+async function runAutoRetry() {
+  try {
+    const { getAccsZoneBalance, retryAllProcessingOrders } = await import("../db");
+    const balResult = await getAccsZoneBalance();
+    const balance = balResult.balance ?? 0;
+    // Only trigger retry if balance has gone from $0 to positive (account was just topped up)
+    // OR if balance > $0 and there are processing orders (catch-all every 5 min)
+    if (balance > 0) {
+      const result = await retryAllProcessingOrders();
+      if (result.retried > 0) {
+        console.log(`[AutoRetry] Balance $${balance.toFixed(2)} — retried ${result.retried} processing orders.`);
+      }
+    }
+    lastRetryBalance = balance;
+  } catch (err) {
+    console.error("[AutoRetry] Error:", err);
+  }
+}
+// Start auto-retry after 3 minutes (after server boot), then every 5 minutes
+setTimeout(() => {
+  runAutoRetry();
+  setInterval(runAutoRetry, 5 * 60 * 1000);
+}, 3 * 60 * 1000);

@@ -309,6 +309,7 @@ export const appRouter = router({
         .input(z.object({ providerKey: z.string(), syncType: z.enum(["categories", "products", "stock", "prices", "full"]) }))
         .mutation(({ input }) => db.triggerProviderSync(input.providerKey, input.syncType)),
       syncLogs: adminProcedure.query(() => db.getProviderSyncLogs()),
+      getAccsZoneBalance: adminProcedure.query(() => db.getAccsZoneBalance()),
     }),
 
     // Categories

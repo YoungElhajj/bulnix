@@ -442,6 +442,47 @@ function getLoginInstructions(categoryName: string, productTitle: string): strin
   </div>`;
 }
 
+/** Send refund confirmation email to customer */
+export async function sendRefundConfirmationEmail(opts: {
+  to: string;
+  name: string;
+  orderNumber: string;
+  orderId: number;
+  amountUSD: number;
+  reason: string;
+  newBalanceUSD: number;
+}): Promise<void> {
+  const body = `
+    <h1>Refund Issued — $${opts.amountUSD.toFixed(2)} Credited</h1>
+    <p>Hi ${opts.name || "there"}, we have processed a refund for your order. The amount has been credited to your Bulnix wallet and is ready to use immediately.</p>
+    <div class="highlight">
+      <div class="label" style="text-align:center;">Refund Amount</div>
+      <div class="code" style="color:#22C55E;">$${opts.amountUSD.toFixed(2)} USD</div>
+      <div style="text-align:center;margin-top:4px;font-size:13px;color:#94a3b8;">Credited to your Bulnix wallet</div>
+    </div>
+    <div style="margin:16px 0;">
+      <div class="label">Order Number</div>
+      <div class="value">${opts.orderNumber}</div>
+      <div class="label">Reason</div>
+      <div class="value">${opts.reason}</div>
+      <div class="label">New Wallet Balance</div>
+      <div class="value" style="color:#22C55E;font-weight:700;">$${opts.newBalanceUSD.toFixed(2)} USD</div>
+    </div>
+    <a href="https://bulnix.com/wallet" class="btn">View Wallet →</a>
+    <hr class="divider" />
+    <p style="font-size:13px;color:#94a3b8;">Your refund is available in your wallet and can be used on your next purchase. If you have any questions, please <a href="https://bulnix.com/tickets" style="color:#00B9E9;">open a support ticket</a>.</p>`;
+
+  const client = getResend();
+  if (!client) { console.warn("[email] RESEND_API_KEY not set — skipping refund confirmation email"); return; }
+  await client.emails.send({
+    from: FROM,
+    replyTo: REPLY_TO,
+    to: opts.to,
+    subject: `Refund of $${opts.amountUSD.toFixed(2)} credited — Order ${opts.orderNumber} | Bulnix`,
+    html: baseTemplate("Refund Confirmation", body),
+  });
+}
+
 /** Generic safe wrapper — logs errors but never throws */
 export async function safeSendEmail(fn: () => Promise<void>): Promise<void> {
   try {

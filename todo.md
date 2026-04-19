@@ -493,3 +493,11 @@
 - [ ] Add Refund button to Admin Order Detail page (same dialog) — future enhancement
 - [ ] Show refund history in order detail (wallet transactions of type refund) — future enhancement
 - [x] Run tests, save checkpoint — 43 tests passing
+
+## AccsZone Balance + Auto-Retry + Refund Email (Apr 19, 2026)
+- [x] Add getAccsZoneBalance tRPC procedure (admin only, calls AccsZone GET /balance)
+- [x] Add low-balance email alert: if balance < $5, send owner notification email
+- [x] Add AccsZone balance card to Admin Dashboard (live balance, low-balance warning badge)
+- [x] Add auto-retry scheduler: every 5 minutes, check AccsZone balance; if > $0, retry all processing orders
+- [x] Send refund confirmation email to customer when admin issues manual refund
+- [x] Run tests, save checkpoint — 43 tests passing

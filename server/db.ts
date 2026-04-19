@@ -1205,6 +1205,20 @@ export async function adminOrderManualRefund(adminId: number, input: { orderId: 
     details: { reason: input.reason, amountUSD: input.amountUSD, userId: order.userId, orderNumber: order.orderNumber },
   }), "adminOrderManualRefund:log");
   await logSystem("info", "order", `Admin issued manual refund of $${input.amountUSD.toFixed(2)} for order ${input.orderId}`, { adminId, orderId: input.orderId, userId: order.userId, reason: input.reason });
+  // Send refund confirmation email to the customer
+  const refundUser = await withDbRetry(() => db!.select({ email: users.email, name: users.name }).from(users).where(eq(users.id, order.userId)).limit(1), "adminOrderManualRefund:user");
+  if (refundUser[0]?.email) {
+    const { sendRefundConfirmationEmail, safeSendEmail } = await import("./email");
+    safeSendEmail(() => sendRefundConfirmationEmail({
+      to: refundUser[0].email!,
+      name: refundUser[0].name ?? "there",
+      orderNumber: order.orderNumber ?? `#${order.id}`,
+      orderId: order.id,
+      amountUSD: input.amountUSD,
+      reason: input.reason,
+      newBalanceUSD: newBalance,
+    }));
+  }
   return { success: true, newBalance, orderNumber: order.orderNumber };
 }
 
@@ -1623,4 +1637,62 @@ export async function adminGetUserDetail(userId: number) {
   const walletTxns = await db.select().from(walletTransactions).where(eq(walletTransactions.userId, userId)).orderBy(desc(walletTransactions.createdAt)).limit(10);
 
   return { user, orders: userOrders, tickets: userTickets, wallet: wallet ?? null, walletTransactions: walletTxns };
+}
+
+// ─── AccsZone Balance ─────────────────────────────────────────────────────────
+
+export async function getAccsZoneBalance(): Promise<{ balance: number; referralBalance: number; lowBalance: boolean; error?: string }> {
+  try {
+    const db = await getDb();
+    if (!db) return { balance: 0, referralBalance: 0, lowBalance: true, error: "Database unavailable" };
+    const [config] = await db.select().from(providerConfigs).where(eq(providerConfigs.providerKey, "accszone")).limit(1);
+    if (!config?.apiKey) return { balance: 0, referralBalance: 0, lowBalance: true, error: "AccsZone API key not configured" };
+
+    const response = await fetch("https://accszone.com/api/v1/user/balance", {
+      headers: { "X-API-Key": config.apiKey, "Accept": "application/json" },
+    });
+    if (!response.ok) return { balance: 0, referralBalance: 0, lowBalance: true, error: `AccsZone API error: ${response.status}` };
+    const json = await response.json() as any;
+    const balance = parseFloat(json?.data?.balance ?? "0");
+    const referralBalance = parseFloat(json?.data?.referral_balance ?? "0");
+    const lowBalance = balance < 5;
+
+    // Send low-balance email alert if balance drops below $5
+    if (lowBalance) {
+      const { notifyOwner } = await import("./_core/notification");
+      await notifyOwner({
+        title: "⚠️ AccsZone Low Balance Alert",
+        content: `Your AccsZone reseller account balance is critically low: $${balance.toFixed(2)}. Please top up your AccsZone account to avoid order fulfillment failures. Current balance: $${balance.toFixed(2)} USD.`,
+      }).catch(() => {/* silent */});
+    }
+
+    return { balance, referralBalance, lowBalance };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { balance: 0, referralBalance: 0, lowBalance: true, error: msg };
+  }
+}
+
+// ─── Auto-Retry Processing Orders ─────────────────────────────────────────────
+
+export async function retryAllProcessingOrders(): Promise<{ retried: number; skipped: number }> {
+  const db = await getDb();
+  if (!db) return { retried: 0, skipped: 0 };
+  try {
+    // Get all orders stuck in processing
+    const processingOrders = await db.select({ id: orders.id }).from(orders).where(eq(orders.status, "processing")).limit(50);
+    if (processingOrders.length === 0) return { retried: 0, skipped: 0 };
+
+    let retried = 0;
+    for (const order of processingOrders) {
+      await db.update(orders).set({ fulfillmentRetries: sql`COALESCE(fulfillmentRetries, 0) + 1` }).where(eq(orders.id, order.id));
+      retried++;
+    }
+    await logSystem("info", "fulfillment", `Auto-retry triggered for ${retried} processing orders`, { orderIds: processingOrders.map(o => o.id) });
+    return { retried, skipped: 0 };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    await logSystem("error", "fulfillment", `Auto-retry failed: ${msg}`, {});
+    return { retried: 0, skipped: 0 };
+  }
 }
