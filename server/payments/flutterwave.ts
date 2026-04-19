@@ -1,4 +1,3 @@
-import { createHmac } from "crypto";
 import { ENV } from "../_core/env";
 
 const BASE_URL = "https://api.flutterwave.com/v3";
@@ -89,11 +88,19 @@ export async function flwVerify(transactionId: string): Promise<FlwVerifyResult>
 
 /**
  * Verify Flutterwave webhook signature.
- * Flutterwave sends a `verif-hash` header which is compared against
- * the FLUTTERWAVE_SECRET_KEY (the webhook secret hash configured in the dashboard).
+ *
+ * Flutterwave sends a `verif-hash` header. This must match the "Secret Hash"
+ * you set in your Flutterwave dashboard under Settings > Webhooks.
+ *
+ * IMPORTANT: This is a SEPARATE value from your API secret key (FLUTTERWAVE_SECRET_KEY).
+ * Set FLUTTERWAVE_WEBHOOK_HASH in your environment to the exact string you entered
+ * as the Secret Hash in the Flutterwave dashboard.
+ *
+ * If neither env var is set (local dev), all webhooks are accepted.
  */
 export function verifyFlwSignature(receivedHash: string): boolean {
-  // Flutterwave uses a plain string comparison against the secret hash
-  // configured in the Flutterwave dashboard under "Webhooks"
-  return receivedHash === ENV.flutterwaveSecretKey;
+  const webhookHash = ENV.flutterwaveWebhookHash;
+  // If no webhook hash is configured, accept the webhook (dev/testing mode)
+  if (!webhookHash) return true;
+  return receivedHash === webhookHash;
 }

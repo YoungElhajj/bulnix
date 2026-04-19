@@ -491,17 +491,23 @@ export async function initiatePayment(userId: number, input: {
   let paymentUrl = `#payment-${gatewayRef}`;
   let gatewayTransactionId: string | undefined;
 
+  // Get NGN rate for Paystack (Paystack Nigeria only supports NGN)
+  const allRates = await getExchangeRates();
+  const ngnRateRow = allRates.find(r => r.fromCurrency === "USD" && r.toCurrency === "NGN");
+  const usdToNgn = ngnRateRow ? Number(ngnRateRow.rate) : 1600;
+
   try {
     if (input.gateway === "paystack") {
-      // Paystack: amount in kobo (NGN) or cents (USD/GBP/EUR)
-      const amountSmallest = Math.round(amount * 100);
+      // Paystack Nigeria only supports NGN. Convert the order USD total → NGN → kobo.
+      const amountNGN = Math.round(Number(order[0].totalUSD) * usdToNgn);
+      const amountKobo = amountNGN * 100;
       const result = await paystackInitiate({
         email: userEmail,
-        amountKobo: amountSmallest,
+        amountKobo,
         reference: gatewayRef,
-        currency: input.currency,
+        currency: "NGN",
         callbackUrl,
-        metadata: { orderId: input.orderId, userId, topupRef: gatewayRef },
+        metadata: { orderId: input.orderId, userId, topupRef: gatewayRef, amountUSD: Number(order[0].totalUSD) },
       });
       paymentUrl = result.authorizationUrl;
     } else if (input.gateway === "flutterwave") {
@@ -716,9 +722,19 @@ export async function getExchangeRates() {
 export async function updateExchangeRate(input: { fromCurrency: string; toCurrency: string; rate: number }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.update(exchangeRates)
+  // Try update first; if no row exists, insert a new one (upsert)
+  const updated = await db.update(exchangeRates)
     .set({ rate: input.rate.toFixed(6) as any, source: "manual" })
     .where(and(eq(exchangeRates.fromCurrency, input.fromCurrency), eq(exchangeRates.toCurrency, input.toCurrency)));
+  // MySQL returns affectedRows; if 0 rows were updated, insert a new row
+  if ((updated as any).affectedRows === 0 || (updated as any)[0]?.affectedRows === 0) {
+    await db.insert(exchangeRates).values({
+      fromCurrency: input.fromCurrency,
+      toCurrency: input.toCurrency,
+      rate: input.rate.toFixed(6) as any,
+      source: "manual",
+    });
+  }
   return { success: true };
 }
 
@@ -1078,17 +1094,24 @@ export async function initiateWalletTopup(userId: number, amountUSD: number, gat
   const callbackUrl = `${siteOrigin}/api/payments/verify?type=topup`;
   let paymentUrl = `#topup-${reference}`;
 
+  // Get NGN rate for Paystack/Flutterwave NGN charging
+  const allRates = await getExchangeRates();
+  const ngnRateRow = allRates.find(r => r.fromCurrency === "USD" && r.toCurrency === "NGN");
+  // Default to 1600 NGN/USD if not set; admin can update this via the Payment Rates panel
+  const usdToNgn = ngnRateRow ? Number(ngnRateRow.rate) : 1600;
+
   try {
     if (gateway === "paystack") {
-      // Paystack uses NGN by default for Nigerian users; for USD topups use USD
-      const amountKobo = Math.round(amountUSD * 100); // treat as USD cents
+      // Paystack Nigeria only supports NGN. Always convert USD → NGN and charge in kobo.
+      const amountNGN = Math.round(amountUSD * usdToNgn);
+      const amountKobo = amountNGN * 100; // Paystack expects kobo (NGN × 100)
       const result = await paystackInitiate({
         email: userEmail,
         amountKobo,
         reference,
-        currency: "USD",
+        currency: "NGN",
         callbackUrl,
-        metadata: { topupRef: reference, userId, type: "wallet_topup" },
+        metadata: { topupRef: reference, userId, type: "wallet_topup", amountUSD },
       });
       paymentUrl = result.authorizationUrl;
     } else if (gateway === "flutterwave") {

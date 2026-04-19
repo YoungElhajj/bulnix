@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Ticket,
   Settings, Activity, Tag, LogOut, Menu, X, Shield,
-  DollarSign, KeyRound, ChevronRight
+  DollarSign, KeyRound, ChevronRight, TrendingUp
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -18,6 +18,7 @@ const navItems = [
   { label: "Tickets",          href: "/admin/tickets",            icon: Ticket },
   { label: "Providers",        href: "/admin/providers",          icon: Settings },
   { label: "Supplier Refunds", href: "/admin/supplier-refunds",   icon: DollarSign },
+  { label: "Payment Rates",    href: "/admin/payment-rates",     icon: TrendingUp },
   { label: "Logs",             href: "/admin/logs",               icon: Activity },
 ];
 

@@ -165,6 +165,12 @@ export default function WalletPage() {
   const totalPages = Math.ceil(totalTx / 15);
   const selectedGateway = GATEWAYS.find(g => g.key === gateway) ?? GATEWAYS[0];
 
+  // Fetch exchange rates to show NGN equivalent for Paystack
+  const { data: ratesData } = trpc.rates.list.useQuery();
+  const ngnRateRow = (ratesData as any[])?.find((r: any) => r.fromCurrency === "USD" && r.toCurrency === "NGN");
+  const usdToNgn = ngnRateRow ? Number(ngnRateRow.rate) : 1600;
+  const amountNGN = Math.round(parseFloat(amount || "0") * usdToNgn);
+
   return (
     <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]">
       <Navbar />
@@ -292,6 +298,18 @@ export default function WalletPage() {
                   {selectedGateway.region}
                 </p>
               </div>
+
+              {/* NGN equivalent notice for Paystack */}
+              {gateway === "paystack" && amountNGN > 0 && (
+                <div className="mb-4 p-3 rounded-xl bg-[#EEF4FF] border border-[#0050D0]/20">
+                  <p className="text-xs text-[#0050D0] font-semibold">
+                    You will be charged ₦{amountNGN.toLocaleString()} on Paystack
+                  </p>
+                  <p className="text-xs text-[#4A6080] mt-0.5">
+                    Rate: ₦{usdToNgn.toLocaleString()}/USD · Your wallet will be credited ${parseFloat(amount || "0").toFixed(2)} USD
+                  </p>
+                </div>
+              )}
 
               <Button
                 className="w-full bg-[#0050D0] hover:bg-[#0040b0] text-white font-semibold"

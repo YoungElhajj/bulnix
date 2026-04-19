@@ -447,3 +447,19 @@
 - [x] Fix NowPayments successUrl/cancelUrl double query-string (? vs &)
 - [x] Add payment return handler in Orders.tsx (shows toast on payment_ref param)
 - [x] All 41 tests still passing
+
+## Payment Bug Fixes Round 2 (Apr 19, 2026)
+- [ ] Fix Paystack: always charge in NGN (convert USD amount using stored NGN rate), never pass USD to Paystack
+- [ ] Fix Flutterwave webhook: wallet topup not being credited after successful payment
+- [ ] Add configurable NGN conversion rate in admin panel (separate from product exchange rate)
+- [ ] Show NGN equivalent amount in Wallet top-up UI when user enters USD amount
+- [ ] Update Wallet.tsx to always show NGN equivalent for Paystack/Flutterwave
+
+## Payment Bug Fixes Round 3 (Apr 19, 2026)
+- [x] Fix Paystack "Currency not supported" — always convert USD to NGN and charge in kobo
+- [x] Fix Flutterwave webhook signature — use dedicated FLUTTERWAVE_WEBHOOK_HASH env var (separate from API key)
+- [x] Add updateExchangeRate upsert — inserts new row if no existing rate found
+- [x] Add Admin > Payment Rates page — configure USD→NGN rate with profit calculator
+- [x] Add NGN equivalent display in Wallet top-up UI when Paystack is selected
+- [x] Add FLUTTERWAVE_WEBHOOK_HASH to env.ts
+- [x] All 41 tests passing
