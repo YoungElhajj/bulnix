@@ -383,3 +383,9 @@
 - [x] Add delivery email with account credentials + per-product login instructions when order is fulfilled
 - [x] Fix TypeScript errors in db.ts (orderItems.productTitle, fulfillmentRecords.orderItemId)
 - [x] Supplier API auto-sync confirmed working (15min stock sync, 1hr full sync)
+
+## Fix Round 3 (Apr 19 2026)
+- [x] Redesign Login left panel with rich visual design: blobs, floating social icons, feature cards
+- [x] Redesign Signup left panel with same rich visual design
+- [x] Fix product card image sizing on mobile (too large, no aspect ratio constraint)
+- [x] Fix categories with 0 products (hidden from customer-facing page; API returns correct counts)

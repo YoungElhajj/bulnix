@@ -33,7 +33,7 @@ export default function Categories() {
   });
 
   const allCats = (categories as any[] | undefined) ?? [];
-  const topLevel = allCats.filter((c: any) => !c.parentId);
+  const topLevel = allCats.filter((c: any) => !c.parentId && (c.productCount ?? 0) > 0);
   const socialCats = topLevel.filter((c: any) => SOCIAL_SLUGS.includes(c.slug)).sort((a: any, b: any) => SOCIAL_SLUGS.indexOf(a.slug) - SOCIAL_SLUGS.indexOf(b.slug));
   const otherCats = topLevel.filter((c: any) => !SOCIAL_SLUGS.includes(c.slug));
   const sortedTopLevel = [...socialCats, ...otherCats];
