@@ -398,9 +398,9 @@ export default function Home() {
               {featuredProducts.slice(0, 8).map((product: any, i: number) => (
                 <Link key={product.id} href={`/products/${product.slug}`}>
                   <div className="reveal product-card cursor-pointer" style={{ transitionDelay: `${i * 80}ms` }}>
-                    <div className="aspect-[4/3] bg-gradient-to-br from-[#F0F8FF] to-[#E0EEFF] flex items-center justify-center overflow-hidden">
+                    <div className="h-36 sm:h-44 bg-gradient-to-br from-[#F0F8FF] to-[#E0EEFF] flex items-center justify-center overflow-hidden">
                       {product.imageUrl ? (
-                        <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <img src={product.imageUrl} alt={product.title} className="max-h-28 sm:max-h-36 max-w-full object-contain group-hover:scale-105 transition-transform duration-300 p-2" />
                       ) : (
                         <Package className="w-12 h-12 text-[#0050D0]/30" />
                       )}
