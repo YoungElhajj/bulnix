@@ -501,3 +501,12 @@
 - [x] Add auto-retry scheduler: every 5 minutes, check AccsZone balance; if > $0, retry all processing orders
 - [x] Send refund confirmation email to customer when admin issues manual refund
 - [x] Run tests, save checkpoint — 43 tests passing
+
+## UI Overhaul Round 2 (Apr 19, 2026)
+- [x] Fix dark theme leaks — all pages must use dark backgrounds, no white/light panels
+- [x] Fix product card icons — modern brand SVGs with gradient backgrounds (Instagram, Facebook, Twitter/X, TikTok, YouTube, Spotify, Netflix, Discord, etc.)
+- [x] Fix product grid — proper multi-column responsive grid (2 cols mobile, 3 cols tablet, 4 cols desktop, 5 cols xl)
+- [x] Fix mobile view across all pages
+- [x] Scrape AccsZone product pages for login instructions per category
+- [x] Add per-platform login instructions to product detail pages (Instagram, Facebook, Twitter/X, TikTok, YouTube, Spotify, Netflix, Discord + generic fallback)
+- [x] Run tests — 43 tests passing

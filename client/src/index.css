@@ -343,4 +343,92 @@
   /* Text */
   .dark .text-\[\#0D2137\] { color: #e8f0f8 !important; }
   .dark .text-\[\#4A6080\] { color: #8ab0cc !important; }
+
+  /* ── Dark mode: additional overrides for product/category pages ── */
+  /* Subcategory pills */
+  .dark .bg-\[\#F5F9FF\] { background-color: #061A2B !important; }
+  .dark .bg-\[\#F0F5FF\] { background-color: #0A1E33 !important; }
+  .dark .bg-\[\#EEF4FF\] { background-color: #0A1E33 !important; }
+  /* Product image area */
+  .dark .bg-gradient-to-br { --tw-gradient-stops: #0A2540, #0F3060 !important; }
+  /* Tabs and content panels */
+  .dark .bg-amber-50 { background-color: rgba(120, 80, 0, 0.15) !important; }
+  .dark .border-amber-200 { border-color: rgba(180, 120, 0, 0.3) !important; }
+  .dark .text-amber-800 { color: #fbbf24 !important; }
+  .dark .text-amber-700 { color: #f59e0b !important; }
+  .dark .bg-green-50 { background-color: rgba(0, 100, 50, 0.15) !important; }
+  .dark .border-green-200 { border-color: rgba(0, 150, 80, 0.3) !important; }
+  .dark .text-green-800 { color: #4ade80 !important; }
+  .dark .text-green-700 { color: #22c55e !important; }
+  .dark .bg-blue-50 { background-color: rgba(0, 60, 150, 0.15) !important; }
+  .dark .border-blue-200 { border-color: rgba(0, 100, 200, 0.3) !important; }
+  .dark .text-blue-700 { color: #60a5fa !important; }
+  /* Input fields */
+  .dark input[type="text"],
+  .dark input[type="email"],
+  .dark input[type="search"],
+  .dark input[type="number"],
+  .dark textarea {
+    background-color: #0A2540 !important;
+    color: #e8f0f8 !important;
+    border-color: #1a3a5c !important;
+  }
+  .dark input::placeholder,
+  .dark textarea::placeholder { color: #4a6a8a !important; }
+  /* Select dropdowns */
+  .dark [data-radix-select-content],
+  .dark [role="listbox"] {
+    background-color: #0F3D5E !important;
+    border-color: #1a5070 !important;
+    color: #e8f0f8 !important;
+  }
+  /* Product detail price box */
+  .dark .border-\[\#D8E8F5\] { border-color: #1a3a5c !important; }
+  /* Pagination buttons */
+  .dark .text-\[\#0050D0\] { color: #00C2FF !important; }
+
+  /* ── Dark mode: Home, Categories, Cart, Checkout, Auth pages ── */
+  /* Hardcoded navy text → light */
+  .dark .text-\[\#0F3D5E\] { color: #e8f0f8 !important; }
+  .dark .text-\[\#0A2540\] { color: #e8f0f8 !important; }
+  .dark .text-\[\#1a3a5c\] { color: #8ab0cc !important; }
+  /* Hardcoded light surfaces */
+  .dark .bg-\[\#F5F8FF\] { background-color: #061A2B !important; }
+  .dark .bg-\[\#F0F5FF\] { background-color: #0A1E33 !important; }
+  .dark .bg-\[\#EEF6FF\] { background-color: #0A1E33 !important; }
+  .dark .bg-\[\#E8F0FF\] { background-color: #0A2540 !important; }
+  .dark .bg-\[\#D8E8F5\] { background-color: #0F3060 !important; }
+  /* Hardcoded borders */
+  .dark .border-\[\#F0F5FF\] { border-color: #1a3a5c !important; }
+  .dark .border-\[\#E8F0FF\] { border-color: #1a3a5c !important; }
+  /* Slate/gray light surfaces used in some components */
+  .dark .bg-slate-50 { background-color: #0A2540 !important; }
+  .dark .bg-slate-100 { background-color: #0F3060 !important; }
+  .dark .text-slate-200 { color: #1a3a5c !important; }
+  .dark .fill-slate-200 { fill: #1a3a5c !important; }
+  .dark .text-slate-600 { color: #8ab0cc !important; }
+  .dark .text-slate-700 { color: #a0c0d8 !important; }
+  .dark .bg-slate-50\/50 { background-color: rgba(10, 37, 64, 0.5) !important; }
+  /* Purple/digital badge */
+  .dark .bg-purple-50 { background-color: rgba(80, 0, 120, 0.15) !important; }
+  .dark .border-purple-200 { border-color: rgba(150, 50, 220, 0.3) !important; }
+  .dark .text-purple-700 { color: #c084fc !important; }
+  /* Red/destructive */
+  .dark .bg-red-50 { background-color: rgba(120, 0, 0, 0.15) !important; }
+  .dark .border-red-200 { border-color: rgba(200, 50, 50, 0.3) !important; }
+  .dark .text-red-600 { color: #f87171 !important; }
+  /* Green */
+  .dark .text-green-600 { color: #4ade80 !important; }
+  .dark .text-green-600 { color: #4ade80 !important; }
+  /* Prose (description tab) */
+  .dark .prose-slate { color: #8ab0cc; }
+  .dark .prose-slate strong { color: #e8f0f8; }
+  /* Product detail image area — prevent white bg showing through transparent PNGs */
+  .dark .aspect-square.bg-gradient-to-br { background: linear-gradient(135deg, #0A2540, #0F3060) !important; }
+  /* SelectContent / dropdown dark override */
+  .dark [data-radix-popper-content-wrapper] [role="option"] { color: #e8f0f8 !important; }
+  .dark [data-radix-popper-content-wrapper] [role="option"]:hover { background-color: #0F3D5E !important; }
+  /* Scrollbar dark */
+  .dark ::-webkit-scrollbar-track { background: #061A2B !important; }
+  .dark ::-webkit-scrollbar-thumb { background: #0F3D5E !important; }
 }

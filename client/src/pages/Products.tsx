@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useState } from "react";
 import { Link, useParams } from "wouter";
-import { Search, SlidersHorizontal, Package, ShoppingCart, X, ChevronRight } from "lucide-react";
+import { Search, SlidersHorizontal, Package, ShoppingCart, X, ChevronRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,106 @@ function formatPrice(usd: number, currency: string): string {
   const converted = usd * (RATES[currency] ?? 1);
   if (currency === "NGN") return `${cur.symbol}${converted.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
   return `${cur.symbol}${converted.toFixed(2)}`;
+}
+
+// Detect brand from product title/image and render a styled icon background
+function ProductImageArea({ product }: { product: any }) {
+  const title = (product.title ?? "").toLowerCase();
+  const hasImage = !!product.imageUrl;
+
+  // Brand color mapping for products without images or with transparent PNGs
+  const getBrandStyle = () => {
+    if (title.includes("instagram") || title.includes("ig account")) {
+      return { bg: "from-[#833ab4] via-[#fd1d1d] to-[#fcb045]", label: "IG" };
+    }
+    if (title.includes("facebook") || title.includes("fb account")) {
+      return { bg: "from-[#1877F2] to-[#0d5db8]", label: "FB" };
+    }
+    if (title.includes("twitter") || title.includes("x account") || title.includes("tweet")) {
+      return { bg: "from-[#111] to-[#333]", label: "𝕏" };
+    }
+    if (title.includes("tiktok")) {
+      return { bg: "from-[#010101] to-[#2d2d2d]", label: "TT" };
+    }
+    if (title.includes("youtube") || title.includes("yt ")) {
+      return { bg: "from-[#FF0000] to-[#cc0000]", label: "YT" };
+    }
+    if (title.includes("spotify")) {
+      return { bg: "from-[#1DB954] to-[#158a3e]", label: "SP" };
+    }
+    if (title.includes("netflix")) {
+      return { bg: "from-[#E50914] to-[#b00710]", label: "NF" };
+    }
+    if (title.includes("discord")) {
+      return { bg: "from-[#5865F2] to-[#3a47d5]", label: "DC" };
+    }
+    if (title.includes("linkedin")) {
+      return { bg: "from-[#0077B5] to-[#005885]", label: "LI" };
+    }
+    if (title.includes("snapchat")) {
+      return { bg: "from-[#FFFC00] to-[#e6e300]", label: "SC" };
+    }
+    if (title.includes("pinterest")) {
+      return { bg: "from-[#E60023] to-[#b0001b]", label: "PI" };
+    }
+    if (title.includes("reddit")) {
+      return { bg: "from-[#FF4500] to-[#cc3700]", label: "RD" };
+    }
+    if (title.includes("gmail") || title.includes("google")) {
+      return { bg: "from-[#4285F4] to-[#2c6fd1]", label: "GM" };
+    }
+    if (title.includes("amazon") || title.includes("aws")) {
+      return { bg: "from-[#FF9900] to-[#cc7a00]", label: "AZ" };
+    }
+    if (title.includes("paypal")) {
+      return { bg: "from-[#003087] to-[#001f5a]", label: "PP" };
+    }
+    return null;
+  };
+
+  const brand = getBrandStyle();
+
+  return (
+    <div className="relative h-36 sm:h-44 overflow-hidden flex items-center justify-center">
+      {hasImage ? (
+        // Use a dark/brand background behind the image to avoid white checkered look
+        <div className={`absolute inset-0 ${brand ? `bg-gradient-to-br ${brand.bg}` : "bg-[#0A2540]"} opacity-90`} />
+      ) : brand ? (
+        <div className={`absolute inset-0 bg-gradient-to-br ${brand.bg}`} />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0A2540] to-[#0F3060]" />
+      )}
+
+      {hasImage ? (
+        <img
+          src={product.imageUrl}
+          alt={product.title}
+          className="relative z-10 h-20 sm:h-28 max-w-[80%] object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-lg"
+        />
+      ) : brand ? (
+        <span className="relative z-10 text-white font-black text-3xl sm:text-4xl tracking-tight drop-shadow-lg select-none">
+          {brand.label}
+        </span>
+      ) : (
+        <Package className="relative z-10 h-12 w-12 text-white/40" />
+      )}
+
+      {/* Badges */}
+      {product.isFeatured && (
+        <Badge className="absolute top-2 left-2 z-20 bg-[#00C2FF] text-[#0F3D5E] text-xs border-0 font-bold shadow">
+          <Star className="h-3 w-3 mr-0.5 fill-current" /> Featured
+        </Badge>
+      )}
+      {!product.stockUnlimited && product.stockQuantity <= 5 && product.stockQuantity > 0 && (
+        <Badge className="absolute top-2 right-2 z-20 bg-orange-500 text-white text-xs border-0 shadow">Low Stock</Badge>
+      )}
+      {!product.stockUnlimited && product.stockQuantity === 0 && (
+        <div className="absolute inset-0 z-20 bg-black/60 flex items-center justify-center">
+          <span className="text-white font-semibold text-sm bg-black/50 px-3 py-1 rounded-full">Out of Stock</span>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function Products() {
@@ -80,8 +180,9 @@ export default function Products() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F9FF]">
+    <div className="min-h-screen bg-background text-foreground">
       <Navbar/>
+
       {/* Page Header */}
       <div className="bg-[#0F3D5E] pt-24 pb-10">
         <div className="container">
@@ -107,13 +208,13 @@ export default function Products() {
 
       {/* Subcategory Pills */}
       {isParentCat && subcategories && (subcategories as any[]).length > 0 && (
-        <div className="bg-white border-b border-[#D8E8F5]">
+        <div className="bg-card border-b border-border">
           <div className="container py-4">
-            <p className="text-[#4A6080] text-xs font-semibold uppercase tracking-wider mb-3">Browse subcategories</p>
+            <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-3">Browse subcategories</p>
             <div className="flex flex-wrap gap-2">
               {(subcategories as any[]).map((sub: any) => (
                 <Link key={sub.id} href={`/categories/${sub.slug}`}>
-                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#F5F9FF] border border-[#D8E8F5] cursor-pointer hover:border-[#00C2FF]/50 hover:bg-[#E8F4FF] hover:text-[#0050D0] transition-all text-sm font-medium text-[#0D2137]">
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted border border-border cursor-pointer hover:border-[#00C2FF]/50 hover:bg-[#00C2FF]/10 hover:text-[#00C2FF] transition-all text-sm font-medium text-foreground">
                     {sub.imageUrl ? (
                       <img src={sub.imageUrl} alt={sub.name} className="w-5 h-5 object-contain rounded" />
                     ) : (
@@ -121,7 +222,7 @@ export default function Products() {
                     )}
                     {sub.name}
                     {(sub.productCount ?? 0) > 0 && (
-                      <span className="text-[#4A6080] text-xs">({sub.productCount})</span>
+                      <span className="text-muted-foreground text-xs">({sub.productCount})</span>
                     )}
                   </div>
                 </Link>
@@ -135,26 +236,26 @@ export default function Products() {
         {/* Filter Bar */}
         <div className="flex flex-col sm:flex-row gap-3 mb-8">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#4A6080]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search products..."
               value={search}
               onChange={e => { setSearch(e.target.value); setPage(1); }}
-              className="pl-9 bg-white border-[#D8E8F5] text-[#0D2137] placeholder:text-[#4A6080]/60 focus:border-[#00C2FF] h-10 rounded-xl"
+              className="pl-9 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-[#00C2FF] h-10 rounded-xl"
             />
             {search && (
-              <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4A6080] hover:text-[#0D2137]">
+              <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                 <X className="h-4 w-4" />
               </button>
             )}
           </div>
 
           <Select value={sort} onValueChange={(v: any) => { setSort(v); setPage(1); }}>
-            <SelectTrigger className="w-[180px] bg-white border-[#D8E8F5] text-[#0D2137] h-10 rounded-xl">
-              <SlidersHorizontal className="h-4 w-4 mr-2 text-[#4A6080]" />
+            <SelectTrigger className="w-[180px] bg-card border-border text-foreground h-10 rounded-xl">
+              <SlidersHorizontal className="h-4 w-4 mr-2 text-muted-foreground" />
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-white border-[#D8E8F5]">
+            <SelectContent className="bg-card border-border">
               <SelectItem value="newest">Newest First</SelectItem>
               <SelectItem value="price_asc">Price: Low to High</SelectItem>
               <SelectItem value="price_desc">Price: High to Low</SelectItem>
@@ -163,10 +264,10 @@ export default function Products() {
           </Select>
 
           <Select value={currency} onValueChange={setCurrency}>
-            <SelectTrigger className="w-[110px] bg-white border-[#D8E8F5] text-[#0D2137] h-10 rounded-xl">
+            <SelectTrigger className="w-[110px] bg-card border-border text-foreground h-10 rounded-xl">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-white border-[#D8E8F5]">
+            <SelectContent className="bg-card border-border">
               {CURRENCIES.map(c => (
                 <SelectItem key={c.code} value={c.code}>{c.symbol} {c.label}</SelectItem>
               ))}
@@ -175,66 +276,57 @@ export default function Products() {
         </div>
 
         {isLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
-              {[...Array(12)].map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl overflow-hidden border border-[#D8E8F5] animate-pulse">
-                <div className="h-28 sm:h-36 bg-[#F0F8FF]" />
-                <div className="p-4 space-y-2">
-                  <div className="h-4 bg-[#F0F8FF] rounded w-3/4" />
-                  <div className="h-4 bg-[#F0F8FF] rounded w-1/2" />
-                  <div className="h-8 bg-[#F0F8FF] rounded mt-3" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+            {[...Array(15)].map((_, i) => (
+              <div key={i} className="bg-card rounded-2xl overflow-hidden border border-border animate-pulse">
+                <div className="h-36 sm:h-44 bg-muted" />
+                <div className="p-3 sm:p-4 space-y-2">
+                  <div className="h-4 bg-muted rounded w-3/4" />
+                  <div className="h-4 bg-muted rounded w-1/2" />
+                  <div className="h-8 bg-muted rounded mt-3" />
                 </div>
               </div>
             ))}
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-20">
-            <div className="w-20 h-20 rounded-2xl bg-[#F0F8FF] border border-[#D8E8F5] flex items-center justify-center mx-auto mb-4">
-              <Package className="h-10 w-10 text-[#4A6080]" />
+            <div className="w-20 h-20 rounded-2xl bg-card border border-border flex items-center justify-center mx-auto mb-4">
+              <Package className="h-10 w-10 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-bold text-[#0D2137] mb-2" style={{ fontFamily: "'Poppins', sans-serif" }}>No products found</h3>
-            <p className="text-[#4A6080] mb-6">Try adjusting your search or browse all categories</p>
+            <h3 className="text-xl font-bold text-foreground mb-2" style={{ fontFamily: "'Poppins', sans-serif" }}>No products found</h3>
+            <p className="text-muted-foreground mb-6">Try adjusting your search or browse all categories</p>
             <Link href="/categories">
               <Button className="bg-[#0050D0] hover:bg-[#0040b0] text-white rounded-full px-6">Browse Categories</Button>
             </Link>
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+            {/* Result count */}
+            <p className="text-muted-foreground text-sm mb-4">
+              Showing {products.length} of {total} products
+            </p>
+
+            {/* Product Grid — responsive: 2 cols mobile, 3 tablet, 4 desktop, 5 xl */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
               {products.map((product: any) => (
                 <Link key={product.id} href={`/products/${product.slug}`}>
-                  <div className="product-card cursor-pointer group bg-white">
-                    <div className="h-28 sm:h-40 bg-white border-b border-[#F0F5FF] flex items-center justify-center overflow-hidden relative">
-                      {product.imageUrl ? (
-                        <img src={product.imageUrl} alt={product.title} className="h-20 sm:h-32 max-w-full object-contain group-hover:scale-105 transition-transform duration-300 p-2" />
-                      ) : (
-                        <Package className="h-12 w-12 text-[#0050D0]/30" />
-                      )}
-                      {product.isFeatured && (
-                        <Badge className="absolute top-2 left-2 bg-[#00C2FF] text-[#0F3D5E] text-xs border-0 font-bold">Featured</Badge>
-                      )}
-                      {!product.stockUnlimited && product.stockQuantity <= 5 && product.stockQuantity > 0 && (
-                        <Badge className="absolute top-2 right-2 bg-orange-500 text-white text-xs border-0">Low Stock</Badge>
-                      )}
-                      {!product.stockUnlimited && product.stockQuantity === 0 && (
-                        <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-                          <span className="text-[#0D2137] font-semibold text-sm">Out of Stock</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-2.5 sm:p-4">
-                      <h3 className="text-xs sm:text-sm font-semibold text-[#0D2137] line-clamp-2 mb-2 sm:mb-3 group-hover:text-[#0050D0] transition-colors">{product.title}</h3>
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-[#0050D0] font-bold text-sm sm:text-lg">
+                  <div className="product-card cursor-pointer group bg-card rounded-2xl overflow-hidden border border-border hover:border-[#00C2FF]/50 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-[#00C2FF]/10">
+                    <ProductImageArea product={product} />
+                    <div className="p-2.5 sm:p-3.5">
+                      <h3 className="text-xs sm:text-sm font-semibold text-foreground line-clamp-2 mb-2 group-hover:text-[#00C2FF] transition-colors leading-snug">
+                        {product.title}
+                      </h3>
+                      <div className="flex items-center justify-between mb-2.5">
+                        <span className="text-[#00C2FF] font-bold text-sm sm:text-base">
                           {formatPrice(Number(product.customerPriceUSD), currency)}
                         </span>
-                        <span className="text-xs text-[#4A6080]">
-                          {product.stockUnlimited ? "In Stock" : `${product.stockQuantity} left`}
+                        <span className="text-xs text-muted-foreground">
+                          {product.stockUnlimited ? "∞ stock" : `${product.stockQuantity} left`}
                         </span>
                       </div>
                       <Button
                         size="sm"
-                        className="w-full bg-[#0050D0]/10 hover:bg-[#0050D0] text-[#0050D0] hover:text-white border border-[#0050D0]/20 hover:border-[#0050D0] transition-all duration-200 text-xs rounded-lg"
+                        className="w-full bg-[#00C2FF]/10 hover:bg-[#00C2FF] text-[#00C2FF] hover:text-[#0F3D5E] border border-[#00C2FF]/30 hover:border-[#00C2FF] transition-all duration-200 text-xs rounded-lg font-semibold h-8"
                         onClick={(e) => handleAddToCart(product, e)}
                         disabled={!product.stockUnlimited && product.stockQuantity === 0}
                       >
@@ -246,20 +338,21 @@ export default function Products() {
               ))}
             </div>
 
+            {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-10">
                 <Button
                   variant="outline"
-                  className="border-[#D8E8F5] bg-white text-[#4A6080] hover:text-[#0D2137] hover:border-[#00C2FF]/50 rounded-full"
+                  className="border-border bg-card text-muted-foreground hover:text-foreground hover:border-[#00C2FF]/50 rounded-full"
                   disabled={page === 1}
                   onClick={() => setPage(p => p - 1)}
                 >
                   Previous
                 </Button>
-                <span className="text-[#4A6080] text-sm px-4">Page {page} of {totalPages}</span>
+                <span className="text-muted-foreground text-sm px-4">Page {page} of {totalPages}</span>
                 <Button
                   variant="outline"
-                  className="border-[#D8E8F5] bg-white text-[#4A6080] hover:text-[#0D2137] hover:border-[#00C2FF]/50 rounded-full"
+                  className="border-border bg-card text-muted-foreground hover:text-foreground hover:border-[#00C2FF]/50 rounded-full"
                   disabled={page === totalPages}
                   onClick={() => setPage(p => p + 1)}
                 >
