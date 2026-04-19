@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { ShoppingCart, Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Package, Settings, Shield, Wallet, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -26,6 +26,7 @@ const navLinks = [
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [location] = useLocation();
   const { totalItems } = useCart();
   const { user, isAuthenticated } = useAuth();
@@ -34,15 +35,38 @@ export default function Navbar() {
   });
 
   const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
   const isActive = (href: string) => location === href || location.startsWith(href + "/");
 
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const navBg = isDark
+    ? scrolled ? "bg-[#061A2B]/95 shadow-lg shadow-black/30" : "bg-[#061A2B]/80"
+    : scrolled ? "bg-white/95 shadow-md shadow-slate-200/60" : "bg-white/80";
+
+  const borderColor = isDark ? "border-[#0F3D5E]/50" : "border-slate-200/80";
+  const linkBase = isDark ? "text-slate-400 hover:text-white" : "text-slate-600 hover:text-[#0F3D5E]";
+  const linkActive = "text-[#00C2FF]";
+  const iconBtn = isDark
+    ? "text-slate-400 hover:text-white hover:bg-[#0F3D5E]/60"
+    : "text-slate-500 hover:text-[#0F3D5E] hover:bg-slate-100";
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[#0F3D5E]/60" style={{ background: 'rgba(6,26,43,0.96)', backdropFilter: "blur(14px)" }}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 border-b ${borderColor} ${navBg} backdrop-blur-md transition-all duration-300`}>
       <div className="container">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <img src={LOGO_URL} alt="Bulnix" className="h-8 w-auto" />
+          {/* Logo — no box, just the image */}
+          <Link href="/" className="flex items-center shrink-0">
+            <img
+              src={LOGO_URL}
+              alt="Bulnix"
+              className="h-9 w-auto object-contain"
+              style={{ background: "transparent" }}
+            />
           </Link>
 
           {/* Desktop Nav */}
@@ -52,9 +76,7 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={`text-sm font-medium transition-colors duration-200 ${
-                  isActive(link.href)
-                    ? "text-[#00C2FF]"
-                    : "text-slate-400 hover:text-white"
+                  isActive(link.href) ? linkActive : linkBase
                 }`}
               >
                 {link.label}
@@ -63,21 +85,21 @@ export default function Navbar() {
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {/* Theme Toggle */}
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleTheme}
-              className="text-slate-400 hover:text-white hover:bg-[#0F3D5E]/60"
-              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              className={iconBtn}
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
-              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
 
             {/* Cart */}
             <Link href="/cart">
-              <Button variant="ghost" size="icon" className="relative text-slate-400 hover:text-white hover:bg-[#0F3D5E]/60">
+              <Button variant="ghost" size="icon" className={`relative ${iconBtn}`}>
                 <ShoppingCart className="h-5 w-5" />
                 {totalItems > 0 && (
                   <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-[#00C2FF] text-[#061A2B] border-0 font-bold">
@@ -91,17 +113,20 @@ export default function Navbar() {
             {isAuthenticated && user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="hidden md:flex items-center gap-2 px-3 text-slate-300 hover:text-white hover:bg-[#0F3D5E]/60">
+                  <Button
+                    variant="ghost"
+                    className={`hidden md:flex items-center gap-2 px-3 ${isDark ? "text-slate-300 hover:text-white hover:bg-[#0F3D5E]/60" : "text-slate-700 hover:text-[#0F3D5E] hover:bg-slate-100"}`}
+                  >
                     <div className="w-7 h-7 rounded-full bg-[#00C2FF]/20 border border-[#00C2FF]/40 flex items-center justify-center text-xs font-semibold text-[#00C2FF]">
                       {(user.name || user.email || "U")[0].toUpperCase()}
                     </div>
                     <span className="text-sm font-medium max-w-24 truncate">{user.name || user.email}</span>
-                    <ChevronDown className="h-3.5 w-3.5 text-slate-500" />
+                    <ChevronDown className="h-3.5 w-3.5 opacity-50" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-52 bg-[#0A2540] border-[#0F3D5E]">
+                <DropdownMenuContent align="end" className={`w-52 ${isDark ? "bg-[#0A2540] border-[#0F3D5E]" : "bg-white border-slate-200"}`}>
                   <DropdownMenuItem asChild>
-                      <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer">
+                    <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer">
                       <LayoutDashboard className="h-4 w-4 text-[#00C2FF]" />
                       <span>Dashboard</span>
                     </Link>
@@ -126,7 +151,7 @@ export default function Navbar() {
                   </DropdownMenuItem>
                   {user.role === "admin" && (
                     <>
-                      <DropdownMenuSeparator className="bg-[#0F3D5E]" />
+                      <DropdownMenuSeparator className={isDark ? "bg-[#0F3D5E]" : "bg-slate-200"} />
                       <DropdownMenuItem asChild>
                         <Link href="/admin" className="flex items-center gap-2 cursor-pointer">
                           <Shield className="h-4 w-4 text-[#00C2FF]" />
@@ -135,10 +160,10 @@ export default function Navbar() {
                       </DropdownMenuItem>
                     </>
                   )}
-                  <DropdownMenuSeparator className="bg-[#0F3D5E]" />
+                  <DropdownMenuSeparator className={isDark ? "bg-[#0F3D5E]" : "bg-slate-200"} />
                   <DropdownMenuItem
                     onClick={() => logoutMutation.mutate()}
-                    className="flex items-center gap-2 cursor-pointer text-red-400 focus:text-red-400 focus:bg-red-500/10"
+                    className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-50"
                   >
                     <LogOut className="h-4 w-4" />
                     <span>Sign Out</span>
@@ -147,14 +172,21 @@ export default function Navbar() {
               </DropdownMenu>
             ) : (
               <div className="hidden md:flex items-center gap-2">
-                  <Link href="/login">
-                    <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-[#0F3D5E]/60">
-                      Sign In
-                    </Button>
-                  </Link>
+                <Link href="/login">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={isDark ? "text-slate-300 hover:text-white hover:bg-[#0F3D5E]/60" : "text-slate-700 hover:text-[#0F3D5E] hover:bg-slate-100 font-medium"}
+                  >
+                    Sign In
+                  </Button>
+                </Link>
                 <Link href="/signup">
-                  <Button size="sm" className="bg-[#00C2FF] hover:bg-[#00aee0] text-[#061A2B] font-bold">
-                    Get Started
+                  <Button
+                    size="sm"
+                    className="bg-[#0319CB] hover:bg-[#0226a8] text-white font-bold rounded-full px-5 shadow-md shadow-[#0319CB]/30 transition-all duration-200 hover:shadow-lg hover:shadow-[#0319CB]/40"
+                  >
+                    Sign Up
                   </Button>
                 </Link>
               </div>
@@ -164,7 +196,7 @@ export default function Navbar() {
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden text-slate-400 hover:text-white hover:bg-[#0F3D5E]/60"
+              className={`md:hidden ${iconBtn}`}
               onClick={() => setMobileOpen(!mobileOpen)}
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -174,7 +206,7 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {mobileOpen && (
-          <div className="md:hidden border-t border-[#0F3D5E]/60 py-4 space-y-1 bg-[#061A2B]">
+          <div className={`md:hidden border-t ${borderColor} py-4 space-y-1 ${isDark ? "bg-[#061A2B]" : "bg-white"}`}>
             {navLinks.map(link => (
               <Link
                 key={link.href}
@@ -183,24 +215,24 @@ export default function Navbar() {
                 className={`block px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${
                   isActive(link.href)
                     ? "text-[#00C2FF] bg-[#00C2FF]/10"
-                    : "text-slate-400 hover:text-white hover:bg-[#0F3D5E]/60"
+                    : isDark ? "text-slate-400 hover:text-white hover:bg-[#0F3D5E]/60" : "text-slate-600 hover:text-[#0F3D5E] hover:bg-slate-100"
                 }`}
               >
                 {link.label}
               </Link>
             ))}
-              <div className="pt-3 px-4 flex flex-col gap-2 border-t border-[#0F3D5E]/60 mt-3">
+            <div className={`pt-3 px-4 flex flex-col gap-2 border-t ${borderColor} mt-3`}>
               {isAuthenticated ? (
                 <>
                   <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" size="sm" className="w-full border-[#0F3D5E] text-slate-300 hover:text-white hover:bg-[#0F3D5E]/60">
+                    <Button variant="outline" size="sm" className="w-full">
                       <LayoutDashboard className="h-4 w-4 mr-2" /> Dashboard
                     </Button>
                   </Link>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-full text-red-400 hover:bg-red-500/10"
+                    className="w-full text-red-500 hover:bg-red-50"
                     onClick={() => { logoutMutation.mutate(); setMobileOpen(false); }}
                   >
                     <LogOut className="h-4 w-4 mr-2" /> Sign Out
@@ -209,10 +241,10 @@ export default function Navbar() {
               ) : (
                 <>
                   <Link href="/login" onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" size="sm" className="w-full border-[#0F3D5E] text-slate-300 hover:text-white">Sign In</Button>
+                    <Button variant="outline" size="sm" className="w-full">Sign In</Button>
                   </Link>
                   <Link href="/signup" onClick={() => setMobileOpen(false)}>
-                    <Button size="sm" className="w-full bg-[#00C2FF] hover:bg-[#00aee0] text-[#061A2B] font-bold">Get Started</Button>
+                    <Button size="sm" className="w-full bg-[#0319CB] hover:bg-[#0226a8] text-white font-bold">Sign Up</Button>
                   </Link>
                 </>
               )}

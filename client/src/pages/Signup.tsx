@@ -15,22 +15,22 @@ function SignupIllustration() {
   return (
     <svg viewBox="0 0 480 480" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full max-w-sm mx-auto">
       {/* Background blob */}
-      <ellipse cx="240" cy="300" rx="200" ry="140" fill="#dbeafe" opacity="0.6" />
+      <ellipse cx="240" cy="300" rx="200" ry="140" fill="#e0f2fe" opacity="0.6" />
       {/* Phone/form card */}
-      <rect x="130" y="80" width="200" height="280" rx="20" fill="white" stroke="#bfdbfe" strokeWidth="2" />
-      <rect x="148" y="110" width="164" height="14" rx="7" fill="#93c5fd" />
-      <rect x="148" y="136" width="120" height="10" rx="5" fill="#bfdbfe" />
-      <rect x="148" y="162" width="164" height="14" rx="7" fill="#93c5fd" />
-      <rect x="148" y="188" width="100" height="10" rx="5" fill="#bfdbfe" />
-      <rect x="148" y="214" width="164" height="14" rx="7" fill="#93c5fd" />
-      <rect x="148" y="240" width="80" height="10" rx="5" fill="#bfdbfe" />
+      <rect x="130" y="80" width="200" height="280" rx="20" fill="white" stroke="#bae6fd" strokeWidth="2" />
+      <rect x="148" y="110" width="164" height="14" rx="7" fill="#7dd3fc" />
+      <rect x="148" y="136" width="120" height="10" rx="5" fill="#bae6fd" />
+      <rect x="148" y="162" width="164" height="14" rx="7" fill="#7dd3fc" />
+      <rect x="148" y="188" width="100" height="10" rx="5" fill="#bae6fd" />
+      <rect x="148" y="214" width="164" height="14" rx="7" fill="#7dd3fc" />
+      <rect x="148" y="240" width="80" height="10" rx="5" fill="#bae6fd" />
       {/* OTP dots */}
-      <circle cx="162" cy="278" r="8" fill="#3b82f6" />
-      <circle cx="186" cy="278" r="8" fill="#3b82f6" />
-      <circle cx="210" cy="278" r="8" fill="#3b82f6" />
-      <circle cx="234" cy="278" r="8" fill="#bfdbfe" />
+      <circle cx="162" cy="278" r="8" fill="#0319CB" />
+      <circle cx="186" cy="278" r="8" fill="#0319CB" />
+      <circle cx="210" cy="278" r="8" fill="#0319CB" />
+      <circle cx="234" cy="278" r="8" fill="#bae6fd" />
       {/* Person body */}
-      <ellipse cx="370" cy="400" rx="40" ry="12" fill="#bfdbfe" opacity="0.5" />
+      <ellipse cx="370" cy="400" rx="40" ry="12" fill="#bae6fd" opacity="0.5" />
       {/* Legs */}
       <rect x="354" y="360" width="14" height="44" rx="7" fill="#1e3a5f" />
       <rect x="374" y="360" width="14" height="44" rx="7" fill="#1e3a5f" />
@@ -55,10 +55,10 @@ function SignupIllustration() {
       {/* Smile */}
       <path d="M362 270 Q371 278 380 270" stroke="#1e3a5f" strokeWidth="2" strokeLinecap="round" fill="none" />
       {/* Floating decorations */}
-      <circle cx="80" cy="160" r="12" fill="#bfdbfe" opacity="0.7" />
-      <circle cx="60" cy="320" r="8" fill="#93c5fd" opacity="0.5" />
-      <circle cx="430" cy="180" r="10" fill="#bfdbfe" opacity="0.6" />
-      <circle cx="450" cy="340" r="6" fill="#93c5fd" opacity="0.4" />
+      <circle cx="80" cy="160" r="12" fill="#bae6fd" opacity="0.7" />
+      <circle cx="60" cy="320" r="8" fill="#7dd3fc" opacity="0.5" />
+      <circle cx="430" cy="180" r="10" fill="#bae6fd" opacity="0.6" />
+      <circle cx="450" cy="340" r="6" fill="#7dd3fc" opacity="0.4" />
       {/* Dollar sign floating */}
       <rect x="68" y="380" width="36" height="36" rx="8" fill="#d1fae5" />
       <text x="86" y="403" textAnchor="middle" fill="#059669" fontSize="18" fontWeight="bold">$</text>
@@ -140,7 +140,7 @@ export default function SignUp() {
   return (
     <div className="min-h-screen bg-white flex">
       {/* ── Left panel — illustration ── */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center bg-[#eff6ff] p-12 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center bg-gradient-to-br from-[#e0f4ff] to-[#f0f8ff] p-12 relative overflow-hidden">
         {/* Logo */}
         <Link href="/" className="absolute top-8 left-8">
           <img src={`${import.meta.env.VITE_APP_LOGO}`} alt="Bulnix" className="h-10 w-auto" />
@@ -150,7 +150,7 @@ export default function SignUp() {
           <SignupIllustration />
           <h2 className="text-2xl font-bold text-slate-800 mt-6">
             Premium digital accounts,<br />
-            <span className="text-[#3b82f6]">delivered instantly.</span>
+            <span className="text-[#0319CB]">delivered instantly.</span>
           </h2>
           <p className="text-slate-500 text-sm mt-3 max-w-xs leading-relaxed">
             Join thousands of customers who trust Bulnix for bulk digital account purchases. Secure payments, instant delivery.
@@ -159,7 +159,7 @@ export default function SignUp() {
           <div className="flex gap-6 mt-8">
             {[{ v: "50K+", l: "Customers" }, { v: "99.9%", l: "Uptime" }, { v: "<4min", l: "Delivery" }].map((s) => (
               <div key={s.v} className="text-center">
-                <div className="text-lg font-bold text-[#3b82f6]">{s.v}</div>
+                <div className="text-lg font-bold text-[#0319CB]">{s.v}</div>
                 <div className="text-xs text-slate-500">{s.l}</div>
               </div>
             ))}
@@ -198,7 +198,7 @@ export default function SignUp() {
                     onChange={(e) => setName(e.target.value)}
                     required
                     minLength={2}
-                    className="h-12 border-slate-200 bg-slate-50 text-slate-800 placeholder:text-slate-400 focus:border-[#3b82f6] focus:ring-[#3b82f6]/20 rounded-lg"
+                    className="h-12 border-slate-200 bg-slate-50 text-slate-800 placeholder:text-slate-400 focus:border-[#00C2FF] focus:ring-[#00C2FF]/20 rounded-lg"
                   />
                 </div>
 
@@ -212,7 +212,7 @@ export default function SignUp() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="h-12 border-slate-200 bg-slate-50 text-slate-800 placeholder:text-slate-400 focus:border-[#3b82f6] focus:ring-[#3b82f6]/20 rounded-lg"
+                    className="h-12 border-slate-200 bg-slate-50 text-slate-800 placeholder:text-slate-400 focus:border-[#00C2FF] focus:ring-[#00C2FF]/20 rounded-lg"
                   />
                 </div>
 
@@ -228,7 +228,7 @@ export default function SignUp() {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       minLength={8}
-                      className="h-12 border-slate-200 bg-slate-50 text-slate-800 placeholder:text-slate-400 pr-10 focus:border-[#3b82f6] focus:ring-[#3b82f6]/20 rounded-lg"
+                      className="h-12 border-slate-200 bg-slate-50 text-slate-800 placeholder:text-slate-400 pr-10 focus:border-[#00C2FF] focus:ring-[#00C2FF]/20 rounded-lg"
                     />
                     <button
                       type="button"
@@ -252,7 +252,7 @@ export default function SignUp() {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                       minLength={8}
-                      className={`h-12 border-slate-200 bg-slate-50 text-slate-800 placeholder:text-slate-400 pr-10 focus:border-[#3b82f6] focus:ring-[#3b82f6]/20 rounded-lg ${
+                      className={`h-12 border-slate-200 bg-slate-50 text-slate-800 placeholder:text-slate-400 pr-10 focus:border-[#00C2FF] focus:ring-[#00C2FF]/20 rounded-lg ${
                         confirmPassword && confirmPassword !== password ? "border-red-400 focus:border-red-400" : ""
                       }`}
                     />
@@ -275,13 +275,13 @@ export default function SignUp() {
                     id="terms"
                     checked={agreedToTerms}
                     onCheckedChange={(v) => setAgreedToTerms(Boolean(v))}
-                    className="mt-0.5 border-slate-300 data-[state=checked]:bg-[#3b82f6] data-[state=checked]:border-[#3b82f6]"
+                    className="mt-0.5 border-slate-300 data-[state=checked]:bg-[#3b82f6] data-[state=checked]:border-[#0319CB]"
                   />
                   <label htmlFor="terms" className="text-sm text-slate-600 leading-snug cursor-pointer">
                     I agree with the{" "}
-                    <Link href="/terms" className="text-[#3b82f6] font-semibold hover:underline">Terms & Conditions</Link>
+                    <Link href="/terms" className="text-[#0319CB] font-semibold hover:underline">Terms & Conditions</Link>
                     {" "}and{" "}
-                    <Link href="/privacy" className="text-[#3b82f6] font-semibold hover:underline">Privacy Policy</Link>
+                    <Link href="/privacy" className="text-[#0319CB] font-semibold hover:underline">Privacy Policy</Link>
                   </label>
                 </div>
 
@@ -289,7 +289,7 @@ export default function SignUp() {
                 <Button
                   type="submit"
                   disabled={registerMutation.isPending || (confirmPassword.length > 0 && confirmPassword !== password)}
-                  className="w-full h-12 bg-gradient-to-r from-[#3b82f6] to-[#06b6d4] hover:from-[#2563eb] hover:to-[#0891b2] text-white font-semibold text-base rounded-lg shadow-md shadow-blue-200 mt-2"
+                  className="w-full h-12 bg-gradient-to-r from-[#0319CB] to-[#00C2FF] hover:from-[#0210a0] hover:to-[#00a8e0] text-white font-semibold text-base rounded-lg shadow-md shadow-[#00C2FF]/30 mt-2"
                 >
                   {registerMutation.isPending ? (
                     <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Creating account...</>
@@ -298,7 +298,7 @@ export default function SignUp() {
 
                 <p className="text-center text-sm text-slate-500">
                   Already have an account?{" "}
-                  <Link href="/login" className="text-[#3b82f6] font-semibold hover:underline">Sign In here</Link>
+                  <Link href="/login" className="text-[#0319CB] font-semibold hover:underline">Sign In here</Link>
                 </p>
               </form>
             </>
@@ -312,8 +312,8 @@ export default function SignUp() {
               </button>
 
               <div className="mb-8">
-                <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
-                  <ShieldCheck className="w-7 h-7 text-[#3b82f6]" />
+                <div className="w-14 h-14 rounded-2xl bg-[#e0f4ff] flex items-center justify-center mb-4">
+                  <ShieldCheck className="w-7 h-7 text-[#0319CB]" />
                 </div>
                 <h1 className="text-2xl font-bold text-slate-800">Verify your email</h1>
                 <p className="text-slate-500 mt-1 text-sm">
@@ -334,14 +334,14 @@ export default function SignUp() {
                     value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
                     required
-                    className="h-14 border-slate-200 bg-slate-50 text-slate-800 placeholder:text-slate-400 text-center text-2xl font-mono tracking-[0.5em] focus:border-[#3b82f6] focus:ring-[#3b82f6]/20 rounded-lg"
+                    className="h-14 border-slate-200 bg-slate-50 text-slate-800 placeholder:text-slate-400 text-center text-2xl font-mono tracking-[0.5em] focus:border-[#00C2FF] focus:ring-[#00C2FF]/20 rounded-lg"
                   />
                 </div>
 
                 <Button
                   type="submit"
                   disabled={verifyMutation.isPending || otp.length !== 6}
-                  className="w-full h-12 bg-gradient-to-r from-[#3b82f6] to-[#06b6d4] hover:from-[#2563eb] hover:to-[#0891b2] text-white font-semibold rounded-lg shadow-md shadow-blue-200"
+                  className="w-full h-12 bg-gradient-to-r from-[#0319CB] to-[#00C2FF] hover:from-[#0210a0] hover:to-[#00a8e0] text-white font-semibold rounded-lg shadow-md shadow-[#00C2FF]/30"
                 >
                   {verifyMutation.isPending ? (
                     <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Verifying...</>
@@ -357,7 +357,7 @@ export default function SignUp() {
                       type="button"
                       onClick={() => resendMutation.mutate({ email, purpose: "register" })}
                       disabled={resendMutation.isPending}
-                      className="text-[#3b82f6] text-sm hover:underline font-medium disabled:opacity-50"
+                      className="text-[#0319CB] text-sm hover:underline font-medium disabled:opacity-50"
                     >
                       {resendMutation.isPending ? "Sending..." : "Resend code"}
                     </button>

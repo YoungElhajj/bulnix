@@ -300,3 +300,14 @@
 - [x] Update Login and Signup pages to use new brand colours
 - [x] Batch-update all remaining customer-facing pages (Products, Categories, Dashboard, Orders, Wallet, Profile, Tickets, Cart, Checkout, About, Contact, etc.)
 - [x] 0 TypeScript errors, 30/30 tests pass, checkpoint saved
+
+## Light Theme + Animations (Apr 19, 2026)
+- [x] Fix logo in Navbar: remove box/container, logo sits cleanly on background
+- [x] Fix dark/light theme toggle to actually switch between themes (ThemeProvider defaultTheme=light, toggle works)
+- [x] Implement light theme as default: white/light-blue bg, dark navy text, cyan/blue accents
+- [x] Add hero animations: fade-in text, slide-in elements (animate-fade-in-up, animate-fade-in-left, animate-fade-in-right)
+- [x] Add scroll-reveal animations on section cards and feature blocks (.reveal/.revealed via IntersectionObserver)
+- [x] Add floating decorative elements in hero (animate-float, animate-float-slow, animate-float-reverse)
+- [x] Add card hover lift animations across Home, Products, Categories pages (.product-card hover)
+- [x] Update Login/Signup pages for light theme compatibility (#0319CB/#00C2FF brand colours)
+- [x] 0 TypeScript errors, 30/30 tests pass, checkpoint saved
