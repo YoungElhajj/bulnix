@@ -23,7 +23,7 @@ const whyBulnix = [
   {
     icon: <ShieldIcon className="w-5 h-5 text-[#00C2FF]" />,
     title: "Verified Products",
-    desc: "Every product is tested and verified before listing. Quality guaranteed.",
+    desc: "Every product is tested and verified before listing. Quality you can count on.",
   },
   {
     icon: <CreditCard className="w-5 h-5 text-[#00C2FF]" />,
@@ -33,7 +33,7 @@ const whyBulnix = [
   {
     icon: <CheckCircle2 className="w-5 h-5 text-[#00C2FF]" />,
     title: "Refund Protection",
-    desc: "Not satisfied? Raise a support ticket and we'll resolve it within 24 hours.",
+    desc: "Not satisfied? Raise a support ticket and we will sort it out within 24 hours.",
   },
 ];
 
@@ -148,7 +148,7 @@ export default function SignUp() {
                 <span className="text-[#00C2FF]">and start buying today</span>
               </h2>
               <p className="text-white/55 text-sm leading-relaxed max-w-sm">
-                Join thousands of customers who trust Bulnix for premium digital accounts. No subscription, no hidden fees.
+                Join thousands of customers who trust Bulnix for premium digital accounts. No subscription fees, no hidden charges.
               </p>
             </div>
 
@@ -198,7 +198,7 @@ export default function SignUp() {
               <>
                 <div className="mb-7">
                   <h1 className="text-3xl font-extrabold text-[#0F3D5E]" style={{ fontFamily: "'Poppins', sans-serif" }}>Create Account</h1>
-                  <p className="text-slate-500 mt-1.5 text-sm">It's free — let's get you started.</p>
+                  <p className="text-slate-500 mt-1.5 text-sm">It's free. Let's get you started.</p>
                 </div>
 
                 <button type="button" onClick={handleGoogleSignup}

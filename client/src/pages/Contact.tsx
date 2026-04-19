@@ -32,7 +32,7 @@ export default function Contact() {
       <div className="container py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
           <div className="space-y-5">
-            {[{icon:Mail,title:"Email Support",desc:"support@bulnix.com",sub:"Typically responds in 2-4 hours"},{icon:MessageSquare,title:"Live Chat",desc:"Available in dashboard",sub:"For registered users"},{icon:Clock,title:"Support Hours",desc:"Mon–Sat, 8am–10pm WAT",sub:"Sunday limited hours"}].map((c,i)=>(
+            {[{icon:Mail,title:"Email Support",desc:"support@bulnix.com",sub:"Usually responds within 2 to 4 hours"},{icon:MessageSquare,title:"Live Chat",desc:"Available in dashboard",sub:"For registered users"},{icon:Clock,title:"Support Hours",desc:"Mon to Sat, 8am to 10pm WAT",sub:"Sunday hours are limited"}].map((c,i)=>(
               <div key={i} className="bg-white border border-[#D8E8F5] shadow-sm rounded-xl p-5 flex items-start gap-4">
                 <div className="w-10 h-10 rounded-lg bg-[#EEF4FF] flex items-center justify-center flex-shrink-0"><c.icon className="h-5 w-5 text-[#0050D0]"/></div>
                 <div><div className="font-semibold text-[#0D2137] text-sm">{c.title}</div><div className="text-[#0050D0] text-sm mt-0.5">{c.desc}</div><div className="text-[#4A6080] text-xs mt-0.5">{c.sub}</div></div>

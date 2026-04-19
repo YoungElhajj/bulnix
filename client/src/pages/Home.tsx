@@ -186,7 +186,7 @@ export default function Home() {
 
               <div style={heroStyle(200)}>
                 <p className="text-[#4A6080] text-lg leading-relaxed mb-8 max-w-lg">
-                  Social media accounts, streaming services, gaming credits, software licenses — all in one place. Instant delivery, secure payments, global access.
+                  Social media accounts, streaming services, gaming credits and software licenses. All in one place. Instant delivery, secure payments, global access.
                 </p>
               </div>
 
@@ -283,7 +283,7 @@ export default function Home() {
               Everything Digital, All in One Place
             </h2>
             <p className="text-[#4A6080] max-w-xl mx-auto">
-              From social media accounts to streaming services, gaming credits to software licenses — we've got you covered.
+              From social media accounts to streaming services, gaming credits to software licenses. Whatever you need, we have it.
             </p>
           </div>
 
@@ -365,7 +365,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <FeatureCard icon={<Zap className="w-6 h-6 text-[#00C2FF]" />} title="Instant Delivery" desc="Orders are fulfilled automatically within seconds. No waiting, no manual processing — just instant access." delay={0} />
+            <FeatureCard icon={<Zap className="w-6 h-6 text-[#00C2FF]" />} title="Instant Delivery" desc="Orders are fulfilled automatically within seconds. No waiting, no manual processing. You get access right away." delay={0} />
             <FeatureCard icon={<Shield className="w-6 h-6 text-[#0050D0]" />} title="Secure Payments" desc="Multiple payment methods including Paystack, Monnify, and cryptocurrency. All transactions are SSL-encrypted." delay={100} />
             <FeatureCard icon={<Globe className="w-6 h-6 text-[#00C2FF]" />} title="Global Access" desc="Shop from anywhere in the world. We accept payments from 80+ countries with local payment options." delay={200} />
             <FeatureCard icon={<Package className="w-6 h-6 text-[#0050D0]" />} title="500+ Products" desc="A massive catalogue of digital accounts, services, and credentials across all major platforms and categories." delay={300} />
@@ -428,9 +428,9 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { name: "Adebayo O.", role: "Reseller", text: "Bulnix has completely transformed my reselling business. The instant delivery and bulk pricing are unmatched.", rating: 5 },
-              { name: "Fatima K.", role: "Social Media Manager", text: "I've tried many platforms but Bulnix is by far the most reliable. Never had a failed order in 6 months.", rating: 5 },
-              { name: "Emmanuel C.", role: "Digital Marketer", text: "The variety of products is incredible. From Instagram to streaming accounts — everything I need is here.", rating: 5 },
+              { name: "Adebayo O.", role: "Reseller", text: "Bulnix has made my reselling business much easier. The instant delivery and bulk pricing are really good.", rating: 5 },
+              { name: "Fatima K.", role: "Social Media Manager", text: "I've tried a few platforms and Bulnix has been the most consistent. Not had a failed order in 6 months.", rating: 5 },
+              { name: "Emmanuel C.", role: "Digital Marketer", text: "The variety of products is incredible. From Instagram to streaming accounts, everything I need is here.", rating: 5 },
             ].map((review, i) => (
               <div key={i} className="reveal bg-white rounded-2xl p-6 border border-[#D8E8F5] shadow-sm" style={{ transitionDelay: `${i * 100}ms` }}>
                 <div className="flex items-center gap-1 mb-3">

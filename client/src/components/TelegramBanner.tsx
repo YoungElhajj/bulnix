@@ -41,7 +41,7 @@ export default function TelegramBanner() {
           </div>
           <p className="text-sm text-slate-300 truncate">
             <span className="font-semibold text-white">Join our Telegram channel</span>
-            <span className="hidden sm:inline"> — get exclusive deals, restocks, and live updates</span>
+            <span className="hidden sm:inline"> for exclusive deals, restocks and live updates</span>
           </p>
         </div>
 

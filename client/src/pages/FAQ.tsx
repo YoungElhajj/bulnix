@@ -14,7 +14,7 @@ const FAQS = [
   { cat: "Products", q: "Can I buy in bulk?", a: "Yes. You can add multiple quantities of any product to your cart. For very large orders, contact our support team for bulk pricing." },
   { cat: "Account", q: "Do I need an account to purchase?", a: "Yes, an account is required to track your orders and access delivery details. Registration is free and takes under 30 seconds." },
   { cat: "Account", q: "How do I access my purchased accounts?", a: "After payment confirmation, your delivery details appear in the Order Detail page under My Orders in your dashboard." },
-  { cat: "Support", q: "How do I contact support?", a: "Open a support ticket from your dashboard or visit the Contact page. We respond within 2-4 hours on average." },
+  { cat: "Support", q: "How do I contact support?", a: "Open a support ticket from your dashboard or visit the Contact page. We usually respond within 2 to 4 hours." },
 ];
 
 export default function FAQ() {

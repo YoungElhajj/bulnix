@@ -295,7 +295,7 @@ export default function ProductDetail() {
                     </p>
                     <p>
                       All products on Bulnix are sourced from trusted suppliers and delivered automatically to your account dashboard
-                      within minutes of payment confirmation. No waiting, no hassle.
+                      within minutes of payment confirmation.
                     </p>
                     <ul className="list-disc list-inside space-y-1 text-sm">
                       <li>100% genuine and verified product</li>
@@ -348,7 +348,7 @@ export default function ProductDetail() {
                     <li>Do not share your credentials with others</li>
                     <li>Do not log in from multiple devices simultaneously</li>
                     <li>Contact support within 24 hours if credentials don't work</li>
-                    <li>Some accounts may require email verification — check your spam folder</li>
+                    <li>Some accounts may require email verification. Check your spam folder if you don't see it.</li>
                   </ul>
                 </div>
 
@@ -420,7 +420,7 @@ export default function ProductDetail() {
                   </div>
                   <div className="p-4 bg-amber-50 rounded-xl border border-amber-200">
                     <p className="text-amber-800 font-medium mb-1">How to Request a Refund</p>
-                    <p className="text-amber-700">Open a support ticket from your dashboard with your order ID and a description of the issue. Our team responds within 2–4 hours.</p>
+                    <p className="text-amber-700">Open a support ticket from your dashboard with your order ID and a description of the issue. Our team usually responds within 2 to 4 hours.</p>
                   </div>
                   <p>
                     For full details, see our <Link href="/refund" className="text-[#0050D0] underline">Refund Policy page</Link>.

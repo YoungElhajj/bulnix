@@ -403,3 +403,6 @@
 - [x] Remove top-selling/featured products section from homepage (icons look bad on mobile)
 - [x] Fix mobile navbar position: Dashboard page was missing Navbar component — added back
 - [x] Admin panel colour scheme confirmed intact (dark slate/emerald) — no changes needed
+
+## Text Cleanup (Apr 19 2026)
+- [x] Remove unnecessary hyphens, em-dashes, and AI-sounding phrasing from all customer-facing pages
