@@ -389,3 +389,8 @@
 - [x] Redesign Signup left panel with same rich visual design
 - [x] Fix product card image sizing on mobile (too large, no aspect ratio constraint)
 - [x] Fix categories with 0 products (hidden from customer-facing page; API returns correct counts)
+
+## Auth Page & Product Card Fix (Apr 19 2026)
+- [x] Redesign Login page: Lanxa-style purple/dark gradient left panel with floating social icons, earnings card ($4,210), feature card, dark form right panel
+- [x] Redesign Signup page: Goviraa-style dark left panel with big headline, trust row with avatars + stars, stats (50K+ customers, 99.9% uptime, <4min delivery), clean white right form
+- [x] Fix product card image height on mobile: constrain to fixed height (h-36/h-44), object-contain, no checkered background overflow
