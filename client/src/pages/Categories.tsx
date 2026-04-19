@@ -2,11 +2,8 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { Package, ChevronRight, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { trpc } from "@/lib/trpc";
 
-// Fallback emoji icons keyed by common category name keywords
 const FALLBACK_ICONS: Record<string, string> = {
   facebook: "📘", instagram: "📸", twitter: "🐦", tiktok: "🎵",
   linkedin: "💼", youtube: "▶️", snapchat: "👻", reddit: "🤖",
@@ -16,11 +13,6 @@ const FALLBACK_ICONS: Record<string, string> = {
   software: "🔑", crypto: "₿", bitcoin: "₿", education: "📚",
   social: "📱", accounts: "👤", tools: "🛠️",
 };
-
-function getCategoryIcon(cat: any): string | null {
-  // Use imageUrl from DB if available
-  return cat.imageUrl ?? null;
-}
 
 function getCategoryEmoji(cat: any): string {
   const name = (cat.name ?? "").toLowerCase();
@@ -34,10 +26,11 @@ const SOCIAL_SLUGS = ["facebook-accounts", "instagram-accounts", "tiktok-account
 
 export default function Categories() {
   const [search, setSearch] = useState("");
-  const { data: categories, isLoading } = trpc.categories.listWithCounts.useQuery(undefined, { retry: 2, retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000) });
+  const { data: categories, isLoading } = trpc.categories.listWithCounts.useQuery(undefined, {
+    retry: 2, retryDelay: (a) => Math.min(1000 * 2 ** a, 10000)
+  });
 
   const allCats = (categories as any[] | undefined) ?? [];
-  // Only show top-level (parentId null) categories, social media pinned to top
   const topLevel = allCats.filter((c: any) => !c.parentId);
   const socialCats = topLevel.filter((c: any) => SOCIAL_SLUGS.includes(c.slug)).sort((a: any, b: any) => SOCIAL_SLUGS.indexOf(a.slug) - SOCIAL_SLUGS.indexOf(b.slug));
   const otherCats = topLevel.filter((c: any) => !SOCIAL_SLUGS.includes(c.slug));
@@ -47,65 +40,75 @@ export default function Categories() {
     : sortedTopLevel;
 
   return (
-    <div className="min-h-screen bg-[#061A2B] text-white">
-      <Navbar />
-      <div className="pt-24 pb-8 bg-gradient-to-b from-[#0A2540] to-[#061A2B] border-b border-white/5">
+    <div className="min-h-screen bg-[#F5F9FF]">
+      {/* Header */}
+      <div className="bg-[#0F3D5E] pt-24 pb-10">
         <div className="container">
-          <h1 className="text-3xl font-bold text-white mb-1">All Categories</h1>
-          <p className="text-slate-500">Browse our full catalog of digital products</p>
+          <div className="flex items-center gap-2 text-sm text-white/50 mb-4">
+            <Link href="/" className="hover:text-[#00C2FF] transition-colors">Home</Link>
+            <ChevronRight className="w-3.5 h-3.5" />
+            <span className="text-white">All Categories</span>
+          </div>
+          <h1 className="text-3xl font-bold text-white mb-1" style={{ fontFamily: "'Poppins', sans-serif" }}>
+            All Categories
+          </h1>
+          <p className="text-white/60">Browse our full catalog of digital products</p>
         </div>
       </div>
 
-      <div className="container py-12">
+      <div className="container py-10">
         {/* Search */}
         <div className="relative max-w-sm mb-8">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#4A6080]" />
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search categories..."
-            className="pl-9 bg-[#0A2540] border-[#0F3D5E] text-white placeholder:text-slate-600 focus:border-[#00C2FF]"
+            className="pl-9 bg-white border-[#D8E8F5] text-[#0D2137] placeholder:text-[#4A6080]/60 focus:border-[#00C2FF] rounded-xl"
           />
         </div>
 
         {isLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-            {[...Array(12)].map((_, i) => <div key={i} className="glass-card rounded-xl p-6 animate-pulse h-36" />)}
+            {[...Array(12)].map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl p-6 border border-[#D8E8F5] animate-pulse h-36" />
+            ))}
           </div>
         ) : !filtered.length ? (
           <div className="text-center py-20">
-            <Package className="h-16 w-16 text-slate-700 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">No categories found</h3>
-            <p className="text-slate-500">Try a different search term or check back after a sync.</p>
+            <div className="w-20 h-20 rounded-2xl bg-[#F0F8FF] border border-[#D8E8F5] flex items-center justify-center mx-auto mb-4">
+              <Package className="h-10 w-10 text-[#4A6080]" />
+            </div>
+            <h3 className="text-xl font-bold text-[#0D2137] mb-2" style={{ fontFamily: "'Poppins', sans-serif" }}>No categories found</h3>
+            <p className="text-[#4A6080]">Try a different search term or check back after a sync.</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {filtered.map((cat: any) => {
-              const iconUrl = getCategoryIcon(cat);
+              const iconUrl = cat.imageUrl ?? null;
               const emoji = getCategoryEmoji(cat);
-              // Count subcategories
               const subCount = allCats.filter((c: any) => c.parentId === cat.id).length;
               return (
                 <Link key={cat.id} href={"/categories/" + cat.slug}>
-                  <div className="glass-card rounded-xl p-6 cursor-pointer group hover:border-[#00C2FF]/30 transition-all duration-200 hover:-translate-y-1">
-                    <div className="w-14 h-14 rounded-xl bg-[#0A2540] border border-white/8 flex items-center justify-center mb-4 group-hover:border-[#00C2FF]/30 transition-colors overflow-hidden">
+                  <div className="bg-white rounded-2xl p-6 border border-[#D8E8F5] cursor-pointer group hover:border-[#00C2FF]/40 hover:shadow-lg hover:shadow-[#00C2FF]/10 hover:-translate-y-1 transition-all duration-300">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#F0F8FF] to-[#E0EEFF] border border-[#D8E8F5] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 overflow-hidden">
                       {iconUrl ? (
                         <img src={iconUrl} alt={cat.name} className="w-10 h-10 object-contain" />
                       ) : (
                         <span className="text-3xl">{emoji}</span>
                       )}
                     </div>
-                    <h3 className="font-semibold text-white group-hover:text-[#00C2FF] transition-colors mb-1 line-clamp-2">{cat.name}</h3>
+                    <h3 className="font-semibold text-[#0D2137] group-hover:text-[#0050D0] transition-colors mb-1 line-clamp-2" style={{ fontFamily: "'Poppins', sans-serif" }}>{cat.name}</h3>
                     {subCount > 0 && (
-                      <p className="text-xs text-slate-500 mb-0.5">{subCount} subcategories</p>
+                      <p className="text-xs text-[#4A6080] mb-0.5">{subCount} subcategories</p>
                     )}
                     {(cat.productCount ?? 0) > 0 && (
-                      <p className="text-xs text-[#00C2FF]/70">{cat.productCount} products</p>
+                      <p className="text-xs text-[#0050D0] font-medium">{cat.productCount} products</p>
                     )}
                     {cat.description && !subCount && !(cat.productCount > 0) && (
-                      <p className="text-xs text-slate-500 line-clamp-2">{cat.description}</p>
+                      <p className="text-xs text-[#4A6080] line-clamp-2">{cat.description}</p>
                     )}
-                    <div className="flex items-center gap-1 mt-3 text-xs text-[#00C2FF] opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1 mt-3 text-xs text-[#00C2FF] font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
                       Browse <ChevronRight className="h-3 w-3" />
                     </div>
                   </div>
@@ -115,7 +118,6 @@ export default function Categories() {
           </div>
         )}
       </div>
-      <Footer />
     </div>
   );
 }

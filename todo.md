@@ -311,3 +311,37 @@
 - [x] Add card hover lift animations across Home, Products, Categories pages (.product-card hover)
 - [x] Update Login/Signup pages for light theme compatibility (#0319CB/#00C2FF brand colours)
 - [x] 0 TypeScript errors, 30/30 tests pass, checkpoint saved
+
+## Full Site Redesign v2 — Unique Bulnix Brand (Apr 19, 2026)
+- [ ] Define unique Bulnix design system (palette, typography, spacing) — NOT copied from competitors
+- [ ] Rewrite global CSS: creamy-white bg #F8FAFF, navy #0F3D5E navbar/footer, cyan #00C2FF accents, blue #0319CB CTAs
+- [ ] Add Google Fonts (Inter + Poppins) to index.html
+- [ ] Redesign Navbar: navy bg matching logo, logo blends seamlessly, clean links, social icons
+- [ ] Redesign Footer: navy bg, social media icons row, quick links, newsletter
+- [ ] Redesign Home page: animated hero with floating social icons, stats counter, feature cards, CTA
+- [ ] Redesign Login page with new brand style
+- [ ] Redesign Signup page with new brand style
+- [ ] Redesign Products listing page
+- [ ] Redesign Categories page
+- [ ] Redesign Product Detail page
+- [ ] Redesign Cart page
+- [ ] Redesign Checkout page
+- [ ] Redesign Dashboard pages (Orders, Profile, Tickets, Wallet)
+- [ ] Run tests, save checkpoint
+
+## Full Site Redesign v2 — Bulnix Light Palette (Apr 19, 2026)
+- [x] Redesign Navbar — navy #0F3D5E bg, seamless logo blend, social icons, Poppins font
+- [x] Redesign Footer — navy bg, social media icons row, newsletter, multi-column layout
+- [x] Redesign Home page — animated hero, floating social platform icons, stats counter, feature cards, CTA
+- [x] Redesign Products page — light #F5F9FF bg, navy page header, card grid
+- [x] Redesign Categories page — light palette, navy header, category cards
+- [x] Redesign ProductDetail page — light palette, navy header
+- [x] Redesign Cart page — light palette, white cards, navy header
+- [x] Redesign Checkout page — light palette, white cards, navy header
+- [x] Redesign Login page — navy left panel, light right panel
+- [x] Redesign Signup page — navy left panel, light right panel
+- [x] Redesign Dashboard page — light palette, gradient wallet banner, stat cards
+- [x] Redesign Orders, OrderDetail, Profile, Wallet, Tickets, TicketDetail pages
+- [x] Redesign About, Contact, FAQ, Privacy, Terms, Refund, Wishlist pages
+- [x] Redesign all Admin pages (AdminDashboard, AdminProducts, AdminCategories, etc.)
+- [x] All 30 tests passing, 0 TypeScript errors

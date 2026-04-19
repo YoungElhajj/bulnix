@@ -156,7 +156,7 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-white flex">
       {/* ── Left panel — illustration ── */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center bg-gradient-to-br from-[#e0f4ff] to-[#f0f8ff] p-12 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center bg-gradient-to-br from-[#0F3D5E] to-[#0050D0] p-12 relative overflow-hidden">
         {/* Logo */}
         <Link href="/" className="absolute top-8 left-8">
           <img src={`${import.meta.env.VITE_APP_LOGO}`} alt="Bulnix" className="h-10 w-auto" />
@@ -164,28 +164,28 @@ export default function Login() {
 
         <div className="flex flex-col items-center text-center mt-12">
           <LoginIllustration />
-          <h2 className="text-2xl font-bold text-slate-800 mt-6">
+          <h2 className="text-2xl font-bold text-white mt-6" style={{ fontFamily: "'Poppins', sans-serif" }}>
             Your digital accounts,<br />
-            <span className="text-[#0319CB]">always at hand.</span>
+            <span className="text-[#00C2FF]">always at hand.</span>
           </h2>
-          <p className="text-slate-500 text-sm mt-3 max-w-xs leading-relaxed">
+          <p className="text-white/60 text-sm mt-3 max-w-xs leading-relaxed">
             Sign in to manage your orders, track deliveries, and access your purchased digital accounts from anywhere.
           </p>
           <div className="flex gap-6 mt-8">
-            {[{ v: "50K+", l: "Customers" }, { v: "99.9%", l: "Uptime" }, { v: "256-bit", l: "Encryption" }].map((s) => (
+              {[{ v: "50K+", l: "Customers" }, { v: "99.9%", l: "Uptime" }, { v: "256-bit", l: "Encryption" }].map((s) => (
               <div key={s.v} className="text-center">
-                <div className="text-lg font-bold text-[#0319CB]">{s.v}</div>
-                <div className="text-xs text-slate-500">{s.l}</div>
+                <div className="text-lg font-bold text-[#00C2FF]">{s.v}</div>
+                <div className="text-xs text-white/50">{s.l}</div>
               </div>
             ))}
           </div>
         </div>
 
-        <p className="absolute bottom-6 text-xs text-slate-400">© {new Date().getFullYear()} Bulnix. All rights reserved.</p>
+        <p className="absolute bottom-6 text-xs text-white/40">© {new Date().getFullYear()} Bulnix. All rights reserved.</p>
       </div>
 
       {/* ── Right panel — form ── */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-white">
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-[#F5F9FF]">
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="lg:hidden mb-8">

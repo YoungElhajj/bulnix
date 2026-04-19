@@ -1,568 +1,546 @@
 import { Link } from "wouter";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Zap, Shield, Globe, Star, ChevronRight, Package, CreditCard, CheckCircle, TrendingUp, Users, Clock, Lock } from "lucide-react";
+import {
+  ArrowRight, Zap, Shield, Globe, Star, ChevronRight, Package,
+  CreditCard, Users, Clock, Lock, TrendingUp, CheckCircle,
+  ShoppingBag, Headphones
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { trpc } from "@/lib/trpc";
 
-// ── Scroll-reveal hook ──────────────────────────────────────────────────────
-function useReveal() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+// ─── Scroll-reveal (global, class-based) ─────────────────────────────────────
+function useScrollReveal() {
+  useEffect(() => {
+    const els = document.querySelectorAll(".reveal");
+    const observer = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("revealed"); }),
+      { threshold: 0.12 }
+    );
+    els.forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+}
+
+// ─── Animated Counter ─────────────────────────────────────────────────────────
+function AnimatedCounter({ target, suffix = "" }: { target: number; suffix?: string }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const started = useRef(false);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
-    }, { threshold: 0.12 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-  return { ref, visible };
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !started.current) {
+        started.current = true;
+        const steps = 60;
+        const increment = target / steps;
+        let current = 0;
+        const timer = setInterval(() => {
+          current = Math.min(current + increment, target);
+          setCount(Math.floor(current));
+          if (current >= target) clearInterval(timer);
+        }, 1800 / steps);
+      }
+    }, { threshold: 0.5 });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [target]);
+  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
 }
 
-const SOCIAL_SLUGS = ["facebook-accounts","instagram-accounts","tiktok-accounts-followers","whatsapp-accounts","youtube-accounts-channels","twitter-x-accounts","telegram-accounts","snapchat-accounts","linkedin-accounts","google-voice-accounts","gmail-accounts","discord-accounts"];
+// ─── Social Icons ─────────────────────────────────────────────────────────────
+const InstagramIcon = () => (
+  <svg viewBox="0 0 24 24" fill="url(#ig-grad)" className="w-6 h-6">
+    <defs>
+      <linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+        <stop offset="0%" stopColor="#f09433"/>
+        <stop offset="50%" stopColor="#dc2743"/>
+        <stop offset="100%" stopColor="#bc1888"/>
+      </linearGradient>
+    </defs>
+    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+  </svg>
+);
+const TikTokIcon = () => (
+  <svg viewBox="0 0 24 24" fill="#000" className="w-6 h-6">
+    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.27 8.27 0 004.84 1.55V6.79a4.85 4.85 0 01-1.07-.1z"/>
+  </svg>
+);
+const FacebookIcon = () => (
+  <svg viewBox="0 0 24 24" fill="#1877F2" className="w-6 h-6">
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+  </svg>
+);
+const TwitterIcon = () => (
+  <svg viewBox="0 0 24 24" fill="#000" className="w-6 h-6">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.631L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/>
+  </svg>
+);
+const WhatsAppIcon = () => (
+  <svg viewBox="0 0 24 24" fill="#25D366" className="w-6 h-6">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+  </svg>
+);
+const YouTubeIcon = () => (
+  <svg viewBox="0 0 24 24" fill="#FF0000" className="w-6 h-6">
+    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+  </svg>
+);
 
-const HOW_IT_WORKS = [
-  { step: "01", title: "Browse & Select", desc: "Explore our catalog of premium digital products from verified suppliers.", icon: Package },
-  { step: "02", title: "Secure Checkout", desc: "Pay with card, bank transfer, or crypto. All transactions are encrypted.", icon: CreditCard },
-  { step: "03", title: "Instant Delivery", desc: "Receive your digital products instantly in your dashboard after payment.", icon: Zap },
-];
-
-const TRUST_STATS = [
-  { value: "50K+", label: "Happy Customers", icon: Users },
-  { value: "99.9%", label: "Uptime", icon: TrendingUp },
-  { value: "<1min", label: "Avg. Delivery", icon: Clock },
-  { value: "256-bit", label: "SSL Encryption", icon: Lock },
-];
-
-const PAYMENT_METHODS = [
-  { name: "Paystack", desc: "Cards & Bank Transfer", region: "Nigeria / Africa", color: "#00C3F7" },
-  { name: "Monnify", desc: "Bank Transfer & USSD", region: "Nigeria", color: "#0066CC" },
-  { name: "Crypto", desc: "BTC, ETH, USDT & more", region: "Global", color: "#F7931A" },
-  { name: "Card", desc: "Visa, Mastercard", region: "Global", color: "#0319CB" },
-];
-
-const FAQ_ITEMS = [
-  { q: "How fast is delivery?", a: "Most orders are fulfilled within seconds to minutes after payment confirmation." },
-  { q: "Is my payment secure?", a: "Yes. All payments are processed through verified gateways with SSL encryption and webhook verification." },
-  { q: "What currencies do you accept?", a: "We accept NGN, USD, EUR, and GBP, plus major cryptocurrencies." },
-  { q: "What if my order fails?", a: "Failed orders are automatically retried. If unresolved, you receive a full refund within 24 hours." },
-];
-
-// ── Reveal Section wrapper ──────────────────────────────────────────────────
-function RevealSection({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
-  const { ref, visible } = useReveal();
+// ─── Floating Icon ────────────────────────────────────────────────────────────
+function FloatingIcon({ icon, label, className = "", animClass = "animate-float-y" }: {
+  icon: React.ReactNode; label: string; className?: string; animClass?: string;
+}) {
   return (
-    <div
-      ref={ref}
-      className={className}
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(32px)",
-        transition: `opacity 0.65s ease ${delay}ms, transform 0.65s ease ${delay}ms`,
-      }}
-    >
-      {children}
+    <div className={`absolute ${animClass} ${className} z-10`}>
+      <div className="w-12 h-12 rounded-2xl bg-white shadow-xl shadow-[#0F3D5E]/15 border border-[#D8E8F5] flex items-center justify-center">
+        {icon}
+      </div>
+      <p className="text-center text-[10px] font-semibold text-[#4A6080] mt-1 whitespace-nowrap">{label}</p>
     </div>
   );
 }
 
-export default function Home() {
-  const { data: featuredProducts } = trpc.products.getFeatured.useQuery(undefined, { retry: 2, retryDelay: (a) => Math.min(1000 * 2 ** a, 10000) });
-  const { data: categoriesData } = trpc.categories.listWithCounts.useQuery(undefined, { retry: 2, retryDelay: (a) => Math.min(1000 * 2 ** a, 10000) });
+// ─── Feature Card ─────────────────────────────────────────────────────────────
+function FeatureCard({ icon, title, desc, delay = 0 }: { icon: React.ReactNode; title: string; desc: string; delay?: number }) {
+  return (
+    <div
+      className="reveal bg-white rounded-2xl p-6 border border-[#D8E8F5] shadow-sm hover:shadow-xl hover:shadow-[#00C2FF]/10 hover:-translate-y-1.5 transition-all duration-300 group"
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#00C2FF]/15 to-[#0050D0]/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+        {icon}
+      </div>
+      <h3 className="text-[#0D2137] font-semibold text-base mb-2" style={{ fontFamily: "'Poppins', sans-serif" }}>{title}</h3>
+      <p className="text-[#4A6080] text-sm leading-relaxed">{desc}</p>
+    </div>
+  );
+}
 
-  // Hero text animation
+const SOCIAL_SLUGS = ["facebook-accounts","instagram-accounts","tiktok-accounts-followers","whatsapp-accounts","youtube-accounts-channels","twitter-x-accounts","telegram-accounts","snapchat-accounts","linkedin-accounts","google-voice-accounts","gmail-accounts","discord-accounts"];
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+export default function Home() {
+  useScrollReveal();
+
+  const { data: featuredProducts } = trpc.products.getFeatured.useQuery(undefined, {
+    retry: 2, retryDelay: (a) => Math.min(1000 * 2 ** a, 10000)
+  });
+  const { data: categoriesData } = trpc.categories.listWithCounts.useQuery(undefined, {
+    retry: 2, retryDelay: (a) => Math.min(1000 * 2 ** a, 10000)
+  });
+
   const [heroVisible, setHeroVisible] = useState(false);
   useEffect(() => { const t = setTimeout(() => setHeroVisible(true), 80); return () => clearTimeout(t); }, []);
 
+  const heroStyle = (delay: number) => ({
+    opacity: heroVisible ? 1 : 0,
+    transform: heroVisible ? "translateY(0)" : "translateY(28px)",
+    transition: `opacity 0.7s ease ${delay}ms, transform 0.7s ease ${delay}ms`,
+  });
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Navbar />
+    <div className="bg-[#F5F9FF] min-h-screen">
 
-      {/* ── Hero ─────────────────────────────────────────────────────────────── */}
-      <section className="relative pt-28 pb-24 overflow-hidden" style={{ background: "linear-gradient(160deg, #e8f4ff 0%, #f0f8ff 40%, #ffffff 100%)" }}>
-        {/* Floating decorative orbs */}
-        <div className="absolute top-16 right-[8%] w-16 h-16 rounded-full bg-[#00C2FF]/20 blur-sm animate-float pointer-events-none" />
-        <div className="absolute top-40 right-[18%] w-8 h-8 rounded-full bg-[#0319CB]/25 blur-sm animate-float-slow pointer-events-none" />
-        <div className="absolute bottom-20 left-[6%] w-12 h-12 rounded-full bg-[#00C2FF]/15 blur-sm animate-float-reverse pointer-events-none" />
-        <div className="absolute top-24 left-[12%] w-6 h-6 rounded-full bg-[#0319CB]/20 blur-sm animate-float pointer-events-none" />
-        {/* Background gradient blob */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#00C2FF]/8 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#0319CB]/6 rounded-full blur-[100px] pointer-events-none" />
+      {/* ══ HERO ══════════════════════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden pt-24 pb-20 md:pt-32 md:pb-28">
+        {/* Background radial glows */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-[#00C2FF]/8 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#0050D0]/6 rounded-full blur-3xl" />
+        </div>
 
-        <div className="container relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <div
-              style={{
-                opacity: heroVisible ? 1 : 0,
-                transform: heroVisible ? "translateY(0)" : "translateY(24px)",
-                transition: "opacity 0.7s ease, transform 0.7s ease",
-              }}
-            >
-              <Badge className="mb-6 bg-[#00C2FF]/10 text-[#0319CB] border border-[#00C2FF]/30 px-4 py-1.5 text-sm font-medium">
-                <Zap className="h-3.5 w-3.5 mr-1.5" />
-                The Central Hub for Bulk Digital Supply
-              </Badge>
-            </div>
+        <div className="container relative">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
-            <div
-              style={{
-                opacity: heroVisible ? 1 : 0,
-                transform: heroVisible ? "translateY(0)" : "translateY(32px)",
-                transition: "opacity 0.75s ease 120ms, transform 0.75s ease 120ms",
-              }}
-            >
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight mb-6 text-[#0F3D5E]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                Buy Premium{" "}
-                <span style={{ background: "linear-gradient(90deg, #00C2FF, #0319CB)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                  Digital Accounts
-                </span>
-                {" "}at Scale
-              </h1>
-            </div>
+            {/* Left: Text */}
+            <div>
+              <div style={heroStyle(0)}>
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#00C2FF]/12 border border-[#00C2FF]/25 text-[#0050D0] text-sm font-semibold mb-6">
+                  <span className="w-2 h-2 rounded-full bg-[#00C2FF] animate-pulse" />
+                  Trusted by 10,000+ customers worldwide
+                </div>
+              </div>
 
-            <div
-              style={{
-                opacity: heroVisible ? 1 : 0,
-                transform: heroVisible ? "translateY(0)" : "translateY(32px)",
-                transition: "opacity 0.75s ease 220ms, transform 0.75s ease 220ms",
-              }}
-            >
-              <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-                Bulnix connects you to thousands of verified digital products — social media accounts, streaming, gaming credits, and more. Instant delivery, global payments, enterprise-grade security.
-              </p>
-            </div>
+              <div style={heroStyle(100)}>
+                <h1 className="text-4xl md:text-5xl lg:text-[3.4rem] font-bold text-[#0D2137] leading-[1.1] mb-6" style={{ fontFamily: "'Poppins', sans-serif" }}>
+                  Buy Premium{" "}
+                  <span className="text-gradient-primary">Digital Accounts</span>{" "}
+                  at Scale
+                </h1>
+              </div>
 
-            <div
-              style={{
-                opacity: heroVisible ? 1 : 0,
-                transform: heroVisible ? "translateY(0)" : "translateY(24px)",
-                transition: "opacity 0.75s ease 320ms, transform 0.75s ease 320ms",
-              }}
-            >
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-                <Link href="/products">
-                  <Button size="lg" className="bg-[#0319CB] hover:bg-[#0215a8] text-white font-bold px-8 h-12 text-base shadow-lg hover:shadow-[#0319CB]/30 hover:shadow-xl transition-all duration-200">
-                    Browse Products
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-                <Link href="/signup">
-                  <Button size="lg" variant="outline" className="border-[#00C2FF] text-[#0319CB] hover:bg-[#00C2FF]/10 px-8 h-12 text-base font-semibold">
-                    Create Free Account
-                  </Button>
-                </Link>
+              <div style={heroStyle(200)}>
+                <p className="text-[#4A6080] text-lg leading-relaxed mb-8 max-w-lg">
+                  Social media accounts, streaming services, gaming credits, software licenses — all in one place. Instant delivery, secure payments, global access.
+                </p>
+              </div>
+
+              <div style={heroStyle(300)}>
+                <div className="flex flex-wrap gap-3 mb-10">
+                  <Link href="/products">
+                    <Button className="bg-[#0050D0] hover:bg-[#0040b0] text-white font-bold rounded-full px-7 py-3 h-auto text-base shadow-lg shadow-[#0050D0]/30 hover:shadow-xl hover:shadow-[#0050D0]/40 transition-all duration-300 flex items-center gap-2">
+                      <ShoppingBag className="w-5 h-5" />
+                      Browse Products
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </Link>
+                  <Link href="/categories">
+                    <Button variant="outline" className="border-[#D8E8F5] bg-white text-[#0D2137] hover:border-[#00C2FF]/50 hover:bg-[#F0F8FF] font-semibold rounded-full px-7 py-3 h-auto text-base transition-all duration-300">
+                      View Categories
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+
+              <div style={heroStyle(400)}>
+                <div className="flex items-center gap-6 flex-wrap">
+                  {["Instant Delivery", "Secure Payments", "24/7 Support"].map(t => (
+                    <div key={t} className="flex items-center gap-1.5 text-[#4A6080] text-sm">
+                      <CheckCircle className="w-4 h-4 text-[#00C2FF]" />
+                      {t}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Trust Stats */}
-            <div
-              style={{
-                opacity: heroVisible ? 1 : 0,
-                transform: heroVisible ? "translateY(0)" : "translateY(24px)",
-                transition: "opacity 0.75s ease 420ms, transform 0.75s ease 420ms",
-              }}
-            >
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {TRUST_STATS.map(stat => (
-                  <div key={stat.label} className="bg-white/80 backdrop-blur-sm rounded-xl p-4 text-center shadow-sm border border-[#00C2FF]/15 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-                    <stat.icon className="h-5 w-5 text-[#00C2FF] mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-[#0F3D5E]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{stat.value}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">{stat.label}</div>
+            {/* Right: Illustration + Floating Social Icons */}
+            <div className="relative flex items-center justify-center" style={heroStyle(150)}>
+              <div className="relative w-72 h-72 md:w-80 md:h-80">
+                {/* Central card */}
+                <div className="w-full h-full rounded-3xl bg-gradient-to-br from-[#0F3D5E] to-[#0050D0] shadow-2xl shadow-[#0050D0]/30 flex flex-col items-center justify-center p-8">
+                  <div className="w-20 h-20 rounded-2xl bg-white/15 backdrop-blur border border-white/25 flex items-center justify-center mb-4">
+                    <ShoppingBag className="w-10 h-10 text-white" />
                   </div>
-                ))}
+                  <p className="text-white font-bold text-xl text-center" style={{ fontFamily: "'Poppins', sans-serif" }}>Bulnix Store</p>
+                  <p className="text-white/60 text-sm text-center mt-1">Premium Digital Marketplace</p>
+                  <div className="mt-4 flex items-center gap-1">
+                    {[1,2,3,4,5].map(i => (
+                      <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                    ))}
+                  </div>
+                  <p className="text-white/50 text-xs mt-1">4.9/5 from 2,400+ reviews</p>
+                </div>
+
+                {/* Floating social icons */}
+                <FloatingIcon icon={<InstagramIcon />} label="Instagram" className="-top-8 -left-10" animClass="animate-float-y" />
+                <FloatingIcon icon={<TikTokIcon />} label="TikTok" className="-top-4 -right-12" animClass="animate-float-slow" />
+                <FloatingIcon icon={<FacebookIcon />} label="Facebook" className="top-1/2 -left-16 -translate-y-1/2" animClass="animate-float-reverse" />
+                <FloatingIcon icon={<TwitterIcon />} label="Twitter/X" className="top-1/2 -right-16 -translate-y-1/2" animClass="animate-float-y" />
+                <FloatingIcon icon={<WhatsAppIcon />} label="WhatsApp" className="-bottom-8 -left-10" animClass="animate-float-slow" />
+                <FloatingIcon icon={<YouTubeIcon />} label="YouTube" className="-bottom-4 -right-12" animClass="animate-float-reverse" />
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Featured Categories ──────────────────────────────────────────────── */}
-      <section className="py-20 bg-white">
+      {/* ══ STATS ═════════════════════════════════════════════════════════════ */}
+      <section className="py-14 bg-[#0F3D5E]">
         <div className="container">
-          <RevealSection>
-            <div className="flex items-center justify-between mb-10">
-              <div>
-                <h2 className="text-3xl font-bold text-[#0F3D5E] mb-2">Browse Categories</h2>
-                <p className="text-slate-500">Thousands of digital products across every category</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { label: "Happy Customers", value: 10000, suffix: "+" },
+              { label: "Products Available", value: 500, suffix: "+" },
+              { label: "Orders Fulfilled", value: 50000, suffix: "+" },
+              { label: "Countries Served", value: 80, suffix: "+" },
+            ].map((stat, i) => (
+              <div key={i} className="text-center">
+                <div className="text-3xl md:text-4xl font-bold text-white mb-1" style={{ fontFamily: "'Poppins', sans-serif" }}>
+                  <AnimatedCounter target={stat.value} suffix={stat.suffix} />
+                </div>
+                <p className="text-white/60 text-sm">{stat.label}</p>
               </div>
-              <Link href="/categories">
-                <Button variant="ghost" className="text-[#0319CB] hover:text-[#0319CB] hover:bg-[#0319CB]/8 gap-1 font-semibold">
-                  View All <ChevronRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-          </RevealSection>
+            ))}
+          </div>
+        </div>
+      </section>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {(() => {
-              const allCats = (categoriesData as any[] | undefined ?? []).filter((c: any) => !c.parentId);
-              const social = allCats.filter((c: any) => SOCIAL_SLUGS.includes(c.slug));
-              const others = allCats.filter((c: any) => !SOCIAL_SLUGS.includes(c.slug));
-              const sorted = [
-                ...social.sort((a: any, b: any) => SOCIAL_SLUGS.indexOf(a.slug) - SOCIAL_SLUGS.indexOf(b.slug)),
-                ...others,
-              ];
-              return sorted.slice(0, 12).map((cat: any, i: number) => (
-                <RevealSection key={i} delay={i * 40}>
-                  <Link href={`/categories/${cat.slug}`}>
-                    <div className="bg-white rounded-xl p-5 text-center cursor-pointer group border border-slate-100 hover:border-[#00C2FF]/50 hover:shadow-lg hover:-translate-y-1.5 transition-all duration-250 shadow-sm">
-                      <div className="w-12 h-12 rounded-xl bg-[#e8f4ff] flex items-center justify-center mx-auto mb-3 overflow-hidden group-hover:bg-[#00C2FF]/15 transition-colors">
+      {/* ══ CATEGORIES ════════════════════════════════════════════════════════ */}
+      <section className="py-20">
+        <div className="container">
+          <div className="text-center mb-12 reveal">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#00C2FF]/10 border border-[#00C2FF]/20 text-[#0050D0] text-sm font-semibold mb-4">
+              <Package className="w-4 h-4" />
+              Product Categories
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0D2137] mb-4" style={{ fontFamily: "'Poppins', sans-serif" }}>
+              Everything Digital, All in One Place
+            </h2>
+            <p className="text-[#4A6080] max-w-xl mx-auto">
+              From social media accounts to streaming services, gaming credits to software licenses — we've got you covered.
+            </p>
+          </div>
+
+          {(() => {
+            const allCats = (categoriesData as any[] | undefined ?? []).filter((c: any) => !c.parentId);
+            const social = allCats.filter((c: any) => SOCIAL_SLUGS.includes(c.slug));
+            const others = allCats.filter((c: any) => !SOCIAL_SLUGS.includes(c.slug));
+            const sorted = [
+              ...social.sort((a: any, b: any) => SOCIAL_SLUGS.indexOf(a.slug) - SOCIAL_SLUGS.indexOf(b.slug)),
+              ...others,
+            ].slice(0, 12);
+
+            const fallback = [
+              { name: "Instagram", icon: <InstagramIcon />, href: "/categories/instagram-accounts" },
+              { name: "TikTok", icon: <TikTokIcon />, href: "/categories/tiktok-accounts-followers" },
+              { name: "Facebook", icon: <FacebookIcon />, href: "/categories/facebook-accounts" },
+              { name: "Twitter/X", icon: <TwitterIcon />, href: "/categories/twitter-x-accounts" },
+              { name: "WhatsApp", icon: <WhatsAppIcon />, href: "/categories/whatsapp-accounts" },
+              { name: "YouTube", icon: <YouTubeIcon />, href: "/categories/youtube-accounts-channels" },
+              { name: "Streaming", icon: <span className="text-2xl">🎬</span>, href: "/categories/streaming" },
+              { name: "Gaming", icon: <span className="text-2xl">🎮</span>, href: "/categories/gaming" },
+              { name: "Software", icon: <span className="text-2xl">💻</span>, href: "/categories/software" },
+              { name: "Email", icon: <span className="text-2xl">📧</span>, href: "/categories/gmail-accounts" },
+              { name: "VPN", icon: <span className="text-2xl">🔒</span>, href: "/categories/vpn" },
+              { name: "More →", icon: <span className="text-2xl">➕</span>, href: "/categories" },
+            ];
+
+            const items = sorted.length > 0 ? sorted : fallback;
+
+            return (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {items.map((cat: any, i: number) => (
+                  <Link key={i} href={cat.href || `/categories/${cat.slug}`}>
+                    <div className="reveal bg-white rounded-2xl p-5 border border-[#D8E8F5] shadow-sm hover:shadow-lg hover:shadow-[#00C2FF]/10 hover:-translate-y-1 hover:border-[#00C2FF]/40 transition-all duration-300 cursor-pointer group text-center"
+                      style={{ transitionDelay: `${i * 40}ms` }}>
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#F0F8FF] to-[#E0F0FF] flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300 overflow-hidden">
                         {cat.imageUrl ? (
                           <img src={cat.imageUrl} alt={cat.name} className="w-9 h-9 object-contain" />
                         ) : (
-                          <span className="text-2xl">📦</span>
+                          cat.icon || <span className="text-2xl">📦</span>
                         )}
                       </div>
-                      <div className="text-sm font-semibold text-[#0F3D5E] group-hover:text-[#0319CB] transition-colors line-clamp-2">{cat.name}</div>
+                      <p className="text-[#0D2137] font-semibold text-sm line-clamp-2">{cat.name}</p>
                       {(cat.productCount ?? 0) > 0 && (
-                        <div className="text-xs text-slate-400 mt-1">{cat.productCount} items</div>
+                        <p className="text-[#4A6080] text-xs mt-0.5">{cat.productCount}+ items</p>
                       )}
                     </div>
                   </Link>
-                </RevealSection>
-              ));
-            })()}
+                ))}
+              </div>
+            );
+          })()}
+
+          <div className="text-center mt-8 reveal">
+            <Link href="/categories">
+              <Button variant="outline" className="border-[#D8E8F5] bg-white text-[#0D2137] hover:border-[#00C2FF]/50 hover:bg-[#F0F8FF] font-semibold rounded-full px-8 transition-all duration-300">
+                View All Categories
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* ── Featured Products ────────────────────────────────────────────────── */}
-      <section className="py-20" style={{ background: "linear-gradient(180deg, #f0f8ff 0%, #ffffff 100%)" }}>
+      {/* ══ FEATURES ══════════════════════════════════════════════════════════ */}
+      <section className="py-20 bg-white">
         <div className="container">
-          <RevealSection>
-            <div className="flex items-center justify-between mb-10">
+          <div className="text-center mb-12 reveal">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#00C2FF]/10 border border-[#00C2FF]/20 text-[#0050D0] text-sm font-semibold mb-4">
+              <Zap className="w-4 h-4" />
+              Why Choose Bulnix
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0D2137] mb-4" style={{ fontFamily: "'Poppins', sans-serif" }}>
+              Built for Speed, Security & Scale
+            </h2>
+            <p className="text-[#4A6080] max-w-xl mx-auto">
+              We've built the most reliable digital account marketplace with features that matter most to buyers and resellers.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <FeatureCard icon={<Zap className="w-6 h-6 text-[#00C2FF]" />} title="Instant Delivery" desc="Orders are fulfilled automatically within seconds. No waiting, no manual processing — just instant access." delay={0} />
+            <FeatureCard icon={<Shield className="w-6 h-6 text-[#0050D0]" />} title="Secure Payments" desc="Multiple payment methods including Paystack, Monnify, and cryptocurrency. All transactions are SSL-encrypted." delay={100} />
+            <FeatureCard icon={<Globe className="w-6 h-6 text-[#00C2FF]" />} title="Global Access" desc="Shop from anywhere in the world. We accept payments from 80+ countries with local payment options." delay={200} />
+            <FeatureCard icon={<Package className="w-6 h-6 text-[#0050D0]" />} title="500+ Products" desc="A massive catalogue of digital accounts, services, and credentials across all major platforms and categories." delay={300} />
+            <FeatureCard icon={<Users className="w-6 h-6 text-[#00C2FF]" />} title="Bulk Orders" desc="Perfect for resellers and agencies. Order in bulk with volume discounts and dedicated account management." delay={400} />
+            <FeatureCard icon={<Headphones className="w-6 h-6 text-[#0050D0]" />} title="24/7 Support" desc="Our support team is available round the clock via WhatsApp, Telegram, and email to resolve any issues." delay={500} />
+          </div>
+        </div>
+      </section>
+
+      {/* ══ FEATURED PRODUCTS ═════════════════════════════════════════════════ */}
+      {featuredProducts && featuredProducts.length > 0 && (
+        <section className="py-20">
+          <div className="container">
+            <div className="flex items-center justify-between mb-10 reveal">
               <div>
-                <h2 className="text-3xl font-bold text-[#0F3D5E] mb-2">Featured Products</h2>
-                <p className="text-slate-500">Hand-picked top sellers with instant delivery</p>
-              </div>
-              <Link href="/products?featured=true">
-                <Button variant="ghost" className="text-[#0319CB] hover:text-[#0319CB] hover:bg-[#0319CB]/8 gap-1 font-semibold">
-                  View All <ChevronRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-          </RevealSection>
-
-          {featuredProducts && featuredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {featuredProducts.slice(0, 8).map((product: any, i: number) => (
-                <RevealSection key={product.id} delay={i * 50}>
-                  <Link href={`/products/${product.slug}`}>
-                    <div className="bg-white rounded-xl overflow-hidden border border-slate-100 hover:border-[#00C2FF]/40 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-250 shadow-sm cursor-pointer group">
-                      <div className="aspect-[4/3] bg-gradient-to-br from-[#e8f4ff] to-[#dbeafe] flex items-center justify-center overflow-hidden">
-                        {product.imageUrl ? (
-                          <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                        ) : (
-                          <Package className="h-12 w-12 text-[#00C2FF]/50" />
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <h3 className="text-sm font-semibold text-[#0F3D5E] line-clamp-2 mb-2">{product.title}</h3>
-                        <div className="flex items-center justify-between">
-                          <span className="text-[#0319CB] font-bold">${Number(product.customerPriceUSD).toFixed(2)}</span>
-                          <Badge className="bg-[#00C2FF]/10 text-[#0319CB] border-[#00C2FF]/20 text-xs">
-                            {product.stockUnlimited ? "In Stock" : `${product.stockQuantity} left`}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                </RevealSection>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm animate-pulse">
-                  <div className="aspect-[4/3] bg-slate-100" />
-                  <div className="p-4 space-y-2">
-                    <div className="h-4 bg-slate-100 rounded w-3/4" />
-                    <div className="h-4 bg-slate-100 rounded w-1/2" />
-                  </div>
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#00C2FF]/10 border border-[#00C2FF]/20 text-[#0050D0] text-sm font-semibold mb-3">
+                  <Star className="w-4 h-4" />
+                  Featured Products
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ── How It Works ─────────────────────────────────────────────────────── */}
-      <section className="py-20 bg-white">
-        <div className="container">
-          <RevealSection>
-            <div className="text-center mb-14">
-              <h2 className="text-3xl font-bold text-[#0F3D5E] mb-3">How Bulnix Works</h2>
-              <p className="text-slate-500 max-w-xl mx-auto">From browsing to delivery in under 60 seconds</p>
-            </div>
-          </RevealSection>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            <div className="hidden md:block absolute top-12 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-[#00C2FF]/40 to-transparent" />
-            {HOW_IT_WORKS.map((step, i) => (
-              <RevealSection key={i} delay={i * 120} className="relative text-center">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#00C2FF]/15 to-[#0319CB]/10 border border-[#00C2FF]/25 flex items-center justify-center mx-auto mb-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200">
-                  <step.icon className="h-9 w-9 text-[#0319CB]" />
-                </div>
-                <div className="text-xs font-bold text-[#00C2FF] tracking-widest mb-2">STEP {step.step}</div>
-                <h3 className="text-xl font-bold text-[#0F3D5E] mb-3">{step.title}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto">{step.desc}</p>
-              </RevealSection>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Value Propositions ───────────────────────────────────────────────── */}
-      <section className="py-20" style={{ background: "linear-gradient(160deg, #e8f4ff 0%, #f0f8ff 100%)" }}>
-        <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <RevealSection>
-              <Badge className="mb-5 bg-[#00C2FF]/10 text-[#0319CB] border border-[#00C2FF]/25 px-3 py-1 text-xs font-semibold">
-                Why Choose Bulnix
-              </Badge>
-              <h2 className="text-4xl font-bold text-[#0F3D5E] mb-6 leading-tight">
-                Built for Resellers,<br />
-                <span style={{ background: "linear-gradient(90deg, #00C2FF, #0319CB)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                  Trusted by Buyers
-                </span>
-              </h2>
-              <p className="text-slate-500 mb-8 leading-relaxed">
-                Bulnix is the nexus between premium digital suppliers and buyers worldwide. We handle the complexity so you get instant, verified digital products every time.
-              </p>
-              <div className="space-y-4">
-                {[
-                  { title: "Verified Product Network", desc: "Every product is sourced from vetted, trusted suppliers and quality-checked before listing." },
-                  { title: "Real-time Stock Sync", desc: "Inventory updated every 30 minutes. No overselling, no disappointments." },
-                  { title: "Multi-Currency Support", desc: "Pay in NGN, USD, EUR, GBP, or crypto. We handle the conversion." },
-                  { title: "24/7 Support", desc: "Ticket-based support with fast response times for every order." },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-[#00C2FF] shrink-0 mt-0.5" />
-                    <div>
-                      <div className="text-sm font-semibold text-[#0F3D5E]">{item.title}</div>
-                      <div className="text-sm text-slate-500">{item.desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-8">
-                <Link href="/signup">
-                  <Button className="bg-[#0319CB] hover:bg-[#0215a8] text-white font-bold px-6 shadow-lg hover:shadow-[#0319CB]/30 hover:shadow-xl transition-all duration-200">
-                    Start Buying Now <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-            </RevealSection>
-
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { icon: Shield, title: "Secure Payments", desc: "All transactions verified via webhook", color: "#00C2FF" },
-                { icon: Zap, title: "Instant Delivery", desc: "Automated fulfillment in seconds", color: "#0319CB" },
-                { icon: Globe, title: "Global Access", desc: "Available in 150+ countries", color: "#00C2FF" },
-                { icon: Star, title: "Premium Quality", desc: "Verified accounts, guaranteed", color: "#0319CB" },
-              ].map((item, i) => (
-                <RevealSection key={i} delay={i * 80}>
-                  <div className="bg-white rounded-xl p-5 border border-slate-100 hover:border-[#00C2FF]/40 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 shadow-sm">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ background: `${item.color}15`, border: `1px solid ${item.color}25` }}>
-                      <item.icon className="h-5 w-5" style={{ color: item.color }} />
-                    </div>
-                    <h4 className="text-sm font-semibold text-[#0F3D5E] mb-1">{item.title}</h4>
-                    <p className="text-xs text-slate-500">{item.desc}</p>
-                  </div>
-                </RevealSection>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Payment Methods ──────────────────────────────────────────────────── */}
-      <section className="py-20 bg-white">
-        <div className="container">
-          <RevealSection>
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-[#0F3D5E] mb-3">Global Payment Options</h2>
-              <p className="text-slate-500">Pay your way with cards, bank transfer, or crypto</p>
-            </div>
-          </RevealSection>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {PAYMENT_METHODS.map((method, i) => (
-              <RevealSection key={i} delay={i * 80}>
-                <div className="bg-white rounded-xl p-6 text-center border border-slate-100 hover:border-[#00C2FF]/40 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 shadow-sm">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: `${method.color}15`, border: `1px solid ${method.color}25` }}>
-                    <CreditCard className="h-6 w-6" style={{ color: method.color }} />
-                  </div>
-                  <h3 className="text-base font-bold text-[#0F3D5E] mb-1">{method.name}</h3>
-                  <p className="text-sm text-slate-500 mb-2">{method.desc}</p>
-                  <Badge className="text-xs" style={{ background: `${method.color}15`, color: method.color, border: `1px solid ${method.color}25` }}>
-                    {method.region}
-                  </Badge>
-                </div>
-              </RevealSection>
-            ))}
-          </div>
-
-          <RevealSection>
-            <div className="mt-8 text-center">
-              <p className="text-slate-500 text-sm">
-                Currencies supported: <span className="text-[#0F3D5E] font-medium">NGN · USD · EUR · GBP · BTC · ETH · USDT</span>
-              </p>
-            </div>
-          </RevealSection>
-        </div>
-      </section>
-
-      {/* ── FAQ Preview ──────────────────────────────────────────────────────── */}
-      <section className="py-20" style={{ background: "linear-gradient(180deg, #f0f8ff 0%, #ffffff 100%)" }}>
-        <div className="container">
-          <div className="max-w-3xl mx-auto">
-            <RevealSection>
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-[#0F3D5E] mb-3">Frequently Asked Questions</h2>
-                <p className="text-slate-500">Quick answers to common questions</p>
-              </div>
-            </RevealSection>
-
-            <div className="space-y-4">
-              {FAQ_ITEMS.map((item, i) => (
-                <RevealSection key={i} delay={i * 80}>
-                  <div className="bg-white rounded-xl p-5 border border-slate-100 hover:border-[#00C2FF]/40 hover:shadow-md transition-all duration-200 shadow-sm">
-                    <h4 className="text-sm font-semibold text-[#0F3D5E] mb-2 flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-[#00C2FF]/10 border border-[#00C2FF]/25 flex items-center justify-center text-[#0319CB] text-xs font-bold shrink-0">{i + 1}</span>
-                      {item.q}
-                    </h4>
-                    <p className="text-sm text-slate-500 pl-7">{item.a}</p>
-                  </div>
-                </RevealSection>
-              ))}
-            </div>
-
-            <RevealSection>
-              <div className="text-center mt-8">
-                <Link href="/faq">
-                  <Button variant="outline" className="border-[#00C2FF] text-[#0319CB] hover:bg-[#00C2FF]/10 font-semibold">
-                    View All FAQs <ChevronRight className="ml-1 h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-            </RevealSection>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Become a Supplier ──────────────────────────────────────────────── */}
-      <section className="py-20 bg-white">
-        <div className="container">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <RevealSection>
-              <Badge className="mb-4 bg-[#0319CB]/10 text-[#0319CB] border border-[#0319CB]/20 text-xs font-semibold px-3 py-1">
-                SUPPLIER PROGRAM
-              </Badge>
-              <h2 className="text-4xl font-bold text-[#0F3D5E] mb-5 leading-tight">
-                Become a <span className="text-[#00C2FF]">Bulnix</span> Supplier
-              </h2>
-              <p className="text-slate-500 text-lg mb-8 leading-relaxed">
-                Have digital products to sell? Partner with Bulnix and reach thousands of buyers across Africa and globally. We handle payments, delivery, and customer support so you can focus on supply.
-              </p>
-              <div className="space-y-4 mb-8">
-                {[
-                  { icon: TrendingUp, title: "Grow Your Revenue", desc: "Access our established buyer network and sell at volume" },
-                  { icon: Shield, title: "Secure Payouts", desc: "Get paid reliably in NGN, USD, or crypto on your schedule" },
-                  { icon: Globe, title: "Global Reach", desc: "Sell to buyers in 50+ countries through our platform" },
-                  { icon: Zap, title: "Easy Integration", desc: "Simple API or dashboard-based product listing and management" },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-start gap-4">
-                    <div className="w-9 h-9 rounded-lg bg-[#00C2FF]/10 border border-[#00C2FF]/20 flex items-center justify-center shrink-0 mt-0.5">
-                      <item.icon className="h-4 w-4 text-[#0319CB]" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-[#0F3D5E]">{item.title}</p>
-                      <p className="text-sm text-slate-500">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <Link href="/contact">
-                <Button size="lg" className="bg-[#0319CB] hover:bg-[#0215a8] text-white font-bold px-8 h-12 shadow-lg hover:shadow-[#0319CB]/30 hover:shadow-xl transition-all duration-200">
-                  Apply to Become a Supplier
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-            </RevealSection>
-
-            <RevealSection delay={120}>
-              <div className="relative">
-                <div className="bg-white rounded-2xl p-8 border border-[#00C2FF]/20 shadow-xl">
-                  <h3 className="text-lg font-bold text-[#0F3D5E] mb-6">Why Suppliers Choose Bulnix</h3>
-                  <div className="grid grid-cols-2 gap-5 mb-6">
-                    {[
-                      { value: "50K+", label: "Active Buyers", color: "#00C2FF" },
-                      { value: "99.9%", label: "Platform Uptime", color: "#00C2FF" },
-                      { value: "24h", label: "Onboarding Time", color: "#0319CB" },
-                      { value: "0%", label: "Setup Fee", color: "#0319CB" },
-                    ].map((stat, i) => (
-                      <div key={i} className="text-center p-4 rounded-xl" style={{ background: `${stat.color}08`, border: `1px solid ${stat.color}20` }}>
-                        <p className="text-2xl font-bold mb-1" style={{ color: stat.color }}>{stat.value}</p>
-                        <p className="text-xs text-slate-500">{stat.label}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="space-y-3">
-                    {["Dedicated supplier dashboard", "Real-time order & payout tracking", "Automated order fulfillment", "Priority support channel"].map((item, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <CheckCircle className="h-4 w-4 text-[#00C2FF] shrink-0" />
-                        <span className="text-sm text-slate-600">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="absolute -bottom-8 -right-8 w-48 h-48 bg-[#0319CB]/8 rounded-full blur-[60px] pointer-events-none" />
-              </div>
-            </RevealSection>
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA Banner ───────────────────────────────────────────────────────── */}
-      <section className="py-20" style={{ background: "linear-gradient(135deg, #0F3D5E 0%, #0319CB 50%, #0A2540 100%)" }}>
-        <div className="container">
-          <RevealSection>
-            <div className="relative rounded-2xl overflow-hidden p-10 md:p-16 text-center">
-              {/* Floating orbs inside CTA */}
-              <div className="absolute top-4 left-[10%] w-20 h-20 rounded-full bg-white/5 blur-lg pointer-events-none animate-float" />
-              <div className="absolute bottom-4 right-[10%] w-16 h-16 rounded-full bg-[#00C2FF]/10 blur-lg pointer-events-none animate-float-slow" />
-              <div className="relative z-10">
-                <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                  Ready to Buy at Scale?
+                <h2 className="text-3xl font-bold text-[#0D2137]" style={{ fontFamily: "'Poppins', sans-serif" }}>
+                  Top Selling This Week
                 </h2>
-                <p className="text-white/70 text-lg mb-8 max-w-xl mx-auto">
-                  Join thousands of buyers on Bulnix. Create your free account and start purchasing premium digital products today.
-                </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <Link href="/signup">
-                    <Button size="lg" className="bg-[#00C2FF] hover:bg-[#00aee0] text-[#0F3D5E] font-bold px-10 h-12 shadow-lg hover:shadow-[#00C2FF]/40 hover:shadow-xl transition-all duration-200">
-                      Create Free Account
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                  </Link>
-                  <Link href="/products">
-                    <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 px-10 h-12 font-semibold">
-                      Browse Products
-                    </Button>
-                  </Link>
-                </div>
               </div>
+              <Link href="/products?featured=true" className="hidden md:flex items-center gap-1 text-[#0050D0] font-semibold text-sm hover:gap-2 transition-all">
+                View All <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
-          </RevealSection>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProducts.slice(0, 8).map((product: any, i: number) => (
+                <Link key={product.id} href={`/products/${product.slug}`}>
+                  <div className="reveal product-card cursor-pointer" style={{ transitionDelay: `${i * 80}ms` }}>
+                    <div className="aspect-[4/3] bg-gradient-to-br from-[#F0F8FF] to-[#E0EEFF] flex items-center justify-center overflow-hidden">
+                      {product.imageUrl ? (
+                        <img src={product.imageUrl} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      ) : (
+                        <Package className="w-12 h-12 text-[#0050D0]/30" />
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <p className="text-[#0D2137] font-semibold text-sm mb-1 line-clamp-2">{product.title}</p>
+                      <p className="text-[#4A6080] text-xs mb-3 line-clamp-1">{product.category?.name || "Digital Product"}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#0050D0] font-bold text-base">
+                          ${Number(product.customerPriceUSD || 0).toFixed(2)}
+                        </span>
+                        <Button size="sm" className="bg-[#0050D0] hover:bg-[#0040b0] text-white text-xs rounded-full px-3 h-7">
+                          Buy Now
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            <div className="text-center mt-8 md:hidden reveal">
+              <Link href="/products">
+                <Button variant="outline" className="border-[#D8E8F5] bg-white text-[#0D2137] hover:border-[#00C2FF]/50 font-semibold rounded-full px-8">
+                  View All Products <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ══ HOW IT WORKS ══════════════════════════════════════════════════════ */}
+      <section className="py-20 bg-white">
+        <div className="container">
+          <div className="text-center mb-12 reveal">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#00C2FF]/10 border border-[#00C2FF]/20 text-[#0050D0] text-sm font-semibold mb-4">
+              How It Works
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0D2137] mb-4" style={{ fontFamily: "'Poppins', sans-serif" }}>
+              Get Started in 3 Simple Steps
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { title: "Create Account", desc: "Sign up for free in seconds. No credit card required to browse.", icon: <Users className="w-6 h-6 text-[#00C2FF]" /> },
+              { title: "Choose Product", desc: "Browse 500+ digital products across all major platforms and categories.", icon: <ShoppingBag className="w-6 h-6 text-[#0050D0]" /> },
+              { title: "Instant Delivery", desc: "Complete payment and receive your order instantly in your dashboard.", icon: <Zap className="w-6 h-6 text-[#00C2FF]" /> },
+            ].map((step, i) => (
+              <div key={i} className="reveal text-center" style={{ transitionDelay: `${i * 150}ms` }}>
+                <div className="relative inline-flex mb-5">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#00C2FF]/15 to-[#0050D0]/10 border border-[#D8E8F5] flex items-center justify-center">
+                    {step.icon}
+                  </div>
+                  <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#0050D0] text-white text-xs font-bold flex items-center justify-center">
+                    {i + 1}
+                  </span>
+                </div>
+                <h3 className="text-[#0D2137] font-bold text-lg mb-2" style={{ fontFamily: "'Poppins', sans-serif" }}>{step.title}</h3>
+                <p className="text-[#4A6080] text-sm leading-relaxed max-w-xs mx-auto">{step.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      <Footer />
+      {/* ══ TESTIMONIALS ══════════════════════════════════════════════════════ */}
+      <section className="py-20">
+        <div className="container">
+          <div className="text-center mb-12 reveal">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#00C2FF]/10 border border-[#00C2FF]/20 text-[#0050D0] text-sm font-semibold mb-4">
+              <Star className="w-4 h-4" />
+              Customer Reviews
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0D2137] mb-4" style={{ fontFamily: "'Poppins', sans-serif" }}>
+              What Our Customers Say
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { name: "Adebayo O.", role: "Reseller", text: "Bulnix has completely transformed my reselling business. The instant delivery and bulk pricing are unmatched.", rating: 5 },
+              { name: "Fatima K.", role: "Social Media Manager", text: "I've tried many platforms but Bulnix is by far the most reliable. Never had a failed order in 6 months.", rating: 5 },
+              { name: "Emmanuel C.", role: "Digital Marketer", text: "The variety of products is incredible. From Instagram to streaming accounts — everything I need is here.", rating: 5 },
+            ].map((review, i) => (
+              <div key={i} className="reveal bg-white rounded-2xl p-6 border border-[#D8E8F5] shadow-sm" style={{ transitionDelay: `${i * 100}ms` }}>
+                <div className="flex items-center gap-1 mb-3">
+                  {[1,2,3,4,5].map(s => (
+                    <Star key={s} className={`w-4 h-4 ${s <= review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200"}`} />
+                  ))}
+                </div>
+                <p className="text-[#4A6080] text-sm leading-relaxed mb-4">"{review.text}"</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#00C2FF]/20 to-[#0050D0]/20 border border-[#D8E8F5] flex items-center justify-center text-[#0050D0] font-bold text-sm">
+                    {review.name[0]}
+                  </div>
+                  <div>
+                    <p className="text-[#0D2137] font-semibold text-sm">{review.name}</p>
+                    <p className="text-[#4A6080] text-xs">{review.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══ PAYMENT METHODS ═══════════════════════════════════════════════════ */}
+      <section className="py-14 bg-white border-t border-[#D8E8F5]">
+        <div className="container">
+          <div className="text-center mb-8 reveal">
+            <p className="text-[#4A6080] text-sm font-medium">Accepted Payment Methods</p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-4 reveal">
+            {[
+              { name: "Paystack", color: "#00C3F7" },
+              { name: "Monnify", color: "#0066CC" },
+              { name: "Crypto", color: "#F7931A" },
+              { name: "Visa / Mastercard", color: "#0050D0" },
+            ].map(pm => (
+              <div key={pm.name} className="px-5 py-2.5 rounded-xl bg-[#F5F9FF] border border-[#D8E8F5] text-sm font-semibold" style={{ color: pm.color }}>
+                {pm.name}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══ CTA ═══════════════════════════════════════════════════════════════ */}
+      <section className="py-20 bg-gradient-to-br from-[#0F3D5E] to-[#0050D0]">
+        <div className="container text-center reveal">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4" style={{ fontFamily: "'Poppins', sans-serif" }}>
+            Ready to Start Buying?
+          </h2>
+          <p className="text-white/70 text-lg mb-8 max-w-lg mx-auto">
+            Join 10,000+ customers who trust Bulnix for their digital account needs. Sign up free today.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link href="/signup">
+              <Button className="bg-[#00C2FF] hover:bg-[#00aee6] text-[#0F3D5E] font-bold rounded-full px-8 py-3 h-auto text-base shadow-lg shadow-[#00C2FF]/30 hover:shadow-xl transition-all duration-300">
+                Create Free Account
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+            <Link href="/products">
+              <Button variant="outline" className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:border-white/50 font-semibold rounded-full px-8 py-3 h-auto text-base transition-all duration-300">
+                Browse Products
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }

@@ -16,14 +16,14 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import AdminLayout from "@/components/AdminLayout";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  draft:             { label: "Draft",              color: "bg-slate-500/20 text-slate-300 border-slate-500/30",    icon: <FileText className="h-3 w-3" /> },
+  draft:             { label: "Draft",              color: "bg-slate-500/20 text-[#4A6080] border-slate-500/30",    icon: <FileText className="h-3 w-3" /> },
   submitted:         { label: "Submitted",          color: "bg-blue-500/20 text-blue-300 border-blue-500/30",       icon: <Send className="h-3 w-3" /> },
   acknowledged:      { label: "Acknowledged",       color: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30", icon: <Clock className="h-3 w-3" /> },
   approved:          { label: "Approved",           color: "bg-green-500/20 text-green-300 border-green-500/30",    icon: <CheckCircle className="h-3 w-3" /> },
   partially_approved:{ label: "Partially Approved", color: "bg-orange-500/20 text-orange-300 border-orange-500/30", icon: <AlertCircle className="h-3 w-3" /> },
   rejected:          { label: "Rejected",           color: "bg-red-500/20 text-red-300 border-red-500/30",          icon: <XCircle className="h-3 w-3" /> },
   resolved:          { label: "Resolved",           color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30", icon: <CheckCircle className="h-3 w-3" /> },
-  cancelled:         { label: "Cancelled",          color: "bg-slate-600/20 text-slate-400 border-slate-600/30",    icon: <XCircle className="h-3 w-3" /> },
+  cancelled:         { label: "Cancelled",          color: "bg-slate-600/20 text-[#4A6080] border-slate-600/30",    icon: <XCircle className="h-3 w-3" /> },
 };
 
 function StatusBadge({ status }: { status: string }) {
@@ -162,14 +162,14 @@ export default function AdminSupplierRefunds() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">Supplier Refund Claims</h1>
-            <p className="text-slate-400 text-sm mt-1">Raise and track refund claims against AccsZone and other suppliers</p>
+            <h1 className="text-2xl font-bold text-[#0D2137]">Supplier Refund Claims</h1>
+            <p className="text-[#4A6080] text-sm mt-1">Raise and track refund claims against AccsZone and other suppliers</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => refetch()} className="border-[#0F3D5E] text-slate-300 hover:text-white hover:bg-[#0F3D5E]/30">
+            <Button variant="outline" size="sm" onClick={() => refetch()} className="border-[#D8E8F5] text-[#4A6080] hover:text-[#0D2137] hover:bg-[#F5F9FF]">
               <RefreshCw className="h-4 w-4 mr-2" /> Refresh
             </Button>
-            <Button onClick={() => setCreateOpen(true)} className="bg-[#00C2FF] hover:bg-[#00a8d4] text-white">
+            <Button onClick={() => setCreateOpen(true)} className="bg-[#0050D0] hover:bg-[#0040b0] text-[#0D2137]">
               <Plus className="h-4 w-4 mr-2" /> New Claim
             </Button>
           </div>
@@ -178,15 +178,15 @@ export default function AdminSupplierRefunds() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Total Claims", value: stats.total, sub: `${stats.draft} drafts`, color: "text-white" },
+            { label: "Total Claims", value: stats.total, sub: `${stats.draft} drafts`, color: "text-[#0D2137]" },
             { label: "In Progress", value: stats.submitted, sub: "submitted / acknowledged", color: "text-blue-400" },
             { label: "Approved", value: stats.approved, sub: `$${stats.totalApproved.toFixed(2)} approved`, color: "text-green-400" },
-            { label: "Total Claimed", value: `$${stats.totalClaimed.toFixed(2)}`, sub: `${stats.resolved} resolved`, color: "text-[#00C2FF]" },
+            { label: "Total Claimed", value: `$${stats.totalClaimed.toFixed(2)}`, sub: `${stats.resolved} resolved`, color: "text-[#0050D0]" },
           ].map(s => (
-            <div key={s.label} className="bg-[#0A2540] border border-white/5 rounded-xl p-4">
-              <p className="text-slate-500 text-xs mb-1">{s.label}</p>
+            <div key={s.label} className="bg-white border border-[#D8E8F5] rounded-xl p-4">
+              <p className="text-[#4A6080] text-xs mb-1">{s.label}</p>
               <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
-              <p className="text-slate-600 text-xs mt-1">{s.sub}</p>
+              <p className="text-[#4A6080] text-xs mt-1">{s.sub}</p>
             </div>
           ))}
         </div>
@@ -199,8 +199,8 @@ export default function AdminSupplierRefunds() {
               onClick={() => setStatusFilter(s)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
                 statusFilter === s
-                  ? "bg-[#00C2FF]/20 text-[#00C2FF] border-[#00C2FF]/40"
-                  : "bg-[#0F3D5E]/30 text-slate-400 border-[#0F3D5E] hover:text-white hover:bg-white/10"
+                  ? "bg-[#00C2FF]/20 text-[#0050D0] border-[#0050D0]/40"
+                  : "bg-[#F5F9FF] text-[#4A6080] border-[#D8E8F5] hover:text-[#0D2137] hover:bg-[#F0F8FF]"
               }`}
             >
               {s === "all" ? "All" : STATUS_CONFIG[s]?.label ?? s}
@@ -209,47 +209,47 @@ export default function AdminSupplierRefunds() {
         </div>
 
         {/* Claims Table */}
-        <div className="bg-[#0A2540] border border-white/5 rounded-xl overflow-hidden">
+        <div className="bg-white border border-[#D8E8F5] rounded-xl overflow-hidden">
           {isLoading ? (
             <div className="flex items-center justify-center py-16">
-              <Loader2 className="h-6 w-6 animate-spin text-[#00C2FF]" />
+              <Loader2 className="h-6 w-6 animate-spin text-[#0050D0]" />
             </div>
           ) : claims.length === 0 ? (
             <div className="text-center py-16">
-              <DollarSign className="h-10 w-10 text-slate-700 mx-auto mb-3" />
-              <p className="text-slate-400 font-medium">No supplier refund claims yet</p>
-              <p className="text-slate-600 text-sm mt-1">Create a claim when a customer reports an issue with a supplier order</p>
-              <Button onClick={() => setCreateOpen(true)} className="mt-4 bg-[#00C2FF] hover:bg-[#00a8d4] text-white">
+              <DollarSign className="h-10 w-10 text-[#4A6080] mx-auto mb-3" />
+              <p className="text-[#4A6080] font-medium">No supplier refund claims yet</p>
+              <p className="text-[#4A6080] text-sm mt-1">Create a claim when a customer reports an issue with a supplier order</p>
+              <Button onClick={() => setCreateOpen(true)} className="mt-4 bg-[#0050D0] hover:bg-[#0040b0] text-[#0D2137]">
                 <Plus className="h-4 w-4 mr-2" /> Create First Claim
               </Button>
             </div>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/5">
+                <tr className="border-b border-[#D8E8F5]">
                   {["Claim #", "Provider", "Amount", "Supplier Order", "Ticket / Order", "Status", "Created", "Actions"].map(h => (
-                    <th key={h} className="text-left px-4 py-3 text-slate-500 font-medium text-xs">{h}</th>
+                    <th key={h} className="text-left px-4 py-3 text-[#4A6080] font-medium text-xs">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {claims.map((claim: any) => (
-                  <tr key={claim.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
-                    <td className="px-4 py-3 text-white font-mono font-medium">#{claim.id}</td>
+                  <tr key={claim.id} className="border-b border-[#D8E8F5] hover:bg-white/[0.02] transition-colors">
+                    <td className="px-4 py-3 text-[#0D2137] font-mono font-medium">#{claim.id}</td>
                     <td className="px-4 py-3">
-                      <span className="px-2 py-0.5 rounded bg-[#00C2FF]/10 text-[#00C2FF] text-xs font-medium uppercase">{claim.providerKey}</span>
+                      <span className="px-2 py-0.5 rounded bg-[#EEF4FF] text-[#0050D0] text-xs font-medium uppercase">{claim.providerKey}</span>
                     </td>
-                    <td className="px-4 py-3 text-white font-semibold">${parseFloat(claim.claimAmountUSD).toFixed(2)}</td>
-                    <td className="px-4 py-3 text-slate-400 font-mono text-xs">{claim.supplierOrderId ?? <span className="text-slate-600">N/A</span>}</td>
-                    <td className="px-4 py-3 text-slate-400 text-xs">
+                    <td className="px-4 py-3 text-[#0D2137] font-semibold">${parseFloat(claim.claimAmountUSD).toFixed(2)}</td>
+                    <td className="px-4 py-3 text-[#4A6080] font-mono text-xs">{claim.supplierOrderId ?? <span className="text-[#4A6080]">N/A</span>}</td>
+                    <td className="px-4 py-3 text-[#4A6080] text-xs">
                       {claim.ticketId && <span className="mr-2">Ticket #{claim.ticketId}</span>}
                       {claim.orderId && <span>Order #{claim.orderId}</span>}
-                      {!claim.ticketId && !claim.orderId && <span className="text-slate-600">N/A</span>}
+                      {!claim.ticketId && !claim.orderId && <span className="text-[#4A6080]">N/A</span>}
                     </td>
                     <td className="px-4 py-3"><StatusBadge status={claim.status} /></td>
-                    <td className="px-4 py-3 text-slate-500 text-xs">{new Date(claim.createdAt).toLocaleDateString()}</td>
+                    <td className="px-4 py-3 text-[#4A6080] text-xs">{new Date(claim.createdAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3">
-                      <Button size="sm" variant="ghost" onClick={() => openDetail(claim)} className="text-slate-400 hover:text-white h-7 px-2">
+                      <Button size="sm" variant="ghost" onClick={() => openDetail(claim)} className="text-[#4A6080] hover:text-[#0D2137] h-7 px-2">
                         <Eye className="h-3.5 w-3.5 mr-1" /> View
                       </Button>
                     </td>
@@ -263,54 +263,54 @@ export default function AdminSupplierRefunds() {
 
       {/* Create Claim Dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="bg-[#0A2540] border-[#0F3D5E] text-white max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-white border-[#D8E8F5] text-[#0D2137] max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <Plus className="h-5 w-5 text-[#00C2FF]" /> New Supplier Refund Claim
+            <DialogTitle className="text-[#0D2137] flex items-center gap-2">
+              <Plus className="h-5 w-5 text-[#0050D0]" /> New Supplier Refund Claim
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-2">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-slate-300 text-sm mb-1.5 block">Ticket ID <span className="text-slate-600">(optional)</span></Label>
-                <Input value={form.ticketId} onChange={e => setForm(f => ({ ...f, ticketId: e.target.value }))} placeholder="e.g. 42" className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
+                <Label className="text-[#4A6080] text-sm mb-1.5 block">Ticket ID <span className="text-[#4A6080]">(optional)</span></Label>
+                <Input value={form.ticketId} onChange={e => setForm(f => ({ ...f, ticketId: e.target.value }))} placeholder="e.g. 42" className="bg-[#F5F9FF] border-[#D8E8F5] text-[#0D2137] focus:border-[#0050D0] h-10" />
               </div>
               <div>
-                <Label className="text-slate-300 text-sm mb-1.5 block">Order ID <span className="text-slate-600">(optional)</span></Label>
-                <Input value={form.orderId} onChange={e => setForm(f => ({ ...f, orderId: e.target.value }))} placeholder="e.g. 101" className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
+                <Label className="text-[#4A6080] text-sm mb-1.5 block">Order ID <span className="text-[#4A6080]">(optional)</span></Label>
+                <Input value={form.orderId} onChange={e => setForm(f => ({ ...f, orderId: e.target.value }))} placeholder="e.g. 101" className="bg-[#F5F9FF] border-[#D8E8F5] text-[#0D2137] focus:border-[#0050D0] h-10" />
               </div>
             </div>
             <div>
-              <Label className="text-slate-300 text-sm mb-1.5 block">Supplier</Label>
+              <Label className="text-[#4A6080] text-sm mb-1.5 block">Supplier</Label>
               <Select value={form.providerKey} onValueChange={v => setForm(f => ({ ...f, providerKey: v }))}>
-                <SelectTrigger className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10">
+                <SelectTrigger className="bg-[#F5F9FF] border-[#D8E8F5] text-[#0D2137] focus:border-[#0050D0] h-10">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#0A2540] border-[#0F3D5E] text-white">
+                <SelectContent className="bg-white border-[#D8E8F5] text-[#0D2137]">
                   <SelectItem value="accszone">AccsZone</SelectItem>
                   <SelectItem value="accsbulk">AccsBulk</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label className="text-slate-300 text-sm mb-1.5 block">Supplier Order ID <span className="text-slate-600">(from your AccsZone dashboard)</span></Label>
-              <Input value={form.supplierOrderId} onChange={e => setForm(f => ({ ...f, supplierOrderId: e.target.value }))} placeholder="e.g. AZ-123456" className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
+              <Label className="text-[#4A6080] text-sm mb-1.5 block">Supplier Order ID <span className="text-[#4A6080]">(from your AccsZone dashboard)</span></Label>
+              <Input value={form.supplierOrderId} onChange={e => setForm(f => ({ ...f, supplierOrderId: e.target.value }))} placeholder="e.g. AZ-123456" className="bg-[#F5F9FF] border-[#D8E8F5] text-[#0D2137] focus:border-[#0050D0] h-10" />
             </div>
             <div>
-              <Label className="text-slate-300 text-sm mb-1.5 block">Claim Amount (USD) <span className="text-red-400">*</span></Label>
-              <Input type="number" min="0.01" step="0.01" value={form.claimAmountUSD} onChange={e => setForm(f => ({ ...f, claimAmountUSD: e.target.value }))} placeholder="e.g. 5.00" className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] h-10" />
+              <Label className="text-[#4A6080] text-sm mb-1.5 block">Claim Amount (USD) <span className="text-red-400">*</span></Label>
+              <Input type="number" min="0.01" step="0.01" value={form.claimAmountUSD} onChange={e => setForm(f => ({ ...f, claimAmountUSD: e.target.value }))} placeholder="e.g. 5.00" className="bg-[#F5F9FF] border-[#D8E8F5] text-[#0D2137] focus:border-[#0050D0] h-10" />
             </div>
             <div>
-              <Label className="text-slate-300 text-sm mb-1.5 block">Reason for Claim <span className="text-red-400">*</span></Label>
-              <Textarea value={form.reason} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} rows={4} placeholder="Describe the issue clearly. This text will be included in the refund request sent to the supplier." className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] resize-none" />
+              <Label className="text-[#4A6080] text-sm mb-1.5 block">Reason for Claim <span className="text-red-400">*</span></Label>
+              <Textarea value={form.reason} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))} rows={4} placeholder="Describe the issue clearly. This text will be included in the refund request sent to the supplier." className="bg-[#F5F9FF] border-[#D8E8F5] text-[#0D2137] focus:border-[#0050D0] resize-none" />
             </div>
             <div>
-              <Label className="text-slate-300 text-sm mb-1.5 block">Internal Admin Notes <span className="text-slate-600">(not sent to supplier)</span></Label>
-              <Textarea value={form.adminNotes} onChange={e => setForm(f => ({ ...f, adminNotes: e.target.value }))} rows={2} placeholder="Private notes for your team..." className="bg-[#061A2B] border-[#0F3D5E] text-white focus:border-[#00C2FF] resize-none" />
+              <Label className="text-[#4A6080] text-sm mb-1.5 block">Internal Admin Notes <span className="text-[#4A6080]">(not sent to supplier)</span></Label>
+              <Textarea value={form.adminNotes} onChange={e => setForm(f => ({ ...f, adminNotes: e.target.value }))} rows={2} placeholder="Private notes for your team..." className="bg-[#F5F9FF] border-[#D8E8F5] text-[#0D2137] focus:border-[#0050D0] resize-none" />
             </div>
             <div className="flex gap-2 pt-2">
-              <Button variant="outline" className="flex-1 border-[#0F3D5E] text-slate-300 hover:text-white hover:bg-[#0F3D5E]/30" onClick={() => setCreateOpen(false)}>Cancel</Button>
-              <Button className="flex-1 bg-[#00C2FF] hover:bg-[#00a8d4] text-white" onClick={handleCreate} disabled={createClaim.isPending}>
+              <Button variant="outline" className="flex-1 border-[#D8E8F5] text-[#4A6080] hover:text-[#0D2137] hover:bg-[#F5F9FF]" onClick={() => setCreateOpen(false)}>Cancel</Button>
+              <Button className="flex-1 bg-[#0050D0] hover:bg-[#0040b0] text-[#0D2137]" onClick={handleCreate} disabled={createClaim.isPending}>
                 {createClaim.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
                 Create Draft Claim
               </Button>
@@ -321,49 +321,49 @@ export default function AdminSupplierRefunds() {
 
       {/* Claim Detail Dialog */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="bg-[#0A2540] border-[#0F3D5E] text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-white border-[#D8E8F5] text-[#0D2137] max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <FileText className="h-5 w-5 text-[#00C2FF]" />
+            <DialogTitle className="text-[#0D2137] flex items-center gap-2">
+              <FileText className="h-5 w-5 text-[#0050D0]" />
               Claim #{selectedClaim?.id}
               {selectedClaim && <StatusBadge status={selectedClaim.status} />}
             </DialogTitle>
           </DialogHeader>
 
           {loadingDetail ? (
-            <div className="flex items-center justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-[#00C2FF]" /></div>
+            <div className="flex items-center justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-[#0050D0]" /></div>
           ) : claimDetail ? (
             <div className="space-y-5 mt-2">
               {/* Claim Info */}
               <div className="grid grid-cols-2 gap-3 text-sm">
                 {[
-                  { label: "Provider", value: <span className="uppercase text-[#00C2FF] font-semibold">{claimDetail.providerKey}</span> },
-                  { label: "Claim Amount", value: <span className="text-white font-bold">${parseFloat(claimDetail.claimAmountUSD as string).toFixed(2)}</span> },
-                  { label: "Approved Amount", value: claimDetail.approvedAmountUSD ? <span className="text-green-400 font-semibold">${parseFloat(claimDetail.approvedAmountUSD as string).toFixed(2)}</span> : <span className="text-slate-600">Pending</span> },
-                  { label: "Supplier Order ID", value: claimDetail.supplierOrderId ?? <span className="text-slate-600">N/A</span> },
-                  { label: "Linked Ticket", value: claimDetail.ticketId ? `#${claimDetail.ticketId}` : <span className="text-slate-600">None</span> },
-                  { label: "Linked Order", value: claimDetail.orderId ? `#${claimDetail.orderId}` : <span className="text-slate-600">None</span> },
-                  { label: "Supplier Ref", value: claimDetail.supplierRefundRef ?? <span className="text-slate-600">Not yet assigned</span> },
-                  { label: "Credited to Customer", value: claimDetail.creditedToCustomer ? <span className="text-green-400">Yes</span> : <span className="text-slate-500">No</span> },
+                  { label: "Provider", value: <span className="uppercase text-[#0050D0] font-semibold">{claimDetail.providerKey}</span> },
+                  { label: "Claim Amount", value: <span className="text-[#0D2137] font-bold">${parseFloat(claimDetail.claimAmountUSD as string).toFixed(2)}</span> },
+                  { label: "Approved Amount", value: claimDetail.approvedAmountUSD ? <span className="text-green-400 font-semibold">${parseFloat(claimDetail.approvedAmountUSD as string).toFixed(2)}</span> : <span className="text-[#4A6080]">Pending</span> },
+                  { label: "Supplier Order ID", value: claimDetail.supplierOrderId ?? <span className="text-[#4A6080]">N/A</span> },
+                  { label: "Linked Ticket", value: claimDetail.ticketId ? `#${claimDetail.ticketId}` : <span className="text-[#4A6080]">None</span> },
+                  { label: "Linked Order", value: claimDetail.orderId ? `#${claimDetail.orderId}` : <span className="text-[#4A6080]">None</span> },
+                  { label: "Supplier Ref", value: claimDetail.supplierRefundRef ?? <span className="text-[#4A6080]">Not yet assigned</span> },
+                  { label: "Credited to Customer", value: claimDetail.creditedToCustomer ? <span className="text-green-400">Yes</span> : <span className="text-[#4A6080]">No</span> },
                 ].map(row => (
-                  <div key={row.label} className="bg-[#061A2B] rounded-lg p-3">
-                    <p className="text-slate-500 text-xs mb-1">{row.label}</p>
+                  <div key={row.label} className="bg-[#F5F9FF] rounded-lg p-3">
+                    <p className="text-[#4A6080] text-xs mb-1">{row.label}</p>
                     <p className="text-slate-200">{row.value}</p>
                   </div>
                 ))}
               </div>
 
               {/* Reason */}
-              <div className="bg-[#061A2B] rounded-lg p-4">
-                <p className="text-slate-500 text-xs mb-2 font-medium uppercase tracking-wide">Claim Reason</p>
-                <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{claimDetail.reason}</p>
+              <div className="bg-[#F5F9FF] rounded-lg p-4">
+                <p className="text-[#4A6080] text-xs mb-2 font-medium uppercase tracking-wide">Claim Reason</p>
+                <p className="text-[#4A6080] text-sm leading-relaxed whitespace-pre-wrap">{claimDetail.reason}</p>
               </div>
 
               {/* Supplier Response */}
               {claimDetail.supplierResponse && (
                 <div className="bg-green-500/5 border border-green-500/20 rounded-lg p-4">
                   <p className="text-green-400 text-xs mb-2 font-medium uppercase tracking-wide">Supplier Response</p>
-                  <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{claimDetail.supplierResponse}</p>
+                  <p className="text-[#4A6080] text-sm leading-relaxed whitespace-pre-wrap">{claimDetail.supplierResponse}</p>
                 </div>
               )}
 
@@ -371,16 +371,16 @@ export default function AdminSupplierRefunds() {
               {claimDetail.adminNotes && (
                 <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-4">
                   <p className="text-yellow-400 text-xs mb-2 font-medium uppercase tracking-wide">Internal Notes</p>
-                  <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{claimDetail.adminNotes}</p>
+                  <p className="text-[#4A6080] text-sm leading-relaxed whitespace-pre-wrap">{claimDetail.adminNotes}</p>
                 </div>
               )}
 
               {/* Submit Button for Draft Claims */}
               {claimDetail.status === "draft" && (
-                <div className="bg-[#00C2FF]/5 border border-[#00C2FF]/20 rounded-lg p-4">
-                  <p className="text-[#00C2FF] text-sm font-medium mb-2">Ready to submit this claim?</p>
-                  <p className="text-slate-400 text-xs mb-3">Submitting will generate a formatted refund request message. Copy it and send it to AccsZone support via their dashboard or email.</p>
-                  <Button onClick={() => submitClaim.mutate({ claimId: claimDetail.id })} disabled={submitClaim.isPending} className="bg-[#00C2FF] hover:bg-[#00a8d4] text-white w-full">
+                <div className="bg-[#00C2FF]/5 border border-[#0050D0]/20 rounded-lg p-4">
+                  <p className="text-[#0050D0] text-sm font-medium mb-2">Ready to submit this claim?</p>
+                  <p className="text-[#4A6080] text-xs mb-3">Submitting will generate a formatted refund request message. Copy it and send it to AccsZone support via their dashboard or email.</p>
+                  <Button onClick={() => submitClaim.mutate({ claimId: claimDetail.id })} disabled={submitClaim.isPending} className="bg-[#0050D0] hover:bg-[#0040b0] text-[#0D2137] w-full">
                     {submitClaim.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
                     Submit Claim to Supplier
                   </Button>
@@ -389,16 +389,16 @@ export default function AdminSupplierRefunds() {
 
               {/* Update Status Form */}
               {claimDetail.status !== "resolved" && claimDetail.status !== "cancelled" && (
-                <div className="bg-[#061A2B] rounded-lg p-4 space-y-3">
-                  <p className="text-slate-300 text-sm font-medium">Update Claim</p>
+                <div className="bg-[#F5F9FF] rounded-lg p-4 space-y-3">
+                  <p className="text-[#4A6080] text-sm font-medium">Update Claim</p>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <Label className="text-slate-400 text-xs mb-1.5 block">New Status</Label>
+                      <Label className="text-[#4A6080] text-xs mb-1.5 block">New Status</Label>
                       <Select value={updateForm.status} onValueChange={v => setUpdateForm(f => ({ ...f, status: v }))}>
-                        <SelectTrigger className="bg-[#0A2540] border-[#0F3D5E] text-white h-9 text-sm">
+                        <SelectTrigger className="bg-white border-[#D8E8F5] text-[#0D2137] h-9 text-sm">
                           <SelectValue placeholder="Select status..." />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#0A2540] border-[#0F3D5E] text-white">
+                        <SelectContent className="bg-white border-[#D8E8F5] text-[#0D2137]">
                           {["acknowledged", "approved", "partially_approved", "rejected", "resolved", "cancelled"].map(s => (
                             <SelectItem key={s} value={s}>{STATUS_CONFIG[s]?.label ?? s}</SelectItem>
                           ))}
@@ -406,34 +406,34 @@ export default function AdminSupplierRefunds() {
                       </Select>
                     </div>
                     <div>
-                      <Label className="text-slate-400 text-xs mb-1.5 block">Approved Amount (USD)</Label>
-                      <Input type="number" value={updateForm.approvedAmountUSD} onChange={e => setUpdateForm(f => ({ ...f, approvedAmountUSD: e.target.value }))} placeholder="0.00" className="bg-[#0A2540] border-[#0F3D5E] text-white h-9 text-sm" />
+                      <Label className="text-[#4A6080] text-xs mb-1.5 block">Approved Amount (USD)</Label>
+                      <Input type="number" value={updateForm.approvedAmountUSD} onChange={e => setUpdateForm(f => ({ ...f, approvedAmountUSD: e.target.value }))} placeholder="0.00" className="bg-white border-[#D8E8F5] text-[#0D2137] h-9 text-sm" />
                     </div>
                   </div>
                   <div>
-                    <Label className="text-slate-400 text-xs mb-1.5 block">Supplier Refund Reference</Label>
-                    <Input value={updateForm.supplierRefundRef} onChange={e => setUpdateForm(f => ({ ...f, supplierRefundRef: e.target.value }))} placeholder="e.g. REF-AZ-789" className="bg-[#0A2540] border-[#0F3D5E] text-white h-9 text-sm" />
+                    <Label className="text-[#4A6080] text-xs mb-1.5 block">Supplier Refund Reference</Label>
+                    <Input value={updateForm.supplierRefundRef} onChange={e => setUpdateForm(f => ({ ...f, supplierRefundRef: e.target.value }))} placeholder="e.g. REF-AZ-789" className="bg-white border-[#D8E8F5] text-[#0D2137] h-9 text-sm" />
                   </div>
                   <div>
-                    <Label className="text-slate-400 text-xs mb-1.5 block">Supplier Response Message</Label>
-                    <Textarea value={updateForm.supplierResponse} onChange={e => setUpdateForm(f => ({ ...f, supplierResponse: e.target.value }))} rows={2} placeholder="Paste supplier's reply here..." className="bg-[#0A2540] border-[#0F3D5E] text-white resize-none text-sm" />
+                    <Label className="text-[#4A6080] text-xs mb-1.5 block">Supplier Response Message</Label>
+                    <Textarea value={updateForm.supplierResponse} onChange={e => setUpdateForm(f => ({ ...f, supplierResponse: e.target.value }))} rows={2} placeholder="Paste supplier's reply here..." className="bg-white border-[#D8E8F5] text-[#0D2137] resize-none text-sm" />
                   </div>
                   {(updateForm.status === "approved" || updateForm.status === "partially_approved") && (
                     <div className="bg-green-500/5 border border-green-500/20 rounded-lg p-3 space-y-2">
                       <p className="text-green-400 text-xs font-medium">Credit Approved Amount to Customer Wallet?</p>
                       <div className="flex items-center gap-3">
                         <input type="checkbox" id="creditCheck" checked={updateForm.creditToCustomer} onChange={e => setUpdateForm(f => ({ ...f, creditToCustomer: e.target.checked }))} className="h-4 w-4 accent-green-500" />
-                        <label htmlFor="creditCheck" className="text-slate-300 text-sm">Yes, credit customer wallet</label>
+                        <label htmlFor="creditCheck" className="text-[#4A6080] text-sm">Yes, credit customer wallet</label>
                       </div>
                       {updateForm.creditToCustomer && (
                         <div>
-                          <Label className="text-slate-400 text-xs mb-1.5 block">Customer User ID</Label>
-                          <Input value={updateForm.customerUserId} onChange={e => setUpdateForm(f => ({ ...f, customerUserId: e.target.value }))} placeholder="User ID from Admin > Users" className="bg-[#0A2540] border-[#0F3D5E] text-white h-9 text-sm" />
+                          <Label className="text-[#4A6080] text-xs mb-1.5 block">Customer User ID</Label>
+                          <Input value={updateForm.customerUserId} onChange={e => setUpdateForm(f => ({ ...f, customerUserId: e.target.value }))} placeholder="User ID from Admin > Users" className="bg-white border-[#D8E8F5] text-[#0D2137] h-9 text-sm" />
                         </div>
                       )}
                     </div>
                   )}
-                  <Button onClick={handleUpdate} disabled={updateClaim.isPending} className="w-full bg-[#00C2FF] hover:bg-[#00a8d4] text-white">
+                  <Button onClick={handleUpdate} disabled={updateClaim.isPending} className="w-full bg-[#0050D0] hover:bg-[#0040b0] text-[#0D2137]">
                     {updateClaim.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                     Save Update
                   </Button>
@@ -444,7 +444,7 @@ export default function AdminSupplierRefunds() {
               <div>
                 <button
                   onClick={() => setShowLog(!showLog)}
-                  className="flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium transition-colors w-full"
+                  className="flex items-center gap-2 text-[#4A6080] hover:text-[#0D2137] text-sm font-medium transition-colors w-full"
                 >
                   <MessageSquare className="h-4 w-4" />
                   Communication Log ({(claimDetail.communicationLog as any[])?.length ?? 0} entries)
@@ -454,36 +454,36 @@ export default function AdminSupplierRefunds() {
                 {showLog && (
                   <div className="mt-3 space-y-3">
                     {((claimDetail.communicationLog as any[]) ?? []).length === 0 ? (
-                      <p className="text-slate-600 text-sm text-center py-4">No log entries yet</p>
+                      <p className="text-[#4A6080] text-sm text-center py-4">No log entries yet</p>
                     ) : (
                       (claimDetail.communicationLog as any[]).map((entry: any, i: number) => (
-                        <div key={i} className={`rounded-lg p-3 text-sm ${entry.direction === "inbound" ? "bg-blue-500/5 border border-blue-500/20 ml-4" : "bg-[#061A2B] border border-white/5 mr-4"}`}>
+                        <div key={i} className={`rounded-lg p-3 text-sm ${entry.direction === "inbound" ? "bg-blue-500/5 border border-blue-500/20 ml-4" : "bg-[#F5F9FF] border border-[#D8E8F5] mr-4"}`}>
                           <div className="flex items-center justify-between mb-1">
-                            <span className={`text-xs font-medium ${entry.direction === "inbound" ? "text-blue-400" : "text-slate-400"}`}>
+                            <span className={`text-xs font-medium ${entry.direction === "inbound" ? "text-blue-400" : "text-[#4A6080]"}`}>
                               {entry.direction === "inbound" ? "From Supplier" : "From Admin"} — {entry.actor}
                             </span>
-                            <span className="text-slate-600 text-xs">{new Date(entry.timestamp).toLocaleString()}</span>
+                            <span className="text-[#4A6080] text-xs">{new Date(entry.timestamp).toLocaleString()}</span>
                           </div>
-                          <p className="text-slate-300 whitespace-pre-wrap leading-relaxed">{entry.message}</p>
+                          <p className="text-[#4A6080] whitespace-pre-wrap leading-relaxed">{entry.message}</p>
                         </div>
                       ))
                     )}
 
                     {/* Add Log Entry */}
-                    <div className="bg-[#061A2B] rounded-lg p-3 space-y-2 mt-2">
-                      <p className="text-slate-400 text-xs font-medium">Add Log Entry</p>
+                    <div className="bg-[#F5F9FF] rounded-lg p-3 space-y-2 mt-2">
+                      <p className="text-[#4A6080] text-xs font-medium">Add Log Entry</p>
                       <div className="flex gap-2">
                         <Select value={logDirection} onValueChange={v => setLogDirection(v as any)}>
-                          <SelectTrigger className="bg-[#0A2540] border-[#0F3D5E] text-white h-8 text-xs w-36">
+                          <SelectTrigger className="bg-white border-[#D8E8F5] text-[#0D2137] h-8 text-xs w-36">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-[#0A2540] border-[#0F3D5E] text-white">
+                          <SelectContent className="bg-white border-[#D8E8F5] text-[#0D2137]">
                             <SelectItem value="inbound">From Supplier</SelectItem>
                             <SelectItem value="outbound">From Admin</SelectItem>
                           </SelectContent>
                         </Select>
-                        <Input value={logEntry} onChange={e => setLogEntry(e.target.value)} placeholder="Enter message..." className="bg-[#0A2540] border-[#0F3D5E] text-white h-8 text-xs flex-1" />
-                        <Button size="sm" onClick={handleAddLog} disabled={updateClaim.isPending} className="bg-[#00C2FF] hover:bg-[#00a8d4] text-white h-8 px-3">
+                        <Input value={logEntry} onChange={e => setLogEntry(e.target.value)} placeholder="Enter message..." className="bg-white border-[#D8E8F5] text-[#0D2137] h-8 text-xs flex-1" />
+                        <Button size="sm" onClick={handleAddLog} disabled={updateClaim.isPending} className="bg-[#0050D0] hover:bg-[#0040b0] text-[#0D2137] h-8 px-3">
                           Add
                         </Button>
                       </div>
