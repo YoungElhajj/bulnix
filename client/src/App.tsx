@@ -1,7 +1,8 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Switch, useLocation } from "wouter";
+import { useEffect } from "react";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { CartProvider } from "./contexts/CartContext";
@@ -51,8 +52,19 @@ import AdminRoute from "./components/AdminRoute";
 import SocialFloatingWidgets from "./components/SocialFloatingWidgets";
 import TelegramBanner from "./components/TelegramBanner";
 
+// Scroll to top on every route change
+function ScrollToTop() {
+  const [location] = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [location]);
+  return null;
+}
+
 function Router() {
   return (
+    <>
+    <ScrollToTop />
     <Switch>
       {/* Public */}
       <Route path="/" component={Home} />
@@ -100,6 +112,7 @@ function Router() {
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
+    </>
   );
 }
 

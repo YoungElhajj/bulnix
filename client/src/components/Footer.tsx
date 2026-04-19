@@ -131,7 +131,7 @@ export default function Footer() {
           {/* Col 4: Brand + Newsletter */}
           <div>
             <Link href="/" className="inline-flex items-center mb-4">
-              <img src={LOGO_URL} alt="Bulnix" className="h-10 w-auto object-contain rounded-lg" />
+              <img src={LOGO_URL} alt="Bulnix" className="h-11 w-auto object-contain rounded-xl" style={{ maxWidth: 160 }} />
             </Link>
             <p className="text-white/50 text-sm leading-relaxed mb-5">
               Your go-to platform for premium digital accounts, social media services, streaming subscriptions, and gaming credits. Instant delivery, secure payments, trusted worldwide.

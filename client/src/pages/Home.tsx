@@ -11,16 +11,26 @@ import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 
 // ─── Scroll-reveal (global, class-based) ─────────────────────────────────────
-function useScrollReveal() {
+function useScrollReveal(deps: unknown[] = []) {
   useEffect(() => {
-    const els = document.querySelectorAll(".reveal");
-    const observer = new IntersectionObserver(
-      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("revealed"); }),
-      { threshold: 0.12 }
-    );
-    els.forEach(el => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
+    // Small delay so dynamically rendered elements are in the DOM
+    const timer = setTimeout(() => {
+      const els = document.querySelectorAll(".reveal:not(.revealed)");
+      const observer = new IntersectionObserver(
+        entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("revealed"); }),
+        { threshold: 0.05, rootMargin: "0px 0px -40px 0px" }
+      );
+      els.forEach(el => observer.observe(el));
+      // Also immediately reveal elements already in viewport
+      els.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight) el.classList.add("revealed");
+      });
+      return () => observer.disconnect();
+    }, 200);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
 }
 
 // ─── Animated Counter ─────────────────────────────────────────────────────────
@@ -123,14 +133,15 @@ const SOCIAL_SLUGS = ["facebook-accounts","instagram-accounts","tiktok-accounts-
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function Home() {
-  useScrollReveal();
-
   const { data: featuredProducts } = trpc.products.getFeatured.useQuery(undefined, {
     retry: 2, retryDelay: (a) => Math.min(1000 * 2 ** a, 10000)
   });
   const { data: categoriesData } = trpc.categories.listWithCounts.useQuery(undefined, {
     retry: 2, retryDelay: (a) => Math.min(1000 * 2 ** a, 10000)
   });
+
+  // Re-run scroll reveal whenever data loads
+  useScrollReveal([featuredProducts, categoriesData]);
 
   const [heroVisible, setHeroVisible] = useState(false);
   useEffect(() => { const t = setTimeout(() => setHeroVisible(true), 80); return () => clearTimeout(t); }, []);
@@ -181,16 +192,16 @@ export default function Home() {
 
               <div style={heroStyle(300)}>
                 <div className="flex flex-wrap gap-3 mb-10">
-                  <Link href="/products">
+                  <Link href="/signup">
                     <Button className="bg-[#0050D0] hover:bg-[#0040b0] text-white font-bold rounded-full px-7 py-3 h-auto text-base shadow-lg shadow-[#0050D0]/30 hover:shadow-xl hover:shadow-[#0050D0]/40 transition-all duration-300 flex items-center gap-2">
-                      <ShoppingBag className="w-5 h-5" />
-                      Browse Products
+                      Get Started Free
                       <ArrowRight className="w-4 h-4" />
                     </Button>
                   </Link>
-                  <Link href="/categories">
-                    <Button variant="outline" className="border-[#D8E8F5] bg-white text-[#0D2137] hover:border-[#00C2FF]/50 hover:bg-[#F0F8FF] font-semibold rounded-full px-7 py-3 h-auto text-base transition-all duration-300">
-                      View Categories
+                  <Link href="/products">
+                    <Button variant="outline" className="border-[#D8E8F5] bg-white text-[#0D2137] hover:border-[#00C2FF]/50 hover:bg-[#F0F8FF] font-semibold rounded-full px-7 py-3 h-auto text-base transition-all duration-300 flex items-center gap-2">
+                      <ShoppingBag className="w-4 h-4" />
+                      Browse Products
                     </Button>
                   </Link>
                 </div>

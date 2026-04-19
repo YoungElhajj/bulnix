@@ -161,7 +161,7 @@ export default function Login() {
       <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center bg-gradient-to-br from-[#0F3D5E] to-[#0050D0] p-12 relative overflow-hidden">
         {/* Logo */}
         <Link href="/" className="absolute top-8 left-8">
-          <img src={`${import.meta.env.VITE_APP_LOGO}`} alt="Bulnix" className="h-10 w-auto" />
+          <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663404004095/UEAuHoiEheGEUEnr.jpg" alt="Bulnix" className="h-10 w-auto rounded-lg" />
         </Link>
 
         <div className="flex flex-col items-center text-center mt-12">
@@ -192,7 +192,7 @@ export default function Login() {
           {/* Mobile logo */}
           <div className="lg:hidden mb-8">
             <Link href="/">
-              <img src={`${import.meta.env.VITE_APP_LOGO}`} alt="Bulnix" className="h-8 w-auto" />
+              <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663404004095/UEAuHoiEheGEUEnr.jpg" alt="Bulnix" className="h-8 w-auto rounded-md" />
             </Link>
           </div>
 

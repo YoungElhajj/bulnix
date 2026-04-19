@@ -367,3 +367,11 @@
 - [x] Dark mode: CSS overrides for hardcoded light bg/text colors
 - [x] Mobile: hero section padding for floating icons
 - [x] Wishlist: fix dark card image background
+
+## Fix Round 3 (Apr 19 2026)
+- [x] Add ScrollToTop component to App.tsx — footer links now scroll to top on navigation
+- [x] Fix blank Home page bottom section — lower reveal threshold, re-run observer when data loads
+- [x] Add "Get Started Free" CTA button on Home hero linking to /signup
+- [x] Update new Bulnix logo on Login and Signup pages (both desktop left panel and mobile)
+- [x] Update Footer logo size to match Navbar
+- [x] Fix Navbar logo size and rounded corners

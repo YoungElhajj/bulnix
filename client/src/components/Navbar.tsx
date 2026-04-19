@@ -118,7 +118,8 @@ export default function Navbar() {
             <img
               src={LOGO_URL}
               alt="Bulnix"
-              className="h-10 w-auto object-contain rounded-lg"
+              className="h-11 w-auto object-contain rounded-xl"
+              style={{ maxWidth: 160 }}
             />
           </Link>
 
