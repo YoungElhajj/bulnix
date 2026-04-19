@@ -463,3 +463,11 @@
 - [x] Add NGN equivalent display in Wallet top-up UI when Paystack is selected
 - [x] Add FLUTTERWAVE_WEBHOOK_HASH to env.ts
 - [x] All 41 tests passing
+
+## AccsZone Auto-Fulfillment (Apr 19, 2026)
+- [x] Read AccsZone API docs and existing integration code in db.ts
+- [x] Build AccsZone fulfillment handler (place order, poll for delivery, store credentials)
+- [x] Auto-trigger fulfillment on wallet payment (payOrderWithWallet)
+- [x] Auto-trigger fulfillment on webhook payment confirmation (Paystack/Flutterwave/NowPayments)
+- [x] Update Order Detail page to show delivered credentials to customer
+- [x] Test end-to-end: pay → fulfill → delivered status with credentials shown

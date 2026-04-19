@@ -583,6 +583,8 @@ export async function fulfillOrderByReference(reference: string, gateway: string
   // Move order to processing
   await withDbRetry(() => db!.update(orders).set({ status: "processing" }).where(eq(orders.id, payment.orderId)), "fulfillOrderByReference:updateOrder");
   await logSystem("info", "payment", `Order ${payment.orderId} payment confirmed via ${gateway} webhook`, { reference, gateway });
+  // Trigger auto-fulfillment asynchronously (don't block the webhook response)
+  autoFulfillOrder(payment.orderId).catch(err => console.error("[AutoFulfill] Error:", err));
   return { success: true, orderId: payment.orderId };
 }
 
@@ -643,7 +645,115 @@ export async function payOrderWithWallet(userId: number, orderId: number) {
   }), "payOrderWithWallet:insertPayment");
 
   await logSystem("info", "payment", `Order ${order.orderNumber} paid with wallet by user ${userId}`, { orderId, totalUSD });
+  // Trigger auto-fulfillment asynchronously (don't block the payment response)
+  autoFulfillOrder(orderId).catch(err => console.error("[AutoFulfill] Error:", err));
   return { success: true, orderId, orderNumber: order.orderNumber, amountDeducted: totalUSD, newBalance: Number(newBalance) };
+}
+
+/**
+ * Auto-fulfill an order by calling the supplier API (AccsZone) for each order item.
+ * Stores credentials in fulfillmentRecords and marks the order as fulfilled/partial/failed.
+ * Called automatically after every successful payment.
+ */
+export async function autoFulfillOrder(orderId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  try {
+    // Get order items with their supplier product IDs
+    const items = await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
+    if (!items.length) {
+      await logSystem("warn", "fulfillment", `No order items found for order ${orderId}`);
+      return;
+    }
+
+    // Get AccsZone API key from providerConfigs
+    const [providerConfig] = await db.select().from(providerConfigs).where(eq(providerConfigs.providerKey, "accszone")).limit(1);
+    const apiKey = providerConfig?.apiKey ?? null;
+    if (!apiKey) {
+      await logSystem("error", "fulfillment", `AccsZone API key not configured — cannot fulfill order ${orderId}`);
+      await db.update(orders).set({ status: "failed" }).where(eq(orders.id, orderId));
+      return;
+    }
+
+    const { placeSupplierOrder } = await import("./connectors/accszone");
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const item of items) {
+      // orderItems.supplierProductId stores the FK int to supplierProducts.id as a string
+      // We need to look up the real AccsZone product ID from supplierProducts.supplierProductId
+      let accsZoneProductId: string | null = null;
+      if (item.supplierProductId && item.providerKey === "accszone") {
+        const [sp] = await db.select().from(supplierProducts)
+          .where(eq(supplierProducts.id, Number(item.supplierProductId)))
+          .limit(1);
+        accsZoneProductId = sp?.supplierProductId ?? null;
+      }
+
+      if (!accsZoneProductId) {
+        await logSystem("warn", "fulfillment", `No AccsZone product ID for order item ${item.id} (order ${orderId})`);
+        await withDbRetry(() => db!.insert(fulfillmentRecords).values({
+          orderId,
+          orderItemId: item.id,
+          providerKey: item.providerKey ?? "accszone",
+          status: "failed",
+          errorMessage: "Supplier product ID not found — product may not be linked to AccsZone",
+        }), "autoFulfillOrder:insertFailedRecord");
+        failCount++;
+        continue;
+      }
+
+      const result = await placeSupplierOrder(apiKey, accsZoneProductId, item.quantity, orderId);
+
+      if (result.success) {
+        const deliveryDataStr = JSON.stringify(result.deliveryData);
+        await withDbRetry(() => db!.insert(fulfillmentRecords).values({
+          orderId,
+          orderItemId: item.id,
+          providerKey: "accszone",
+          supplierOrderId: result.supplierOrderId ?? null,
+          status: "success",
+          deliveryData: deliveryDataStr,
+          rawResponse: result.deliveryData as any,
+        }), "autoFulfillOrder:insertSuccessRecord");
+        successCount++;
+      } else {
+        await withDbRetry(() => db!.insert(fulfillmentRecords).values({
+          orderId,
+          orderItemId: item.id,
+          providerKey: "accszone",
+          status: "failed",
+          errorMessage: result.error ?? "Unknown supplier error",
+        }), "autoFulfillOrder:insertFailedRecord");
+        failCount++;
+      }
+    }
+
+    // Update order status based on results
+    const finalStatus = failCount === 0 ? "fulfilled" : successCount === 0 ? "failed" : "partial";
+    await withDbRetry(() => db!.update(orders).set({ status: finalStatus }).where(eq(orders.id, orderId)), "autoFulfillOrder:updateOrderStatus");
+    await logSystem("info", "fulfillment", `Order ${orderId} fulfillment complete: ${successCount} success, ${failCount} failed (status: ${finalStatus})`, { orderId, successCount, failCount });
+
+    // Send order status update email if fulfilled
+    if (finalStatus === "fulfilled" || finalStatus === "partial") {
+      const [orderRow] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
+      const [orderUser] = await db.select({ email: users.email, name: users.name }).from(users).where(eq(users.id, orderRow?.userId ?? 0)).limit(1);
+      if (orderUser?.email && orderRow) {
+        const { sendOrderStatusEmail, safeSendEmail } = await import("./email");
+        safeSendEmail(() => sendOrderStatusEmail({
+          to: orderUser.email!,
+          name: orderUser.name ?? "there",
+          orderNumber: orderRow.orderNumber,
+          orderId,
+          status: finalStatus,
+        }));
+      }
+    }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    await logSystem("error", "fulfillment", `autoFulfillOrder exception for order ${orderId}`, { error: message });
+    // Don't rethrow — fulfillment failure should not break the payment confirmation
+  }
 }
 
 export async function getPaymentStatus(userId: number, orderId: number) {
