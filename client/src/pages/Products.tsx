@@ -175,10 +175,10 @@ export default function Products() {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {[...Array(12)].map((_, i) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+              {[...Array(12)].map((_, i) => (
               <div key={i} className="bg-white rounded-2xl overflow-hidden border border-[#D8E8F5] animate-pulse">
-                <div className="aspect-[4/3] bg-[#F0F8FF]" />
+                <div className="h-28 sm:h-36 bg-[#F0F8FF]" />
                 <div className="p-4 space-y-2">
                   <div className="h-4 bg-[#F0F8FF] rounded w-3/4" />
                   <div className="h-4 bg-[#F0F8FF] rounded w-1/2" />
@@ -200,13 +200,13 @@ export default function Products() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
               {products.map((product: any) => (
                 <Link key={product.id} href={`/products/${product.slug}`}>
                   <div className="product-card cursor-pointer group bg-white">
-                    <div className="h-36 sm:h-44 bg-gradient-to-br from-[#F0F8FF] to-[#E0EEFF] flex items-center justify-center overflow-hidden relative">
+                    <div className="h-28 sm:h-40 bg-white border-b border-[#F0F5FF] flex items-center justify-center overflow-hidden relative">
                       {product.imageUrl ? (
-                        <img src={product.imageUrl} alt={product.title} className="max-h-28 sm:max-h-36 max-w-full object-contain group-hover:scale-105 transition-transform duration-300 p-2" />
+                        <img src={product.imageUrl} alt={product.title} className="h-20 sm:h-32 max-w-full object-contain group-hover:scale-105 transition-transform duration-300 p-2" />
                       ) : (
                         <Package className="h-12 w-12 text-[#0050D0]/30" />
                       )}
@@ -222,10 +222,10 @@ export default function Products() {
                         </div>
                       )}
                     </div>
-                    <div className="p-4">
-                      <h3 className="text-sm font-semibold text-[#0D2137] line-clamp-2 mb-3 group-hover:text-[#0050D0] transition-colors">{product.title}</h3>
+                    <div className="p-2.5 sm:p-4">
+                      <h3 className="text-xs sm:text-sm font-semibold text-[#0D2137] line-clamp-2 mb-2 sm:mb-3 group-hover:text-[#0050D0] transition-colors">{product.title}</h3>
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-[#0050D0] font-bold text-lg">
+                        <span className="text-[#0050D0] font-bold text-sm sm:text-lg">
                           {formatPrice(Number(product.customerPriceUSD), currency)}
                         </span>
                         <span className="text-xs text-[#4A6080]">

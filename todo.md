@@ -393,3 +393,8 @@
 ## Auth Page Original Redesign (Apr 19 2026)
 - [ ] Rewrite Login.tsx with original Bulnix design (blue/navy, no Goviraa/Lanxa copying)
 - [ ] Rewrite Signup.tsx with original Bulnix design (blue/navy, no Goviraa/Lanxa copying)
+
+## Product Card & Search Fixes (Apr 19 2026)
+- [x] Fix product card image background: replaced transparent/checkered with solid white bg
+- [x] Switch product grid to 2-column on mobile (grid-cols-2 sm:grid-cols-3 lg:grid-cols-4)
+- [x] Fix Instagram search: search now matches category name too (e.g. 'instagram' finds IG Accounts products)

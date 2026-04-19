@@ -240,7 +240,18 @@ export async function getProducts(input: {
   if (input.categoryId) conditions.push(eq(products.categoryId, input.categoryId));
   if (input.featured) conditions.push(eq(products.isFeatured, true));
   if (input.search) {
-    conditions.push(like(products.title, `%${input.search}%`));
+    // Search across title AND category name so e.g. 'instagram' finds 'IG Accounts' products
+    const searchTerm = `%${input.search}%`;
+    const matchingCats = await withDbRetry(
+      () => db!.select({ id: categories.id }).from(categories).where(like(categories.name, searchTerm)),
+      "getProducts:searchCats"
+    );
+    const matchingCatIds = matchingCats.map(c => c.id);
+    if (matchingCatIds.length > 0) {
+      conditions.push(or(like(products.title, searchTerm), inArray(products.categoryId, matchingCatIds))!);
+    } else {
+      conditions.push(like(products.title, searchTerm));
+    }
   }
 
   const offset = (input.page - 1) * input.limit;
