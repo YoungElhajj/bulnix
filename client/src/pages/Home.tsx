@@ -376,62 +376,7 @@ export default function Home() {
       </section>
 
       {/* ══ FEATURED PRODUCTS ═════════════════════════════════════════════════ */}
-      {featuredProducts && featuredProducts.length > 0 && (
-        <section className="py-20">
-          <div className="container">
-            <div className="flex items-center justify-between mb-10 reveal">
-              <div>
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#00C2FF]/10 border border-[#00C2FF]/20 text-[#0050D0] text-sm font-semibold mb-3">
-                  <Star className="w-4 h-4" />
-                  Featured Products
-                </div>
-                <h2 className="text-3xl font-bold text-[#0D2137]" style={{ fontFamily: "'Poppins', sans-serif" }}>
-                  Top Selling This Week
-                </h2>
-              </div>
-              <Link href="/products?featured=true" className="hidden md:flex items-center gap-1 text-[#0050D0] font-semibold text-sm hover:gap-2 transition-all">
-                View All <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.slice(0, 8).map((product: any, i: number) => (
-                <Link key={product.id} href={`/products/${product.slug}`}>
-                  <div className="reveal product-card cursor-pointer" style={{ transitionDelay: `${i * 80}ms` }}>
-                    <div className="h-36 sm:h-44 bg-gradient-to-br from-[#F0F8FF] to-[#E0EEFF] flex items-center justify-center overflow-hidden">
-                      {product.imageUrl ? (
-                        <img src={product.imageUrl} alt={product.title} className="max-h-28 sm:max-h-36 max-w-full object-contain group-hover:scale-105 transition-transform duration-300 p-2" />
-                      ) : (
-                        <Package className="w-12 h-12 text-[#0050D0]/30" />
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <p className="text-[#0D2137] font-semibold text-sm mb-1 line-clamp-2">{product.title}</p>
-                      <p className="text-[#4A6080] text-xs mb-3 line-clamp-1">{product.category?.name || "Digital Product"}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[#0050D0] font-bold text-base">
-                          ${Number(product.customerPriceUSD || 0).toFixed(2)}
-                        </span>
-                        <Button size="sm" className="bg-[#0050D0] hover:bg-[#0040b0] text-white text-xs rounded-full px-3 h-7">
-                          Buy Now
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-
-            <div className="text-center mt-8 md:hidden reveal">
-              <Link href="/products">
-                <Button variant="outline" className="border-[#D8E8F5] bg-white text-[#0D2137] hover:border-[#00C2FF]/50 font-semibold rounded-full px-8">
-                  View All Products <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
+      {/* Featured products section removed — replaced by Categories section */}
 
       {/* ══ HOW IT WORKS ══════════════════════════════════════════════════════ */}
       <section className="py-20 bg-white">

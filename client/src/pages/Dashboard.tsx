@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const statusBadge = (s: string) => ({
   pending: "bg-yellow-50 text-yellow-700 border-yellow-200",
@@ -38,6 +40,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#F5F9FF]">
+      <Navbar />
       {/* Header */}
       <div className="bg-[#0F3D5E] pt-24 pb-8">
         <div className="container">
@@ -155,6 +158,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

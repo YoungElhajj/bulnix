@@ -398,3 +398,8 @@
 - [x] Fix product card image background: replaced transparent/checkered with solid white bg
 - [x] Switch product grid to 2-column on mobile (grid-cols-2 sm:grid-cols-3 lg:grid-cols-4)
 - [x] Fix Instagram search: search now matches category name too (e.g. 'instagram' finds IG Accounts products)
+
+## Homepage & Nav & Admin Fixes (Apr 19 2026)
+- [x] Remove top-selling/featured products section from homepage (icons look bad on mobile)
+- [x] Fix mobile navbar position: Dashboard page was missing Navbar component — added back
+- [x] Admin panel colour scheme confirmed intact (dark slate/emerald) — no changes needed
