@@ -409,3 +409,30 @@
 
 ## Admin Panel Colour Fix (Apr 19 2026)
 - [x] Restore admin panel stat cards to dark slate background with emerald accents (remove white/light card backgrounds)
+
+## Payment Gateway Integration (Apr 19 2026)
+- [ ] Add payment_transactions table to DB schema
+- [ ] Add Paystack initiate + verify + webhook handler
+- [ ] Add Flutterwave initiate + verify + webhook handler
+- [ ] Add NowPayments (crypto) initiate + verify + webhook handler
+- [ ] Build frontend checkout: payment method selector, redirect handling, order confirmation
+- [ ] Update admin Providers panel: configure and toggle each gateway
+
+## Payment Gateway Integration (Apr 19, 2026)
+- [x] Replace Monnify with Flutterwave in Checkout.tsx and Wallet.tsx
+- [x] Create server/payments/paystack.ts handler (initiate + verify)
+- [x] Create server/payments/flutterwave.ts handler (initiate + verify)
+- [x] Create server/payments/nowpayments.ts handler (initiate + status + IPN verify)
+- [x] Update server/_core/env.ts to expose PAYSTACK_SECRET_KEY, FLUTTERWAVE_SECRET_KEY, NOWPAYMENTS_API_KEY, NOWPAYMENTS_IPN_SECRET
+- [x] Add webhook routes: POST /api/webhooks/paystack, /api/webhooks/flutterwave, /api/webhooks/nowpayments
+- [x] Add payment verify redirect route: GET /api/payments/verify
+- [x] Update initiatePayment in db.ts to call real gateway handlers and return real paymentUrl
+- [x] Update initiateWalletTopup in db.ts to call real gateway handlers and return real paymentUrl
+- [x] Add fulfillOrderByReference helper function in db.ts
+- [x] Update Wallet.tsx: replace Monnify with Flutterwave, add redirect on paymentUrl, handle return from gateway
+- [x] Write vitest tests for all 3 payment gateways (11 tests passing)
+- [x] All 41 tests passing (3 test files)
+- [ ] Set PAYSTACK_SECRET_KEY in Secrets (already injected as env)
+- [ ] Set FLUTTERWAVE_SECRET_KEY in Secrets (already injected as env)
+- [ ] Set NOWPAYMENTS_API_KEY in Secrets (already injected as env)
+- [ ] Set NOWPAYMENTS_IPN_SECRET in Secrets (already injected as env)

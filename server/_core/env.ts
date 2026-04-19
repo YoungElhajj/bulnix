@@ -7,4 +7,12 @@ export const ENV = {
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  // Payment gateways
+  paystackSecretKey: process.env.PAYSTACK_SECRET_KEY ?? "",
+  paystackPublicKey: process.env.PAYSTACK_PUBLIC_KEY ?? "",
+  flutterwaveSecretKey: process.env.FLUTTERWAVE_SECRET_KEY ?? "",
+  flutterwavePublicKey: process.env.FLUTTERWAVE_PUBLIC_KEY ?? "",
+  nowpaymentsApiKey: process.env.NOWPAYMENTS_API_KEY ?? "",
+  nowpaymentsIpnSecret: process.env.NOWPAYMENTS_IPN_SECRET ?? "",
+  nowpaymentsCurrency: process.env.NOWPAYMENTS_CURRENCY ?? "usdttrc20",
 };

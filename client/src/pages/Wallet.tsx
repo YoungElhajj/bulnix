@@ -1,22 +1,53 @@
-import { useState } from "react";
-import { Wallet, Plus, ArrowDownLeft, ArrowUpRight, RefreshCw, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Wallet, Plus, ArrowDownLeft, ArrowUpRight, RefreshCw, Clock, CheckCircle, XCircle, AlertCircle, ExternalLink, Bitcoin, CreditCard, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
 const PRESET_AMOUNTS = [5, 10, 20, 50, 100, 200];
 
 const GATEWAYS = [
-  { key: "paystack", label: "Paystack", desc: "Cards, Bank Transfer, USSD (NGN)", region: "Nigeria" },
-  { key: "monnify", label: "Monnify", desc: "Bank Transfer, USSD (NGN)", region: "Nigeria" },
-  { key: "nowpayments", label: "Crypto", desc: "BTC, ETH, USDT, and 100+ coins", region: "Global" },
+  {
+    key: "paystack",
+    label: "Paystack",
+    desc: "Cards, Bank Transfer, USSD",
+    region: "Nigeria / Africa",
+    icon: CreditCard,
+    color: "text-[#0050D0]",
+    bg: "bg-[#EEF4FF]",
+    border: "border-[#0050D0]/30",
+    activeBg: "bg-[#EEF4FF]",
+    activeBorder: "border-[#0050D0]",
+  },
+  {
+    key: "flutterwave",
+    label: "Flutterwave",
+    desc: "Cards, Bank Transfer, Mobile Money",
+    region: "Africa / Global",
+    icon: Zap,
+    color: "text-[#F5A623]",
+    bg: "bg-[#FFF8EC]",
+    border: "border-[#F5A623]/30",
+    activeBg: "bg-[#FFF8EC]",
+    activeBorder: "border-[#F5A623]",
+  },
+  {
+    key: "nowpayments",
+    label: "Crypto",
+    desc: "BTC, ETH, USDT, and 100+ coins",
+    region: "Global",
+    icon: Bitcoin,
+    color: "text-[#F7931A]",
+    bg: "bg-[#FFF5E6]",
+    border: "border-[#F7931A]/30",
+    activeBg: "bg-[#FFF5E6]",
+    activeBorder: "border-[#F7931A]",
+  },
 ];
 
 function TxIcon({ type }: { type: string }) {
@@ -29,9 +60,9 @@ function TxIcon({ type }: { type: string }) {
 function TxStatusBadge({ status }: { status: string }) {
   const map: Record<string, { color: string; icon: any; label: string }> = {
     completed: { color: "text-[#0050D0] bg-[#EEF4FF] border-[#0050D0]/20", icon: CheckCircle, label: "Completed" },
-    pending: { color: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20", icon: Clock, label: "Pending" },
-    failed: { color: "text-red-400 bg-red-400/10 border-red-400/20", icon: XCircle, label: "Failed" },
-    reversed: { color: "text-[#4A6080] bg-slate-400/10 border-slate-400/20", icon: AlertCircle, label: "Reversed" },
+    pending: { color: "text-yellow-600 bg-yellow-50 border-yellow-300/40", icon: Clock, label: "Pending" },
+    failed: { color: "text-red-500 bg-red-50 border-red-300/40", icon: XCircle, label: "Failed" },
+    reversed: { color: "text-[#4A6080] bg-slate-100 border-slate-300/40", icon: AlertCircle, label: "Reversed" },
   };
   const s = map[status] ?? map.pending;
   return (
@@ -46,16 +77,24 @@ export default function WalletPage() {
   const [amount, setAmount] = useState<string>("10");
   const [gateway, setGateway] = useState("paystack");
   const [txPage, setTxPage] = useState(1);
+  const [, setLocation] = useLocation();
 
   const { data: wallet, refetch: refetchWallet } = trpc.wallet.get.useQuery(undefined, { enabled: isAuthenticated });
   const { data: txData, refetch: refetchTx } = trpc.wallet.transactions.useQuery({ page: txPage, limit: 15 }, { enabled: isAuthenticated });
 
   const initTopup = trpc.wallet.initiateTopup.useMutation({
     onSuccess: (data) => {
-      toast.success(`Top-up initiated! Reference: ${data.reference}`, {
-        description: "In production, you will be redirected to complete payment. For now, use Confirm to simulate.",
-        duration: 8000,
-      });
+      const paymentUrl = (data as any).paymentUrl;
+      if (paymentUrl && !paymentUrl.startsWith("#")) {
+        toast.success("Redirecting to payment page...", { duration: 3000 });
+        // Open in same tab for redirect-based flows
+        window.location.href = paymentUrl;
+      } else {
+        toast.success(`Top-up initiated! Reference: ${data.reference}`, {
+          description: "You will be redirected to complete payment.",
+          duration: 8000,
+        });
+      }
     },
     onError: (err) => toast.error(err.message),
   });
@@ -68,6 +107,21 @@ export default function WalletPage() {
     },
     onError: (err) => toast.error(err.message),
   });
+
+  // Handle redirect back from payment gateway
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const topupRef = params.get("topup_ref");
+    const status = params.get("status");
+    if (topupRef && status === "success") {
+      confirmTopup.mutate({ reference: topupRef });
+      // Clean up URL
+      window.history.replaceState({}, "", "/wallet");
+    } else if (topupRef && status && status !== "success") {
+      toast.error("Payment was not completed. Please try again.");
+      window.history.replaceState({}, "", "/wallet");
+    }
+  }, []);
 
   const handleTopup = () => {
     const val = parseFloat(amount);
@@ -95,7 +149,7 @@ export default function WalletPage() {
             <Wallet className="h-16 w-16 text-[#4A6080] mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-[#0D2137] mb-2">Sign in to access your wallet</h2>
             <p className="text-[#4A6080] mb-6">Top up your balance and pay for orders instantly.</p>
-            <a href="/login"><Button className="bg-[#0050D0] hover:bg-[#0040b0] text-[#0D2137]">Sign In</Button></a>
+            <a href="/login"><Button className="bg-[#0050D0] hover:bg-[#0040b0] text-white">Sign In</Button></a>
           </div>
         </div>
         <Footer />
@@ -109,6 +163,7 @@ export default function WalletPage() {
   const transactions = (txData as any)?.items ?? [];
   const totalTx = (txData as any)?.total ?? 0;
   const totalPages = Math.ceil(totalTx / 15);
+  const selectedGateway = GATEWAYS.find(g => g.key === gateway) ?? GATEWAYS[0];
 
   return (
     <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]">
@@ -116,9 +171,9 @@ export default function WalletPage() {
       <div className="pt-24 pb-8 bg-gradient-to-b from-[#0A2540] to-[#061A2B] border-b border-[#D8E8F5]">
         <div className="container">
           <div className="flex items-center gap-2 text-sm text-white/60 mb-4">
-            <Link href="/dashboard" className="hover:text-[#0050D0]">Dashboard</Link>
+            <Link href="/dashboard" className="hover:text-[#00C2FF]">Dashboard</Link>
             <span>/</span>
-            <span className="text-[#0D2137]">Wallet</span>
+            <span className="text-white/80">Wallet</span>
           </div>
           <h1 className="text-3xl font-bold text-white mb-1">My Wallet</h1>
           <p className="text-white/60">Manage your balance and top up to pay for orders</p>
@@ -132,7 +187,7 @@ export default function WalletPage() {
           <div className="lg:col-span-1 space-y-5">
             {/* Balance Card */}
             <div className="bg-white border border-[#D8E8F5] shadow-sm rounded-2xl p-6 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#00C2FF]/5 to-[#00C2FF]/5 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[#00C2FF]/5 to-[#0050D0]/5 pointer-events-none" />
               <div className="relative">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-10 h-10 rounded-xl bg-[#EEF4FF] flex items-center justify-center">
@@ -174,7 +229,7 @@ export default function WalletPage() {
                     onClick={() => setAmount(String(preset))}
                     className={`py-2 rounded-lg text-sm font-semibold border transition-all ${
                       amount === String(preset)
-                        ? "bg-[#00C2FF] border-[#0050D0] text-[#0D2137]"
+                        ? "bg-[#0050D0] border-[#0050D0] text-white"
                         : "bg-[#F5F9FF] border-[#D8E8F5] text-[#4A6080] hover:border-[#0050D0]/50 hover:text-[#0D2137]"
                     }`}
                   >
@@ -201,43 +256,60 @@ export default function WalletPage() {
                 <p className="text-xs text-[#4A6080] mt-1">Minimum deposit: $3.00</p>
               </div>
 
-              {/* Payment method */}
+              {/* Payment method selector */}
               <div className="mb-5">
-                <label className="text-xs text-[#4A6080] mb-1.5 block">Payment Method</label>
-                <Select value={gateway} onValueChange={setGateway}>
-                  <SelectTrigger className="bg-white border-[#D8E8F5] text-[#0D2137]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border-[#D8E8F5]">
-                    {GATEWAYS.map(g => (
-                      <SelectItem key={g.key} value={g.key}>
-                        <div>
-                          <span className="font-medium">{g.label}</span>
-                          <span className="text-[#4A6080] ml-2 text-xs">{g.region}</span>
+                <label className="text-xs text-[#4A6080] mb-2 block">Payment Method</label>
+                <div className="space-y-2">
+                  {GATEWAYS.map(g => {
+                    const GIcon = g.icon;
+                    const isSelected = gateway === g.key;
+                    return (
+                      <button
+                        key={g.key}
+                        onClick={() => setGateway(g.key)}
+                        className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                          isSelected
+                            ? `${g.activeBg} ${g.activeBorder}`
+                            : "bg-[#F5F9FF] border-[#D8E8F5] hover:border-[#0050D0]/30"
+                        }`}
+                      >
+                        <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${g.bg}`}>
+                          <GIcon className={`h-5 w-5 ${g.color}`} />
                         </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-[#4A6080] mt-1">
-                  {GATEWAYS.find(g => g.key === gateway)?.desc}
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-semibold ${isSelected ? "text-[#0D2137]" : "text-[#4A6080]"}`}>{g.label}</p>
+                          <p className="text-xs text-[#4A6080] truncate">{g.desc}</p>
+                        </div>
+                        <div className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${isSelected ? `${g.activeBorder} ${g.color}` : "border-[#D8E8F5]"}`}>
+                          {isSelected && <div className={`w-2 h-2 rounded-full ${g.color.replace("text-", "bg-")}`} />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-[#4A6080] mt-2 flex items-center gap-1">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#4A6080]" />
+                  {selectedGateway.region}
                 </p>
               </div>
 
               <Button
-                className="w-full bg-[#00C2FF] hover:bg-[#0215a8] text-[#0D2137] font-semibold"
+                className="w-full bg-[#0050D0] hover:bg-[#0040b0] text-white font-semibold"
                 onClick={handleTopup}
                 disabled={initTopup.isPending}
               >
                 {initTopup.isPending ? (
-                  <span className="flex items-center gap-2"><RefreshCw className="h-4 w-4 animate-spin" /> Processing...</span>
+                  <span className="flex items-center gap-2"><RefreshCw className="h-4 w-4 animate-spin" /> Redirecting...</span>
                 ) : (
-                  <span className="flex items-center gap-2"><Plus className="h-4 w-4" /> Top Up ${parseFloat(amount || "0").toFixed(2)}</span>
+                  <span className="flex items-center gap-2">
+                    <ExternalLink className="h-4 w-4" />
+                    Pay ${parseFloat(amount || "0").toFixed(2)} via {selectedGateway.label}
+                  </span>
                 )}
               </Button>
 
               <p className="text-xs text-[#4A6080] text-center mt-3">
-                Payment integration coming soon. Funds will be credited after payment confirmation.
+                You will be redirected to {selectedGateway.label} to complete your payment securely.
               </p>
             </div>
           </div>
@@ -258,9 +330,9 @@ export default function WalletPage() {
                 </div>
               ) : (
                 <>
-                  <div className="divide-y divide-white/5">
+                  <div className="divide-y divide-[#F0F5FF]">
                     {transactions.map((tx: any) => (
-                      <div key={tx.id} className="flex items-center gap-4 p-4 hover:bg-white/2 transition-colors">
+                      <div key={tx.id} className="flex items-center gap-4 p-4 hover:bg-[#F5F9FF]/50 transition-colors">
                         <div className="w-9 h-9 rounded-xl bg-[#F5F9FF] flex items-center justify-center shrink-0">
                           <TxIcon type={tx.type} />
                         </div>

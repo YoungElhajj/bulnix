@@ -1,4 +1,7 @@
 import { and, asc, desc, eq, ilike, inArray, like, or, sql } from "drizzle-orm";
+import { paystackInitiate, paystackVerify } from "./payments/paystack";
+import { flwInitiate, flwVerify } from "./payments/flutterwave";
+import { npInitiate, npGetPaymentStatus, isNowPaymentsSuccess } from "./payments/nowpayments";
 import { isRetryableDbError, sleep, withDbRetry } from "./db-retry";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
@@ -462,7 +465,7 @@ export async function getOrderDelivery(userId: number, orderId: number) {
 // ─── Payments ─────────────────────────────────────────────────────────────────
 
 export async function initiatePayment(userId: number, input: {
-  orderId: number; gateway: "paystack" | "monnify" | "nowpayments"; currency: "NGN" | "USD" | "EUR" | "GBP";
+  orderId: number; gateway: "paystack" | "flutterwave" | "nowpayments"; currency: "NGN" | "USD" | "EUR" | "GBP";
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -476,11 +479,66 @@ export async function initiatePayment(userId: number, input: {
   const exchangeRate = rate ? Number(rate.rate) : 1;
   const amount = Number(order[0].totalUSD) * exchangeRate;
 
-   await withDbRetry(() => db!.insert(payments).values({
+  // Fetch user email for gateway
+  const [orderUser] = await db.select({ email: users.email, name: users.name }).from(users).where(eq(users.id, userId)).limit(1);
+  const userEmail = orderUser?.email ?? `user${userId}@bulnix.com`;
+  const userName = orderUser?.name ?? "Bulnix Customer";
+
+  // Determine the callback URL (relative path; the webhook handles confirmation)
+  const callbackUrl = `${process.env.NODE_ENV === "production" ? "https://bulnix.com" : "http://localhost:3000"}/api/payments/verify`;
+
+  let paymentUrl = `#payment-${gatewayRef}`;
+  let gatewayTransactionId: string | undefined;
+
+  try {
+    if (input.gateway === "paystack") {
+      // Paystack: amount in kobo (NGN) or cents (USD/GBP/EUR)
+      const amountSmallest = Math.round(amount * 100);
+      const result = await paystackInitiate({
+        email: userEmail,
+        amountKobo: amountSmallest,
+        reference: gatewayRef,
+        currency: input.currency,
+        callbackUrl,
+        metadata: { orderId: input.orderId, userId, topupRef: gatewayRef },
+      });
+      paymentUrl = result.authorizationUrl;
+    } else if (input.gateway === "flutterwave") {
+      const result = await flwInitiate({
+        txRef: gatewayRef,
+        amount,
+        currency: input.currency,
+        email: userEmail,
+        name: userName,
+        redirectUrl: callbackUrl,
+        description: `Order #${order[0].orderNumber}`,
+        meta: { orderId: input.orderId, userId },
+      });
+      paymentUrl = result.paymentLink;
+    } else if (input.gateway === "nowpayments") {
+      const result = await npInitiate({
+        priceAmount: Number(order[0].totalUSD),
+        priceCurrency: "usd",
+        orderId: gatewayRef,
+        orderDescription: `Order #${order[0].orderNumber}`,
+        successUrl: `${callbackUrl}?reference=${gatewayRef}&status=success`,
+        cancelUrl: `${callbackUrl}?reference=${gatewayRef}&status=cancelled`,
+        ipnCallbackUrl: `${process.env.NODE_ENV === "production" ? "https://bulnix.com" : "http://localhost:3000"}/api/webhooks/nowpayments`,
+      });
+      paymentUrl = result.invoiceUrl;
+      gatewayTransactionId = result.invoiceId;
+    }
+  } catch (err: any) {
+    await logSystem("error", "payment", `Gateway initiation failed for order ${input.orderId}`, { gateway: input.gateway, error: err.message });
+    throw new Error(`Payment gateway error: ${err.message}`);
+  }
+
+  await withDbRetry(() => db!.insert(payments).values({
     orderId: input.orderId,
     userId,
     gateway: input.gateway,
     gatewayReference: gatewayRef,
+    gatewayTransactionId: gatewayTransactionId ?? null,
     status: "pending",
     amount: amount.toFixed(2) as any,
     currency: input.currency,
@@ -490,17 +548,35 @@ export async function initiatePayment(userId: number, input: {
   // Lock the order
   await withDbRetry(() => db!.update(orders).set({ isLocked: true }).where(eq(orders.id, input.orderId)), "initiatePayment:lockOrder");
 
-  await logSystem("info", "payment", `Payment initiated for order ${input.orderId}`, { gateway: input.gateway, amount, currency: input.currency });
+  await logSystem("info", "payment", `Payment initiated for order ${input.orderId}`, { gateway: input.gateway, amount, currency: input.currency, paymentUrl });
 
   return {
     gatewayRef,
     amount,
     currency: input.currency,
     gateway: input.gateway,
-    // In production these would be real gateway URLs
-    paymentUrl: `#payment-${gatewayRef}`,
+    paymentUrl,
     message: `Payment initiated. Reference: ${gatewayRef}`,
   };
+}
+
+/**
+ * Called by webhooks when a payment is confirmed for an order (not a wallet topup).
+ * Marks the payment as successful and updates the order status to processing.
+ */
+export async function fulfillOrderByReference(reference: string, gateway: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [payment] = await db.select().from(payments).where(eq(payments.gatewayReference, reference)).limit(1);
+  if (!payment) throw new Error(`Payment not found for reference ${reference}`);
+  if (payment.status === "success") return { success: true, alreadyProcessed: true };
+
+  // Mark payment as success
+  await withDbRetry(() => db!.update(payments).set({ status: "success", webhookVerified: true }).where(eq(payments.id, payment.id)), "fulfillOrderByReference:updatePayment");
+  // Move order to processing
+  await withDbRetry(() => db!.update(orders).set({ status: "processing" }).where(eq(orders.id, payment.orderId)), "fulfillOrderByReference:updateOrder");
+  await logSystem("info", "payment", `Order ${payment.orderId} payment confirmed via ${gateway} webhook`, { reference, gateway });
+  return { success: true, orderId: payment.orderId };
 }
 
 export async function getPaymentStatus(userId: number, orderId: number) {
@@ -991,6 +1067,58 @@ export async function initiateWalletTopup(userId: number, amountUSD: number, gat
   if (!db) throw new Error("Database not available");
   if (amountUSD < 3) throw new Error("Minimum deposit is $3.00");
   const reference = `TOPUP-${userId}-${Date.now()}`;
+
+  // Fetch user email for gateway
+  const [topupUser] = await db.select({ email: users.email, name: users.name }).from(users).where(eq(users.id, userId)).limit(1);
+  const userEmail = topupUser?.email ?? `user${userId}@bulnix.com`;
+  const userName = topupUser?.name ?? "Bulnix Customer";
+
+  const callbackUrl = `${process.env.NODE_ENV === "production" ? "https://bulnix.com" : "http://localhost:3000"}/api/payments/verify`;
+
+  let paymentUrl = `#topup-${reference}`;
+
+  try {
+    if (gateway === "paystack") {
+      // Paystack uses NGN by default for Nigerian users; for USD topups use USD
+      const amountKobo = Math.round(amountUSD * 100); // treat as USD cents
+      const result = await paystackInitiate({
+        email: userEmail,
+        amountKobo,
+        reference,
+        currency: "USD",
+        callbackUrl,
+        metadata: { topupRef: reference, userId, type: "wallet_topup" },
+      });
+      paymentUrl = result.authorizationUrl;
+    } else if (gateway === "flutterwave") {
+      const result = await flwInitiate({
+        txRef: reference,
+        amount: amountUSD,
+        currency: "USD",
+        email: userEmail,
+        name: userName,
+        redirectUrl: callbackUrl,
+        description: `Wallet top-up $${amountUSD.toFixed(2)}`,
+        meta: { topupRef: reference, userId, type: "wallet_topup" },
+      });
+      paymentUrl = result.paymentLink;
+    } else if (gateway === "nowpayments") {
+      const result = await npInitiate({
+        priceAmount: amountUSD,
+        priceCurrency: "usd",
+        orderId: reference,
+        orderDescription: `Bulnix wallet top-up $${amountUSD.toFixed(2)}`,
+        successUrl: `${callbackUrl}?reference=${reference}&status=success`,
+        cancelUrl: `${callbackUrl}?reference=${reference}&status=cancelled`,
+        ipnCallbackUrl: `${process.env.NODE_ENV === "production" ? "https://bulnix.com" : "http://localhost:3000"}/api/webhooks/nowpayments`,
+      });
+      paymentUrl = result.invoiceUrl;
+    }
+  } catch (err: any) {
+    await logSystem("error", "payment", `Wallet topup gateway initiation failed`, { gateway, userId, amountUSD, error: err.message });
+    throw new Error(`Payment gateway error: ${err.message}`);
+  }
+
   // Create a pending transaction record
   await withDbRetry(() => db!.insert(walletTransactions).values({
     userId,
@@ -1002,7 +1130,7 @@ export async function initiateWalletTopup(userId: number, amountUSD: number, gat
     status: "pending",
     gateway,
   }), "initiateWalletTopup");
-  return { reference, amountUSD };
+  return { reference, amountUSD, paymentUrl };
 }
 
 export async function confirmWalletTopup(reference: string) {

@@ -1,0 +1,1 @@
+ALTER TABLE `payments` MODIFY COLUMN `gateway` enum('paystack','flutterwave','nowpayments','manual') NOT NULL;

@@ -11,6 +11,10 @@ import { serveStatic, setupVite } from "./vite";
 import multer from "multer";
 import { storagePut } from "../storage";
 import { nanoid } from "nanoid";
+import { verifyPaystackSignature } from "../payments/paystack";
+import { verifyFlwSignature } from "../payments/flutterwave";
+import { verifyNowPaymentsIpn, isNowPaymentsSuccess } from "../payments/nowpayments";
+import { confirmWalletTopup, fulfillOrderByReference, logSystem } from "../db";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -46,6 +50,126 @@ async function startServer() {
     }
     next();
   });
+
+  // ─── Webhook routes (raw body required for signature verification) ──────────
+  // These MUST be registered before express.json() middleware
+
+  // Paystack webhook
+  app.post("/api/webhooks/paystack", express.raw({ type: "application/json" }), async (req: any, res: any) => {
+    try {
+      const signature = req.headers["x-paystack-signature"] as string;
+      const rawBody = req.body.toString("utf8");
+      if (!verifyPaystackSignature(rawBody, signature)) {
+        await logSystem("warn", "payment", "Paystack webhook: invalid signature");
+        return res.status(401).json({ error: "Invalid signature" });
+      }
+      const event = JSON.parse(rawBody) as Record<string, unknown>;
+      const eventType = event.event as string;
+      if (eventType === "charge.success") {
+        const data = event.data as Record<string, unknown>;
+        const reference = data.reference as string;
+        const metadata = (data.metadata as Record<string, unknown>) ?? {};
+        const topupRef = (metadata.topupRef as string) ?? reference;
+        try {
+          await confirmWalletTopup(topupRef);
+          await logSystem("info", "payment", `Paystack webhook: wallet topup confirmed for ref ${topupRef}`);
+        } catch (e: any) {
+          // May be an order payment — try order fulfillment
+          try {
+            await fulfillOrderByReference(reference, "paystack");
+            await logSystem("info", "payment", `Paystack webhook: order fulfilled for ref ${reference}`);
+          } catch (e2: any) {
+            await logSystem("error", "payment", `Paystack webhook: failed to process ref ${reference}: ${e2.message}`);
+          }
+        }
+      }
+      res.status(200).json({ received: true });
+    } catch (e: any) {
+      await logSystem("error", "payment", `Paystack webhook error: ${e.message}`);
+      res.status(500).json({ error: "Internal error" });
+    }
+  });
+
+  // Flutterwave webhook
+  app.post("/api/webhooks/flutterwave", express.raw({ type: "application/json" }), async (req: any, res: any) => {
+    try {
+      const hash = req.headers["verif-hash"] as string;
+      if (!verifyFlwSignature(hash)) {
+        await logSystem("warn", "payment", "Flutterwave webhook: invalid signature");
+        return res.status(401).json({ error: "Invalid signature" });
+      }
+      const rawBody = req.body.toString("utf8");
+      const event = JSON.parse(rawBody) as Record<string, unknown>;
+      const eventType = (event.event as string) ?? "";
+      if (eventType === "charge.completed") {
+        const data = event.data as Record<string, unknown>;
+        const txRef = data.tx_ref as string;
+        const status = data.status as string;
+        if (status === "successful") {
+          try {
+            await confirmWalletTopup(txRef);
+            await logSystem("info", "payment", `Flutterwave webhook: wallet topup confirmed for txRef ${txRef}`);
+          } catch (e: any) {
+            try {
+              await fulfillOrderByReference(txRef, "flutterwave");
+              await logSystem("info", "payment", `Flutterwave webhook: order fulfilled for txRef ${txRef}`);
+            } catch (e2: any) {
+              await logSystem("error", "payment", `Flutterwave webhook: failed to process txRef ${txRef}: ${e2.message}`);
+            }
+          }
+        }
+      }
+      res.status(200).json({ received: true });
+    } catch (e: any) {
+      await logSystem("error", "payment", `Flutterwave webhook error: ${e.message}`);
+      res.status(500).json({ error: "Internal error" });
+    }
+  });
+
+  // NowPayments IPN webhook
+  app.post("/api/webhooks/nowpayments", express.raw({ type: "application/json" }), async (req: any, res: any) => {
+    try {
+      const signature = req.headers["x-nowpayments-sig"] as string;
+      const rawBody = req.body.toString("utf8");
+      if (!verifyNowPaymentsIpn(rawBody, signature)) {
+        await logSystem("warn", "payment", "NowPayments IPN: invalid signature");
+        return res.status(401).json({ error: "Invalid signature" });
+      }
+      const payload = JSON.parse(rawBody) as Record<string, unknown>;
+      const paymentStatus = payload.payment_status as string;
+      const orderId = payload.order_id as string;
+      if (isNowPaymentsSuccess(paymentStatus)) {
+        try {
+          await confirmWalletTopup(orderId);
+          await logSystem("info", "payment", `NowPayments IPN: wallet topup confirmed for orderId ${orderId}`);
+        } catch (e: any) {
+          try {
+            await fulfillOrderByReference(orderId, "nowpayments");
+            await logSystem("info", "payment", `NowPayments IPN: order fulfilled for orderId ${orderId}`);
+          } catch (e2: any) {
+            await logSystem("error", "payment", `NowPayments IPN: failed to process orderId ${orderId}: ${e2.message}`);
+          }
+        }
+      }
+      res.status(200).json({ received: true });
+    } catch (e: any) {
+      await logSystem("error", "payment", `NowPayments IPN error: ${e.message}`);
+      res.status(500).json({ error: "Internal error" });
+    }
+  });
+
+  // Payment redirect callback (for redirect-based flows — Paystack/Flutterwave redirect back here)
+  app.get("/api/payments/verify", async (req: any, res: any) => {
+    const { reference, tx_ref, status } = req.query as Record<string, string>;
+    const ref = reference ?? tx_ref ?? "";
+    // Redirect to frontend with the reference so the client can confirm
+    const frontendUrl = process.env.NODE_ENV === "production"
+      ? `https://${req.headers.host}`
+      : `http://localhost:${req.socket.localPort}`;
+    res.redirect(`${frontendUrl}/wallet?topup_ref=${encodeURIComponent(ref)}&status=${encodeURIComponent(status ?? "")}`);
+  });
+
+  // ─── Regular middleware ──────────────────────────────────────────────────────
 
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));

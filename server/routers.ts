@@ -118,7 +118,7 @@ export const appRouter = router({
     initiate: protectedProcedure
       .input(z.object({
         orderId: z.number(),
-        gateway: z.enum(["paystack", "monnify", "nowpayments"]),
+        gateway: z.enum(["paystack", "flutterwave", "nowpayments"]),
         currency: z.enum(["NGN", "USD", "EUR", "GBP"]),
       }))
       .mutation(({ input, ctx }) => db.initiatePayment(ctx.user.id, input)),
@@ -378,7 +378,7 @@ export const appRouter = router({
     initiateTopup: protectedProcedure
       .input(z.object({
         amountUSD: z.number().min(3),
-        gateway: z.enum(["paystack", "monnify", "nowpayments"]),
+        gateway: z.enum(["paystack", "flutterwave", "nowpayments"]),
       }))
       .mutation(({ input, ctx }) => db.initiateWalletTopup(ctx.user.id, input.amountUSD, input.gateway)),
     confirmTopup: protectedProcedure

@@ -264,7 +264,7 @@ export const payments = mysqlTable("payments", {
   id: int("id").autoincrement().primaryKey(),
   orderId: int("orderId").notNull(),
   userId: int("userId").notNull(),
-  gateway: mysqlEnum("gateway", ["paystack", "monnify", "nowpayments", "manual"]).notNull(),
+  gateway: mysqlEnum("gateway", ["paystack", "flutterwave", "nowpayments", "manual"]).notNull(),
   gatewayReference: varchar("gatewayReference", { length: 256 }).unique(),
   gatewayTransactionId: varchar("gatewayTransactionId", { length: 256 }),
   status: mysqlEnum("status", ["pending", "success", "failed", "refunded", "disputed"]).default("pending").notNull(),

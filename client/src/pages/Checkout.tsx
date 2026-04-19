@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { CreditCard, Bitcoin, Banknote, Shield, Lock, ArrowLeft, CheckCircle, Loader2, ChevronRight } from "lucide-react";
+import { CreditCard, Bitcoin, Zap, Shield, Lock, ArrowLeft, CheckCircle, Loader2, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,9 +12,9 @@ import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 const GATEWAYS = [
-  { id: "paystack", name: "Paystack", desc: "Cards & Bank Transfer (NGN/Africa)", icon: CreditCard, color: "#00C3F7" },
-  { id: "monnify", name: "Monnify", desc: "Bank Transfer & USSD (NGN)", icon: Banknote, color: "#0066CC" },
-  { id: "nowpayments", name: "Crypto", desc: "BTC, ETH, USDT & 50+ coins", icon: Bitcoin, color: "#F7931A" },
+  { id: "paystack", name: "Paystack", desc: "Cards, Bank Transfer, USSD (NGN/Africa)", icon: CreditCard, color: "#0050D0" },
+  { id: "flutterwave", name: "Flutterwave", desc: "Cards, Bank Transfer, Mobile Money", icon: Zap, color: "#F5A623" },
+  { id: "nowpayments", name: "Crypto", desc: "BTC, ETH, USDT & 100+ coins", icon: Bitcoin, color: "#F7931A" },
 ];
 
 export default function Checkout() {
