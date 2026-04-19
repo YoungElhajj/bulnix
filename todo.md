@@ -485,3 +485,11 @@
 - [x] Retry 3 stuck orders (#120002, #150001, #150002) — all fail with "Insufficient balance" (AccsZone account has $0.00 balance, not a code bug)
 - [x] Reset stuck orders back to "processing" status so they retry when AccsZone account is funded
 - [x] All 41 tests passing
+
+## Admin Manual Refund (Apr 19, 2026)
+- [x] Add adminManualRefund DB helper: credits customer wallet, inserts wallet transaction, logs action, marks order as refunded
+- [x] Add admin.orders.manualRefund tRPC procedure (adminProcedure, orderId + amount + reason)
+- [x] Add Refund button to Admin Orders list page (opens confirmation dialog with amount + reason fields)
+- [ ] Add Refund button to Admin Order Detail page (same dialog) — future enhancement
+- [ ] Show refund history in order detail (wallet transactions of type refund) — future enhancement
+- [x] Run tests, save checkpoint — 43 tests passing

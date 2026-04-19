@@ -38,6 +38,7 @@ vi.mock("./db", () => ({
   adminGetOrders: vi.fn().mockResolvedValue({ orders: [], total: 0 }),
   adminUpdateOrder: vi.fn().mockResolvedValue({ success: true }),
   adminRetryFulfillment: vi.fn().mockResolvedValue({ success: true }),
+  adminOrderManualRefund: vi.fn().mockResolvedValue({ success: true, newBalance: 10.00, orderNumber: "BLX-TEST-001" }),
   adminGetUsers: vi.fn().mockResolvedValue({ users: [], total: 0 }),
   adminSuspendUser: vi.fn().mockResolvedValue({ success: true }),
   adminReactivateUser: vi.fn().mockResolvedValue({ success: true }),
@@ -250,6 +251,18 @@ describe("admin - orders", () => {
     const caller = appRouter.createCaller(makeAdminCtx());
     const result = await caller.admin.orders.retryFulfillment({ orderId: 1 });
     expect(result.success).toBe(true);
+  });
+
+  it("admin can issue manual refund", async () => {
+    const caller = appRouter.createCaller(makeAdminCtx());
+    const result = await caller.admin.orders.manualRefund({ orderId: 1, amountUSD: 5.00, reason: "Customer complaint" });
+    expect(result.success).toBe(true);
+    expect(result).toHaveProperty("orderNumber");
+  });
+
+  it("non-admin cannot issue manual refund", async () => {
+    const caller = appRouter.createCaller(makeUserCtx());
+    await expect(caller.admin.orders.manualRefund({ orderId: 1, amountUSD: 5.00, reason: "Customer complaint" })).rejects.toThrow();
   });
 });
 

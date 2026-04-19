@@ -1172,6 +1172,42 @@ export async function adminRetryFulfillment(orderId: number) {
   return { success: true };
 }
 
+export async function adminOrderManualRefund(adminId: number, input: { orderId: number; amountUSD: number; reason: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Fetch the order to get the customer userId
+  const orderRows = await db.select().from(orders).where(eq(orders.id, input.orderId)).limit(1);
+  if (!orderRows[0]) throw new Error("Order not found");
+  const order = orderRows[0];
+  // Credit the customer wallet
+  const wallet = await getOrCreateWallet(order.userId);
+  const newBalance = Number(wallet.balanceUSD) + input.amountUSD;
+  const reference = `REFUND-${input.orderId}-${Date.now()}`;
+  await withDbRetry(() => db!.update(wallets).set({ balanceUSD: newBalance.toFixed(6) }).where(eq(wallets.userId, order.userId)), "adminOrderManualRefund:wallet");
+  await withDbRetry(() => db!.insert(walletTransactions).values({
+    userId: order.userId,
+    type: "refund",
+    amountUSD: input.amountUSD.toFixed(6),
+    balanceAfterUSD: newBalance.toFixed(6),
+    description: `Refund for order #${order.orderNumber}: ${input.reason}`,
+    reference,
+    orderId: input.orderId,
+    status: "completed",
+  }), "adminOrderManualRefund:txn");
+  // Mark order as refunded
+  await withDbRetry(() => db!.update(orders).set({ status: "refunded" }).where(eq(orders.id, input.orderId)), "adminOrderManualRefund:orderStatus");
+  // Log admin action
+  await withDbRetry(() => db!.insert(adminActions).values({
+    adminId,
+    action: `Manual refund of $${input.amountUSD.toFixed(2)} for order #${order.orderNumber}`,
+    targetType: "order",
+    targetId: input.orderId,
+    details: { reason: input.reason, amountUSD: input.amountUSD, userId: order.userId, orderNumber: order.orderNumber },
+  }), "adminOrderManualRefund:log");
+  await logSystem("info", "order", `Admin issued manual refund of $${input.amountUSD.toFixed(2)} for order ${input.orderId}`, { adminId, orderId: input.orderId, userId: order.userId, reason: input.reason });
+  return { success: true, newBalance, orderNumber: order.orderNumber };
+}
+
 export async function adminGetUsers(input: { page: number; limit: number; search?: string }) {
   const db = await getDb();
   if (!db) return { items: [], total: 0 };

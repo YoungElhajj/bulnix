@@ -245,6 +245,13 @@ export const appRouter = router({
       retryFulfillment: adminProcedure
         .input(z.object({ orderId: z.number() }))
         .mutation(({ input }) => db.adminRetryFulfillment(input.orderId)),
+      manualRefund: adminProcedure
+        .input(z.object({
+          orderId: z.number(),
+          amountUSD: z.number().min(0.01),
+          reason: z.string().min(3),
+        }))
+        .mutation(({ input, ctx }) => db.adminOrderManualRefund(ctx.user.id, input)),
     }),
 
     // Users
