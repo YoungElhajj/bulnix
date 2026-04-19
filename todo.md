@@ -253,3 +253,8 @@
 - [x] Create admin account in database (qazeemayobami@gmail.com, role=admin)
 - [x] Build /secure-admin login page (hidden, no public link)
 - [x] Register /secure-admin route in App.tsx
+
+## Admin Panel Route Guard (Apr 19, 2026)
+- [x] Create AdminRoute guard component that redirects to /secure-admin if not admin
+- [x] Wrap all /admin/* routes with AdminRoute guard
+- [x] Ensure /admin/* never redirects to /login (always /secure-admin)
