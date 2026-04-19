@@ -70,19 +70,18 @@ export default function Checkout() {
         billingCountry: country || undefined,
         couponCode: coupon || undefined,
       });
-      setOrderId((order as any).id);
+      const newOrderId = (order as any).orderId ?? (order as any).id;
+      setOrderId(newOrderId);
       const payment = await initiatePayment.mutateAsync({
-        orderId: (order as any).id,
+        orderId: newOrderId,
         gateway: gateway as any,
         currency,
       });
       const payUrl = (payment as any).paymentUrl;
-      if (payUrl) {
+      if (payUrl && payUrl.startsWith("http")) {
         window.location.href = payUrl;
       } else {
-        toast.info("Payment gateway is being set up. Your order has been created.", { duration: 5000 });
-        setStep("success");
-        clearCart();
+        toast.error("Could not connect to payment gateway. Please try again or choose a different payment method.");
       }
     } catch (err: any) {
       toast.error(err.message ?? "Failed to create order. Please try again.");

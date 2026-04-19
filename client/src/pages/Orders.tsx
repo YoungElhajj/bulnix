@@ -1,18 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
-import { Package, ChevronRight } from "lucide-react";
+import { Package, ChevronRight, CheckCircle2, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function Orders() {
   const { isAuthenticated, loading } = useAuth();
   const [status, setStatus] = useState("all");
   const [page, setPage] = useState(1);
+
+  // Handle return from payment gateway (Paystack/Flutterwave redirect back here)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paymentRef = params.get("payment_ref");
+    const paymentStatus = params.get("status");
+    if (paymentRef) {
+      if (paymentStatus === "success" || paymentStatus === "successful" || paymentStatus === "completed") {
+        toast.success("Payment received! Your order is being processed.", { duration: 6000 });
+      } else if (paymentStatus === "cancelled" || paymentStatus === "failed" || paymentStatus === "abandoned") {
+        toast.error("Payment was cancelled or failed. Please try again from your order.", { duration: 6000 });
+      } else {
+        toast.info("Payment submitted. Your order status will update shortly.", { duration: 6000 });
+      }
+      // Clean up URL without reloading
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, "", cleanUrl);
+    }
+  }, []);
   const { data, isLoading } = trpc.orders.list.useQuery({ status: status === "all" ? undefined : status, page, limit: 20 }, { enabled: isAuthenticated, retry: 2, retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000) });
 
   if (loading) return <div className="min-h-screen bg-[#F5F9FF] flex items-center justify-center"><div className="w-8 h-8 border-2 border-[#0050D0] border-t-transparent rounded-full animate-spin"/></div>;

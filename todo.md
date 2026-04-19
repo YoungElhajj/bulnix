@@ -436,3 +436,14 @@
 - [ ] Set FLUTTERWAVE_SECRET_KEY in Secrets (already injected as env)
 - [ ] Set NOWPAYMENTS_API_KEY in Secrets (already injected as env)
 - [ ] Set NOWPAYMENTS_IPN_SECRET in Secrets (already injected as env)
+
+## Paystack Bug Fixes (Apr 19, 2026)
+- [x] Fix orderId extraction in Checkout.tsx (was reading order.id instead of order.orderId)
+- [x] Fix paymentUrl guard to reject fallback #hash URLs and show proper error toast
+- [x] Fix callbackUrl using localhost:3000 — now uses request origin (x-forwarded-host) so it works in all environments
+- [x] Update initiatePayment and initiateWalletTopup to accept optional origin param
+- [x] Update routers.ts to extract origin from request headers and pass to db functions
+- [x] Fix /api/payments/verify route to redirect to /orders for order payments and /wallet for topups
+- [x] Fix NowPayments successUrl/cancelUrl double query-string (? vs &)
+- [x] Add payment return handler in Orders.tsx (shows toast on payment_ref param)
+- [x] All 41 tests still passing

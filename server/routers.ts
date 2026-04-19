@@ -121,7 +121,12 @@ export const appRouter = router({
         gateway: z.enum(["paystack", "flutterwave", "nowpayments"]),
         currency: z.enum(["NGN", "USD", "EUR", "GBP"]),
       }))
-      .mutation(({ input, ctx }) => db.initiatePayment(ctx.user.id, input)),
+      .mutation(({ input, ctx }) => {
+        const host = ctx.req.headers["x-forwarded-host"] ?? ctx.req.headers.host ?? "localhost:3000";
+        const proto = ctx.req.headers["x-forwarded-proto"] ?? (process.env.NODE_ENV === "production" ? "https" : "http");
+        const origin = `${proto}://${host}`;
+        return db.initiatePayment(ctx.user.id, input, origin);
+      }),
 
     getStatus: protectedProcedure
       .input(z.object({ orderId: z.number() }))
@@ -380,7 +385,12 @@ export const appRouter = router({
         amountUSD: z.number().min(3),
         gateway: z.enum(["paystack", "flutterwave", "nowpayments"]),
       }))
-      .mutation(({ input, ctx }) => db.initiateWalletTopup(ctx.user.id, input.amountUSD, input.gateway)),
+      .mutation(({ input, ctx }) => {
+        const host = ctx.req.headers["x-forwarded-host"] ?? ctx.req.headers.host ?? "localhost:3000";
+        const proto = ctx.req.headers["x-forwarded-proto"] ?? (process.env.NODE_ENV === "production" ? "https" : "http");
+        const origin = `${proto}://${host}`;
+        return db.initiateWalletTopup(ctx.user.id, input.amountUSD, input.gateway, origin);
+      }),
     confirmTopup: protectedProcedure
       .input(z.object({ reference: z.string() }))
       .mutation(({ input }) => db.confirmWalletTopup(input.reference)),

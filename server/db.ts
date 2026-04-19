@@ -466,7 +466,7 @@ export async function getOrderDelivery(userId: number, orderId: number) {
 
 export async function initiatePayment(userId: number, input: {
   orderId: number; gateway: "paystack" | "flutterwave" | "nowpayments"; currency: "NGN" | "USD" | "EUR" | "GBP";
-}) {
+}, origin?: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const order = await db.select().from(orders).where(and(eq(orders.id, input.orderId), eq(orders.userId, userId))).limit(1);
@@ -484,8 +484,9 @@ export async function initiatePayment(userId: number, input: {
   const userEmail = orderUser?.email ?? `user${userId}@bulnix.com`;
   const userName = orderUser?.name ?? "Bulnix Customer";
 
-  // Determine the callback URL (relative path; the webhook handles confirmation)
-  const callbackUrl = `${process.env.NODE_ENV === "production" ? "https://bulnix.com" : "http://localhost:3000"}/api/payments/verify`;
+  // Determine the callback URL — use the origin passed from the request so it works in all environments
+  const siteOrigin = origin ?? (process.env.NODE_ENV === "production" ? "https://bulnix.com" : "http://localhost:3000");
+  const callbackUrl = `${siteOrigin}/api/payments/verify?type=order`;
 
   let paymentUrl = `#payment-${gatewayRef}`;
   let gatewayTransactionId: string | undefined;
@@ -521,9 +522,9 @@ export async function initiatePayment(userId: number, input: {
         priceCurrency: "usd",
         orderId: gatewayRef,
         orderDescription: `Order #${order[0].orderNumber}`,
-        successUrl: `${callbackUrl}?reference=${gatewayRef}&status=success`,
-        cancelUrl: `${callbackUrl}?reference=${gatewayRef}&status=cancelled`,
-        ipnCallbackUrl: `${process.env.NODE_ENV === "production" ? "https://bulnix.com" : "http://localhost:3000"}/api/webhooks/nowpayments`,
+        successUrl: `${callbackUrl}&reference=${gatewayRef}&status=success`,
+        cancelUrl: `${callbackUrl}&reference=${gatewayRef}&status=cancelled`,
+        ipnCallbackUrl: `${siteOrigin}/api/webhooks/nowpayments`,
       });
       paymentUrl = result.invoiceUrl;
       gatewayTransactionId = result.invoiceId;
@@ -1062,7 +1063,7 @@ export async function getWalletTransactions(userId: number, page: number = 1, li
   return { items, total: Number(countRow?.count ?? 0) };
 }
 
-export async function initiateWalletTopup(userId: number, amountUSD: number, gateway: string) {
+export async function initiateWalletTopup(userId: number, amountUSD: number, gateway: string, origin?: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   if (amountUSD < 3) throw new Error("Minimum deposit is $3.00");
@@ -1073,8 +1074,8 @@ export async function initiateWalletTopup(userId: number, amountUSD: number, gat
   const userEmail = topupUser?.email ?? `user${userId}@bulnix.com`;
   const userName = topupUser?.name ?? "Bulnix Customer";
 
-  const callbackUrl = `${process.env.NODE_ENV === "production" ? "https://bulnix.com" : "http://localhost:3000"}/api/payments/verify`;
-
+   const siteOrigin = origin ?? (process.env.NODE_ENV === "production" ? "https://bulnix.com" : "http://localhost:3000");
+  const callbackUrl = `${siteOrigin}/api/payments/verify?type=topup`;
   let paymentUrl = `#topup-${reference}`;
 
   try {
@@ -1108,9 +1109,9 @@ export async function initiateWalletTopup(userId: number, amountUSD: number, gat
         priceCurrency: "usd",
         orderId: reference,
         orderDescription: `Bulnix wallet top-up $${amountUSD.toFixed(2)}`,
-        successUrl: `${callbackUrl}?reference=${reference}&status=success`,
-        cancelUrl: `${callbackUrl}?reference=${reference}&status=cancelled`,
-        ipnCallbackUrl: `${process.env.NODE_ENV === "production" ? "https://bulnix.com" : "http://localhost:3000"}/api/webhooks/nowpayments`,
+        successUrl: `${callbackUrl}&reference=${reference}&status=success`,
+        cancelUrl: `${callbackUrl}&reference=${reference}&status=cancelled`,
+        ipnCallbackUrl: `${siteOrigin}/api/webhooks/nowpayments`,
       });
       paymentUrl = result.invoiceUrl;
     }

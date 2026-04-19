@@ -160,13 +160,19 @@ async function startServer() {
 
   // Payment redirect callback (for redirect-based flows — Paystack/Flutterwave redirect back here)
   app.get("/api/payments/verify", async (req: any, res: any) => {
-    const { reference, tx_ref, status } = req.query as Record<string, string>;
+    const { reference, tx_ref, status, type } = req.query as Record<string, string>;
     const ref = reference ?? tx_ref ?? "";
-    // Redirect to frontend with the reference so the client can confirm
-    const frontendUrl = process.env.NODE_ENV === "production"
-      ? `https://${req.headers.host}`
-      : `http://localhost:${req.socket.localPort}`;
-    res.redirect(`${frontendUrl}/wallet?topup_ref=${encodeURIComponent(ref)}&status=${encodeURIComponent(status ?? "")}`);
+    // Use the same host from the incoming request so it works in all environments (dev proxy, staging, production)
+    const proto = req.headers["x-forwarded-proto"] ?? (process.env.NODE_ENV === "production" ? "https" : "http");
+    const host = req.headers["x-forwarded-host"] ?? req.headers.host ?? "localhost:3000";
+    const frontendUrl = `${proto}://${host}`;
+    // Route to the correct frontend page based on payment type
+    if (type === "order") {
+      res.redirect(`${frontendUrl}/orders?payment_ref=${encodeURIComponent(ref)}&status=${encodeURIComponent(status ?? "")}`);
+    } else {
+      // Default: wallet topup
+      res.redirect(`${frontendUrl}/wallet?topup_ref=${encodeURIComponent(ref)}&status=${encodeURIComponent(status ?? "")}`);
+    }
   });
 
   // ─── Regular middleware ──────────────────────────────────────────────────────
