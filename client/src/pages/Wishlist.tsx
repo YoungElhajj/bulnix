@@ -35,7 +35,7 @@ export default function Wishlist() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {products.map((p: any) => (
               <div key={p.id} className="product-card group">
-                <div className="aspect-[4/3] bg-gradient-to-br from-[#0A2540] to-[#1e293b] flex items-center justify-center relative overflow-hidden">
+                <div className="aspect-[4/3] bg-gradient-to-br from-[#F0F8FF] to-[#E0EEFF] flex items-center justify-center relative overflow-hidden">
                   {p.imageUrl ? <img src={p.imageUrl} alt={p.title} className="w-full h-full object-cover"/> : <Package className="h-12 w-12 text-[#4A6080]"/>}
                   <button onClick={()=>toggle.mutate({productId:p.id})} className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center hover:bg-black/70 transition-colors"><Heart className="h-4 w-4 text-red-400 fill-red-400"/></button>
                 </div>

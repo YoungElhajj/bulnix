@@ -345,3 +345,25 @@
 - [x] Redesign About, Contact, FAQ, Privacy, Terms, Refund, Wishlist pages
 - [x] Redesign all Admin pages (AdminDashboard, AdminProducts, AdminCategories, etc.)
 - [x] All 30 tests passing, 0 TypeScript errors
+
+## Navbar/Footer/Auth/Mobile Fix (Apr 19, 2026)
+- [ ] Rebuild Navbar: logo, all menu links (FAQ, About, Contact, Policy), Sign In/Sign Up buttons, dark/light toggle, mobile hamburger
+- [ ] Rebuild Footer: multi-column (Help & Info, About Us, Menu, logo+newsletter+social)
+- [ ] Fix auth: Sign In/Sign Up/OTP pages work end-to-end, redirect after login
+- [ ] Add product description + login instructions to Product Detail page
+- [ ] Fix mobile responsiveness on all major pages
+
+## Fix v2 (Apr 19 2026)
+- [x] Navbar: restore logo, all menu links (Home, Products, Categories + More dropdown for FAQ/About/Contact/Terms/Privacy/Refund)
+- [x] Navbar: dark/light theme toggle button
+- [x] Navbar: mobile hamburger with all links including More Pages section
+- [x] Navbar: social icons in desktop and mobile
+- [x] Footer: XeroSMS-style 4-column layout (Help & Information, About Us, Menu, Brand+Newsletter)
+- [x] Footer: social icons row in bottom bar
+- [x] ProductDetail: tabs for Description, How to Login, Delivery Info, Refund Policy
+- [x] ProductDetail: step-by-step login instructions
+- [x] ProductDetail: login prompt for guest users
+- [x] ProductDetail: wishlist button
+- [x] Dark mode: CSS overrides for hardcoded light bg/text colors
+- [x] Mobile: hero section padding for floating icons
+- [x] Wishlist: fix dark card image background

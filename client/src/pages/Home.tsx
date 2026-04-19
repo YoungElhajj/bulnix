@@ -206,8 +206,8 @@ export default function Home() {
             </div>
 
             {/* Right: Illustration + Floating Social Icons */}
-            <div className="relative flex items-center justify-center" style={heroStyle(150)}>
-              <div className="relative w-72 h-72 md:w-80 md:h-80">
+            <div className="relative flex items-center justify-center py-14 px-20 sm:py-12 sm:px-16" style={heroStyle(150)}>
+              <div className="relative w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 lg:w-80 lg:h-80">
                 {/* Central card */}
                 <div className="w-full h-full rounded-3xl bg-gradient-to-br from-[#0F3D5E] to-[#0050D0] shadow-2xl shadow-[#0050D0]/30 flex flex-col items-center justify-center p-8">
                   <div className="w-20 h-20 rounded-2xl bg-white/15 backdrop-blur border border-white/25 flex items-center justify-center mb-4">

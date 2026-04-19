@@ -327,4 +327,20 @@
   @media (min-width: 1024px) {
     .container { padding-left: 2rem; padding-right: 2rem; max-width: 1280px; }
   }
+
+  /* ── Dark mode: override hardcoded light bg/text colors ── */
+  /* Page backgrounds */
+  .dark .bg-\[\#F5F9FF\] { background-color: #061A2B !important; }
+  .dark .bg-\[\#EEF4FF\] { background-color: #0A1E33 !important; }
+  .dark .bg-\[\#F0F8FF\] { background-color: #0A2540 !important; }
+  .dark .bg-\[\#E0EEFF\] { background-color: #0F3060 !important; }
+  .dark .bg-\[\#E8F4FF\] { background-color: #0A2540 !important; }
+  /* White cards/sections */
+  .dark .bg-white { background-color: #0D2137 !important; }
+  /* Borders */
+  .dark .border-\[\#D8E8F5\] { border-color: #1a3a5c !important; }
+  .dark .border-\[\#E0EEFF\] { border-color: #1a3a5c !important; }
+  /* Text */
+  .dark .text-\[\#0D2137\] { color: #e8f0f8 !important; }
+  .dark .text-\[\#4A6080\] { color: #8ab0cc !important; }
 }

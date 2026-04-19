@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import {
   ShoppingCart, Menu, X, ChevronDown, User, LogOut,
-  LayoutDashboard, Package, Settings, Shield, Wallet, Sun, Moon
+  LayoutDashboard, Package, Settings, Shield, Wallet, Sun, Moon,
+  HelpCircle, Info, FileText, Phone, Home
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
@@ -20,11 +21,21 @@ import { trpc } from "@/lib/trpc";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663404004095/6qKkSV9dybS3AerhXhrTfQ/bulnix-logo_9d63016d.png";
 
-const navLinks = [
+// Primary nav links (always visible on desktop)
+const primaryLinks = [
+  { label: "Home", href: "/" },
   { label: "Products", href: "/products" },
   { label: "Categories", href: "/categories" },
-  { label: "FAQ", href: "/faq" },
-  { label: "Support", href: "/contact" },
+];
+
+// Secondary links shown in "More" dropdown and mobile menu
+const moreLinks = [
+  { label: "FAQ", href: "/faq", icon: HelpCircle },
+  { label: "About Us", href: "/about", icon: Info },
+  { label: "Contact", href: "/contact", icon: Phone },
+  { label: "Terms of Service", href: "/terms", icon: FileText },
+  { label: "Privacy Policy", href: "/privacy", icon: FileText },
+  { label: "Refund Policy", href: "/refund", icon: FileText },
 ];
 
 // Social media links
@@ -69,6 +80,7 @@ const socialLinks = [
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [location] = useLocation();
   const { totalItems } = useCart();
@@ -78,7 +90,7 @@ export default function Navbar() {
   });
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
-  const isActive = (href: string) => location === href || location.startsWith(href + "/");
+  const isActive = (href: string) => href === "/" ? location === "/" : location === href || location.startsWith(href + "/");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -86,7 +98,12 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Always navy background — logo blends seamlessly
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileOpen(false);
+    setMobileMoreOpen(false);
+  }, [location]);
+
   const navBg = scrolled
     ? "bg-[#0F3D5E] shadow-lg shadow-[#0F3D5E]/40"
     : "bg-[#0F3D5E]";
@@ -96,38 +113,57 @@ export default function Navbar() {
       <div className="container">
         <div className="flex items-center justify-between h-16">
 
-          {/* Logo — blends seamlessly into navy navbar */}
+          {/* Logo */}
           <Link href="/" className="flex items-center shrink-0">
             <img
               src={LOGO_URL}
               alt="Bulnix"
-              className="h-10 w-auto object-contain"
+              className="h-9 w-auto object-contain"
               style={{ background: "transparent" }}
             />
           </Link>
 
           {/* Desktop Nav Links */}
-          <div className="hidden md:flex items-center gap-6">
-            {navLinks.map(link => (
+          <div className="hidden lg:flex items-center gap-1">
+            {primaryLinks.map(link => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-medium transition-colors duration-200 ${
+                className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
                   isActive(link.href)
-                    ? "text-[#00C2FF]"
-                    : "text-white/80 hover:text-white"
+                    ? "text-[#00C2FF] bg-white/10"
+                    : "text-white/80 hover:text-white hover:bg-white/10"
                 }`}
               >
                 {link.label}
               </Link>
             ))}
+
+            {/* More dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200">
+                  More <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48 bg-[#0F3D5E] border-[#1a5070] shadow-xl mt-1">
+                {moreLinks.map(link => (
+                  <DropdownMenuItem key={link.href} asChild>
+                    <Link href={link.href} className="flex items-center gap-2 cursor-pointer text-white/80 hover:text-white focus:text-white focus:bg-white/10">
+                      <link.icon className="h-4 w-4 text-[#00C2FF]" />
+                      <span>{link.label}</span>
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
 
             {/* Social Icons — desktop only */}
-            <div className="hidden lg:flex items-center gap-1 mr-2">
+            <div className="hidden xl:flex items-center gap-0.5 mr-1">
               {socialLinks.map(s => (
                 <a
                   key={s.name}
@@ -165,18 +201,18 @@ export default function Navbar() {
               </Button>
             </Link>
 
-            {/* Auth */}
+            {/* Auth — desktop */}
             {isAuthenticated && user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="hidden md:flex items-center gap-2 px-3 text-white/80 hover:text-white hover:bg-white/10"
+                    className="hidden md:flex items-center gap-2 px-2.5 text-white/80 hover:text-white hover:bg-white/10 h-8"
                   >
-                    <div className="w-7 h-7 rounded-full bg-[#00C2FF]/25 border border-[#00C2FF]/50 flex items-center justify-center text-xs font-semibold text-[#00C2FF]">
+                    <div className="w-6 h-6 rounded-full bg-[#00C2FF]/25 border border-[#00C2FF]/50 flex items-center justify-center text-xs font-semibold text-[#00C2FF]">
                       {(user.name || user.email || "U")[0].toUpperCase()}
                     </div>
-                    <span className="text-sm font-medium max-w-24 truncate">{user.name || user.email}</span>
+                    <span className="text-sm font-medium max-w-20 truncate hidden lg:block">{user.name || user.email}</span>
                     <ChevronDown className="h-3.5 w-3.5 opacity-50" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -227,12 +263,12 @@ export default function Navbar() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <div className="hidden md:flex items-center gap-2">
+              <div className="hidden md:flex items-center gap-1.5">
                 <Link href="/login">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-white/80 hover:text-white hover:bg-white/10 font-medium border border-white/30 hover:border-white/50 rounded-full px-4"
+                    className="text-white/80 hover:text-white hover:bg-white/10 font-medium border border-white/30 hover:border-white/50 rounded-full px-4 h-8 text-xs"
                   >
                     Sign In
                   </Button>
@@ -240,7 +276,7 @@ export default function Navbar() {
                 <Link href="/signup">
                   <Button
                     size="sm"
-                    className="bg-[#00C2FF] hover:bg-[#00aee6] text-[#0F3D5E] font-bold rounded-full px-5 shadow-md shadow-[#00C2FF]/30 transition-all duration-200 hover:shadow-lg hover:shadow-[#00C2FF]/40"
+                    className="bg-[#00C2FF] hover:bg-[#00aee6] text-[#0F3D5E] font-bold rounded-full px-4 h-8 text-xs shadow-md shadow-[#00C2FF]/30 transition-all duration-200"
                   >
                     Sign Up
                   </Button>
@@ -252,8 +288,9 @@ export default function Navbar() {
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden text-white/70 hover:text-white hover:bg-white/10 h-8 w-8"
+              className="lg:hidden text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 ml-1"
               onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label="Toggle menu"
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
@@ -262,24 +299,54 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {mobileOpen && (
-          <div className="md:hidden border-t border-[#1a5070]/50 py-4 space-y-1 bg-[#0F3D5E]">
-            {navLinks.map(link => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className={`block px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${
-                  isActive(link.href)
-                    ? "text-[#00C2FF] bg-white/10"
-                    : "text-white/80 hover:text-white hover:bg-white/10"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+          <div className="lg:hidden border-t border-[#1a5070]/50 py-3 bg-[#0F3D5E]">
+            {/* Primary links */}
+            <div className="space-y-0.5 mb-2">
+              {primaryLinks.map(link => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg mx-2 transition-colors ${
+                    isActive(link.href)
+                      ? "text-[#00C2FF] bg-white/10"
+                      : "text-white/80 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
 
-            {/* Mobile Social Icons */}
-            <div className="px-4 pt-2 pb-1 flex items-center gap-3">
+            {/* More section toggle */}
+            <button
+              onClick={() => setMobileMoreOpen(!mobileMoreOpen)}
+              className="flex items-center justify-between w-full px-4 py-2.5 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 rounded-lg mx-2 transition-colors"
+              style={{ width: "calc(100% - 1rem)" }}
+            >
+              <span>More Pages</span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${mobileMoreOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {mobileMoreOpen && (
+              <div className="space-y-0.5 mb-2 pl-4">
+                {moreLinks.map(link => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg mx-2 transition-colors"
+                  >
+                    <link.icon className="h-3.5 w-3.5 text-[#00C2FF]" />
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {/* Social Icons */}
+            <div className="px-4 py-2 flex items-center gap-2 border-t border-[#1a5070]/50 mt-2 pt-3">
+              <span className="text-white/40 text-xs mr-1">Follow:</span>
               {socialLinks.map(s => (
                 <a
                   key={s.name}
@@ -294,12 +361,18 @@ export default function Navbar() {
               ))}
             </div>
 
-            <div className="pt-3 px-4 flex flex-col gap-2 border-t border-[#1a5070]/50 mt-3">
+            {/* Auth buttons */}
+            <div className="px-4 pt-2 pb-2 flex flex-col gap-2 border-t border-[#1a5070]/50 mt-2">
               {isAuthenticated ? (
                 <>
                   <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" size="sm" className="w-full border-white/30 text-white hover:bg-white/10">
+                    <Button variant="outline" size="sm" className="w-full border-white/30 text-white bg-transparent hover:bg-white/10">
                       <LayoutDashboard className="h-4 w-4 mr-2" /> Dashboard
+                    </Button>
+                  </Link>
+                  <Link href="/orders" onClick={() => setMobileOpen(false)}>
+                    <Button variant="outline" size="sm" className="w-full border-white/30 text-white bg-transparent hover:bg-white/10">
+                      <Package className="h-4 w-4 mr-2" /> My Orders
                     </Button>
                   </Link>
                   <Button
@@ -314,10 +387,10 @@ export default function Navbar() {
               ) : (
                 <>
                   <Link href="/login" onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" size="sm" className="w-full border-white/30 text-white hover:bg-white/10">Sign In</Button>
+                    <Button variant="outline" size="sm" className="w-full border-white/30 text-white bg-transparent hover:bg-white/10">Sign In</Button>
                   </Link>
                   <Link href="/signup" onClick={() => setMobileOpen(false)}>
-                    <Button size="sm" className="w-full bg-[#00C2FF] hover:bg-[#00aee6] text-[#0F3D5E] font-bold">Sign Up</Button>
+                    <Button size="sm" className="w-full bg-[#00C2FF] hover:bg-[#00aee6] text-[#0F3D5E] font-bold">Create Account</Button>
                   </Link>
                 </>
               )}
