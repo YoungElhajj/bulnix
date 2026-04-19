@@ -7,6 +7,8 @@ import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import { TRPCError } from "@trpc/server";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
+import * as OTPAuth from "otpauth";
+import QRCode from "qrcode";
 import { z } from "zod/v4";
 import { users } from "../../drizzle/schema";
 import { getDb } from "../db";
@@ -36,7 +38,7 @@ async function findUserByEmail(email: string) {
   return rows[0] ?? null;
 }
 
-// ─── Router ──────────────────────────────────────────────────────────────────
+// ─── Public/User Auth Router ──────────────────────────────────────────────────
 
 export const customAuthRouter = router({
   /**
@@ -69,7 +71,6 @@ export const customAuthRouter = router({
       const passwordHash = await bcrypt.hash(input.password, 12);
 
       if (existing) {
-        // Update existing unverified account
         await db.update(users).set({
           name: input.name,
           passwordHash,
@@ -78,7 +79,6 @@ export const customAuthRouter = router({
           otpPurpose: "register",
         }).where(eq(users.email, email));
       } else {
-        // Create new unverified account
         await db.insert(users).values({
           openId: generateOpenId(),
           name: input.name,
@@ -135,7 +135,6 @@ export const customAuthRouter = router({
         throw new TRPCError({ code: "BAD_REQUEST", message: "Incorrect verification code" });
       }
 
-      // Mark verified and clear OTP
       await db.update(users).set({
         emailVerified: true,
         otpCode: null,
@@ -144,7 +143,6 @@ export const customAuthRouter = router({
         lastSignedIn: new Date(),
       }).where(eq(users.id, user.id));
 
-      // Create session
       const sessionToken = await sdk.createSessionToken(user.openId, {
         name: user.name ?? "",
         expiresInMs: ONE_YEAR_MS,
@@ -156,7 +154,6 @@ export const customAuthRouter = router({
         maxAge: ONE_YEAR_MS,
       });
 
-      // Send welcome email for new registrations
       if (input.purpose === "register") {
         await safeSendEmail(() =>
           sendWelcomeEmail({ to: email, name: user.name ?? "" })
@@ -233,7 +230,6 @@ export const customAuthRouter = router({
       const user = await findUserByEmail(email);
       if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "Account not found" });
 
-      // Rate limit: only allow resend if previous OTP is older than 60s
       if (user.otpExpiry) {
         const secondsLeft = (user.otpExpiry.getTime() - Date.now()) / 1000;
         if (secondsLeft > 9 * 60) {
@@ -267,7 +263,6 @@ export const customAuthRouter = router({
       const email = input.email.toLowerCase().trim();
       const user = await findUserByEmail(email);
 
-      // Always return success to prevent email enumeration
       if (!user || !user.emailVerified) return { success: true };
 
       const otp = generateOtp();
@@ -319,7 +314,6 @@ export const customAuthRouter = router({
         lastSignedIn: new Date(),
       }).where(eq(users.id, user.id));
 
-      // Auto sign in after reset
       const sessionToken = await sdk.createSessionToken(user.openId, {
         name: user.name ?? "",
         expiresInMs: ONE_YEAR_MS,
@@ -331,7 +325,7 @@ export const customAuthRouter = router({
     }),
 
   /**
-   * Change password (authenticated)
+   * Change password (authenticated user)
    */
   changePassword: protectedProcedure
     .input(z.object({
@@ -361,7 +355,6 @@ export const customAuthRouter = router({
 
   /**
    * Admin-only direct login (email + password, no OTP, admin role required)
-   * Used exclusively at /secure-admin — never linked from the public site
    */
   adminLogin: publicProcedure
     .input(z.object({
@@ -387,19 +380,16 @@ export const customAuthRouter = router({
         .limit(1);
 
       const user = rows[0];
-
-      // Generic error to prevent email enumeration
       const invalidErr = new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
 
       if (!user) throw invalidErr;
-      if (user.role !== "admin") throw invalidErr; // Only admins allowed
+      if (user.role !== "admin") throw invalidErr;
       if (!user.passwordHash) throw invalidErr;
       if (user.isSuspended) throw new TRPCError({ code: "FORBIDDEN", message: "Account suspended" });
 
       const valid = await bcrypt.compare(input.password, user.passwordHash);
       if (!valid) throw invalidErr;
 
-      const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
       const sessionToken = await sdk.createSessionToken(user.openId, {
         expiresInMs: ONE_YEAR_MS,
         name: user.name || "",
@@ -408,5 +398,136 @@ export const customAuthRouter = router({
       ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
 
       return { success: true, name: user.name };
+    }),
+});
+
+// ─── Admin Account Settings Router (TOTP 2FA + Password) ─────────────────────
+
+export const adminAccountRouter = router({
+  /**
+   * Change admin password (admin-only, requires current password)
+   */
+  changeAdminPassword: protectedProcedure
+    .input(z.object({
+      currentPassword: z.string().min(1),
+      newPassword: z.string().min(8, "New password must be at least 8 characters"),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+
+      const rows = await db.select({ passwordHash: users.passwordHash })
+        .from(users).where(eq(users.id, ctx.user.id)).limit(1);
+      const userRow = rows[0];
+      if (!userRow?.passwordHash) throw new TRPCError({ code: "BAD_REQUEST", message: "No password set" });
+
+      const valid = await bcrypt.compare(input.currentPassword, userRow.passwordHash);
+      if (!valid) throw new TRPCError({ code: "UNAUTHORIZED", message: "Current password is incorrect" });
+
+      const newHash = await bcrypt.hash(input.newPassword, 12);
+      await db.update(users).set({ passwordHash: newHash }).where(eq(users.id, ctx.user.id));
+      return { success: true };
+    }),
+
+  /**
+   * Generate a new TOTP secret + QR code data URL for setup
+   */
+  setupTotp: protectedProcedure
+    .mutation(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+
+      const totp = new OTPAuth.TOTP({
+        issuer: "Bulnix Admin",
+        label: ctx.user.email ?? "admin",
+        algorithm: "SHA1",
+        digits: 6,
+        period: 30,
+      });
+
+      const secret = totp.secret.base32;
+      const otpauthUrl = totp.toString();
+
+      await db.update(users)
+        .set({ twoFactorSecret: secret })
+        .where(eq(users.id, ctx.user.id));
+
+      const qrDataUrl = await QRCode.toDataURL(otpauthUrl);
+      return { secret, qrDataUrl };
+    }),
+
+  /**
+   * Verify TOTP token and enable 2FA
+   */
+  verifyTotp: protectedProcedure
+    .input(z.object({ token: z.string().length(6) }))
+    .mutation(async ({ input, ctx }) => {
+      if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+
+      const rows = await db.select({ twoFactorSecret: users.twoFactorSecret })
+        .from(users).where(eq(users.id, ctx.user.id)).limit(1);
+      const secret = rows[0]?.twoFactorSecret;
+      if (!secret) throw new TRPCError({ code: "BAD_REQUEST", message: "No TOTP secret found. Please start setup again." });
+
+      const totp = new OTPAuth.TOTP({
+        issuer: "Bulnix Admin",
+        label: ctx.user.email ?? "admin",
+        algorithm: "SHA1",
+        digits: 6,
+        period: 30,
+        secret: OTPAuth.Secret.fromBase32(secret),
+      });
+
+      const delta = totp.validate({ token: input.token, window: 1 });
+      if (delta === null) throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid verification code. Please try again." });
+
+      await db.update(users)
+        .set({ twoFactorEnabled: true })
+        .where(eq(users.id, ctx.user.id));
+
+      return { success: true };
+    }),
+
+  /**
+   * Disable 2FA (requires current password for safety)
+   */
+  disableTotp: protectedProcedure
+    .input(z.object({ password: z.string().min(1) }))
+    .mutation(async ({ input, ctx }) => {
+      if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+
+      const rows = await db.select({ passwordHash: users.passwordHash })
+        .from(users).where(eq(users.id, ctx.user.id)).limit(1);
+      const userRow = rows[0];
+      if (!userRow?.passwordHash) throw new TRPCError({ code: "BAD_REQUEST", message: "No password set" });
+
+      const valid = await bcrypt.compare(input.password, userRow.passwordHash);
+      if (!valid) throw new TRPCError({ code: "UNAUTHORIZED", message: "Incorrect password" });
+
+      await db.update(users)
+        .set({ twoFactorEnabled: false, twoFactorSecret: null })
+        .where(eq(users.id, ctx.user.id));
+
+      return { success: true };
+    }),
+
+  /**
+   * Get current 2FA status for the admin
+   */
+  getTotpStatus: protectedProcedure
+    .query(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+
+      const rows = await db.select({ twoFactorEnabled: users.twoFactorEnabled })
+        .from(users).where(eq(users.id, ctx.user.id)).limit(1);
+      return { enabled: rows[0]?.twoFactorEnabled ?? false };
     }),
 });

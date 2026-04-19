@@ -258,3 +258,12 @@
 - [x] Create AdminRoute guard component that redirects to /secure-admin if not admin
 - [x] Wrap all /admin/* routes with AdminRoute guard
 - [x] Ensure /admin/* never redirects to /login (always /secure-admin)
+
+## Admin Portal Redesign (Apr 19, 2026)
+- [x] Build AdminLayout component (sidebar, header, distinct colour scheme — dark slate/emerald)
+- [x] Build Admin Account Settings page (change password)
+- [x] Add 2FA setup page (TOTP / Google Authenticator) with QR code
+- [x] Add DB columns for 2FA (totpSecret, totpEnabled) — columns already existed in DB
+- [x] Add server procedures: changeAdminPassword, setupTotp, verifyTotp, disableTotp, getTotpStatus
+- [x] Wrap all existing admin pages with new AdminLayout — all pages already use AdminLayout
+- [x] Register /admin/account route in App.tsx with AdminRoute guard

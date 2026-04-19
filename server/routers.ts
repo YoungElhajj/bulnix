@@ -1,5 +1,5 @@
 import { COOKIE_NAME } from "../shared/const";
-import { customAuthRouter } from "./routers/customAuth";
+import { customAuthRouter, adminAccountRouter } from "./routers/customAuth";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
@@ -34,6 +34,12 @@ export const appRouter = router({
     resetPassword: customAuthRouter.resetPassword,
     changePassword: customAuthRouter.changePassword,
     adminLogin: customAuthRouter.adminLogin,
+    // Admin account settings (2FA + password)
+    changeAdminPassword: adminAccountRouter.changeAdminPassword,
+    setupTotp: adminAccountRouter.setupTotp,
+    verifyTotp: adminAccountRouter.verifyTotp,
+    disableTotp: adminAccountRouter.disableTotp,
+    getTotpStatus: adminAccountRouter.getTotpStatus,
   }),
 
   // ── Categories ──────────────────────────────────────────────────────────

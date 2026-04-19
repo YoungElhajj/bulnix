@@ -45,6 +45,7 @@ import AdminProviders from "./pages/admin/AdminProviders";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminLogs from "./pages/admin/AdminLogs";
 import AdminSupplierRefunds from "./pages/admin/AdminSupplierRefunds";
+import AdminAccountSettings from "./pages/admin/AdminAccountSettings";
 import SecureAdminLogin from "./pages/SecureAdminLogin";
 import AdminRoute from "./components/AdminRoute";
 import SocialFloatingWidgets from "./components/SocialFloatingWidgets";
@@ -94,6 +95,7 @@ function Router() {
       <Route path="/admin/categories">{() => <AdminRoute component={AdminCategories} />}</Route>
       <Route path="/admin/logs">{() => <AdminRoute component={AdminLogs} />}</Route>
       <Route path="/admin/supplier-refunds">{() => <AdminRoute component={AdminSupplierRefunds} />}</Route>
+      <Route path="/admin/account">{() => <AdminRoute component={AdminAccountSettings} />}</Route>
 
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
