@@ -208,6 +208,19 @@ async function startServer() {
     createExpressMiddleware({
       router: appRouter,
       createContext,
+      onError({ error, path }) {
+        // Log DB / unexpected errors server-side but never expose raw SQL to clients
+        const isDbError = error.message?.includes('Failed query') ||
+          error.message?.includes('ER_') ||
+          error.message?.includes('TiDB') ||
+          error.message?.includes('mysql') ||
+          error.message?.includes('ECONNREFUSED');
+        if (isDbError) {
+          console.error(`[tRPC] DB error on ${path}:`, error.message);
+          // Replace the raw message with a safe one
+          (error as any).message = 'A database error occurred. Please try again shortly.';
+        }
+      },
     })
   );
   // development mode uses Vite, production mode uses static files
@@ -280,3 +293,30 @@ setTimeout(() => {
   runAutoRetry();
   setInterval(runAutoRetry, 5 * 60 * 1000);
 }, 3 * 60 * 1000);
+
+// ─── Daily Backup Scheduler ──────────────────────────────────────────────────
+// Runs a full database backup every 24 hours at 2:00 AM UTC.
+function msUntil2amUTC(): number {
+  const now = new Date();
+  const next2am = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 2, 0, 0, 0));
+  if (next2am.getTime() <= now.getTime()) {
+    next2am.setUTCDate(next2am.getUTCDate() + 1);
+  }
+  return next2am.getTime() - now.getTime();
+}
+async function runDailyBackup() {
+  try {
+    const { runDatabaseBackupSafe } = await import("../backup");
+    await runDatabaseBackupSafe();
+  } catch (err) {
+    console.error("[Backup] Scheduler error:", err);
+  }
+}
+// Schedule first backup at 2:00 AM UTC, then every 24 hours
+const delayToFirstBackup = msUntil2amUTC();
+const hoursUntilFirst = Math.round(delayToFirstBackup / 3600000 * 10) / 10;
+console.log(`[Backup] Next daily backup scheduled in ${hoursUntilFirst}h (2:00 AM UTC)`);
+setTimeout(() => {
+  runDailyBackup();
+  setInterval(runDailyBackup, 24 * 60 * 60 * 1000);
+}, delayToFirstBackup);

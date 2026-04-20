@@ -510,3 +510,16 @@
 - [x] Scrape AccsZone product pages for login instructions per category
 - [x] Add per-platform login instructions to product detail pages (Instagram, Facebook, Twitter/X, TikTok, YouTube, Spotify, Netflix, Discord + generic fallback)
 - [x] Run tests — 43 tests passing
+
+## Critical Pre-Launch Bug Fix (Apr 20, 2026)
+- [ ] Fix Sign In showing raw DB error to users (missing columns in users table)
+- [ ] Add missing columns to users table via migration (twoFactorEnabled, twoFactorSecret, otpCode, otpExpiry, otpPurpose, lastLoginIp, etc.)
+- [ ] Sanitize all tRPC error handlers so DB errors never leak to the frontend
+- [ ] Run tests, save checkpoint
+
+## Automatic Daily Database Backups (Apr 20, 2026)
+- [x] Write server/backup.ts module: dump all tables to SQL, upload to S3, email owner confirmation
+- [x] Add daily backup scheduler (runs at 2am UTC) to server/_core/index.ts
+- [x] Add admin.system.runBackup tRPC procedure for manual on-demand backup trigger
+- [x] Add Backup card to Admin Dashboard (last backup time, download link, manual trigger button)
+- [x] Run tests, save checkpoint — 43 tests passing

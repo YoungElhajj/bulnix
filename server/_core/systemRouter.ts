@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { notifyOwner } from "./notification";
 import { adminProcedure, publicProcedure, router } from "./trpc";
+import { runDatabaseBackup } from "../backup";
 
 export const systemRouter = router({
   health: publicProcedure
@@ -25,5 +26,16 @@ export const systemRouter = router({
       return {
         success: delivered,
       } as const;
+    }),
+
+  runBackup: adminProcedure
+    .mutation(async () => {
+      const result = await runDatabaseBackup();
+      return {
+        success: true,
+        url: result.url,
+        sizeKb: result.sizeKb,
+        tableCount: result.tableCount,
+      };
     }),
 });

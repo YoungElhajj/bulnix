@@ -1,0 +1,8 @@
+{
+  "query": "SHOW TABLES",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2xomvQyHT3Pc2eM.33c921a427fa --database 6qKkSV9dybS3AerhXhrTfQ --execute SHOW TABLES",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1105 (HY000): No available TiDB instances, please make sure TiDB is available"
+  ]
+}

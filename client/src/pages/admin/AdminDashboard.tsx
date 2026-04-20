@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link } from "wouter";
-import { Package, Users, ShoppingCart, Ticket, TrendingUp, AlertCircle, RefreshCw, Activity, Wallet, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Package, Users, ShoppingCart, Ticket, TrendingUp, AlertCircle, RefreshCw, Activity, Wallet, AlertTriangle, CheckCircle2, Database, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
@@ -9,12 +10,24 @@ import AdminLayout from "@/components/AdminLayout";
 export default function AdminDashboard() {
   const { user, isAuthenticated } = useAuth();
   const enabled = isAuthenticated && user?.role === "admin";
+  const [lastBackup, setLastBackup] = useState<{ url: string; sizeKb: number; tableCount: number; time: string } | null>(null);
 
   const { data: stats, isLoading, refetch } = trpc.admin.getStats.useQuery(undefined, { enabled, retry: false });
   const { data: balanceData, isLoading: balanceLoading, refetch: refetchBalance } = trpc.admin.providers.getAccsZoneBalance.useQuery(undefined, {
     enabled,
     retry: false,
-    refetchInterval: 5 * 60 * 1000, // refresh every 5 minutes
+    refetchInterval: 5 * 60 * 1000,
+  });
+
+  const backupMutation = trpc.system.runBackup.useMutation({
+    onSuccess: (data: any) => {
+      setLastBackup({
+        url: data.url,
+        sizeKb: data.sizeKb,
+        tableCount: data.tableCount,
+        time: new Date().toLocaleString(),
+      });
+    },
   });
 
   const s = stats as any;
@@ -42,7 +55,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* AccsZone Balance Card */}
-      <div className={`mb-6 rounded-xl border p-5 flex items-center gap-4 ${
+      <div className={`mb-4 rounded-xl border p-5 flex items-center gap-4 ${
         balanceLoading
           ? "bg-white/5 border-emerald-900/30 animate-pulse"
           : bal?.lowBalance
@@ -93,6 +106,54 @@ export default function AdminDashboard() {
         >
           Top Up
         </a>
+      </div>
+
+      {/* Database Backup Card */}
+      <div className="mb-6 rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-5 flex items-center gap-4">
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-cyan-500/15">
+          <Database className="h-6 w-6 text-cyan-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-sm font-medium text-slate-300">Database Backup</span>
+            <Badge className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-xs flex items-center gap-1">
+              <CheckCircle2 className="h-3 w-3"/>Auto Daily at 2:00 AM UTC
+            </Badge>
+          </div>
+          {lastBackup ? (
+            <div className="flex items-center gap-3 mt-0.5">
+              <span className="text-sm text-slate-400">Last backup: {lastBackup.time} — {lastBackup.sizeKb} KB, {lastBackup.tableCount} tables</span>
+              <a
+                href={lastBackup.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+              >
+                <Download className="h-3 w-3"/> Download
+              </a>
+            </div>
+          ) : (
+            <p className="text-xs text-slate-500 mt-0.5">
+              Backups run automatically every day at 2:00 AM UTC and are emailed to you. Click to run a manual backup now.
+            </p>
+          )}
+          {backupMutation.isError && (
+            <p className="text-xs text-red-400 mt-1">Backup failed: {(backupMutation.error as any)?.message ?? "Unknown error"}</p>
+          )}
+        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          className="shrink-0 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 bg-transparent"
+          onClick={() => backupMutation.mutate()}
+          disabled={backupMutation.isPending}
+        >
+          {backupMutation.isPending ? (
+            <><RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-spin"/> Backing up...</>
+          ) : (
+            <><Database className="h-3.5 w-3.5 mr-1.5"/> Run Backup</>
+          )}
+        </Button>
       </div>
 
       {isLoading ? (
@@ -168,6 +229,7 @@ export default function AdminDashboard() {
                   { label: "Database",         status: "active" },
                   { label: "Webhook Handler",  status: "active" },
                   { label: "Auto-Sync",        status: "active" },
+                  { label: "Daily Backup",     status: "active" },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center justify-between">
                     <span className="text-sm text-slate-300">{item.label}</span>

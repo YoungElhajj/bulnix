@@ -483,6 +483,46 @@ export async function sendRefundConfirmationEmail(opts: {
   });
 }
 
+/** Backup success email to owner */
+export async function sendBackupEmail(opts: {
+  to: string;
+  date: string;
+  sizeKb: number;
+  tableCount: number;
+  downloadUrl: string;
+}): Promise<void> {
+  const body = `
+    <h1>&#x2705; Daily Backup Complete</h1>
+    <p>Your automatic database backup ran successfully and has been stored securely in S3.</p>
+    <div style="margin:16px 0;background:#0f172a;border-radius:8px;padding:16px;">
+      <div style="margin-bottom:8px;"><span style="color:#94a3b8;">Date:</span> <strong style="color:#f1f5f9;">${opts.date}</strong></div>
+      <div style="margin-bottom:8px;"><span style="color:#94a3b8;">Tables backed up:</span> <strong style="color:#f1f5f9;">${opts.tableCount}</strong></div>
+      <div style="margin-bottom:8px;"><span style="color:#94a3b8;">Backup size:</span> <strong style="color:#f1f5f9;">${opts.sizeKb} KB</strong></div>
+    </div>
+    <a href="${opts.downloadUrl}" class="btn">Download Backup File</a>
+    <p style="font-size:12px;color:#475569;margin-top:16px;">Backups are stored in your Bulnix S3 storage. Keep copies in a safe place for disaster recovery.</p>`;
+  const client = getResend();
+  if (!client) { console.warn("[email] RESEND_API_KEY not set \u2014 skipping backup email"); return; }
+  await client.emails.send({ from: FROM, replyTo: REPLY_TO, to: opts.to, subject: `\u2705 Bulnix Daily Backup Complete \u2014 ${opts.date.slice(0, 10)}`, html: baseTemplate("Daily Backup Complete", body) });
+}
+
+/** Backup failure alert email to owner */
+export async function sendBackupFailedEmail(opts: {
+  to: string;
+  date: string;
+  errorMessage: string;
+}): Promise<void> {
+  const body = `
+    <h1 style="color:#ef4444;">&#x274c; Daily Backup FAILED</h1>
+    <p>Your automatic database backup encountered an error and did not complete. Please take action immediately.</p>
+    <div style="background:#1f2937;color:#f87171;padding:12px;border-radius:6px;font-family:monospace;font-size:13px;margin:16px 0;">${opts.errorMessage}</div>
+    <p>Please log in to your admin panel and trigger a manual backup, or contact Manus support.</p>
+    <a href="https://help.manus.im" class="btn" style="background:#ef4444;">Contact Support</a>`;
+  const client = getResend();
+  if (!client) { console.warn("[email] RESEND_API_KEY not set \u2014 skipping backup failure email"); return; }
+  await client.emails.send({ from: FROM, replyTo: REPLY_TO, to: opts.to, subject: `\u274c Bulnix Daily Backup FAILED \u2014 ${opts.date}`, html: baseTemplate("Backup Failed", body) });
+}
+
 /** Generic safe wrapper — logs errors but never throws */
 export async function safeSendEmail(fn: () => Promise<void>): Promise<void> {
   try {
