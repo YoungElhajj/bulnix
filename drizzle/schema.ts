@@ -163,6 +163,7 @@ export const products = mysqlTable("products", {
   riskFlag: boolean("riskFlag").default(false).notNull(),
   requiresAgeVerification: boolean("requiresAgeVerification").default(false).notNull(),
   deliveryNote: text("deliveryNote"),
+  deliveryFormat: text("deliveryFormat"), // Override auto-detected credential format, e.g. "Email : Password : 2FA : Facebook ID"
   refundPolicy: text("refundPolicy"),
 
   createdAt: timestamp("createdAt").defaultNow().notNull(),

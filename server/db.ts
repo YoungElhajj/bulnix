@@ -1066,7 +1066,7 @@ export async function adminGetProducts(input: { page: number; limit: number; sea
 export async function adminCreateProduct(input: {
   title: string; slug: string; description?: string; imageUrl?: string;
   categoryId?: number; supplierPrice: number; markupPercent: number;
-  stockQuantity: number; stockUnlimited: boolean; deliveryNote?: string;
+  stockQuantity: number; stockUnlimited: boolean; deliveryNote?: string; deliveryFormat?: string;
   isVisible: boolean; isFeatured: boolean;
 }) {
   const db = await getDb();
@@ -1086,6 +1086,7 @@ export async function adminCreateProduct(input: {
     stockQuantity: input.stockQuantity,
     stockUnlimited: input.stockUnlimited,
     deliveryNote: input.deliveryNote ?? null,
+    deliveryFormat: input.deliveryFormat ?? null,
     isVisible: input.isVisible,
     isFeatured: input.isFeatured,
   });
@@ -1096,7 +1097,7 @@ export async function adminUpdateProduct(input: {
   id: number; title?: string; description?: string; imageUrl?: string; markupPercent?: number;
   isVisible?: boolean; isFeatured?: boolean; categoryId?: number;
   regionRestrictions?: string[]; allowedPaymentMethods?: string[];
-  deliveryNote?: string; refundPolicy?: string;
+  deliveryNote?: string; deliveryFormat?: string; refundPolicy?: string;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -1110,6 +1111,7 @@ export async function adminUpdateProduct(input: {
   if (input.regionRestrictions !== undefined) updateData.regionRestrictions = input.regionRestrictions;
   if (input.allowedPaymentMethods !== undefined) updateData.allowedPaymentMethods = input.allowedPaymentMethods;
   if (input.deliveryNote !== undefined) updateData.deliveryNote = input.deliveryNote;
+  if (input.deliveryFormat !== undefined) updateData.deliveryFormat = input.deliveryFormat;
   if (input.refundPolicy !== undefined) updateData.refundPolicy = input.refundPolicy;
   if (input.markupPercent !== undefined) {
     updateData.markupPercent = input.markupPercent.toFixed(2);

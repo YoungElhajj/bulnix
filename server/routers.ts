@@ -216,6 +216,7 @@ export const appRouter = router({
           stockQuantity: z.number().default(0),
           stockUnlimited: z.boolean().default(false),
           deliveryNote: z.string().optional(),
+          deliveryFormat: z.string().optional(),
           isVisible: z.boolean().default(true),
           isFeatured: z.boolean().default(false),
         }))
@@ -233,6 +234,7 @@ export const appRouter = router({
           regionRestrictions: z.array(z.string()).optional(),
           allowedPaymentMethods: z.array(z.string()).optional(),
           deliveryNote: z.string().optional(),
+          deliveryFormat: z.string().optional(),
           refundPolicy: z.string().optional(),
         }))
         .mutation(({ input }) => db.adminUpdateProduct(input)),

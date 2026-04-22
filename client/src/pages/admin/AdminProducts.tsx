@@ -24,7 +24,7 @@ export default function AdminProducts() {
     title: "", slug: "", description: "", imageUrl: "",
     categoryId: "", supplierPrice: "", markupPercent: "20",
     stockQuantity: "0", stockUnlimited: false,
-    deliveryNote: "", isVisible: true, isFeatured: false,
+    deliveryNote: "", deliveryFormat: "", isVisible: true, isFeatured: false,
   });
 
   const [uploading, setUploading] = useState(false);
@@ -64,7 +64,7 @@ export default function AdminProducts() {
     onSuccess: () => {
       toast.success("Product added!");
       setAddOpen(false);
-      setAddForm({ title: "", slug: "", description: "", imageUrl: "", categoryId: "", supplierPrice: "", markupPercent: "20", stockQuantity: "0", stockUnlimited: false, deliveryNote: "", isVisible: true, isFeatured: false });
+      setAddForm({ title: "", slug: "", description: "", imageUrl: "", categoryId: "", supplierPrice: "", markupPercent: "20", stockQuantity: "0", stockUnlimited: false, deliveryNote: "", deliveryFormat: "", isVisible: true, isFeatured: false });
       utils.admin.products.list.invalidate();
     },
     onError: e => toast.error(e.message),
@@ -83,6 +83,7 @@ export default function AdminProducts() {
       categoryId: p.categoryId ? String(p.categoryId) : "",
       markupPercent: p.markupPercent ?? 20,
       deliveryNote: p.deliveryNote ?? "",
+      deliveryFormat: p.deliveryFormat ?? "",
       refundPolicy: p.refundPolicy ?? "",
       isVisible: !!p.isVisible,
       isFeatured: !!p.isFeatured,
@@ -99,6 +100,7 @@ export default function AdminProducts() {
       categoryId: editForm.categoryId ? Number(editForm.categoryId) : undefined,
       markupPercent: Number(editForm.markupPercent),
       deliveryNote: editForm.deliveryNote || undefined,
+      deliveryFormat: editForm.deliveryFormat || undefined,
       refundPolicy: editForm.refundPolicy || undefined,
       isVisible: editForm.isVisible,
       isFeatured: editForm.isFeatured,
@@ -121,6 +123,7 @@ export default function AdminProducts() {
       stockQuantity: Number(addForm.stockQuantity),
       stockUnlimited: addForm.stockUnlimited,
       deliveryNote: addForm.deliveryNote || undefined,
+      deliveryFormat: addForm.deliveryFormat || undefined,
       isVisible: addForm.isVisible,
       isFeatured: addForm.isFeatured,
     });
@@ -276,6 +279,11 @@ export default function AdminProducts() {
                 <Input value={editForm.deliveryNote} onChange={e => setEditForm((f: any) => ({ ...f, deliveryNote: e.target.value }))} placeholder="e.g. Delivered within 5 minutes" className="bg-[#0d1117] border-emerald-900/30 text-white focus:border-emerald-500 h-10" />
               </div>
               <div>
+                <Label className="text-slate-400 text-sm mb-1.5 block">Credential Delivery Format</Label>
+                <Input value={editForm.deliveryFormat} onChange={e => setEditForm((f: any) => ({ ...f, deliveryFormat: e.target.value }))} placeholder="e.g. Email : Password : 2FA : Facebook ID" className="bg-[#0d1117] border-emerald-900/30 text-white focus:border-emerald-500 h-10" />
+                <p className="text-xs text-slate-500 mt-1">Override the auto-detected credential format shown on the product page. Use colon-separated field names.</p>
+              </div>
+              <div>
                 <Label className="text-slate-400 text-sm mb-1.5 block">Refund Policy</Label>
                 <Input value={editForm.refundPolicy} onChange={e => setEditForm((f: any) => ({ ...f, refundPolicy: e.target.value }))} placeholder="e.g. No refunds on digital goods" className="bg-[#0d1117] border-emerald-900/30 text-white focus:border-emerald-500 h-10" />
               </div>
@@ -374,6 +382,11 @@ export default function AdminProducts() {
             <div>
               <Label className="text-slate-400 text-sm mb-1.5 block">Delivery Note</Label>
               <Input value={addForm.deliveryNote} onChange={e => setAddForm(f => ({ ...f, deliveryNote: e.target.value }))} placeholder="e.g. Delivered within 5 minutes" className="bg-[#0d1117] border-emerald-900/30 text-white focus:border-emerald-500 h-10" />
+            </div>
+            <div>
+              <Label className="text-slate-400 text-sm mb-1.5 block">Credential Delivery Format</Label>
+              <Input value={addForm.deliveryFormat} onChange={e => setAddForm(f => ({ ...f, deliveryFormat: e.target.value }))} placeholder="e.g. Email : Password : 2FA : Facebook ID" className="bg-[#0d1117] border-emerald-900/30 text-white focus:border-emerald-500 h-10" />
+              <p className="text-xs text-slate-500 mt-1">Override the auto-detected credential format. Use colon-separated field names.</p>
             </div>
             <div className="flex items-center justify-between py-1">
               <div className="text-sm text-white">Visible to customers</div>

@@ -995,7 +995,7 @@ export default function ProductDetail() {
                   {/* Delivery format */}
                   <div className="p-4 bg-[#0050D0]/5 rounded-xl border border-[#0050D0]/20">
                     <p className="text-xs font-semibold text-[#0050D0] uppercase tracking-wide mb-1">Delivery Format</p>
-                    <p className="text-sm font-mono text-foreground font-semibold">{productInfo.deliveryFormat}</p>
+                    <p className="text-sm font-mono text-foreground font-semibold">{(p as any).deliveryFormat || productInfo.deliveryFormat}</p>
                     <p className="text-xs text-muted-foreground mt-1">Credentials will be displayed in this format in your order details after purchase.</p>
                   </div>
 
