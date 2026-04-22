@@ -523,3 +523,15 @@
 - [x] Add admin.system.runBackup tRPC procedure for manual on-demand backup trigger
 - [x] Add Backup card to Admin Dashboard (last backup time, download link, manual trigger button)
 - [x] Run tests, save checkpoint — 43 tests passing
+
+## Payment System Overhaul (Apr 22, 2026)
+- [x] Disable Paystack checkout (hidden from UI, code preserved for future re-enable)
+- [x] Fix Flutterwave wallet funding flow (backend connector fixed)
+- [x] Fix NowPayments minimum deposit amount ($20 minimum enforced, shown in UI)
+- [x] Integrate Kora Pay as wallet funding gateway (live key validated sk_live_*)
+- [x] Enforce wallet-first checkout: Checkout.tsx now wallet-only, no direct gateway payment
+- [x] All orders deduct from wallet balance only
+- [x] Payment gateways only used for wallet top-up, not order tracking
+- [x] Wallet balance visible in navbar as badge next to username (auto-refreshes every 60s)
+- [x] Wallet balance prominent in wallet page header and checkout page
+- [x] Run tests — 43 tests passing, 0 TypeScript errors, Kora Pay live key validated

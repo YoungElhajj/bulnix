@@ -2,6 +2,7 @@ import { and, asc, desc, eq, ilike, inArray, like, or, sql } from "drizzle-orm";
 import { paystackInitiate, paystackVerify } from "./payments/paystack";
 import { flwInitiate, flwVerify } from "./payments/flutterwave";
 import { npInitiate, npGetPaymentStatus, isNowPaymentsSuccess } from "./payments/nowpayments";
+import { koraInitiate, koraVerify, isKoraSuccess } from "./payments/korapay";
 import { isRetryableDbError, sleep, withDbRetry } from "./db-retry";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
@@ -1319,18 +1320,8 @@ export async function initiateWalletTopup(userId: number, amountUSD: number, gat
 
   try {
     if (gateway === "paystack") {
-      // Paystack Nigeria only supports NGN. Always convert USD → NGN and charge in kobo.
-      const amountNGN = Math.round(amountUSD * usdToNgn);
-      const amountKobo = amountNGN * 100; // Paystack expects kobo (NGN × 100)
-      const result = await paystackInitiate({
-        email: userEmail,
-        amountKobo,
-        reference,
-        currency: "NGN",
-        callbackUrl,
-        metadata: { topupRef: reference, userId, type: "wallet_topup", amountUSD },
-      });
-      paymentUrl = result.authorizationUrl;
+      // Paystack is temporarily disabled — throw a user-friendly error
+      throw new Error("Paystack is currently unavailable. Please use Flutterwave, Kora Pay, or Crypto.");
     } else if (gateway === "flutterwave") {
       const result = await flwInitiate({
         txRef: reference,
@@ -1338,22 +1329,35 @@ export async function initiateWalletTopup(userId: number, amountUSD: number, gat
         currency: "USD",
         email: userEmail,
         name: userName,
-        redirectUrl: callbackUrl,
-        description: `Wallet top-up $${amountUSD.toFixed(2)}`,
+        redirectUrl: `${siteOrigin}/wallet?topup_ref=${reference}&status=success`,
+        description: `Bulnix wallet top-up $${amountUSD.toFixed(2)}`,
         meta: { topupRef: reference, userId, type: "wallet_topup" },
       });
       paymentUrl = result.paymentLink;
     } else if (gateway === "nowpayments") {
+      // NowPayments minimum is $1 USD equivalent
+      if (amountUSD < 1) throw new Error("Minimum crypto deposit is $1.00");
       const result = await npInitiate({
         priceAmount: amountUSD,
         priceCurrency: "usd",
         orderId: reference,
         orderDescription: `Bulnix wallet top-up $${amountUSD.toFixed(2)}`,
-        successUrl: `${callbackUrl}&reference=${reference}&status=success`,
-        cancelUrl: `${callbackUrl}&reference=${reference}&status=cancelled`,
+        successUrl: `${siteOrigin}/wallet?topup_ref=${reference}&status=success`,
+        cancelUrl: `${siteOrigin}/wallet?topup_ref=${reference}&status=cancelled`,
         ipnCallbackUrl: `${siteOrigin}/api/webhooks/nowpayments`,
       });
       paymentUrl = result.invoiceUrl;
+    } else if (gateway === "korapay") {
+      const result = await koraInitiate({
+        reference,
+        amountUSD,
+        email: userEmail,
+        name: userName,
+        redirectUrl: `${siteOrigin}/wallet?topup_ref=${reference}&status=success`,
+        description: `Bulnix wallet top-up $${amountUSD.toFixed(2)}`,
+        metadata: { topupRef: reference, userId, type: "wallet_topup" },
+      });
+      paymentUrl = result.checkoutUrl;
     }
   } catch (err: any) {
     await logSystem("error", "payment", `Wallet topup gateway initiation failed`, { gateway, userId, amountUSD, error: err.message });

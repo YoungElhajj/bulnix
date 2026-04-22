@@ -103,6 +103,8 @@ export default function Navbar() {
   const [location] = useLocation();
   const { totalItems } = useCart();
   const { user, isAuthenticated } = useAuth();
+  const walletQuery = trpc.wallet.get.useQuery(undefined, { enabled: isAuthenticated, refetchInterval: 60000 });
+  const walletBalance = Number(walletQuery.data?.balanceUSD ?? 0);
   const logoutMutation = trpc.auth.logout.useMutation({
     onSuccess: () => { window.location.href = "/"; }
   });
@@ -231,6 +233,11 @@ export default function Navbar() {
                       {(user.name || user.email || "U")[0].toUpperCase()}
                     </div>
                     <span className="text-sm font-medium max-w-20 truncate hidden lg:block">{user.name || user.email}</span>
+                    {/* Wallet balance badge */}
+                    <span className="hidden lg:flex items-center gap-1 bg-[#00C2FF]/15 border border-[#00C2FF]/30 text-[#00C2FF] text-xs font-bold px-2 py-0.5 rounded-full">
+                      <Wallet className="h-3 w-3" />
+                      ${walletBalance.toFixed(2)}
+                    </span>
                     <ChevronDown className="h-3.5 w-3.5 opacity-50" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -249,9 +256,14 @@ export default function Navbar() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/wallet" className="flex items-center gap-2 cursor-pointer text-white/80 hover:text-white focus:text-white focus:bg-white/10">
-                      <Wallet className="h-4 w-4 text-[#00C2FF]" />
-                      <span>My Wallet</span>
+                    <Link href="/wallet" className="flex items-center justify-between gap-2 cursor-pointer text-white/80 hover:text-white focus:text-white focus:bg-white/10">
+                      <span className="flex items-center gap-2">
+                        <Wallet className="h-4 w-4 text-[#00C2FF]" />
+                        <span>My Wallet</span>
+                      </span>
+                      <span className="text-xs font-bold text-[#00C2FF] bg-[#00C2FF]/10 px-2 py-0.5 rounded-full">
+                        ${walletBalance.toFixed(2)}
+                      </span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Wallet, Plus, ArrowDownLeft, ArrowUpRight, RefreshCw, Clock, CheckCircle, XCircle, AlertCircle, ExternalLink, Bitcoin, CreditCard, Zap } from "lucide-react";
+import { Wallet, Plus, ArrowDownLeft, ArrowUpRight, RefreshCw, Clock, CheckCircle, XCircle, AlertCircle, ExternalLink, Bitcoin, CreditCard, Zap, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -13,39 +13,42 @@ const PRESET_AMOUNTS = [5, 10, 20, 50, 100, 200];
 
 const GATEWAYS = [
   {
-    key: "paystack",
-    label: "Paystack",
-    desc: "Cards, Bank Transfer, USSD",
+    key: "korapay",
+    label: "Kora Pay",
+    desc: "Cards, Bank Transfer, Mobile Money",
     region: "Nigeria / Africa",
+    minUSD: 1,
     icon: CreditCard,
-    color: "text-[#0050D0]",
-    bg: "bg-[#EEF4FF]",
-    border: "border-[#0050D0]/30",
-    activeBg: "bg-[#EEF4FF]",
-    activeBorder: "border-[#0050D0]",
+    color: "text-[#00C2FF]",
+    bg: "bg-[#001a2e]",
+    border: "border-[#00C2FF]/30",
+    activeBg: "bg-[#001a2e]",
+    activeBorder: "border-[#00C2FF]",
   },
   {
     key: "flutterwave",
     label: "Flutterwave",
     desc: "Cards, Bank Transfer, Mobile Money",
     region: "Africa / Global",
+    minUSD: 1,
     icon: Zap,
     color: "text-[#F5A623]",
-    bg: "bg-[#FFF8EC]",
+    bg: "bg-[#1a1200]",
     border: "border-[#F5A623]/30",
-    activeBg: "bg-[#FFF8EC]",
+    activeBg: "bg-[#1a1200]",
     activeBorder: "border-[#F5A623]",
   },
   {
     key: "nowpayments",
     label: "Crypto",
-    desc: "BTC, ETH, USDT, and 100+ coins",
+    desc: "BTC, ETH, USDT, and 100+ coins — min $20",
     region: "Global",
+    minUSD: 20,
     icon: Bitcoin,
     color: "text-[#F7931A]",
-    bg: "bg-[#FFF5E6]",
+    bg: "bg-[#1a0d00]",
     border: "border-[#F7931A]/30",
-    activeBg: "bg-[#FFF5E6]",
+    activeBg: "bg-[#1a0d00]",
     activeBorder: "border-[#F7931A]",
   },
 ];
@@ -75,7 +78,7 @@ function TxStatusBadge({ status }: { status: string }) {
 export default function WalletPage() {
   const { user, isAuthenticated, loading } = useAuth();
   const [amount, setAmount] = useState<string>("10");
-  const [gateway, setGateway] = useState("paystack");
+  const [gateway, setGateway] = useState("korapay");
   const [txPage, setTxPage] = useState(1);
   const [, setLocation] = useLocation();
 
@@ -125,8 +128,9 @@ export default function WalletPage() {
 
   const handleTopup = () => {
     const val = parseFloat(amount);
-    if (isNaN(val) || val < 3) {
-      toast.error("Minimum deposit is $3.00");
+    const selectedGw = GATEWAYS.find(g => g.key === gateway) ?? GATEWAYS[0];
+    if (isNaN(val) || val < selectedGw.minUSD) {
+      toast.error(`Minimum deposit for ${selectedGw.label} is $${selectedGw.minUSD.toFixed(2)}`);
       return;
     }
     initTopup.mutate({ amountUSD: val, gateway: gateway as any });

@@ -395,8 +395,8 @@ export const appRouter = router({
       .query(({ input, ctx }) => db.getWalletTransactions(ctx.user.id, input.page, input.limit)),
     initiateTopup: protectedProcedure
       .input(z.object({
-        amountUSD: z.number().min(3),
-        gateway: z.enum(["paystack", "flutterwave", "nowpayments"]),
+        amountUSD: z.number().min(1),
+        gateway: z.enum(["flutterwave", "nowpayments", "korapay"]),
       }))
       .mutation(({ input, ctx }) => {
         // Use the real public domain in production — never trust x-forwarded-host as it may be an internal proxy

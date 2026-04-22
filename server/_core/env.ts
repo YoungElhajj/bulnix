@@ -18,4 +18,8 @@ export const ENV = {
   nowpaymentsApiKey: process.env.NOWPAYMENTS_API_KEY ?? "",
   nowpaymentsIpnSecret: process.env.NOWPAYMENTS_IPN_SECRET ?? "",
   nowpaymentsCurrency: process.env.NOWPAYMENTS_CURRENCY ?? "usdttrc20",
+  // Kora Pay
+  korapaySecretKey: process.env.KORAPAY_SECRET_KEY ?? "",
+  korapayPublicKey: process.env.KORAPAY_PUBLIC_KEY ?? "",
+  korapayWebhookSecret: process.env.KORAPAY_WEBHOOK_SECRET ?? "",
 };
