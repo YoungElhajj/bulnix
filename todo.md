@@ -569,3 +569,9 @@
 - [ ] Fix Kora Pay card missing logo and name on wallet payment method selector
 - [ ] Add auto-redirect to wallet page after payment is confirmed
 - [ ] Add loading animation on payment processing/waiting page
+
+## Flutterwave Security Audit (Apr 22, 2026)
+- [x] Verified Flutterwave webhook uses skipVerify=true (correct, same as Kora Pay)
+- [x] Verified frontend no longer calls confirmTopup on redirect for any gateway (polling only)
+- [x] Added Flutterwave API verification to confirmWalletTopup (defense-in-depth: blocks false credits if confirmTopup tRPC is ever called directly)
+- [x] NGN rate blank in Flutterwave checkout: expected behavior — Flutterwave charges USD directly, no NGN conversion needed

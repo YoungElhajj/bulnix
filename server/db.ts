@@ -1430,7 +1430,7 @@ export async function confirmWalletTopup(reference: string, skipVerify = false) 
   if (!txn) throw new Error("Transaction not found");
   if (txn.status === "completed") return { success: true, alreadyProcessed: true };
 
-  // For Kora Pay: ALWAYS verify with the API before crediting.
+  // For Kora Pay and Flutterwave: ALWAYS verify with the API before crediting.
   // The redirect_url fires even on cancel, so we cannot trust it.
   // Only the webhook (skipVerify=true) or a confirmed API status should credit the wallet.
   if (!skipVerify && txn.gateway === "korapay") {
@@ -1445,6 +1445,30 @@ export async function confirmWalletTopup(reference: string, skipVerify = false) 
     if (!verified) {
       await logSystem("warn", "payment", `Kora Pay confirmation rejected — payment not confirmed by API`, { reference });
       throw new Error("Payment has not been confirmed by Kora Pay. Your wallet will be credited automatically once payment is received.");
+    }
+  }
+
+  if (!skipVerify && txn.gateway === "flutterwave") {
+    // Flutterwave: verify via transaction ID stored in the payment record
+    const { flwVerify } = await import("./payments/flutterwave");
+    let verified = false;
+    try {
+      // Look up the gateway transaction ID from the payments table
+      const [pmtRow] = await db!.select({ gatewayTransactionId: payments.gatewayTransactionId })
+        .from(payments).where(eq(payments.gatewayReference, reference)).limit(1);
+      if (pmtRow?.gatewayTransactionId) {
+        const result = await flwVerify(pmtRow.gatewayTransactionId);
+        verified = result.status === "successful";
+      } else {
+        // No transaction ID yet — payment hasn't been processed by Flutterwave
+        verified = false;
+      }
+    } catch (verifyErr: any) {
+      await logSystem("warn", "payment", `Flutterwave verify failed for ${reference}: ${verifyErr.message}`);
+    }
+    if (!verified) {
+      await logSystem("warn", "payment", `Flutterwave confirmation rejected — payment not confirmed by API`, { reference });
+      throw new Error("Payment has not been confirmed by Flutterwave. Your wallet will be credited automatically once payment is received.");
     }
   }
 
