@@ -624,3 +624,9 @@
 - [ ] Rewrite product descriptions with clear Bulnix-branded login instructions per category (streaming, social media, gaming, software)
 - [ ] Full mobile responsiveness audit: wallet balance badge, navbar, product grid, checkout, dashboard
 - [ ] Fix wallet balance badge not showing on mobile navbar
+
+## Logo & Product Description Updates (Apr 22, 2026)
+- [ ] Update favicon and logo to new Bulnix icon (dark blue cross/circle symbol)
+- [ ] Improve product descriptions to supplier-style format (detailed bullets, delivery format line, important notes)
+- [ ] Raise NowPayments minimum deposit from $10 to $12
+- [ ] Format delivered credentials clearly in order delivery view (Username: xxx | Password: xxx | 2FA: xxx)

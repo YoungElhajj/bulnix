@@ -9,26 +9,75 @@ import Footer from "@/components/Footer";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 
+// Known credential field labels for common platforms
+const FIELD_LABELS: Record<string, string> = {
+  login: "Username / Login",
+  username: "Username",
+  email: "Email",
+  password: "Password",
+  email_password: "Email Password",
+  "2fa": "2FA Key",
+  "2fa_key": "2FA Key",
+  totp: "2FA Key",
+  backup_codes: "Backup Codes",
+  token: "Token",
+  id: "Account ID",
+  facebook_id: "Facebook ID",
+  data: "Data",
+  credential: "Credential",
+  phone: "Phone Number",
+  recovery_email: "Recovery Email",
+};
+
+function labelKey(key: string): string {
+  return FIELD_LABELS[key.toLowerCase()] ?? key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// Parse a colon-separated string like "email:pass:2fa" into labeled fields
+function parseColonString(line: string): Record<string, string> {
+  const parts = line.split(":").map(p => p.trim());
+  if (parts.length === 1) return { credential: parts[0] };
+  const fieldMaps: Record<number, string[]> = {
+    2: ["login", "password"],
+    3: ["email", "password", "email_password"],
+    4: ["email", "password", "email_password", "2fa"],
+    5: ["login", "password", "email", "email_password", "2fa"],
+    6: ["login", "password", "email", "email_password", "2fa", "id"],
+  };
+  const keys = fieldMaps[parts.length] ?? parts.map((_, i) => `field_${i + 1}`);
+  const result: Record<string, string> = {};
+  parts.forEach((val, i) => { if (val) result[keys[i] ?? `field_${i + 1}`] = val; });
+  return result;
+}
+
 function parseDeliveryData(raw: string | null | undefined): Array<Record<string, string>> {
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) return parsed.map((item) => {
-      if (typeof item === "string") return { credential: item };
-      return item as Record<string, string>;
+      if (typeof item === "string") {
+        return item.includes(":") ? parseColonString(item) : { credential: item };
+      }
+      // AccsZone account object: { login, password, email, data, ... }
+      const acc = item as Record<string, unknown>;
+      const result: Record<string, string> = {};
+      for (const [k, v] of Object.entries(acc)) {
+        if (v !== null && v !== undefined && v !== "") result[k] = String(v);
+      }
+      return result;
     });
-    if (typeof parsed === "object") return [parsed];
+    if (typeof parsed === "object" && parsed !== null) return [parsed as Record<string, string>];
     return [{ credential: String(parsed) }];
   } catch {
-    // If not JSON, treat as plain text (one credential per line)
-    return raw.split("\n").filter(Boolean).map((line) => ({ credential: line.trim() }));
+    return raw.split("\n").filter(Boolean).map((line) => {
+      const trimmed = line.trim();
+      return trimmed.includes(":") ? parseColonString(trimmed) : { credential: trimmed };
+    });
   }
 }
-
 function CredentialCard({ account, index, onCopy }: { account: Record<string, string>; index: number; onCopy: (text: string) => void }) {
   const entries = Object.entries(account).filter(([, v]) => v);
-  const fullText = entries.map(([k, v]) => `${k}: ${v}`).join("\n");
-
+  const fullText = entries.map(([k, v]) => `${labelKey(k)}: ${v}`).join("\n");
   return (
     <div className="p-4 bg-[#F0F8FF] border border-[#0050D0]/20 rounded-xl">
       <div className="flex items-center justify-between mb-3">
@@ -45,12 +94,13 @@ function CredentialCard({ account, index, onCopy }: { account: Record<string, st
       </div>
       <div className="space-y-2">
         {entries.map(([key, value]) => (
-          <div key={key} className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-[#D8E8F5]">
-            <span className="text-xs text-[#4A6080] capitalize min-w-[60px] font-medium">{key}</span>
-            <span className="font-mono text-sm text-[#0D2137] flex-1 break-all">{value}</span>
+          <div key={key} className="flex items-start gap-2 bg-white rounded-lg px-3 py-2.5 border border-[#D8E8F5]">
+            <span className="text-xs text-[#4A6080] font-semibold min-w-[120px] shrink-0 mt-0.5">{labelKey(key)}</span>
+            <span className="font-mono text-sm text-[#0D2137] flex-1 break-all leading-snug">{value}</span>
             <button
               onClick={() => onCopy(value)}
-              className="flex-shrink-0 p-1.5 rounded hover:bg-[#F0F8FF] text-[#4A6080] hover:text-[#0050D0] transition-colors"
+              className="flex-shrink-0 p-1.5 rounded hover:bg-[#F0F8FF] text-[#4A6080] hover:text-[#0050D0] transition-colors mt-0.5"
+              title={`Copy ${labelKey(key)}`}
             >
               <Copy className="h-3.5 w-3.5" />
             </button>
@@ -59,9 +109,7 @@ function CredentialCard({ account, index, onCopy }: { account: Record<string, st
       </div>
     </div>
   );
-}
-
-export default function OrderDetail() {
+}export default function OrderDetail() {
   const params = useParams<{ id: string }>();
   const { isAuthenticated } = useAuth();
   const orderId = parseInt(params.id ?? "0");

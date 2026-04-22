@@ -10,7 +10,7 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
 
-const LOGO_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663404004095/UEAuHoiEheGEUEnr.jpg";
+const LOGO_URL = "https://static-assets.manus.space/manus-storage/bulnix-new-logo_9cb6900b.jpg";
 
 type Step = "signup" | "otp";
 

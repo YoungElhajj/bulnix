@@ -393,6 +393,298 @@ function getLoginInstructions(title: string): {
   };
 }
 
+// Get product-specific description features, delivery format, and important notes
+function getProductInfo(title: string): {
+  features: string[];
+  deliveryFormat: string;
+  importantNotes: string[];
+} {
+  const t = title.toLowerCase();
+
+  if (t.includes("instagram") || t.includes("ig account")) {
+    const hasFollowers = t.match(/(\d+)\+?\s*follower/);
+    const followerCount = hasFollowers ? hasFollowers[1] : "100+";
+    const has2FA = t.includes("2fa");
+    const hasEmail = t.includes("email");
+    const isAged = t.includes("aged") || t.includes("old");
+    const hasAvatar = t.includes("avatar") || t.includes("posts");
+    return {
+      features: [
+        `${followerCount}+ followers added to the account`,
+        ...(hasEmail ? ["Email verified with full email access (email address + email password included)"] : []),
+        ...(has2FA ? ["2FA enabled — 2FA key/backup codes included in delivery"] : []),
+        ...(isAged ? ["Aged account — created before 2024 for higher trust score"] : []),
+        ...(hasAvatar ? ["Profile fully set up with avatar and posts"] : []),
+        "Registered using a US IP/proxy for location consistency",
+        "Phone number added to the account",
+      ],
+      deliveryFormat: has2FA && hasEmail
+        ? "Instagram Username : Password : Email : Email Password : 2FA Key"
+        : hasEmail
+        ? "Instagram Username : Password : Email : Email Password"
+        : "Instagram Username : Password",
+      importantNotes: [
+        "These are access-based Instagram accounts. The term 'verified' refers to email/phone association during account setup — not Meta blue-badge verification.",
+        "We strongly recommend logging in using a US IP (mobile or high-quality residential proxy) to minimise security checks.",
+        "If you face a login issue: first confirm you are using a US IP/location, and avoid VPNs, datacenter IPs, or previously flagged devices.",
+        "If the issue continues, contact our support team for assistance.",
+      ],
+    };
+  }
+
+  if (t.includes("facebook") || t.includes("fb account")) {
+    const hasEmail = t.includes("email");
+    const has2FA = t.includes("2fa");
+    const hasBM = t.includes("bm") || t.includes("business manager") || t.includes("ads account");
+    return {
+      features: [
+        "100+ followers added to the account",
+        "Phone number added to the account",
+        ...(hasEmail ? ["Email verified with full email access (email address + email password included)"] : []),
+        ...(has2FA ? ["2FA enabled — 2FA key/backup codes included"] : []),
+        ...(hasBM ? ["Business Manager access included"] : []),
+        "Profile fully set up with profile picture, cover photo, and basic information",
+        "Latin (English) names with realistic profile details",
+        "Gender: male or female (random)",
+        "Registered using a US IP/proxy for location consistency",
+      ],
+      deliveryFormat: has2FA && hasEmail
+        ? "Facebook Email : Facebook Password : Email Password : 2FA : Facebook ID"
+        : hasEmail
+        ? "Facebook Email : Facebook Password : Email Password : Facebook ID"
+        : "Facebook Email : Facebook Password : Facebook ID",
+      importantNotes: [
+        "These are access-based Facebook accounts. The term 'verified' refers to email verification and phone number association during account setup — not Meta blue-badge verification.",
+        "We strongly recommend logging in using a US IP (mobile or high-quality residential proxy) to minimise security checks.",
+        "If you face a login issue: first confirm you are using a US IP/location, and avoid VPNs, datacenter IPs, or previously flagged devices.",
+        "Do NOT run Facebook Ads within the first 48 hours of taking ownership.",
+      ],
+    };
+  }
+
+  if (t.includes("twitter") || t.includes("x account") || t.includes("tweet")) {
+    const hasEmail = t.includes("email");
+    const has2FA = t.includes("2fa");
+    return {
+      features: [
+        "Aged Twitter/X account with established history",
+        ...(hasEmail ? ["Full email access included (email address + email password)"] : []),
+        ...(has2FA ? ["2FA enabled — backup codes included"] : []),
+        "Profile set up with username, bio, and profile picture",
+        "Registered using a US IP for location consistency",
+      ],
+      deliveryFormat: hasEmail
+        ? "Twitter Username : Password : Email : Email Password"
+        : "Twitter Username : Password",
+      importantNotes: [
+        "Do not tweet or retweet immediately — wait 24 hours to avoid suspension.",
+        "Use a VPN matching the account's original country for first login.",
+        "Change the password immediately after first login.",
+        "Contact Bulnix support within 24 hours if credentials are invalid.",
+      ],
+    };
+  }
+
+  if (t.includes("tiktok")) {
+    const hasEmail = t.includes("email");
+    return {
+      features: [
+        "TikTok account with followers",
+        ...(hasEmail ? ["Full email access included (email address + email password)"] : []),
+        "Profile set up with username and profile picture",
+        "Registered using a US IP for location consistency",
+      ],
+      deliveryFormat: hasEmail
+        ? "TikTok Username : Password : Email : Email Password"
+        : "TikTok Username : Password",
+      importantNotes: [
+        "Use a VPN matching the account's original country for first login.",
+        "Do not post content immediately — warm up the account gradually.",
+        "Change the password immediately after first login.",
+        "Contact Bulnix support within 24 hours if credentials are invalid.",
+      ],
+    };
+  }
+
+  if (t.includes("youtube") || t.includes("yt ")) {
+    const hasEmail = t.includes("email");
+    return {
+      features: [
+        "YouTube channel with subscribers",
+        "Full Google account access included",
+        ...(hasEmail ? ["Email access included (email address + email password)"] : []),
+        "Channel set up with name, description, and profile picture",
+      ],
+      deliveryFormat: "Google Email : Password : Recovery Email : Recovery Password",
+      importantNotes: [
+        "Use a VPN matching the account's original country for first login.",
+        "Do not upload videos immediately — wait 24–48 hours.",
+        "Change the password and add your own recovery email immediately after login.",
+        "Contact Bulnix support within 24 hours if credentials are invalid.",
+      ],
+    };
+  }
+
+  if (t.includes("spotify")) {
+    return {
+      features: [
+        "Spotify Premium subscription included",
+        "Full account access (email + password)",
+        "Ad-free listening, offline downloads, and unlimited skips",
+        "Works on all devices (mobile, desktop, web)",
+      ],
+      deliveryFormat: "Spotify Email : Password",
+      importantNotes: [
+        "Do not change the email address on the account.",
+        "Do not add payment methods to the account.",
+        "Contact Bulnix support within 24 hours if the subscription is not active.",
+      ],
+    };
+  }
+
+  if (t.includes("netflix")) {
+    return {
+      features: [
+        "Netflix subscription included (check plan in listing title)",
+        "Full account access (email + password)",
+        "Works on all devices (TV, mobile, desktop)",
+        "HD/4K streaming depending on plan",
+      ],
+      deliveryFormat: "Netflix Email : Password",
+      importantNotes: [
+        "Do not change the email address or password on the account.",
+        "Do not add payment methods to the account.",
+        "Use only the profile slot assigned to you — do not modify other profiles.",
+        "Contact Bulnix support within 24 hours if access is not working.",
+      ],
+    };
+  }
+
+  if (t.includes("discord")) {
+    const hasEmail = t.includes("email");
+    return {
+      features: [
+        "Discord account with established history",
+        ...(hasEmail ? ["Full email access included"] : []),
+        "Profile set up with username and avatar",
+        "Aged account for higher trust score",
+      ],
+      deliveryFormat: hasEmail
+        ? "Discord Email : Password : Email Password : Token"
+        : "Discord Email : Password : Token",
+      importantNotes: [
+        "Do not use the account for spam or self-botting — it will be banned.",
+        "Change the password immediately after first login.",
+        "Contact Bulnix support within 24 hours if credentials are invalid.",
+      ],
+    };
+  }
+
+  if (t.includes("amazon") || t.includes("prime video") || t.includes("prime")) {
+    return {
+      features: [
+        "Amazon Prime subscription included",
+        "Full account access (email + password)",
+        "Access to Prime Video, Prime Music, and free delivery",
+        "Works on all devices",
+      ],
+      deliveryFormat: "Amazon Email : Password",
+      importantNotes: [
+        "Do not place orders or use stored payment methods on the account.",
+        "Do not change the email address on the account.",
+        "Contact Bulnix support within 24 hours if access is not working.",
+      ],
+    };
+  }
+
+  if (t.includes("canva")) {
+    return {
+      features: [
+        "Canva Pro subscription included",
+        "Full account access (email + password)",
+        "Access to all Pro templates, fonts, and assets",
+        "Works on all devices",
+      ],
+      deliveryFormat: "Canva Email : Password",
+      importantNotes: [
+        "Do not change the email address on the account.",
+        "Contact Bulnix support within 24 hours if access is not working.",
+      ],
+    };
+  }
+
+  if (t.includes("microsoft") || t.includes("office 365") || t.includes("office365") || t.includes("ms office")) {
+    return {
+      features: [
+        "Microsoft 365 / Office subscription included",
+        "Full account access (email + password)",
+        "Access to Word, Excel, PowerPoint, Teams, and OneDrive",
+        "Works on up to 5 devices",
+      ],
+      deliveryFormat: "Microsoft Email : Password",
+      importantNotes: [
+        "Do not change the email address on the account.",
+        "Do not add payment methods to the account.",
+        "Contact Bulnix support within 24 hours if access is not working.",
+      ],
+    };
+  }
+
+  if (t.includes("vpn") || t.includes("nordvpn") || t.includes("expressvpn") || t.includes("surfshark")) {
+    return {
+      features: [
+        "VPN subscription included (check plan in listing title)",
+        "Full account access (email + password)",
+        "Access to all server locations",
+        "Works on multiple devices simultaneously",
+      ],
+      deliveryFormat: "VPN Email : Password",
+      importantNotes: [
+        "Do not change the email address on the account.",
+        "Do not add payment methods to the account.",
+        "Contact Bulnix support within 24 hours if the subscription is not active.",
+      ],
+    };
+  }
+
+  if (t.includes("gaming") || t.includes("steam") || t.includes("pubg") || t.includes("valorant") || t.includes("fortnite") || t.includes("roblox") || t.includes("minecraft") || t.includes("gta") || t.includes("cod") || t.includes("call of duty") || t.includes("battlenet") || t.includes("epic games") || t.includes("playstation") || t.includes("psn")) {
+    const has2FA = t.includes("2fa") || t.includes("guard");
+    return {
+      features: [
+        "Gaming account with rank, level, and inventory as described",
+        "Full account access (email + password)",
+        ...(has2FA ? ["2FA/Guard codes included in delivery"] : []),
+        "Account verified and tested before delivery",
+      ],
+      deliveryFormat: has2FA
+        ? "Game Email : Password : 2FA Code : Account ID"
+        : "Game Email : Password : Account ID",
+      importantNotes: [
+        "Do not use cheats or hacks — the account will be permanently banned.",
+        "Do not make purchases using stored payment methods on the account.",
+        "Check the account's rank, level, and inventory before making any changes.",
+        "Contact Bulnix support within 24 hours if you cannot log in.",
+      ],
+    };
+  }
+
+  // Generic fallback
+  return {
+    features: [
+      "100% genuine and verified product",
+      "Instant digital delivery to your dashboard",
+      "Full account credentials provided",
+      "Support available if you encounter any issues",
+    ],
+    deliveryFormat: "Email / Username : Password",
+    importantNotes: [
+      "Credentials are valid at the time of delivery.",
+      "If login details do not work on arrival, contact support within 24 hours.",
+      "Our team will verify the issue and provide a suitable resolution according to our policy.",
+    ],
+  };
+}
+
 // Simple image area — show supplier image as-is on a white background
 function ProductImageArea({ product }: { product: any }) {
   return (
@@ -670,31 +962,72 @@ export default function ProductDetail() {
           <div className="p-6 md:p-8">
 
             {/* DESCRIPTION TAB */}
-            {activeTab === "description" && (
-              <div>
-                <h3 className="text-lg font-semibold text-foreground mb-3">About This Product</h3>
-                {p.description ? (
-                  <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{p.description}</p>
-                ) : (
-                  <div className="space-y-3 text-muted-foreground">
-                    <p>
+            {activeTab === "description" && (() => {
+              const productInfo = getProductInfo(p.title);
+              return (
+                <div className="space-y-6">
+                  {/* Header */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">About This Product</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
                       <strong className="text-foreground">{p.title}</strong> is a premium digital product available for instant delivery after purchase.
                       This is a verified, high-quality account or service that has been tested and confirmed to work.
                     </p>
-                    <p>
-                      All products on Bulnix are sourced from trusted suppliers and delivered automatically to your account dashboard
-                      within minutes of payment confirmation.
+                    <p className="text-muted-foreground text-sm leading-relaxed mt-2">
+                      All products on Bulnix are sourced from trusted suppliers and delivered automatically to your account dashboard within minutes of payment confirmation.
                     </p>
-                    <ul className="list-disc list-inside space-y-1 text-sm">
-                      <li>100% genuine and verified product</li>
-                      <li>Instant digital delivery to your dashboard</li>
-                      <li>Full account credentials provided</li>
-                      <li>Support available if you encounter any issues</li>
+                  </div>
+
+                  {/* Feature list */}
+                  {p.description ? (
+                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line text-sm">{p.description}</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {productInfo.features.map((f, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                          <CheckCircle className="h-4 w-4 text-[#00C2FF] mt-0.5 shrink-0" />
+                          <span dangerouslySetInnerHTML={{ __html: f.replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground">$1</strong>') }} />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {/* Delivery format */}
+                  <div className="p-4 bg-[#0050D0]/5 rounded-xl border border-[#0050D0]/20">
+                    <p className="text-xs font-semibold text-[#0050D0] uppercase tracking-wide mb-1">Delivery Format</p>
+                    <p className="text-sm font-mono text-foreground font-semibold">{productInfo.deliveryFormat}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Credentials will be displayed in this format in your order details after purchase.</p>
+                  </div>
+
+                  {/* Important notes */}
+                  <div className="p-4 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                    <p className="text-sm font-semibold text-amber-500 mb-2 flex items-center gap-1.5">
+                      <AlertTriangle className="h-4 w-4" /> Important Notes (Please Read Before Purchase)
+                    </p>
+                    <ul className="space-y-1.5">
+                      {productInfo.importantNotes.map((note, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-amber-700 dark:text-amber-300/80">
+                          <span className="shrink-0 mt-0.5">{i === 1 ? '✓' : i === 2 ? '✗' : '•'}</span>
+                          <span>{note}</span>
+                        </li>
+                      ))}
                     </ul>
                   </div>
-                )}
-              </div>
-            )}
+
+                  {/* Delivery & Support summary */}
+                  <div className="p-4 bg-green-500/10 rounded-xl border border-green-500/20">
+                    <p className="text-sm font-semibold text-green-500 mb-2 flex items-center gap-1.5">
+                      <Zap className="h-4 w-4" /> Delivery & Support
+                    </p>
+                    <ul className="space-y-1 text-sm text-green-700 dark:text-green-300/80">
+                      <li>• Instant delivery after successful payment</li>
+                      <li>• All credentials are delivered automatically to your order dashboard</li>
+                      <li>• Support available if you need help verifying or accessing the account</li>
+                    </ul>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* HOW TO LOGIN TAB */}
             {activeTab === "how-to-login" && (
