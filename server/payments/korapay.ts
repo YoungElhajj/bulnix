@@ -29,6 +29,12 @@ export interface KoraInitResult {
  * Amount must be in the smallest currency unit (kobo for NGN, cents for USD).
  * We pass USD amounts in USD directly — Kora supports USD.
  */
+// Exchange rate: 1 USD ≈ 1600 NGN (update periodically or fetch dynamically)
+const USD_TO_NGN = 1600;
+// Kora Pay account transaction limit: NGN 2,000 max (~$1.25 USD).
+// Contact Kora Pay support to increase this limit for your merchant account.
+const KORA_MAX_NGN = 2000;
+
 export async function koraInitiate(params: {
   reference: string;
   amountUSD: number;
@@ -38,12 +44,20 @@ export async function koraInitiate(params: {
   description?: string;
   metadata?: Record<string, unknown>;
 }): Promise<KoraInitResult> {
-  // Kora Pay expects amount in kobo/cents (minor unit). For USD, 1 USD = 100 cents.
-  const amountCents = Math.round(params.amountUSD * 100);
+  // Kora Pay uses NGN in kobo (1 NGN = 100 kobo).
+  // Convert USD → NGN → kobo. Do NOT pass channels — let Kora use account defaults.
+  const amountNGN = Math.round(params.amountUSD * USD_TO_NGN);
+  if (amountNGN > KORA_MAX_NGN) {
+    throw new Error(
+      `Kora Pay maximum per transaction is NGN ${KORA_MAX_NGN.toLocaleString()} (~$${(KORA_MAX_NGN / USD_TO_NGN).toFixed(2)} USD). ` +
+      `Please top up a smaller amount or use Flutterwave/Crypto for larger amounts.`
+    );
+  }
+  const amountKobo = amountNGN * 100;
   const data = await koraRequest("POST", "/charges/initialize", {
     reference: params.reference,
-    amount: amountCents,
-    currency: "USD",
+    amount: amountKobo,
+    currency: "NGN",
     redirect_url: params.redirectUrl,
     customer: {
       email: params.email,
@@ -51,7 +65,6 @@ export async function koraInitiate(params: {
     },
     narration: params.description ?? "Bulnix wallet top-up",
     metadata: params.metadata ?? {},
-    channels: ["card", "bank_transfer"],
   });
   return {
     checkoutUrl: (data.checkout_url ?? data.authorization_url) as string,

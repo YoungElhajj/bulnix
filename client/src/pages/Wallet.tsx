@@ -84,6 +84,8 @@ export default function WalletPage() {
 
   const { data: wallet, refetch: refetchWallet } = trpc.wallet.get.useQuery(undefined, { enabled: isAuthenticated });
   const { data: txData, refetch: refetchTx } = trpc.wallet.transactions.useQuery({ page: txPage, limit: 15 }, { enabled: isAuthenticated });
+  // MUST be called before any early returns to comply with Rules of Hooks
+  const { data: ratesData } = trpc.rates.list.useQuery(undefined, { enabled: isAuthenticated });
 
   const initTopup = trpc.wallet.initiateTopup.useMutation({
     onSuccess: (data) => {
@@ -169,8 +171,6 @@ export default function WalletPage() {
   const totalPages = Math.ceil(totalTx / 15);
   const selectedGateway = GATEWAYS.find(g => g.key === gateway) ?? GATEWAYS[0];
 
-  // Fetch exchange rates to show NGN equivalent for Paystack
-  const { data: ratesData } = trpc.rates.list.useQuery();
   const ngnRateRow = (ratesData as any[])?.find((r: any) => r.fromCurrency === "USD" && r.toCurrency === "NGN");
   const usdToNgn = ngnRateRow ? Number(ngnRateRow.rate) : 1600;
   const amountNGN = Math.round(parseFloat(amount || "0") * usdToNgn);
