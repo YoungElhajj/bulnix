@@ -14,6 +14,7 @@ import { nanoid } from "nanoid";
 import { verifyPaystackSignature } from "../payments/paystack";
 import { verifyFlwSignature } from "../payments/flutterwave";
 import { verifyNowPaymentsIpn, isNowPaymentsSuccess } from "../payments/nowpayments";
+import { verifyKoraSignature, isKoraSuccess } from "../payments/korapay";
 import { confirmWalletTopup, fulfillOrderByReference, logSystem } from "../db";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -53,6 +54,40 @@ async function startServer() {
 
   // ─── Webhook routes (raw body required for signature verification) ──────────
   // These MUST be registered before express.json() middleware
+
+  // Kora Pay webhook
+  app.post("/api/webhooks/korapay", express.raw({ type: "application/json" }), async (req: any, res: any) => {
+    try {
+      const signature = req.headers["x-korapay-signature"] as string;
+      const rawBody = req.body.toString("utf8");
+      if (!verifyKoraSignature(rawBody, signature)) {
+        await logSystem("warn", "payment", "Kora Pay webhook: invalid signature");
+        return res.status(401).json({ error: "Invalid signature" });
+      }
+      const event = JSON.parse(rawBody) as Record<string, unknown>;
+      // Kora Pay sends event type in event.event (e.g. "charge.success")
+      const eventType = (event.event as string) ?? "";
+      if (eventType === "charge.success") {
+        const data = event.data as Record<string, unknown>;
+        const reference = data.reference as string;
+        const status = (data.status as string) ?? "";
+        if (isKoraSuccess(status)) {
+          try {
+            await confirmWalletTopup(reference);
+            await logSystem("info", "payment", `Kora Pay webhook: wallet topup confirmed for ref ${reference}`);
+          } catch (e: any) {
+            // Not a wallet topup — ignore (Kora Pay is wallet-only for now)
+            await logSystem("warn", "payment", `Kora Pay webhook: could not confirm topup for ref ${reference}: ${e.message}`);
+          }
+        }
+      }
+      // Always return 200 to acknowledge receipt
+      res.status(200).json({ received: true });
+    } catch (e: any) {
+      await logSystem("error", "payment", `Kora Pay webhook error: ${e.message}`);
+      res.status(500).json({ error: "Internal error" });
+    }
+  });
 
   // Paystack webhook
   app.post("/api/webhooks/paystack", express.raw({ type: "application/json" }), async (req: any, res: any) => {
