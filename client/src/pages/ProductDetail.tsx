@@ -567,7 +567,7 @@ export default function ProductDetail() {
             )}
 
             {/* Quantity */}
-            <div className="flex items-center gap-4 mb-5">
+            <div className="flex flex-wrap items-center gap-3 mb-5">
               <span className="text-muted-foreground text-sm font-medium shrink-0">Quantity:</span>
               <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-3 py-2">
                 <button

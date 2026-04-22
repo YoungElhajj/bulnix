@@ -523,12 +523,12 @@ export default function SocialFloatingWidgets() {
   const toggle = () => setPanel(p => p === null ? "menu" : null);
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end gap-3">
 
       {/* ── CHAT PANEL ── */}
       {panel === "chat" && (
         <div className="flex flex-col bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden animate-in slide-in-from-bottom-4 fade-in duration-200"
-          style={{ width: 320, maxHeight: 500 }}>
+          style={{ width: 'min(320px, calc(100vw - 2rem))', maxHeight: 500 }}>
           {/* Header */}
           <div className="flex items-center gap-3 px-4 py-3 bg-[#0050D0] text-white flex-shrink-0">
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">

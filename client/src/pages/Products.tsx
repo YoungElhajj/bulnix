@@ -182,29 +182,31 @@ export default function Products() {
             )}
           </div>
 
-          <Select value={sort} onValueChange={(v: any) => { setSort(v); setPage(1); }}>
-            <SelectTrigger className="w-[180px] bg-card border-border text-foreground h-10 rounded-xl">
-              <SlidersHorizontal className="h-4 w-4 mr-2 text-muted-foreground" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-card border-border">
-              <SelectItem value="newest">Newest First</SelectItem>
-              <SelectItem value="price_asc">Price: Low to High</SelectItem>
-              <SelectItem value="price_desc">Price: High to Low</SelectItem>
-              <SelectItem value="popular">Most Popular</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex gap-3">
+            <Select value={sort} onValueChange={(v: any) => { setSort(v); setPage(1); }}>
+              <SelectTrigger className="flex-1 sm:w-[180px] bg-card border-border text-foreground h-10 rounded-xl">
+                <SlidersHorizontal className="h-4 w-4 mr-2 text-muted-foreground shrink-0" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border">
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="price_asc">Price: Low to High</SelectItem>
+                <SelectItem value="price_desc">Price: High to Low</SelectItem>
+                <SelectItem value="popular">Most Popular</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <Select value={currency} onValueChange={setCurrency}>
-            <SelectTrigger className="w-[110px] bg-card border-border text-foreground h-10 rounded-xl">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-card border-border">
-              {CURRENCIES.map(c => (
-                <SelectItem key={c.code} value={c.code}>{c.symbol} {c.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <Select value={currency} onValueChange={setCurrency}>
+              <SelectTrigger className="w-[90px] sm:w-[110px] bg-card border-border text-foreground h-10 rounded-xl">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border">
+                {CURRENCIES.map(c => (
+                  <SelectItem key={c.code} value={c.code}>{c.symbol} {c.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {isLoading ? (
