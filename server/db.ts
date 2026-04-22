@@ -1396,6 +1396,7 @@ export async function initiateWalletTopup(userId: number, amountUSD: number, gat
         email: userEmail,
         name: userName,
         redirectUrl: `${siteOrigin}/wallet?topup_ref=${reference}&status=success`,
+        notificationUrl: `${siteOrigin}/api/webhooks/korapay`,
         description: `Bulnix wallet top-up $${amountUSD.toFixed(2)}`,
         metadata: { topupRef: reference, userId, type: "wallet_topup" },
       });

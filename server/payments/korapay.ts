@@ -5,15 +5,24 @@ import { getExchangeRates } from "../db";
 const BASE_URL = "https://api.korapay.com/merchant/api/v1";
 
 async function koraRequest(method: string, path: string, body?: Record<string, unknown>) {
+  const bodyStr = body ? JSON.stringify(body) : undefined;
+  console.log(`[KoraPay] ${method} ${path} payload:`, bodyStr);
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
     headers: {
       Authorization: `Bearer ${ENV.korapaySecretKey}`,
       "Content-Type": "application/json",
     },
-    body: body ? JSON.stringify(body) : undefined,
+    body: bodyStr,
   });
-  const data = (await res.json()) as Record<string, unknown>;
+  const rawText = await res.text();
+  console.log(`[KoraPay] ${method} ${path} status=${res.status} response:`, rawText);
+  let data: Record<string, unknown>;
+  try {
+    data = JSON.parse(rawText) as Record<string, unknown>;
+  } catch {
+    throw new Error(`Kora Pay returned non-JSON response (${res.status}): ${rawText.slice(0, 200)}`);
+  }
   if (!res.ok || data.status === false) {
     throw new Error((data.message as string) ?? "Kora Pay API error");
   }
@@ -53,6 +62,7 @@ export async function koraInitiate(params: {
   email: string;
   name: string;
   redirectUrl: string;
+  notificationUrl?: string;
   description?: string;
   metadata?: Record<string, unknown>;
 }): Promise<KoraInitResult> {
@@ -73,6 +83,8 @@ export async function koraInitiate(params: {
     amount: amountNGN,
     currency: "NGN",
     redirect_url: params.redirectUrl,
+    // notification_url is required by Kora Pay API
+    ...(params.notificationUrl ? { notification_url: params.notificationUrl } : {}),
     customer: {
       email: params.email,
       name: params.name,
