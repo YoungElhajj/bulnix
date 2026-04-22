@@ -23,6 +23,13 @@ export default function AdminPaymentRates() {
     },
     onError: (err) => toast.error(err.message),
   });
+  const refreshRates = trpc.rates.refresh.useMutation({
+    onSuccess: (result) => {
+      toast.success(`Live rates refreshed — USD/NGN = ₦${(result as any).rateNGN?.toFixed(2) ?? "?"}`);
+      refetch();
+    },
+    onError: (err) => toast.error(`Rate refresh failed: ${err.message}`),
+  });
 
   const [editValues, setEditValues] = useState<Record<string, string>>({});
 
@@ -50,16 +57,30 @@ export default function AdminPaymentRates() {
   const ngnKey = getEditKey("USD", "NGN");
   const ngnRateStr = editValues[ngnKey] ?? getRate("USD", "NGN");
   const ngnRate = parseFloat(ngnRateStr) || 1600;
-  const marketRate = 1580; // approximate market rate for display
+  // Use live DB rate as market rate reference; fall back to hardcoded if not yet fetched
+  const liveNgnRow = (rates as any[])?.find((r: any) => r.fromCurrency === "USD" && r.toCurrency === "NGN" && r.source === "api");
+  const marketRate = liveNgnRow ? Number(liveNgnRow.rate) : 1348;
+  const liveRateUpdatedAt = liveNgnRow?.updatedAt ? new Date(liveNgnRow.updatedAt) : null;
   const markupPct = ((ngnRate - marketRate) / marketRate * 100).toFixed(1);
   const profitPer100USD = ((ngnRate - marketRate) * 100 / 100).toFixed(0);
 
   return (
     <AdminLayout>
       <div className="p-6 max-w-3xl">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Poppins', sans-serif" }}>Payment Rates</h1>
-          <p className="text-slate-400 mt-1">Configure currency conversion rates used by payment gateways. Set the NGN rate higher than market to earn profit on each transaction.</p>
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Poppins', sans-serif" }}>Payment Rates</h1>
+            <p className="text-slate-400 mt-1">Configure currency conversion rates used by payment gateways. Set the NGN rate higher than market to earn profit on currency conversion.</p>
+          </div>
+          <Button
+            onClick={() => refreshRates.mutate()}
+            disabled={refreshRates.isPending}
+            variant="outline"
+            className="shrink-0 border-emerald-700/50 text-emerald-400 hover:bg-emerald-900/30 bg-transparent"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${refreshRates.isPending ? "animate-spin" : ""}`} />
+            {refreshRates.isPending ? "Fetching..." : "Refresh Live Rates"}
+          </Button>
         </div>
 
         {/* NGN Profit Calculator */}
@@ -70,7 +91,12 @@ export default function AdminPaymentRates() {
               NGN Rate Profit Calculator
             </CardTitle>
             <CardDescription className="text-slate-400">
-              Approximate market rate today: <span className="text-white font-semibold">₦{marketRate.toLocaleString()}/USD</span>
+              Live market rate: <span className="text-white font-semibold">₦{marketRate.toLocaleString()}/USD</span>
+              {liveRateUpdatedAt && (
+                <span className="text-slate-500 text-xs ml-2">
+                  (updated {liveRateUpdatedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})
+                </span>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>

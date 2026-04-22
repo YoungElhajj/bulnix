@@ -542,3 +542,10 @@
 - [x] Update rates.list tRPC procedure to also expose last-updated timestamp
 - [x] Update Wallet.tsx to show live rate with "last updated" timestamp and attribution
 - [x] Update Kora Pay connector to use live DB rate instead of hardcoded 1600
+
+## Kora Pay Fix + Refresh Rates Button (Apr 22, 2026)
+- [x] Fix Kora Pay payload: amount was sent in kobo (×100) but API expects naira — removed the ×100 multiplication
+- [x] Fix Kora Pay verify: amount was divided by 100 incorrectly — removed the ÷100 division
+- [x] Fix Kora Pay: empty metadata object {} was causing "issue with your input" — now omitted when empty
+- [x] Add "Refresh Live Rates" button to Admin > Payment Rates page
+- [x] Update profit calculator to show live market rate with last-updated timestamp instead of hardcoded value

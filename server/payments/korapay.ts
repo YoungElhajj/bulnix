@@ -66,10 +66,11 @@ export async function koraInitiate(params: {
       `Please use Flutterwave or Crypto for larger amounts.`
     );
   }
-  const amountKobo = amountNGN * 100;
+  // Kora Pay amount is in major currency unit (naira), NOT kobo.
+  // See: https://developers.korapay.com/docs/checkout-redirect (example: amount: 22000 = ₦22,000)
   const data = await koraRequest("POST", "/charges/initialize", {
     reference: params.reference,
-    amount: amountKobo,
+    amount: amountNGN,
     currency: "NGN",
     redirect_url: params.redirectUrl,
     customer: {
@@ -77,7 +78,8 @@ export async function koraInitiate(params: {
       name: params.name,
     },
     narration: params.description ?? "Bulnix wallet top-up",
-    metadata: params.metadata ?? {},
+    // metadata must not be an empty object — omit if no keys
+    ...(params.metadata && Object.keys(params.metadata).length > 0 ? { metadata: params.metadata } : {}),
   });
   return {
     checkoutUrl: (data.checkout_url ?? data.authorization_url) as string,
@@ -107,10 +109,10 @@ export async function koraVerify(reference: string): Promise<KoraVerifyResult> {
   return {
     status,
     reference: data.reference as string,
-    // Kora returns amount in minor units — convert back to major
-    amount: (data.amount as number) / 100,
+    // Kora returns amount in major units (naira), not kobo
+    amount: data.amount as number,
     currency: data.currency as string,
-    fee: ((data.fee as number) ?? 0) / 100,
+    fee: (data.fee as number) ?? 0,
     narration: (data.narration as string) ?? "",
   };
 }
