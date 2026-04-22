@@ -22,6 +22,7 @@ export default function Checkout() {
   const [country, setCountry] = useState("");
   const [loading, setLoading] = useState(false);
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
+  const [placedOrderId, setPlacedOrderId] = useState<number | null>(null);
   const [success, setSuccess] = useState(false);
 
   const walletQuery = trpc.wallet.get.useQuery(undefined, { enabled: isAuthenticated });
@@ -93,12 +94,15 @@ export default function Checkout() {
       const newOrderId = (order as any).orderId ?? (order as any).id;
       const newOrderNumber = (order as any).orderNumber;
       setOrderNumber(newOrderNumber);
+      setPlacedOrderId(newOrderId);
 
       // Always pay from wallet — no direct gateway checkout
       const result = await payWithWallet.mutateAsync({ orderId: newOrderId });
       clearCart();
       setSuccess(true);
       toast.success(`Order placed! $${(result as any).amountDeducted?.toFixed(2)} deducted from wallet.`);
+      // Auto-redirect to order detail after 2 seconds
+      setTimeout(() => setLocation(`/orders/${newOrderId}`), 2000);
     } catch (err: any) {
       toast.error(err.message ?? "Failed to place order. Please try again.");
     } finally {
@@ -113,11 +117,12 @@ export default function Checkout() {
           <CheckCircle className="h-8 w-8 text-green-400" />
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">Order Placed!</h2>
-        <p className="text-[#8BA5C0] mb-6">Your order <span className="text-[#00C2FF] font-mono">{orderNumber}</span> has been paid from your wallet. Delivery details will appear in your orders page shortly.</p>
+        <p className="text-[#8BA5C0] mb-4">Your order <span className="text-[#00C2FF] font-mono">{orderNumber}</span> has been placed and paid from your wallet.</p>
+        <p className="text-[#4A6080] text-sm mb-6">Redirecting to your order details in a moment...</p>
         <div className="flex gap-3">
-          <Link href="/orders" className="flex-1">
-            <Button className="bg-[#00C2FF] hover:bg-[#00a8e0] text-[#0A1628] font-bold rounded-full w-full">View My Orders</Button>
-          </Link>
+          <Button className="bg-[#00C2FF] hover:bg-[#00a8e0] text-[#0A1628] font-bold rounded-full flex-1" onClick={() => setLocation(`/orders/${placedOrderId}`)}>
+            View Order Now
+          </Button>
           <Link href="/products" className="flex-1">
             <Button variant="outline" className="border-[#1E3A5F] text-[#8BA5C0] hover:text-white rounded-full w-full">Continue Shopping</Button>
           </Link>
