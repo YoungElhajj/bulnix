@@ -19,7 +19,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 
-const LOGO_URL = "https://static-assets.manus.space/manus-storage/bulnix-new-logo_9cb6900b.jpg";
+const LOGO_URL = "https://static-assets.manus.space/manus-storage/bulnix-logo-new_03e40d5d.jpg";
 
 // Primary nav links (always visible on desktop)
 const primaryLinks = [

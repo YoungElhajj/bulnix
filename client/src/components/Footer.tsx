@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { ArrowRight, Shield, Zap, Globe } from "lucide-react";
 
-const LOGO_URL = "https://static-assets.manus.space/manus-storage/bulnix-new-logo_9cb6900b.jpg";
+const LOGO_URL = "https://static-assets.manus.space/manus-storage/bulnix-logo-new_03e40d5d.jpg";
 
 // Social icons — Instagram, X, TikTok only
 const InstagramIcon = () => (
