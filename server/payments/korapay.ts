@@ -89,7 +89,8 @@ export async function koraInitiate(params: {
       email: params.email,
       name: params.name,
     },
-    narration: params.description ?? "Bulnix wallet top-up",
+    // Strip characters Kora Pay rejects as unsafe (e.g. $, #, &, etc.)
+    narration: (params.description ?? "Bulnix wallet top-up").replace(/[^a-zA-Z0-9 .,'\-_]/g, ""),
     // metadata must not be an empty object — omit if no keys
     ...(params.metadata && Object.keys(params.metadata).length > 0 ? { metadata: params.metadata } : {}),
   });
