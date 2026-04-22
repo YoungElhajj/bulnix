@@ -562,3 +562,10 @@
 - [x] Fix confirmWalletTopup: must verify payment status with Kora Pay API before crediting wallet
 - [x] Remove frontend-triggered confirmTopup on redirect — rely on webhook only for Kora Pay
 - [ ] Debit the fraudulently credited $3.00 from admin test account (manual action needed)
+
+## Bug Fixes Batch (Apr 22, 2026)
+- [ ] Fix admin NGN rate resetting to market rate after Save (save mutation overwrites with live rate)
+- [ ] Fix false "Payment confirmed" toast showing after cancelled Kora Pay payment
+- [ ] Fix Kora Pay card missing logo and name on wallet payment method selector
+- [ ] Add auto-redirect to wallet page after payment is confirmed
+- [ ] Add loading animation on payment processing/waiting page

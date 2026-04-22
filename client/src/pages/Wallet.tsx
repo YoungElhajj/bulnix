@@ -83,7 +83,15 @@ export default function WalletPage() {
   const [, setLocation] = useLocation();
   const [isPolling, setIsPolling] = useState(false);
   const [pollingRef, setPollingRef] = useState<string | null>(null);
-  const balanceBeforeTopupRef = useState<number>(0);
+  // Use sessionStorage to persist balance across the page reload that happens after gateway redirect
+  const balanceBeforeTopupRef = useState<number>(() => {
+    const stored = sessionStorage.getItem("bulnix_topup_balance_before");
+    return stored ? parseFloat(stored) : -1; // -1 means not set
+  });
+  const setBalanceBefore = (v: number) => {
+    balanceBeforeTopupRef[1](v);
+    sessionStorage.setItem("bulnix_topup_balance_before", String(v));
+  };
 
   // Stop polling after 15 minutes to avoid infinite polling
   useEffect(() => {
@@ -109,8 +117,8 @@ export default function WalletPage() {
     onSuccess: (data) => {
       const paymentUrl = (data as any).paymentUrl;
       if (paymentUrl && !paymentUrl.startsWith("#")) {
-        // Store current balance so we can detect when it increases
-        balanceBeforeTopupRef[1](Number(wallet?.balanceUSD ?? 0));
+        // Store current balance so we can detect when it increases (persisted across redirect)
+        setBalanceBefore(Number(wallet?.balanceUSD ?? 0));
         // Store reference for polling
         setPollingRef(data.reference ?? null);
         // Start polling immediately so we detect webhook credit even if user doesn't return
@@ -144,11 +152,18 @@ export default function WalletPage() {
     if (!isPolling || !wallet) return;
     const currentBalance = Number(wallet.balanceUSD ?? 0);
     const prevBalance = balanceBeforeTopupRef[0];
-    if (currentBalance > prevBalance) {
+    // Only trigger if we have a valid stored balance (not -1) and balance genuinely increased
+    if (prevBalance >= 0 && currentBalance > prevBalance) {
       setIsPolling(false);
       setPollingRef(null);
-      toast.success("Payment confirmed! Your wallet has been topped up.", { duration: 6000 });
+      sessionStorage.removeItem("bulnix_topup_balance_before");
+      const added = (currentBalance - prevBalance).toFixed(2);
+      toast.success(`Payment confirmed! $${added} added to your wallet.`, { duration: 6000 });
       refetchTx();
+      // Auto-redirect to wallet page top (scroll to balance) after short delay
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 500);
     }
   }, [wallet?.balanceUSD, isPolling]);
 
@@ -164,9 +179,10 @@ export default function WalletPage() {
         // Start polling — wallet will update when webhook fires
         setPollingRef(topupRef);
         setIsPolling(true);
-        balanceBeforeTopupRef[1](Number(wallet?.balanceUSD ?? 0));
+        setBalanceBefore(Number(wallet?.balanceUSD ?? 0));
       } else {
         toast.error("Payment was cancelled or failed. Please try again.");
+        sessionStorage.removeItem("bulnix_topup_balance_before");
       }
       // Clean up URL
       window.history.replaceState({}, "", "/wallet");
@@ -344,8 +360,8 @@ export default function WalletPage() {
                           <GIcon className={`h-5 w-5 ${g.color}`} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className={`text-sm font-semibold ${isSelected ? "text-[#0D2137]" : "text-[#4A6080]"}`}>{g.label}</p>
-                          <p className="text-xs text-[#4A6080] truncate">{g.desc}</p>
+                          <p className={`text-sm font-semibold ${isSelected ? "text-white" : "text-[#4A6080]"}`}>{g.label}</p>
+                          <p className={`text-xs truncate ${isSelected ? "text-white/60" : "text-[#4A6080]"}`}>{g.desc}</p>
                         </div>
                         <div className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${isSelected ? `${g.activeBorder} ${g.color}` : "border-[#D8E8F5]"}`}>
                           {isSelected && <div className={`w-2 h-2 rounded-full ${g.color.replace("text-", "bg-")}`} />}

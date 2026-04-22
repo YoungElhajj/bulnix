@@ -916,6 +916,8 @@ async function upsertExchangeRateApi(fromCurrency: string, toCurrency: string, r
   const existing = await db.select().from(exchangeRates)
     .where(and(eq(exchangeRates.fromCurrency, fromCurrency), eq(exchangeRates.toCurrency, toCurrency)));
   if (existing.length > 0) {
+    // ONLY overwrite if the current source is "api" — never overwrite admin-set manual rates
+    if (existing[0].source === "manual") return;
     await db.update(exchangeRates)
       .set({ rate: rate.toFixed(6) as any, source: "api" })
       .where(and(eq(exchangeRates.fromCurrency, fromCurrency), eq(exchangeRates.toCurrency, toCurrency)));
