@@ -303,15 +303,20 @@ export default function WalletPage() {
                 </p>
               </div>
 
-              {/* NGN equivalent notice for Paystack */}
-              {gateway === "paystack" && amountNGN > 0 && (
+              {/* NGN equivalent notice for Kora Pay and Paystack */}
+              {(gateway === "korapay" || gateway === "paystack") && amountNGN > 0 && (
                 <div className="mb-4 p-3 rounded-xl bg-[#EEF4FF] border border-[#0050D0]/20">
                   <p className="text-xs text-[#0050D0] font-semibold">
-                    You will be charged ₦{amountNGN.toLocaleString()} on Paystack
+                    You will be charged ₦{amountNGN.toLocaleString()} via {gateway === "korapay" ? "Kora Pay" : "Paystack"}
                   </p>
                   <p className="text-xs text-[#4A6080] mt-0.5">
-                    Rate: ₦{usdToNgn.toLocaleString()}/USD · Your wallet will be credited ${parseFloat(amount || "0").toFixed(2)} USD
+                    Rate: ₦{usdToNgn.toLocaleString()}/USD · Wallet credited ${parseFloat(amount || "0").toFixed(2)} USD
                   </p>
+                  {gateway === "korapay" && (
+                    <p className="text-xs text-[#4A6080] mt-0.5">
+                      Max per transaction: ₦200,000 (~$125 USD) · Daily limit: ₦1,000,000 (~$625 USD)
+                    </p>
+                  )}
                 </div>
               )}
 

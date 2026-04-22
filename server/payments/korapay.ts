@@ -31,8 +31,9 @@ export interface KoraInitResult {
  */
 // Exchange rate: 1 USD ≈ 1600 NGN (update periodically or fetch dynamically)
 const USD_TO_NGN = 1600;
-// Kora Pay account transaction limit: NGN 8,000,000 max (~$5,000 USD) — approved merchant account.
-const KORA_MAX_NGN = 8_000_000;
+// Kora Pay per-transaction limit: NGN 200,000 (~$125 USD) for Card, Bank Transfer, and Bank payments.
+// Daily limit is NGN 1,000,000 (~$625 USD).
+const KORA_MAX_NGN = 200_000;
 
 export async function koraInitiate(params: {
   reference: string;
@@ -48,8 +49,8 @@ export async function koraInitiate(params: {
   const amountNGN = Math.round(params.amountUSD * USD_TO_NGN);
   if (amountNGN > KORA_MAX_NGN) {
     throw new Error(
-      `Kora Pay maximum per transaction is NGN ${KORA_MAX_NGN.toLocaleString()} (~$${(KORA_MAX_NGN / USD_TO_NGN).toFixed(2)} USD). ` +
-      `Please use Flutterwave or Crypto for amounts above this limit.`
+      `Kora Pay maximum per transaction is NGN ${KORA_MAX_NGN.toLocaleString()} (~$${(KORA_MAX_NGN / USD_TO_NGN).toFixed(0)} USD). ` +
+      `Please use Flutterwave or Crypto for larger amounts.`
     );
   }
   const amountKobo = amountNGN * 100;
