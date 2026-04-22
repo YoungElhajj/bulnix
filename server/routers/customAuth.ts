@@ -4,6 +4,8 @@
  * All emails are sent from noreply@support.bulnix.com via Resend.
  */
 import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+
+const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 import { TRPCError } from "@trpc/server";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
@@ -145,13 +147,13 @@ export const customAuthRouter = router({
 
       const sessionToken = await sdk.createSessionToken(user.openId, {
         name: user.name ?? "",
-        expiresInMs: ONE_YEAR_MS,
+        expiresInMs: TWENTY_FOUR_HOURS_MS,
       });
 
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.cookie(COOKIE_NAME, sessionToken, {
         ...cookieOptions,
-        maxAge: ONE_YEAR_MS,
+        maxAge: TWENTY_FOUR_HOURS_MS,
       });
 
       if (input.purpose === "register") {
@@ -167,7 +169,9 @@ export const customAuthRouter = router({
     }),
 
   /**
-   * Step 1 of login: validate credentials, send OTP
+   * Step 1 of login: validate credentials.
+   * - Regular users: log in directly (no OTP), 24h session.
+   * - Admin users: send OTP for extra security.
    */
   loginRequest: publicProcedure
     .input(
@@ -176,7 +180,7 @@ export const customAuthRouter = router({
         password: z.string().min(1, "Password is required"),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
 
@@ -200,18 +204,37 @@ export const customAuthRouter = router({
         throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
       }
 
-      const otp = generateOtp();
-      await db.update(users).set({
-        otpCode: otp,
-        otpExpiry: otpExpiresAt(),
-        otpPurpose: "login",
-      }).where(eq(users.id, user.id));
+      // Admin users: require OTP for extra security
+      if (user.role === "admin") {
+        const otp = generateOtp();
+        await db.update(users).set({
+          otpCode: otp,
+          otpExpiry: otpExpiresAt(),
+          otpPurpose: "login",
+        }).where(eq(users.id, user.id));
 
-      await safeSendEmail(() =>
-        sendOtpEmail({ to: email, name: user.name ?? "", otp, purpose: "login" })
-      );
+        await safeSendEmail(() =>
+          sendOtpEmail({ to: email, name: user.name ?? "", otp, purpose: "login" })
+        );
 
-      return { success: true, email };
+        return { success: true, email, requiresOtp: true };
+      }
+
+      // Regular users: log in directly with a 24h session
+      await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, user.id));
+
+      const sessionToken = await sdk.createSessionToken(user.openId, {
+        name: user.name ?? "",
+        expiresInMs: TWENTY_FOUR_HOURS_MS,
+      });
+
+      const cookieOptions = getSessionCookieOptions(ctx.req);
+      ctx.res.cookie(COOKIE_NAME, sessionToken, {
+        ...cookieOptions,
+        maxAge: TWENTY_FOUR_HOURS_MS,
+      });
+
+      return { success: true, email, requiresOtp: false };
     }),
 
   /**
@@ -313,13 +336,12 @@ export const customAuthRouter = router({
         otpPurpose: null,
         lastSignedIn: new Date(),
       }).where(eq(users.id, user.id));
-
       const sessionToken = await sdk.createSessionToken(user.openId, {
         name: user.name ?? "",
-        expiresInMs: ONE_YEAR_MS,
+        expiresInMs: TWENTY_FOUR_HOURS_MS,
       });
       const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+      ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: TWENTY_FOUR_HOURS_MS });
 
       return { success: true };
     }),
@@ -400,11 +422,11 @@ export const customAuthRouter = router({
         .where(eq(users.id, user.id));
 
       const sessionToken = await sdk.createSessionToken(user.openId, {
-        expiresInMs: ONE_YEAR_MS,
+        expiresInMs: TWENTY_FOUR_HOURS_MS,
         name: user.name || "",
       });
       const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+      ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: TWENTY_FOUR_HOURS_MS });
 
       return { success: true, name: user.name };
     }),

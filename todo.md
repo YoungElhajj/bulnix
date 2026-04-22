@@ -578,3 +578,19 @@
 
 ## NowPayments Minimum Update (Apr 22, 2026)
 - [x] Raise NowPayments crypto minimum from $1 to $10 (server validation in db.ts + frontend gateway card desc/minUSD in Wallet.tsx)
+
+## Social Links & Contact Update (Apr 22, 2026)
+- [x] Replace social icons in Navbar + Footer with Instagram, X (Twitter), TikTok only
+- [x] Update X link to https://x.com/Bulnix_
+- [x] Update Instagram link to https://www.instagram.com/bulnix_
+- [x] Update TikTok link to https://www.tiktok.com/@bulnix_
+- [x] Update support email to bulnixsupport@gmail.com on Contact page
+- [x] Update UK WhatsApp support number to +447367061279 in floating widget
+- [x] Add WhatsApp support card to Contact page (clickable, opens wa.me)
+- [x] Telegram stays in floating support widget (not social icons)
+
+## Auth Fixes (Apr 22, 2026)
+- [x] Remove OTP for regular users on login — direct 24h session issued immediately
+- [x] Admin users still require OTP on login (both /login and /secure-admin pages)
+- [x] Reduce all session expiry from 1 year to 24h (customAuth + oauth callback)
+- [x] Fix Google login/signup buttons to point to real Manus OAuth portal URL

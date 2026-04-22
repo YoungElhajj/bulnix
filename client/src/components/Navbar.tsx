@@ -38,7 +38,7 @@ const moreLinks = [
   { label: "Refund Policy", href: "/refund", icon: FileText },
 ];
 
-// Modern brand social icons
+// Social icons — Instagram, X, TikTok only
 const InstagramIcon = () => (
   <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none">
     <defs>
@@ -56,12 +56,6 @@ const InstagramIcon = () => (
   </svg>
 );
 
-const FacebookIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="#1877F2">
-    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-  </svg>
-);
-
 const TwitterXIcon = () => (
   <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="currentColor">
     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
@@ -74,26 +68,11 @@ const TikTokIcon = () => (
   </svg>
 );
 
-const TelegramIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
-    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-  </svg>
-);
-
-const WhatsAppIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
-    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-  </svg>
-);
-
-// Social media links with modern icons
+// Social media links — Instagram, X, TikTok only
 const socialLinks = [
-  { name: "Instagram", href: "https://instagram.com/bulnix", icon: <InstagramIcon />, hoverClass: "" },
-  { name: "Facebook", href: "https://facebook.com/bulnix", icon: <FacebookIcon />, hoverClass: "hover:text-[#1877F2]" },
-  { name: "Twitter / X", href: "https://x.com/bulnix", icon: <TwitterXIcon />, hoverClass: "hover:text-white" },
-  { name: "TikTok", href: "https://tiktok.com/@bulnix", icon: <TikTokIcon />, hoverClass: "hover:text-white" },
-  { name: "Telegram", href: "https://t.me/bulnix", icon: <TelegramIcon />, hoverClass: "hover:text-[#229ED9]" },
-  { name: "WhatsApp", href: "https://wa.me/447916699429", icon: <WhatsAppIcon />, hoverClass: "hover:text-[#25D366]" },
+  { name: "Instagram", href: "https://www.instagram.com/bulnix_", icon: <InstagramIcon />, hoverClass: "" },
+  { name: "Twitter / X", href: "https://x.com/Bulnix_", icon: <TwitterXIcon />, hoverClass: "hover:text-white" },
+  { name: "TikTok", href: "https://www.tiktok.com/@bulnix_", icon: <TikTokIcon />, hoverClass: "hover:text-white" },
 ];
 
 export default function Navbar() {
@@ -162,16 +141,16 @@ export default function Navbar() {
             {/* More dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200">
-                  More <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+                <button className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                  More <ChevronDown className="w-3.5 h-3.5" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48 bg-[#0F3D5E] border-[#1a5070] shadow-xl mt-1">
+              <DropdownMenuContent align="start" className="w-52">
                 {moreLinks.map(link => (
                   <DropdownMenuItem key={link.href} asChild>
-                    <Link href={link.href} className="flex items-center gap-2 cursor-pointer text-white/80 hover:text-white focus:text-white focus:bg-white/10">
-                      <link.icon className="h-4 w-4 text-[#00C2FF]" />
-                      <span>{link.label}</span>
+                    <Link href={link.href} className="flex items-center gap-2 cursor-pointer">
+                      <link.icon className="w-4 h-4 text-muted-foreground" />
+                      {link.label}
                     </Link>
                   </DropdownMenuItem>
                 ))}
@@ -179,11 +158,11 @@ export default function Navbar() {
             </DropdownMenu>
           </div>
 
-          {/* Right Actions */}
-          <div className="flex items-center gap-1">
+          {/* Right side: social icons + theme + cart + auth */}
+          <div className="flex items-center gap-2">
 
-            {/* Social Icons — desktop only (xl+) */}
-            <div className="hidden xl:flex items-center gap-0.5 mr-1">
+            {/* Social icons (desktop only) */}
+            <div className="hidden lg:flex items-center gap-1">
               {socialLinks.map(s => (
                 <a
                   key={s.name}
@@ -191,193 +170,165 @@ export default function Navbar() {
                   target="_blank"
                   rel="noopener noreferrer"
                   title={s.name}
-                  className={`w-7 h-7 flex items-center justify-center rounded-full text-white/60 ${s.hoverClass} hover:bg-white/10 transition-all duration-200`}
+                  className={`w-7 h-7 flex items-center justify-center rounded-lg text-white/60 hover:bg-white/10 transition-all ${s.hoverClass}`}
                 >
                   {s.icon}
                 </a>
               ))}
             </div>
 
-            {/* Theme Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
+            {/* Theme toggle */}
+            <button
               onClick={toggleTheme}
-              className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8"
-              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all"
+              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
             >
-              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </Button>
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
 
             {/* Cart */}
-            <Link href="/cart">
-              <Button variant="ghost" size="icon" className="relative text-white/70 hover:text-white hover:bg-white/10 h-8 w-8">
-                <ShoppingCart className="h-5 w-5" />
-                {totalItems > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-[#00C2FF] text-[#0F3D5E] border-0 font-bold">
-                    {totalItems > 99 ? "99+" : totalItems}
-                  </Badge>
-                )}
-              </Button>
+            <Link href="/cart" className="relative w-8 h-8 flex items-center justify-center rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all">
+              <ShoppingCart className="w-4 h-4" />
+              {totalItems > 0 && (
+                <Badge className="absolute -top-1 -right-1 w-4 h-4 p-0 flex items-center justify-center text-[10px] bg-[#00C2FF] text-[#0F3D5E] border-0">
+                  {totalItems > 9 ? "9+" : totalItems}
+                </Badge>
+              )}
             </Link>
 
-            {/* Auth — desktop */}
-            {isAuthenticated && user ? (
+            {/* Wallet balance (authenticated) */}
+            {isAuthenticated && (
+              <Link href="/wallet"
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 transition-all text-white text-xs font-semibold border border-white/10">
+                <Wallet className="w-3.5 h-3.5 text-[#00C2FF]" />
+                ${walletBalance.toFixed(2)}
+              </Link>
+            )}
+
+            {/* Auth */}
+            {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="hidden md:flex items-center gap-2 px-2.5 text-white/80 hover:text-white hover:bg-white/10 h-8"
-                  >
-                    <div className="w-6 h-6 rounded-full bg-[#00C2FF]/25 border border-[#00C2FF]/50 flex items-center justify-center text-xs font-semibold text-[#00C2FF]">
-                      {(user.name || user.email || "U")[0].toUpperCase()}
-                    </div>
-                    <span className="text-sm font-medium max-w-20 truncate hidden lg:block">{user.name || user.email}</span>
-                    {/* Wallet balance badge */}
-                    <span className="hidden lg:flex items-center gap-1 bg-[#00C2FF]/15 border border-[#00C2FF]/30 text-[#00C2FF] text-xs font-bold px-2 py-0.5 rounded-full">
-                      <Wallet className="h-3 w-3" />
-                      ${walletBalance.toFixed(2)}
-                    </span>
-                    <ChevronDown className="h-3.5 w-3.5 opacity-50" />
-                  </Button>
+                  <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 transition-all text-white text-xs font-medium border border-white/10 max-w-[120px]">
+                    <User className="w-3.5 h-3.5 text-[#00C2FF] flex-shrink-0" />
+                    <span className="truncate">{user?.name?.split(" ")[0] ?? "Account"}</span>
+                    <ChevronDown className="w-3 h-3 flex-shrink-0 text-white/50" />
+                  </button>
                 </DropdownMenuTrigger>
-                {/* FIXED: dark dropdown instead of white */}
-                <DropdownMenuContent align="end" className="w-52 bg-[#0F3D5E] border-[#1a5070] shadow-xl">
+                <DropdownMenuContent align="end" className="w-52">
+                  <div className="px-3 py-2 border-b border-border">
+                    <p className="text-sm font-medium truncate">{user?.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                  </div>
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer text-white/80 hover:text-white focus:text-white focus:bg-white/10">
-                      <LayoutDashboard className="h-4 w-4 text-[#00C2FF]" />
-                      <span>Dashboard</span>
+                    <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer">
+                      <LayoutDashboard className="w-4 h-4" /> Dashboard
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/orders" className="flex items-center gap-2 cursor-pointer text-white/80 hover:text-white focus:text-white focus:bg-white/10">
-                      <Package className="h-4 w-4 text-white/50" />
-                      <span>My Orders</span>
+                    <Link href="/orders" className="flex items-center gap-2 cursor-pointer">
+                      <Package className="w-4 h-4" /> My Orders
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/wallet" className="flex items-center justify-between gap-2 cursor-pointer text-white/80 hover:text-white focus:text-white focus:bg-white/10">
-                      <span className="flex items-center gap-2">
-                        <Wallet className="h-4 w-4 text-[#00C2FF]" />
-                        <span>My Wallet</span>
-                      </span>
-                      <span className="text-xs font-bold text-[#00C2FF] bg-[#00C2FF]/10 px-2 py-0.5 rounded-full">
-                        ${walletBalance.toFixed(2)}
-                      </span>
+                    <Link href="/wallet" className="flex items-center gap-2 cursor-pointer">
+                      <Wallet className="w-4 h-4" /> My Wallet
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/profile" className="flex items-center gap-2 cursor-pointer text-white/80 hover:text-white focus:text-white focus:bg-white/10">
-                      <Settings className="h-4 w-4 text-white/50" />
-                      <span>Profile Settings</span>
+                    <Link href="/profile" className="flex items-center gap-2 cursor-pointer">
+                      <Settings className="w-4 h-4" /> Profile Settings
                     </Link>
                   </DropdownMenuItem>
-                  {user.role === "admin" && (
+                  {user?.role === "admin" && (
                     <>
-                      <DropdownMenuSeparator className="bg-[#1a5070]" />
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link href="/admin" className="flex items-center gap-2 cursor-pointer text-[#00C2FF] hover:text-[#00C2FF] focus:text-[#00C2FF] focus:bg-white/10">
-                          <Shield className="h-4 w-4 text-[#00C2FF]" />
-                          <span>Admin Panel</span>
+                        <Link href="/admin" className="flex items-center gap-2 cursor-pointer text-amber-600">
+                          <Shield className="w-4 h-4" /> Admin Panel
                         </Link>
                       </DropdownMenuItem>
                     </>
                   )}
-                  <DropdownMenuSeparator className="bg-[#1a5070]" />
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => logoutMutation.mutate()}
-                    className="flex items-center gap-2 cursor-pointer text-red-400 focus:text-red-400 focus:bg-red-500/10"
+                    className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
                   >
-                    <LogOut className="h-4 w-4" />
-                    <span>Sign Out</span>
+                    <LogOut className="w-4 h-4" /> Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <div className="hidden md:flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5">
                 <Link href="/login">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-white/80 hover:text-white hover:bg-white/10 font-medium border border-white/30 hover:border-white/50 rounded-full px-4 h-8 text-xs"
-                  >
+                  <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10 text-xs h-8 px-3">
                     Sign In
                   </Button>
                 </Link>
                 <Link href="/signup">
-                  <Button
-                    size="sm"
-                    className="bg-[#00C2FF] hover:bg-[#00aee6] text-[#0F3D5E] font-bold rounded-full px-4 h-8 text-xs shadow-md shadow-[#00C2FF]/30 transition-all duration-200"
-                  >
+                  <Button size="sm" className="bg-[#00C2FF] hover:bg-[#00a8e0] text-[#0F3D5E] font-semibold text-xs h-8 px-3">
                     Sign Up
                   </Button>
                 </Link>
               </div>
             )}
 
-            {/* Mobile Menu Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="lg:hidden text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 ml-1"
-              onClick={() => setMobileOpen(!mobileOpen)}
+            {/* Mobile hamburger */}
+            <button
+              className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all"
+              onClick={() => setMobileOpen(prev => !prev)}
               aria-label="Toggle menu"
             >
-              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
+      </div>
 
-        {/* Mobile Menu */}
-        {mobileOpen && (
-          <div className="lg:hidden border-t border-[#1a5070]/50 py-3 bg-[#0F3D5E]">
+      {/* Mobile Menu */}
+      {mobileOpen && (
+        <div className="lg:hidden border-t border-white/10 bg-[#0F3D5E]">
+          <div className="container py-4 space-y-1">
             {/* Primary links */}
-            <div className="space-y-0.5 mb-2">
-              {primaryLinks.map(link => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg mx-2 transition-colors ${
-                    isActive(link.href)
-                      ? "text-[#00C2FF] bg-white/10"
-                      : "text-white/80 hover:text-white hover:bg-white/10"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
+            {primaryLinks.map(link => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  isActive(link.href) ? "text-[#00C2FF] bg-white/10" : "text-white/80 hover:text-white hover:bg-white/10"
+                }`}
+              >
+                <Home className="w-4 h-4" />
+                {link.label}
+              </Link>
+            ))}
 
-            {/* More section toggle */}
+            {/* More links toggle */}
             <button
-              onClick={() => setMobileMoreOpen(!mobileMoreOpen)}
-              className="flex items-center justify-between w-full px-4 py-2.5 text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 rounded-lg mx-2 transition-colors"
-              style={{ width: "calc(100% - 1rem)" }}
+              onClick={() => setMobileMoreOpen(prev => !prev)}
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors"
             >
               <span>More Pages</span>
-              <ChevronDown className={`h-4 w-4 transition-transform ${mobileMoreOpen ? "rotate-180" : ""}`} />
+              <ChevronDown className={`w-4 h-4 transition-transform ${mobileMoreOpen ? "rotate-180" : ""}`} />
             </button>
-
             {mobileMoreOpen && (
-              <div className="space-y-0.5 mb-2 pl-4">
+              <div className="pl-4 space-y-1">
                 {moreLinks.map(link => (
                   <Link
                     key={link.href}
                     href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg mx-2 transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition-colors"
                   >
-                    <link.icon className="h-3.5 w-3.5 text-[#00C2FF]" />
+                    <link.icon className="w-4 h-4" />
                     {link.label}
                   </Link>
                 ))}
               </div>
             )}
 
-            {/* Social Icons — mobile */}
-            <div className="px-4 py-3 flex items-center gap-2 border-t border-[#1a5070]/50 mt-2 flex-wrap">
-              <span className="text-white/40 text-xs mr-1">Follow us:</span>
+            {/* Social icons row (mobile) */}
+            <div className="flex items-center gap-2 px-3 pt-2">
               {socialLinks.map(s => (
                 <a
                   key={s.name}
@@ -385,50 +336,27 @@ export default function Navbar() {
                   target="_blank"
                   rel="noopener noreferrer"
                   title={s.name}
-                  className={`w-9 h-9 flex items-center justify-center rounded-full bg-white/10 text-white/60 ${s.hoverClass} hover:bg-white/20 transition-all`}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-white/60 hover:bg-white/10 transition-all"
                 >
                   {s.icon}
                 </a>
               ))}
             </div>
 
-            {/* Auth buttons */}
-            <div className="px-4 pt-2 pb-2 flex flex-col gap-2 border-t border-[#1a5070]/50 mt-2">
-              {isAuthenticated ? (
-                <>
-                  <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" size="sm" className="w-full border-white/30 text-white bg-transparent hover:bg-white/10">
-                      <LayoutDashboard className="h-4 w-4 mr-2" /> Dashboard
-                    </Button>
-                  </Link>
-                  <Link href="/orders" onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" size="sm" className="w-full border-white/30 text-white bg-transparent hover:bg-white/10">
-                      <Package className="h-4 w-4 mr-2" /> My Orders
-                    </Button>
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full text-red-400 hover:bg-red-500/10"
-                    onClick={() => { logoutMutation.mutate(); setMobileOpen(false); }}
-                  >
-                    <LogOut className="h-4 w-4 mr-2" /> Sign Out
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Link href="/login" onClick={() => setMobileOpen(false)}>
-                    <Button variant="outline" size="sm" className="w-full border-white/30 text-white bg-transparent hover:bg-white/10">Sign In</Button>
-                  </Link>
-                  <Link href="/signup" onClick={() => setMobileOpen(false)}>
-                    <Button size="sm" className="w-full bg-[#00C2FF] hover:bg-[#00aee6] text-[#0F3D5E] font-bold">Create Account</Button>
-                  </Link>
-                </>
-              )}
-            </div>
+            {/* Auth buttons (mobile) */}
+            {!isAuthenticated && (
+              <div className="flex gap-2 pt-2">
+                <Link href="/login" className="flex-1">
+                  <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10 text-sm">Sign In</Button>
+                </Link>
+                <Link href="/signup" className="flex-1">
+                  <Button className="w-full bg-[#00C2FF] hover:bg-[#00a8e0] text-[#0F3D5E] font-semibold text-sm">Sign Up</Button>
+                </Link>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </nav>
   );
 }

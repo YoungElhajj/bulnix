@@ -73,7 +73,20 @@ export default function Login() {
   };
 
   const loginMutation = trpc.auth.loginRequest.useMutation({
-    onSuccess: (data) => { setEmail(data.email); setStep("otp"); startCooldown(); toast.success("Verification code sent to " + data.email); },
+    onSuccess: async (data) => {
+      setEmail(data.email);
+      if ((data as any).requiresOtp) {
+        // Admin: show OTP step
+        setStep("otp");
+        startCooldown();
+        toast.success("Verification code sent to " + data.email);
+      } else {
+        // Regular user: session already set, redirect
+        await utils.auth.me.invalidate();
+        toast.success("Welcome back!");
+        navigate("/dashboard");
+      }
+    },
     onError: (err) => toast.error(err.message),
   });
 
@@ -101,7 +114,13 @@ export default function Login() {
   const handleVerify = (e: React.FormEvent) => { e.preventDefault(); verifyMutation.mutate({ email, otp, purpose: "login" }); };
   const handleForgot = (e: React.FormEvent) => { e.preventDefault(); forgotMutation.mutate({ email }); };
   const handleReset = (e: React.FormEvent) => { e.preventDefault(); resetMutation.mutate({ email, otp, newPassword }); };
-  const handleGoogleLogin = () => { window.location.href = getLoginUrl("/dashboard"); };
+  const handleGoogleLogin = () => {
+    const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
+    if (!oauthPortalUrl) { toast.error("Google login is not configured."); return; }
+    const callbackUrl = `${window.location.origin}/api/oauth/callback`;
+    const state = btoa(callbackUrl);
+    window.location.href = `${oauthPortalUrl}?appId=${import.meta.env.VITE_APP_ID}&state=${encodeURIComponent(state)}`;
+  };
 
   return (
     <div className="min-h-screen bg-[#F8FAFF] flex flex-col">

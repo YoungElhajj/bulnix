@@ -112,7 +112,13 @@ export default function SignUp() {
     verifyMutation.mutate({ email, otp, purpose: "register" });
   };
 
-  const handleGoogleSignup = () => { window.location.href = getLoginUrl("/dashboard"); };
+  const handleGoogleSignup = () => {
+    const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
+    if (!oauthPortalUrl) { toast.error("Google signup is not configured."); return; }
+    const callbackUrl = `${window.location.origin}/api/oauth/callback`;
+    const state = btoa(callbackUrl);
+    window.location.href = `${oauthPortalUrl}?appId=${import.meta.env.VITE_APP_ID}&state=${encodeURIComponent(state)}`;
+  };
 
   return (
     <div className="min-h-screen bg-[#F8FAFF] flex flex-col">
