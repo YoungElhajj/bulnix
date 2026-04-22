@@ -607,3 +607,11 @@
 - [x] Add visible "Support" label beside the main toggle button so users know what it is
 - [x] Redesign live chat as WhatsApp pre-triage bot: structured questions → WhatsApp with context
 - [x] Bot clearly tells users it's gathering info before connecting to human
+
+## Triage Bot & Auth Improvements (Apr 22, 2026)
+- [x] Expanded triage bot with all specific customer flows: order (not delivered, fulfilled missing, wrong item, delayed, partial, not working), payment (not credited, failed, crypto, top-up info), refund (invalid, wallet, double charge, cancelled, wrong product), account (password, login, suspended, email change, profile, delete, 2FA), discount (code not working, expired, request, referral), bulk orders, delivery info, and other
+- [x] Added product-specific question "Which product did you order?" in order flow (streaming, social, gaming, software, other) — included in WhatsApp pre-fill
+- [x] Send email confirmation to customer when triage ticket is completed (issue summary + steps)
+- [x] Added support.submitTriage tRPC procedure to server/routers.ts
+- [x] Restored Google sign-in/sign-up with custom Google OAuth (client ID + secret from user)
+- [x] Built /api/auth/google and /api/auth/google/callback server routes in server/googleAuth.ts

@@ -22,4 +22,7 @@ export const ENV = {
   korapaySecretKey: process.env.KORAPAY_SECRET_KEY ?? "",
   korapayPublicKey: process.env.KORAPAY_PUBLIC_KEY ?? "",
   korapayWebhookSecret: process.env.KORAPAY_WEBHOOK_SECRET ?? "",
+  // Google OAuth
+  googleClientId: process.env.GOOGLE_CLIENT_ID ?? "",
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
 };
