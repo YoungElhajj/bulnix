@@ -552,3 +552,8 @@
 
 ## Wallet Top-Up Receipt Email (Apr 22, 2026)
 - [x] Send receipt email to customer on successful wallet top-up (amount, reference, new balance)
+
+## Kora Pay Post-Payment UX Fix (Apr 22, 2026)
+- [x] Fix redirect_url so Kora Pay returns user to /wallet?topup=success after payment
+- [x] Add balance polling on wallet page when returning from Kora Pay (detect balance increase, show success toast)
+- [x] Show "Payment processing..." state while polling instead of staying on bank transfer screen

@@ -81,8 +81,26 @@ export default function WalletPage() {
   const [gateway, setGateway] = useState("korapay");
   const [txPage, setTxPage] = useState(1);
   const [, setLocation] = useLocation();
+  const [isPolling, setIsPolling] = useState(false);
+  const [pollingRef, setPollingRef] = useState<string | null>(null);
+  const balanceBeforeTopupRef = useState<number>(0);
 
-  const { data: wallet, refetch: refetchWallet } = trpc.wallet.get.useQuery(undefined, { enabled: isAuthenticated });
+  // Stop polling after 15 minutes to avoid infinite polling
+  useEffect(() => {
+    if (!isPolling) return;
+    const timeout = setTimeout(() => {
+      setIsPolling(false);
+      setPollingRef(null);
+      toast.error("Payment confirmation timed out. If you completed the payment, your wallet will update shortly.", { duration: 10000 });
+    }, 15 * 60 * 1000);
+    return () => clearTimeout(timeout);
+  }, [isPolling]);
+
+  const { data: wallet, refetch: refetchWallet } = trpc.wallet.get.useQuery(undefined, {
+    enabled: isAuthenticated,
+    // Poll every 3 seconds when waiting for payment confirmation
+    refetchInterval: isPolling ? 3000 : false,
+  });
   const { data: txData, refetch: refetchTx } = trpc.wallet.transactions.useQuery({ page: txPage, limit: 15 }, { enabled: isAuthenticated });
   // MUST be called before any early returns to comply with Rules of Hooks
   const { data: ratesData } = trpc.rates.list.useQuery(undefined, { enabled: isAuthenticated });
@@ -91,6 +109,12 @@ export default function WalletPage() {
     onSuccess: (data) => {
       const paymentUrl = (data as any).paymentUrl;
       if (paymentUrl && !paymentUrl.startsWith("#")) {
+        // Store current balance so we can detect when it increases
+        balanceBeforeTopupRef[1](Number(wallet?.balanceUSD ?? 0));
+        // Store reference for polling
+        setPollingRef(data.reference ?? null);
+        // Start polling immediately so we detect webhook credit even if user doesn't return
+        setIsPolling(true);
         toast.success("Redirecting to payment page...", { duration: 3000 });
         // Open in same tab for redirect-based flows
         window.location.href = paymentUrl;
@@ -107,11 +131,26 @@ export default function WalletPage() {
   const confirmTopup = trpc.wallet.confirmTopup.useMutation({
     onSuccess: () => {
       toast.success("Wallet topped up successfully!");
+      setIsPolling(false);
+      setPollingRef(null);
       refetchWallet();
       refetchTx();
     },
     onError: (err) => toast.error(err.message),
   });
+
+  // Detect balance increase from webhook (polling) and show success
+  useEffect(() => {
+    if (!isPolling || !wallet) return;
+    const currentBalance = Number(wallet.balanceUSD ?? 0);
+    const prevBalance = balanceBeforeTopupRef[0];
+    if (currentBalance > prevBalance) {
+      setIsPolling(false);
+      setPollingRef(null);
+      toast.success("Payment confirmed! Your wallet has been topped up.", { duration: 6000 });
+      refetchTx();
+    }
+  }, [wallet?.balanceUSD, isPolling]);
 
   // Handle redirect back from payment gateway
   useEffect(() => {
@@ -119,7 +158,10 @@ export default function WalletPage() {
     const topupRef = params.get("topup_ref");
     const status = params.get("status");
     if (topupRef && status === "success") {
-      confirmTopup.mutate({ reference: topupRef });
+      // Start polling to confirm via webhook (don't call confirmTopup manually — webhook already did it)
+      setPollingRef(topupRef);
+      setIsPolling(true);
+      balanceBeforeTopupRef[1](Number(wallet?.balanceUSD ?? 0));
       // Clean up URL
       window.history.replaceState({}, "", "/wallet");
     } else if (topupRef && status && status !== "success") {
@@ -193,6 +235,16 @@ export default function WalletPage() {
       </div>
 
       <div className="container py-8">
+        {/* Payment polling banner */}
+        {isPolling && (
+          <div className="mb-6 flex items-center gap-3 bg-[#EEF4FF] border border-[#0050D0]/30 rounded-xl px-5 py-4">
+            <div className="w-5 h-5 border-2 border-[#0050D0] border-t-transparent rounded-full animate-spin flex-shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-[#0050D0]">Waiting for payment confirmation...</p>
+              <p className="text-xs text-[#4A6080] mt-0.5">Your wallet will update automatically once your payment is confirmed. You can leave this page — we will credit your wallet as soon as we receive confirmation.</p>
+            </div>
+          </div>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Left: Balance card + top-up form */}
