@@ -57,7 +57,7 @@ function baseTemplate(title: string, body: string): string {
 <body>
   <div class="wrapper">
     <div class="logo">
-      <img src="https://static-assets.manus.space/manus-storage/bulnix-logo-new_03e40d5d.jpg" alt="Bulnix" />
+      <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663404004095/UEAuHoiEheGEUEnr.jpg" alt="Bulnix" />
     </div>
     <div class="card">
       ${body}

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-const LOGO_URL = "https://static-assets.manus.space/manus-storage/bulnix-logo-new_03e40d5d.jpg";
+const LOGO_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663404004095/UEAuHoiEheGEUEnr.jpg";
 
 export default function About() {
   return (

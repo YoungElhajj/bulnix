@@ -51,6 +51,7 @@ const MIGRATIONS: { name: string; sql: string }[] = [
   { name: "users.otpExpiry", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `otpExpiry` timestamp" },
   { name: "users.otpPurpose", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `otpPurpose` varchar(16)" },
   { name: "users.lastLoginIp", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `lastLoginIp` varchar(64)" },
+  { name: "products.deliveryFormat", sql: "ALTER TABLE `products` ADD COLUMN IF NOT EXISTS `deliveryFormat` text" },
 ];
 
 export async function runPendingMigrations(): Promise<void> {

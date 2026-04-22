@@ -79,6 +79,12 @@ export const migrationsRouter = router({
           `ALTER TABLE \`users\` ADD COLUMN IF NOT EXISTS \`lastLoginIp\` varchar(64)`,
         ],
       },
+      {
+        name: "0007_deliveryFormat",
+        sql: [
+          `ALTER TABLE \`products\` ADD COLUMN IF NOT EXISTS \`deliveryFormat\` text`,
+        ],
+      },
     ];
 
     const results: { migration: string; statement: string; status: string; error?: string }[] = [];
