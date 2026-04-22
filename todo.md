@@ -549,3 +549,6 @@
 - [x] Fix Kora Pay: empty metadata object {} was causing "issue with your input" — now omitted when empty
 - [x] Add "Refresh Live Rates" button to Admin > Payment Rates page
 - [x] Update profit calculator to show live market rate with last-updated timestamp instead of hardcoded value
+
+## Wallet Top-Up Receipt Email (Apr 22, 2026)
+- [x] Send receipt email to customer on successful wallet top-up (amount, reference, new balance)

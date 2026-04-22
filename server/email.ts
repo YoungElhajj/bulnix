@@ -483,6 +483,50 @@ export async function sendRefundConfirmationEmail(opts: {
   });
 }
 
+/** Wallet top-up receipt email to customer */
+export async function sendWalletTopupReceiptEmail(opts: {
+  to: string;
+  name: string;
+  amountUSD: number;
+  reference: string;
+  gateway: string;
+  newBalanceUSD: number;
+}): Promise<void> {
+  const gatewayLabel = opts.gateway === "korapay" ? "Kora Pay"
+    : opts.gateway === "flutterwave" ? "Flutterwave"
+    : opts.gateway === "nowpayments" ? "Crypto"
+    : opts.gateway === "paystack" ? "Paystack"
+    : opts.gateway;
+  const body = `
+    <h1>Wallet Funded Successfully</h1>
+    <p>Hi ${opts.name || "there"}, your Bulnix wallet has been topped up. Your funds are ready to use.</p>
+    <div class="highlight">
+      <div class="label" style="text-align:center;">Amount Added</div>
+      <div class="code" style="color:#22C55E;">$${opts.amountUSD.toFixed(2)} USD</div>
+    </div>
+    <div style="margin:16px 0;">
+      <div class="label">Reference</div>
+      <div class="value">${opts.reference}</div>
+      <div class="label">Payment Method</div>
+      <div class="value">${gatewayLabel}</div>
+      <div class="label">New Wallet Balance</div>
+      <div class="value" style="color:#22C55E;font-weight:700;">$${opts.newBalanceUSD.toFixed(2)} USD</div>
+    </div>
+    <a href="https://bulnix.com/wallet" class="btn">View Wallet</a>
+    <hr class="divider" />
+    <p style="font-size:13px;color:#94a3b8;">Your wallet is ready to use. Browse our products and place your order. If you did not make this top-up, please <a href="https://bulnix.com/tickets" style="color:#00B9E9;">contact support</a> immediately.</p>`;
+
+  const client = getResend();
+  if (!client) { console.warn("[email] RESEND_API_KEY not set — skipping wallet top-up receipt email"); return; }
+  await client.emails.send({
+    from: FROM,
+    replyTo: REPLY_TO,
+    to: opts.to,
+    subject: `Wallet funded: $${opts.amountUSD.toFixed(2)} added to your Bulnix wallet`,
+    html: baseTemplate("Wallet Funded", body),
+  });
+}
+
 /** Backup success email to owner */
 export async function sendBackupEmail(opts: {
   to: string;

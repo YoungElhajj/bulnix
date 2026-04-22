@@ -32,7 +32,7 @@ import {
   type InsertSupplierRefundClaim,
 } from "../drizzle/schema";
 import { nanoid } from "nanoid";
-import { safeSendEmail, sendOrderConfirmationEmail, sendOrderStatusEmail, sendTicketReplyEmail, sendDeliveryEmail } from "./email";
+import { safeSendEmail, sendOrderConfirmationEmail, sendOrderStatusEmail, sendTicketReplyEmail, sendDeliveryEmail, sendWalletTopupReceiptEmail } from "./email";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -1440,6 +1440,25 @@ export async function confirmWalletTopup(reference: string) {
     status: "completed",
     balanceAfterUSD: newBalance.toFixed(6),
   }).where(eq(walletTransactions.id, txn.id)), "confirmWalletTopup:updateTxn");
+
+  // Send receipt email to customer (fire-and-forget, don't block confirmation)
+  try {
+    const [topupUser] = await db!.select({ email: users.email, name: users.name })
+      .from(users).where(eq(users.id, txn.userId)).limit(1);
+    if (topupUser?.email) {
+      await sendWalletTopupReceiptEmail({
+        to: topupUser.email,
+        name: topupUser.name ?? "",
+        amountUSD: Number(txn.amountUSD),
+        reference: txn.reference ?? "",
+        gateway: String(txn.gateway ?? "unknown"),
+        newBalanceUSD: newBalance,
+      });
+    }
+  } catch (emailErr: any) {
+    await logSystem("warn", "email", `Failed to send wallet top-up receipt: ${emailErr.message}`);
+  }
+
   return { success: true, newBalance };
 }
 
