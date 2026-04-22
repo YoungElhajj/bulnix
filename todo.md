@@ -594,3 +594,10 @@
 - [x] Admin users still require OTP on login (both /login and /secure-admin pages)
 - [x] Reduce all session expiry from 1 year to 24h (customAuth + oauth callback)
 - [x] Fix Google login/signup buttons to point to real Manus OAuth portal URL
+
+## UX & Feature Update (Apr 22, 2026)
+- [x] Remove Google login/signup buttons from Login.tsx and Signup.tsx (redirects to Manus AI — wrong)
+- [x] Add visible text labels beside WhatsApp and Telegram floating buttons ("Live Support", "Join Channel")
+- [x] Build Telegram join popup: shows once after login, dismissible, skipped if user already joined (localStorage flag)
+- [x] Design and build live chat automation UI (chatbox with auto-replies, escalation to WhatsApp)
+- [ ] Add additional supplier API (TBD — awaiting user details)
