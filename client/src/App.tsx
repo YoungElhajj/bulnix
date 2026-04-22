@@ -53,7 +53,6 @@ import AdminRoute from "./components/AdminRoute";
 import SocialFloatingWidgets from "./components/SocialFloatingWidgets";
 import TelegramBanner from "./components/TelegramBanner";
 import TelegramJoinPopup from "./components/TelegramJoinPopup";
-import LiveChatWidget from "./components/LiveChatWidget";
 
 // Scroll to top on every route change
 function ScrollToTop() {
@@ -131,7 +130,6 @@ function App() {
             <TelegramJoinPopup />
             <Router />
             <SocialFloatingWidgets />
-            <LiveChatWidget />
           </TooltipProvider>
         </CartProvider>
       </ThemeProvider>

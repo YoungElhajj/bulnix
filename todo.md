@@ -601,3 +601,9 @@
 - [x] Build Telegram join popup: shows once after login, dismissible, skipped if user already joined (localStorage flag)
 - [x] Design and build live chat automation UI (chatbox with auto-replies, escalation to WhatsApp)
 - [ ] Add additional supplier API (TBD — awaiting user details)
+
+## Floating Widget & Chat Redesign (Apr 22, 2026)
+- [x] Remove standalone LiveChatWidget button — merged chat into SocialFloatingWidgets
+- [x] Add visible "Support" label beside the main toggle button so users know what it is
+- [x] Redesign live chat as WhatsApp pre-triage bot: structured questions → WhatsApp with context
+- [x] Bot clearly tells users it's gathering info before connecting to human
