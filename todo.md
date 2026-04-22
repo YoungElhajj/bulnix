@@ -575,3 +575,6 @@
 - [x] Verified frontend no longer calls confirmTopup on redirect for any gateway (polling only)
 - [x] Added Flutterwave API verification to confirmWalletTopup (defense-in-depth: blocks false credits if confirmTopup tRPC is ever called directly)
 - [x] NGN rate blank in Flutterwave checkout: expected behavior — Flutterwave charges USD directly, no NGN conversion needed
+
+## NowPayments Minimum Update (Apr 22, 2026)
+- [x] Raise NowPayments crypto minimum from $1 to $10 (server validation in db.ts + frontend gateway card desc/minUSD in Wallet.tsx)

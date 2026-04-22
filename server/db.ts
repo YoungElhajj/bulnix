@@ -1379,8 +1379,8 @@ export async function initiateWalletTopup(userId: number, amountUSD: number, gat
       });
       paymentUrl = result.paymentLink;
     } else if (gateway === "nowpayments") {
-      // NowPayments minimum is $1 USD equivalent
-      if (amountUSD < 1) throw new Error("Minimum crypto deposit is $1.00");
+      // NowPayments minimum is $10 USD equivalent
+      if (amountUSD < 10) throw new Error("Minimum crypto deposit is $10.00");
       const result = await npInitiate({
         priceAmount: amountUSD,
         priceCurrency: "usd",

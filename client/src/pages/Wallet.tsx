@@ -41,9 +41,9 @@ const GATEWAYS = [
   {
     key: "nowpayments",
     label: "Crypto",
-    desc: "BTC, ETH, USDT, and 100+ coins — min $20",
+    desc: "BTC, ETH, USDT, and 100+ coins — min $10",
     region: "Global",
-    minUSD: 20,
+    minUSD: 10,
     icon: Bitcoin,
     color: "text-[#F7931A]",
     bg: "bg-[#1a0d00]",
