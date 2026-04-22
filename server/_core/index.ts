@@ -362,3 +362,19 @@ setTimeout(() => {
   runDailyBackup();
   setInterval(runDailyBackup, 24 * 60 * 60 * 1000);
 }, delayToFirstBackup);
+
+// ─── Exchange Rate Refresh Scheduler ────────────────────────────────────────
+// Fetches live USD rates from open.er-api.com every 6 hours and caches in DB.
+// Data only updates once per day on the free tier, so 6-hour polling is safe.
+async function runExchangeRateRefresh() {
+  try {
+    const { fetchAndCacheExchangeRates } = await import("../db");
+    const result = await fetchAndCacheExchangeRates();
+    console.log(`[ExchangeRates] Updated ${result.updated} rates. USD/NGN = ${result.rateNGN.toFixed(2)}`);
+  } catch (err) {
+    console.error("[ExchangeRates] Refresh failed:", err);
+  }
+}
+// Run immediately on startup, then every 6 hours
+runExchangeRateRefresh();
+setInterval(runExchangeRateRefresh, 6 * 60 * 60 * 1000);

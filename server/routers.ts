@@ -189,6 +189,7 @@ export const appRouter = router({
   // ── Exchange Rates ──────────────────────────────────────────────────────
   rates: router({
     list: publicProcedure.query(() => db.getExchangeRates()),
+    refresh: adminProcedure.mutation(() => db.fetchAndCacheExchangeRates()),
   }),
 
   // ── Admin ───────────────────────────────────────────────────────────────

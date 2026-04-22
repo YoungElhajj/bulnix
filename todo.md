@@ -535,3 +535,10 @@
 - [x] Wallet balance visible in navbar as badge next to username (auto-refreshes every 60s)
 - [x] Wallet balance prominent in wallet page header and checkout page
 - [x] Run tests — 43 tests passing, 0 TypeScript errors, Kora Pay live key validated
+
+## Live Exchange Rate Integration (Apr 22, 2026)
+- [x] Add fetchAndCacheExchangeRates() helper in db.ts — fetches USD→NGN from open.er-api.com, stores in exchange_rates table with source="api"
+- [x] Add scheduled refresh every 6 hours in server/_core/index.ts
+- [x] Update rates.list tRPC procedure to also expose last-updated timestamp
+- [x] Update Wallet.tsx to show live rate with "last updated" timestamp and attribution
+- [x] Update Kora Pay connector to use live DB rate instead of hardcoded 1600

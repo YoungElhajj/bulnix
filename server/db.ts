@@ -887,6 +887,48 @@ export async function getExchangeRates() {
   );
 }
 
+/**
+ * Fetch live exchange rates from open.er-api.com (no API key required)
+ * and upsert them into the exchange_rates table with source="api".
+ * Only updates NGN, EUR, GBP, and GHS rates from USD base.
+ * Safe to call repeatedly — idempotent upsert.
+ */
+export async function fetchAndCacheExchangeRates(): Promise<{ updated: number; rateNGN: number }> {
+  const res = await fetch("https://open.er-api.com/v6/latest/USD");
+  if (!res.ok) throw new Error(`Exchange rate API error: ${res.status}`);
+  const json = (await res.json()) as { result: string; rates: Record<string, number>; time_next_update_utc?: string };
+  if (json.result !== "success") throw new Error("Exchange rate API returned non-success result");
+
+  const targets = ["NGN", "EUR", "GBP", "GHS"];
+  let updated = 0;
+  for (const toCurrency of targets) {
+    const rate = json.rates[toCurrency];
+    if (!rate) continue;
+    await upsertExchangeRateApi("USD", toCurrency, rate);
+    updated++;
+  }
+  return { updated, rateNGN: json.rates["NGN"] ?? 0 };
+}
+
+async function upsertExchangeRateApi(fromCurrency: string, toCurrency: string, rate: number) {
+  const db = await getDb();
+  if (!db) return;
+  const existing = await db.select().from(exchangeRates)
+    .where(and(eq(exchangeRates.fromCurrency, fromCurrency), eq(exchangeRates.toCurrency, toCurrency)));
+  if (existing.length > 0) {
+    await db.update(exchangeRates)
+      .set({ rate: rate.toFixed(6) as any, source: "api" })
+      .where(and(eq(exchangeRates.fromCurrency, fromCurrency), eq(exchangeRates.toCurrency, toCurrency)));
+  } else {
+    await db.insert(exchangeRates).values({
+      fromCurrency,
+      toCurrency,
+      rate: rate.toFixed(6) as any,
+      source: "api",
+    });
+  }
+}
+
 export async function updateExchangeRate(input: { fromCurrency: string; toCurrency: string; rate: number }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");

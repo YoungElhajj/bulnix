@@ -173,6 +173,8 @@ export default function WalletPage() {
 
   const ngnRateRow = (ratesData as any[])?.find((r: any) => r.fromCurrency === "USD" && r.toCurrency === "NGN");
   const usdToNgn = ngnRateRow ? Number(ngnRateRow.rate) : 1600;
+  const rateSource = ngnRateRow?.source ?? "manual";
+  const rateUpdatedAt = ngnRateRow?.updatedAt ? new Date(ngnRateRow.updatedAt) : null;
   const amountNGN = Math.round(parseFloat(amount || "0") * usdToNgn);
 
   return (
@@ -310,11 +312,21 @@ export default function WalletPage() {
                     You will be charged ₦{amountNGN.toLocaleString()} via {gateway === "korapay" ? "Kora Pay" : "Paystack"}
                   </p>
                   <p className="text-xs text-[#4A6080] mt-0.5">
-                    Rate: ₦{usdToNgn.toLocaleString()}/USD · Wallet credited ${parseFloat(amount || "0").toFixed(2)} USD
+                    Rate: ₦{usdToNgn.toLocaleString("en-NG", { maximumFractionDigits: 2 })}/USD
+                    {rateSource === "api" && " · Live rate"}
+                    {rateUpdatedAt && (
+                      <span> · Updated {rateUpdatedAt.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                    )}
                   </p>
                   {gateway === "korapay" && (
                     <p className="text-xs text-[#4A6080] mt-0.5">
                       Max per transaction: ₦200,000 (~$125 USD) · Daily limit: ₦1,000,000 (~$625 USD)
+                    </p>
+                  )}
+                  {rateSource === "api" && (
+                    <p className="text-xs text-[#4A6080]/70 mt-1">
+                      Rates by{" "}
+                      <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#0050D0]">Exchange Rate API</a>
                     </p>
                   )}
                 </div>

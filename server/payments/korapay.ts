@@ -1,5 +1,6 @@
 import { createHmac } from "crypto";
 import { ENV } from "../_core/env";
+import { getExchangeRates } from "../db";
 
 const BASE_URL = "https://api.korapay.com/merchant/api/v1";
 
@@ -29,11 +30,22 @@ export interface KoraInitResult {
  * Amount must be in the smallest currency unit (kobo for NGN, cents for USD).
  * We pass USD amounts in USD directly — Kora supports USD.
  */
-// Exchange rate: 1 USD ≈ 1600 NGN (update periodically or fetch dynamically)
-const USD_TO_NGN = 1600;
 // Kora Pay per-transaction limit: NGN 200,000 (~$125 USD) for Card, Bank Transfer, and Bank payments.
 // Daily limit is NGN 1,000,000 (~$625 USD).
 const KORA_MAX_NGN = 200_000;
+// Fallback rate used only if DB has no cached rate yet
+const FALLBACK_USD_TO_NGN = 1600;
+
+async function getLiveNgnRate(): Promise<number> {
+  try {
+    const rates = await getExchangeRates();
+    const row = rates.find((r: any) => r.fromCurrency === "USD" && r.toCurrency === "NGN");
+    if (row && Number(row.rate) > 0) return Number(row.rate);
+  } catch {
+    // fall through to fallback
+  }
+  return FALLBACK_USD_TO_NGN;
+}
 
 export async function koraInitiate(params: {
   reference: string;
@@ -45,11 +57,12 @@ export async function koraInitiate(params: {
   metadata?: Record<string, unknown>;
 }): Promise<KoraInitResult> {
   // Kora Pay uses NGN in kobo (1 NGN = 100 kobo).
-  // Convert USD → NGN → kobo. Do NOT pass channels — let Kora use account defaults.
-  const amountNGN = Math.round(params.amountUSD * USD_TO_NGN);
+  // Convert USD → NGN → kobo using live DB rate. Do NOT pass channels — let Kora use account defaults.
+  const usdToNgn = await getLiveNgnRate();
+  const amountNGN = Math.round(params.amountUSD * usdToNgn);
   if (amountNGN > KORA_MAX_NGN) {
     throw new Error(
-      `Kora Pay maximum per transaction is NGN ${KORA_MAX_NGN.toLocaleString()} (~$${(KORA_MAX_NGN / USD_TO_NGN).toFixed(0)} USD). ` +
+      `Kora Pay maximum per transaction is NGN ${KORA_MAX_NGN.toLocaleString()} (~$${(KORA_MAX_NGN / usdToNgn).toFixed(0)} USD). ` +
       `Please use Flutterwave or Crypto for larger amounts.`
     );
   }
