@@ -153,19 +153,22 @@ export default function WalletPage() {
   }, [wallet?.balanceUSD, isPolling]);
 
   // Handle redirect back from payment gateway
+  // NOTE: For Kora Pay, the redirect_url fires even on cancel — do NOT call confirmTopup here.
+  // Instead, just start polling. The webhook is the only trusted source that credits the wallet.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const topupRef = params.get("topup_ref");
     const status = params.get("status");
-    if (topupRef && status === "success") {
-      // Start polling to confirm via webhook (don't call confirmTopup manually — webhook already did it)
-      setPollingRef(topupRef);
-      setIsPolling(true);
-      balanceBeforeTopupRef[1](Number(wallet?.balanceUSD ?? 0));
+    if (topupRef) {
+      if (status !== "cancelled" && status !== "failed") {
+        // Start polling — wallet will update when webhook fires
+        setPollingRef(topupRef);
+        setIsPolling(true);
+        balanceBeforeTopupRef[1](Number(wallet?.balanceUSD ?? 0));
+      } else {
+        toast.error("Payment was cancelled or failed. Please try again.");
+      }
       // Clean up URL
-      window.history.replaceState({}, "", "/wallet");
-    } else if (topupRef && status && status !== "success") {
-      toast.error("Payment was not completed. Please try again.");
       window.history.replaceState({}, "", "/wallet");
     }
   }, []);

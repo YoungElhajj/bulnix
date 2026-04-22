@@ -73,7 +73,7 @@ async function startServer() {
         const status = (data.status as string) ?? "";
         if (isKoraSuccess(status)) {
           try {
-            await confirmWalletTopup(reference);
+            await confirmWalletTopup(reference, true); // skipVerify: webhook is already verified by signature
             await logSystem("info", "payment", `Kora Pay webhook: wallet topup confirmed for ref ${reference}`);
           } catch (e: any) {
             // Not a wallet topup — ignore (Kora Pay is wallet-only for now)
@@ -106,7 +106,7 @@ async function startServer() {
         const metadata = (data.metadata as Record<string, unknown>) ?? {};
         const topupRef = (metadata.topupRef as string) ?? reference;
         try {
-          await confirmWalletTopup(topupRef);
+          await confirmWalletTopup(topupRef, true); // skipVerify: webhook is already verified
           await logSystem("info", "payment", `Paystack webhook: wallet topup confirmed for ref ${topupRef}`);
         } catch (e: any) {
           // May be an order payment — try order fulfillment
@@ -142,7 +142,7 @@ async function startServer() {
         const status = data.status as string;
         if (status === "successful") {
           try {
-            await confirmWalletTopup(txRef);
+            await confirmWalletTopup(txRef, true); // skipVerify: webhook is already verified
             await logSystem("info", "payment", `Flutterwave webhook: wallet topup confirmed for txRef ${txRef}`);
           } catch (e: any) {
             try {
@@ -175,7 +175,7 @@ async function startServer() {
       const orderId = payload.order_id as string;
       if (isNowPaymentsSuccess(paymentStatus)) {
         try {
-          await confirmWalletTopup(orderId);
+          await confirmWalletTopup(orderId, true); // skipVerify: IPN is already verified
           await logSystem("info", "payment", `NowPayments IPN: wallet topup confirmed for orderId ${orderId}`);
         } catch (e: any) {
           try {

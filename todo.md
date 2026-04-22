@@ -557,3 +557,8 @@
 - [x] Fix redirect_url so Kora Pay returns user to /wallet?topup=success after payment
 - [x] Add balance polling on wallet page when returning from Kora Pay (detect balance increase, show success toast)
 - [x] Show "Payment processing..." state while polling instead of staying on bank transfer screen
+
+## Critical Security Fix: Wallet Credited Without Payment (Apr 22, 2026)
+- [x] Fix confirmWalletTopup: must verify payment status with Kora Pay API before crediting wallet
+- [x] Remove frontend-triggered confirmTopup on redirect — rely on webhook only for Kora Pay
+- [ ] Debit the fraudulently credited $3.00 from admin test account (manual action needed)

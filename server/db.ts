@@ -1421,12 +1421,30 @@ export async function initiateWalletTopup(userId: number, amountUSD: number, gat
   return { reference, amountUSD, paymentUrl };
 }
 
-export async function confirmWalletTopup(reference: string) {
+export async function confirmWalletTopup(reference: string, skipVerify = false) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const [txn] = await db.select().from(walletTransactions).where(eq(walletTransactions.reference, reference)).limit(1);
   if (!txn) throw new Error("Transaction not found");
   if (txn.status === "completed") return { success: true, alreadyProcessed: true };
+
+  // For Kora Pay: ALWAYS verify with the API before crediting.
+  // The redirect_url fires even on cancel, so we cannot trust it.
+  // Only the webhook (skipVerify=true) or a confirmed API status should credit the wallet.
+  if (!skipVerify && txn.gateway === "korapay") {
+    const { koraVerify } = await import("./payments/korapay");
+    let verified = false;
+    try {
+      const result = await koraVerify(reference);
+      verified = result.status === "success";
+    } catch (verifyErr: any) {
+      await logSystem("warn", "payment", `Kora Pay verify failed for ${reference}: ${verifyErr.message}`);
+    }
+    if (!verified) {
+      await logSystem("warn", "payment", `Kora Pay confirmation rejected — payment not confirmed by API`, { reference });
+      throw new Error("Payment has not been confirmed by Kora Pay. Your wallet will be credited automatically once payment is received.");
+    }
+  }
 
   const wallet = await getOrCreateWallet(txn.userId);
   const newBalance = Number(wallet.balanceUSD) + Number(txn.amountUSD);
