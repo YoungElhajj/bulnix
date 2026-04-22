@@ -6,6 +6,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod/v4";
 import * as db from "./db";
+import { migrationsRouter } from "./routers/migrations";
 
 // Admin guard middleware
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -414,6 +415,8 @@ export const appRouter = router({
   supplier: router({
     syncStatus: adminProcedure.query(() => db.getProviderSyncLogs()),
   }),
+  // ── One-time Migrations (admin only) ─────────────────────────────────────
+  migrations: migrationsRouter,
 });
 
 export type AppRouter = typeof appRouter;

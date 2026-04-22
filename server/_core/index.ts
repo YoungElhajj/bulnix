@@ -244,6 +244,13 @@ async function startServer() {
 
 startServer().catch(console.error);
 
+// ─── Auto-Run Pending Migrations on Startup ─────────────────────────────────────────
+// Runs all CREATE TABLE IF NOT EXISTS / ALTER TABLE ADD COLUMN IF NOT EXISTS
+// statements on every server boot. Safe to run multiple times (idempotent).
+import("../runMigrations").then(m => m.runPendingMigrations()).catch(e =>
+  console.error("[Migrations] Startup migration failed:", e)
+);
+
 // ─── Auto-Sync Scheduler ────────────────────────────────────────────────────
 // Runs a stock+price sync every 15 minutes to keep inventory up to date
 // and prevent overselling. Full sync runs once per hour.
