@@ -48,7 +48,7 @@ function getLoginInstructions(title: string): {
       warnings: [
         "Do not share the account credentials with others",
         "Do not use automation tools or bots immediately after login",
-        "Contact support within 24 hours if the credentials are invalid",
+        "Contact Bulnix support via WhatsApp or the live chat within 24 hours if the credentials are invalid",
       ],
     };
   }
@@ -74,7 +74,7 @@ function getLoginInstructions(title: string): {
       warnings: [
         "Do not add your personal phone number as the primary contact immediately",
         "Do not run Facebook Ads within the first 48 hours of taking ownership",
-        "Report any issues within 24 hours of purchase for warranty coverage",
+        "Report any issues to Bulnix support within 24 hours of purchase for warranty coverage",
       ],
     };
   }
@@ -100,7 +100,7 @@ function getLoginInstructions(title: string): {
       warnings: [
         "X (Twitter) may lock the account if it detects a new device login — have the email ready for verification",
         "Do not use third-party apps or automation tools on the first day",
-        "Contact support within 24 hours if you cannot log in",
+        "Contact Bulnix support within 24 hours if you cannot log in",
       ],
     };
   }
@@ -123,7 +123,7 @@ function getLoginInstructions(title: string): {
       ],
       warnings: [
         "Do not change the username immediately on high-follower accounts",
-        "Contact support within 24 hours if credentials are invalid",
+        "Contact Bulnix support within 24 hours if credentials are invalid",
       ],
     };
   }
@@ -148,7 +148,7 @@ function getLoginInstructions(title: string): {
       warnings: [
         "Google may require phone verification on new device logins — have the backup phone ready",
         "Do not violate YouTube's Terms of Service or the channel may be terminated",
-        "Contact support within 24 hours if you cannot access the account",
+        "Contact Bulnix support within 24 hours if you cannot access the account",
       ],
     };
   }
@@ -171,7 +171,7 @@ function getLoginInstructions(title: string): {
       ],
       warnings: [
         "Sharing Premium accounts violates Spotify's Terms of Service",
-        "Contact support within 24 hours if the account is not Premium as advertised",
+        "Contact Bulnix support within 24 hours if the account is not Premium as advertised",
       ],
     };
   }
@@ -195,7 +195,7 @@ function getLoginInstructions(title: string): {
       warnings: [
         "Do not sign out other devices if it is a shared account",
         "Netflix is cracking down on password sharing — use the account from the correct region",
-        "Contact support within 24 hours if the account is not accessible",
+        "Contact Bulnix support within 24 hours if the account is not accessible",
       ],
     };
   }
@@ -219,7 +219,150 @@ function getLoginInstructions(title: string): {
       ],
       warnings: [
         "Do not use the account for spam or self-botting — it will be banned",
-        "Contact support within 24 hours if you cannot log in",
+        "Contact Bulnix support within 24 hours if you cannot log in",
+      ],
+    };
+  }
+
+  if (t.includes("amazon") || t.includes("prime video") || t.includes("prime")) {
+    return {
+      platform: "Amazon Prime",
+      loginUrl: "https://www.amazon.com/ap/signin",
+      steps: [
+        { title: "Open Amazon Login", detail: "Go to amazon.com (or amazon.co.uk for UK accounts) and click 'Sign in'. Use a fresh browser session or incognito mode." },
+        { title: "Enter Email and Password", detail: "Enter the email address and password from your Bulnix order details. Click 'Sign in'." },
+        { title: "Handle OTP Verification", detail: "Amazon may send a one-time code to the account email. Log into the email account provided in your order to retrieve the code." },
+        { title: "Change Password", detail: "Go to Account & Lists → Account → Login & Security → Password → Edit. Set a new strong password." },
+        { title: "Update Recovery Email", detail: "In Login & Security, add your own email as a secondary address for account recovery." },
+        { title: "Access Prime Video", detail: "Go to primevideo.com or open the Prime Video app. Sign in with the same Amazon credentials." },
+      ],
+      tips: [
+        "Prime membership: check the renewal date in Account → Prime Membership",
+        "Do not place orders on the account immediately — secure it first",
+        "Saved payment methods belong to the original owner — do not use them",
+      ],
+      warnings: [
+        "Do not use saved payment cards or gift card balances on the account",
+        "Do not change the account's country/region immediately",
+        "Contact Bulnix support within 24 hours if access is denied",
+      ],
+    };
+  }
+
+  if (t.includes("canva")) {
+    return {
+      platform: "Canva",
+      loginUrl: "https://www.canva.com/login",
+      steps: [
+        { title: "Open Canva Login", detail: "Go to canva.com/login in your browser. Choose 'Continue with email'." },
+        { title: "Enter Email and Password", detail: "Enter the email and password from your Bulnix order details." },
+        { title: "Verify via Email if Prompted", detail: "Canva may send a magic link or OTP to the account email. Log into the provided email to complete verification." },
+        { title: "Change Password", detail: "Go to Account Settings → Security → Change Password. Set a new strong password." },
+        { title: "Update Account Email", detail: "In Account Settings → Account, update the email to your own address." },
+        { title: "Check Plan Type", detail: "Go to Account Settings → Billing & Plans to confirm whether the account has Canva Pro, Teams, or Free." },
+      ],
+      tips: [
+        "Canva Pro: check the subscription renewal date in Billing & Plans",
+        "All your designs are saved to the account — do not delete existing designs",
+        "You can invite team members after securing the account",
+      ],
+      warnings: [
+        "Do not cancel the Pro subscription immediately — verify it is active first",
+        "Contact Bulnix support within 24 hours if the account is not Pro as advertised",
+      ],
+    };
+  }
+
+  if (t.includes("microsoft") || t.includes("office 365") || t.includes("office365") || t.includes("ms office") || t.includes("xbox")) {
+    return {
+      platform: "Microsoft / Office 365",
+      loginUrl: "https://login.microsoftonline.com/",
+      steps: [
+        { title: "Open Microsoft Login", detail: "Go to login.microsoftonline.com or account.microsoft.com in your browser. Use a fresh browser session." },
+        { title: "Enter Email and Password", detail: "Enter the Microsoft account email and password from your Bulnix order details." },
+        { title: "Handle 2-Step Verification", detail: "Microsoft may send a code to the backup email or phone. The backup credentials are included in your order." },
+        { title: "Change Password", detail: "Go to account.microsoft.com → Security → Change Password. Set a new strong password." },
+        { title: "Update Recovery Info", detail: "In Security → Advanced Security Options, add your own email or phone as a recovery contact." },
+        { title: "Install Office Apps", detail: "For Office 365 accounts, go to office.com → Install Office to download Word, Excel, PowerPoint, and other apps." },
+      ],
+      tips: [
+        "Office 365: check the subscription status at account.microsoft.com → Services & Subscriptions",
+        "You can install Office on up to 5 devices with a personal Microsoft 365 subscription",
+        "Xbox accounts: check for any active Game Pass subscriptions",
+      ],
+      warnings: [
+        "Do not use any stored payment methods on the account",
+        "Contact Bulnix support within 24 hours if the subscription is not active as advertised",
+      ],
+    };
+  }
+
+  if (t.includes("duolingo")) {
+    return {
+      platform: "Duolingo",
+      loginUrl: "https://www.duolingo.com/login",
+      steps: [
+        { title: "Open Duolingo Login", detail: "Go to duolingo.com/login or open the Duolingo app. Choose 'I already have an account'." },
+        { title: "Enter Email and Password", detail: "Enter the email and password from your Bulnix order details." },
+        { title: "Change Password", detail: "Go to Profile → Settings → Account → Change Password. Set a new password." },
+        { title: "Update Email", detail: "In Settings → Account, update the email to your own address." },
+        { title: "Check Super Duolingo Status", detail: "In Settings → Super Duolingo, verify the subscription is active and check the renewal date." },
+      ],
+      tips: [
+        "Super Duolingo: check the streak and XP — do not reset them",
+        "Leagues and achievements are tied to the account — preserve them",
+      ],
+      warnings: [
+        "Contact Bulnix support within 24 hours if Super Duolingo is not active as advertised",
+      ],
+    };
+  }
+
+  if (t.includes("vpn") || t.includes("nordvpn") || t.includes("expressvpn") || t.includes("surfshark")) {
+    return {
+      platform: "VPN Service",
+      loginUrl: "",
+      steps: [
+        { title: "Download the VPN App", detail: "Go to the official website of the VPN service (e.g., nordvpn.com, expressvpn.com, surfshark.com) and download the app for your device." },
+        { title: "Open the App and Log In", detail: "Open the app and choose 'Log in'. Enter the email and password from your Bulnix order details." },
+        { title: "Verify via Email if Prompted", detail: "Log into the email account provided in your order to retrieve any verification code." },
+        { title: "Change Password", detail: "In the app or on the service website, go to Account Settings → Change Password. Set a new strong password." },
+        { title: "Update Recovery Email", detail: "Add your own email address as the account recovery contact." },
+        { title: "Connect to a Server", detail: "Select a server location and click Connect. Your internet traffic is now encrypted." },
+      ],
+      tips: [
+        "Check the subscription expiry date in Account → Billing",
+        "You can use the VPN on multiple devices simultaneously (check your plan's device limit)",
+        "Use the fastest server for streaming, or a specific country server for geo-restricted content",
+      ],
+      warnings: [
+        "Do not use stored payment methods on the account",
+        "Contact Bulnix support within 24 hours if the subscription is not active as advertised",
+      ],
+    };
+  }
+
+  if (t.includes("gaming") || t.includes("steam") || t.includes("pubg") || t.includes("valorant") || t.includes("fortnite") || t.includes("roblox") || t.includes("minecraft") || t.includes("gta") || t.includes("cod") || t.includes("call of duty") || t.includes("battlenet") || t.includes("battle.net") || t.includes("epic games") || t.includes("playstation") || t.includes("psn")) {
+    return {
+      platform: "Gaming Account",
+      loginUrl: "",
+      steps: [
+        { title: "Retrieve Your Credentials", detail: "After your order is fulfilled, go to My Orders → Order Details on Bulnix to find your login email and password." },
+        { title: "Open the Platform Login", detail: "Go to the official platform website (e.g., store.steampowered.com, epicgames.com, account.activision.com) or open the game launcher." },
+        { title: "Enter Email and Password", detail: "Enter the credentials exactly as shown in your order. Copy-paste to avoid typos." },
+        { title: "Handle 2FA / Guard", detail: "If the platform uses 2FA (e.g., Steam Guard), the backup codes or authenticator details are included in your order." },
+        { title: "Change Password Immediately", detail: "Go to Account Settings → Security → Change Password. Set a new strong password." },
+        { title: "Update Recovery Email", detail: "Add your own email address as the recovery contact in Account Settings." },
+      ],
+      tips: [
+        "Check the account's rank, level, and inventory before making any changes",
+        "Do not trade or sell in-game items immediately — wait 24–48 hours",
+        "Steam: enable Steam Guard with your own authenticator app after securing the account",
+      ],
+      warnings: [
+        "Do not use cheats or hacks — the account will be permanently banned",
+        "Do not make purchases using stored payment methods on the account",
+        "Contact Bulnix support within 24 hours if you cannot log in",
       ],
     };
   }
@@ -240,12 +383,12 @@ function getLoginInstructions(title: string): {
       "Use a VPN if login is blocked from your country",
       "Change the password immediately after first login",
       "Save your new credentials in a password manager",
-      "Contact support within 24 hours if there are any issues",
+      "Contact Bulnix support via WhatsApp or live chat within 24 hours if there are any issues",
     ],
     warnings: [
       "Do not share your credentials with others",
       "Do not log in from multiple devices simultaneously on the first day",
-      "Contact support within 24 hours if credentials don't work",
+      "Contact Bulnix support within 24 hours if credentials don't work — issues reported after 24 hours may not be covered under warranty",
     ],
   };
 }

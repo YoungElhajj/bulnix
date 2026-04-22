@@ -62,7 +62,7 @@ function ProductImageArea({ product }: { product: any }) {
 export default function Products() {
   const params = useParams<{ slug?: string }>();
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<"newest" | "price_asc" | "price_desc" | "popular">("newest");
+  const [sort, setSort] = useState<"newest" | "price_asc" | "price_desc" | "popular">("price_asc");
   const [currency, setCurrency] = useState("USD");
   const [page, setPage] = useState(1);
   const { addItem } = useCart();

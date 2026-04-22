@@ -52,20 +52,20 @@ export default function Dashboard() {
       <div className="container py-8">
         {/* Wallet Banner */}
         <Link href="/wallet">
-          <div className="bg-gradient-to-r from-[#0F3D5E] to-[#0050D0] rounded-2xl p-5 mb-6 flex items-center justify-between cursor-pointer hover:shadow-xl hover:shadow-[#0050D0]/20 transition-all group">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center">
-                <Wallet className="h-6 w-6 text-white" />
+          <div className="bg-gradient-to-r from-[#0F3D5E] to-[#0050D0] rounded-2xl p-4 sm:p-5 mb-6 flex items-center justify-between cursor-pointer hover:shadow-xl hover:shadow-[#0050D0]/20 transition-all group gap-3">
+              <div className="flex items-center gap-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center shrink-0">
+                <Wallet className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div>
                 <p className="text-white/60 text-xs">Wallet Balance</p>
-                <p className="text-2xl font-bold text-white" style={{ fontFamily: "'Poppins', sans-serif" }}>
-                  ${Number(wallet?.balanceUSD ?? 0).toFixed(2)} <span className="text-sm text-white/50 font-normal">USD</span>
+                <p className="text-xl sm:text-2xl font-bold text-white" style={{ fontFamily: "'Poppins', sans-serif" }}>
+                  ${Number(wallet?.balanceUSD ?? 0).toFixed(2)} <span className="text-xs sm:text-sm text-white/50 font-normal">USD</span>
                 </p>
               </div>
             </div>
-            <Button size="sm" className="bg-white/20 hover:bg-white/30 text-white border-white/20 border gap-1.5 group-hover:scale-105 transition-transform rounded-full">
-              <Plus className="h-4 w-4" /> Add Funds
+            <Button size="sm" className="bg-white/20 hover:bg-white/30 text-white border-white/20 border gap-1.5 group-hover:scale-105 transition-transform rounded-full shrink-0 text-xs sm:text-sm">
+              <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> <span className="hidden xs:inline">Add </span>Funds
             </Button>
           </div>
         </Link>
@@ -79,12 +79,12 @@ export default function Dashboard() {
             { icon: User, label: "My Profile", value: "Edit", color: "#7C3AED", bg: "#F5F3FF", link: "/profile" },
           ].map((stat, i) => (
             <Link key={i} href={stat.link}>
-              <div className="bg-white rounded-2xl p-5 border border-[#D8E8F5] shadow-sm cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{background:stat.bg}}>
-                  <stat.icon className="h-5 w-5" style={{color:stat.color}}/>
+              <div className="bg-white rounded-2xl p-3 sm:p-5 border border-[#D8E8F5] shadow-sm cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center mb-2 sm:mb-3" style={{background:stat.bg}}>
+                  <stat.icon className="h-4 w-4 sm:h-5 sm:w-5" style={{color:stat.color}}/>
                 </div>
-                <div className="text-2xl font-bold text-[#0D2137]" style={{ fontFamily: "'Poppins', sans-serif" }}>{stat.value}</div>
-                <div className="text-sm text-[#4A6080] mt-0.5">{stat.label}</div>
+                <div className="text-xl sm:text-2xl font-bold text-[#0D2137]" style={{ fontFamily: "'Poppins', sans-serif" }}>{stat.value}</div>
+                <div className="text-xs sm:text-sm text-[#4A6080] mt-0.5 leading-tight">{stat.label}</div>
               </div>
             </Link>
           ))}

@@ -15,6 +15,17 @@ export default function Orders() {
   const [status, setStatus] = useState("all");
   const [page, setPage] = useState(1);
 
+  // Map friendly filter labels → actual DB status values
+  const statusMap: Record<string, string | undefined> = {
+    all: undefined,
+    pending_payment: "pending_payment",
+    processing: "processing",
+    fulfilled: "fulfilled",
+    failed: "failed",
+    cancelled: "cancelled",
+    refunded: "refunded",
+  };
+
   // Handle return from payment gateway (Paystack/Flutterwave redirect back here)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -33,7 +44,7 @@ export default function Orders() {
       window.history.replaceState({}, "", cleanUrl);
     }
   }, []);
-  const { data, isLoading } = trpc.orders.list.useQuery({ status: status === "all" ? undefined : status, page, limit: 20 }, { enabled: isAuthenticated, retry: 2, retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000) });
+  const { data, isLoading } = trpc.orders.list.useQuery({ status: statusMap[status], page, limit: 20 }, { enabled: isAuthenticated, retry: 2, retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000) });
 
   if (loading) return <div className="min-h-screen bg-[#F5F9FF] flex items-center justify-center"><div className="w-8 h-8 border-2 border-[#0050D0] border-t-transparent rounded-full animate-spin"/></div>;
   if (!isAuthenticated) return (
@@ -46,7 +57,28 @@ export default function Orders() {
   const orders = (data as any)?.items ?? [];
   const total = (data as any)?.total ?? 0;
   const totalPages = Math.ceil(total / 20);
-  const statusBadge = (s: string) => ({ pending: "bg-yellow-500/10 text-yellow-400", processing: "bg-blue-500/10 text-blue-400", completed: "bg-[#EEF4FF] text-[#0050D0]", failed: "bg-red-500/10 text-red-400", refunded: "bg-orange-500/10 text-orange-400" }[s] ?? "bg-slate-500/10 text-[#4A6080]");
+  const statusBadge = (s: string) => ({
+    pending_payment: "bg-yellow-500/10 text-yellow-600",
+    paid: "bg-green-500/10 text-green-600",
+    processing: "bg-blue-500/10 text-blue-600",
+    fulfilled: "bg-[#EEF4FF] text-[#0050D0]",
+    partial: "bg-purple-500/10 text-purple-600",
+    failed: "bg-red-500/10 text-red-500",
+    cancelled: "bg-slate-500/10 text-slate-500",
+    refunded: "bg-orange-500/10 text-orange-500",
+    disputed: "bg-pink-500/10 text-pink-500",
+  }[s] ?? "bg-slate-500/10 text-[#4A6080]");
+  const statusLabel = (s: string) => ({
+    pending_payment: "Pending",
+    paid: "Paid",
+    processing: "Processing",
+    fulfilled: "Completed",
+    partial: "Partial",
+    failed: "Failed",
+    cancelled: "Cancelled",
+    refunded: "Refunded",
+    disputed: "Disputed",
+  }[s] ?? s);
 
   return (
     <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]"><Navbar/>
@@ -56,7 +88,13 @@ export default function Orders() {
           <Select value={status} onValueChange={v => { setStatus(v); setPage(1); }}>
             <SelectTrigger className="w-[160px] bg-white border-[#D8E8F5] text-[#0D2137] h-9"><SelectValue/></SelectTrigger>
             <SelectContent className="bg-white border-[#D8E8F5]">
-              <SelectItem value="all">All Orders</SelectItem><SelectItem value="pending">Pending</SelectItem><SelectItem value="processing">Processing</SelectItem><SelectItem value="completed">Completed</SelectItem><SelectItem value="failed">Failed</SelectItem>
+              <SelectItem value="all">All Orders</SelectItem>
+              <SelectItem value="pending_payment">Pending</SelectItem>
+              <SelectItem value="processing">Processing</SelectItem>
+              <SelectItem value="fulfilled">Completed</SelectItem>
+              <SelectItem value="failed">Failed</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+              <SelectItem value="refunded">Refunded</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -74,7 +112,7 @@ export default function Orders() {
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-lg bg-[#EEF4FF] flex items-center justify-center flex-shrink-0"><Package className="h-5 w-5 text-[#0050D0]"/></div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 mb-1"><span className="font-semibold text-[#0D2137]">Order #{order.id}</span><Badge className={"text-xs border-0 " + statusBadge(order.status)}>{order.status}</Badge></div>
+                        <div className="flex items-center gap-3 mb-1"><span className="font-semibold text-[#0D2137]">Order #{order.id}</span><Badge className={"text-xs border-0 " + statusBadge(order.status)}>{statusLabel(order.status)}</Badge></div>
                         <div className="text-xs text-[#4A6080]">{new Date(order.createdAt).toLocaleString()} · {order.currency}</div>
                       </div>
                       <div className="text-right flex-shrink-0">

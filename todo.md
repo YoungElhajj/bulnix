@@ -615,3 +615,12 @@
 - [x] Added support.submitTriage tRPC procedure to server/routers.ts
 - [x] Restored Google sign-in/sign-up with custom Google OAuth (client ID + secret from user)
 - [x] Built /api/auth/google and /api/auth/google/callback server routes in server/googleAuth.ts
+
+## Bug Fixes & Improvements Batch (Apr 22, 2026 - Round 2)
+- [ ] Fix Flutterwave checkout: apply admin NGN rate from DB instead of hardcoded/default rate
+- [ ] Fix Flutterwave email sender name: show "Bulnix" not owner personal name
+- [ ] Fix order page filters: Pending/Processing/Completed/Failed showing empty results
+- [ ] Change products page default sort from "Newest First" to "Price: Low to High"
+- [ ] Rewrite product descriptions with clear Bulnix-branded login instructions per category (streaming, social media, gaming, software)
+- [ ] Full mobile responsiveness audit: wallet balance badge, navbar, product grid, checkout, dashboard
+- [ ] Fix wallet balance badge not showing on mobile navbar

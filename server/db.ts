@@ -1367,15 +1367,17 @@ export async function initiateWalletTopup(userId: number, amountUSD: number, gat
       // Paystack is temporarily disabled — throw a user-friendly error
       throw new Error("Paystack is currently unavailable. Please use Flutterwave, Kora Pay, or Crypto.");
     } else if (gateway === "flutterwave") {
+      // Charge in NGN using the admin-configured rate so the admin markup is applied
+      const amountNGN = Math.round(amountUSD * usdToNgn);
       const result = await flwInitiate({
         txRef: reference,
-        amount: amountUSD,
-        currency: "USD",
+        amount: amountNGN,
+        currency: "NGN",
         email: userEmail,
         name: userName,
         redirectUrl: `${siteOrigin}/wallet?topup_ref=${reference}&status=success`,
         description: `Bulnix wallet top-up $${amountUSD.toFixed(2)}`,
-        meta: { topupRef: reference, userId, type: "wallet_topup" },
+        meta: { topupRef: reference, userId, type: "wallet_topup", amountUSD },
       });
       paymentUrl = result.paymentLink;
     } else if (gateway === "nowpayments") {

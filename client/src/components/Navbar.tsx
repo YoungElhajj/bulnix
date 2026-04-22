@@ -199,9 +199,10 @@ export default function Navbar() {
             {/* Wallet balance (authenticated) */}
             {isAuthenticated && (
               <Link href="/wallet"
-                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 transition-all text-white text-xs font-semibold border border-white/10">
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 transition-all text-white text-xs font-semibold border border-white/10">
                 <Wallet className="w-3.5 h-3.5 text-[#00C2FF]" />
-                ${walletBalance.toFixed(2)}
+                <span className="hidden sm:inline">${walletBalance.toFixed(2)}</span>
+                <span className="sm:hidden">${walletBalance.toFixed(0)}</span>
               </Link>
             )}
 
