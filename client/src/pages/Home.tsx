@@ -499,6 +499,37 @@ export default function Home() {
           </div>
         </div>
       </section>
+      {/* ══ SEO KEYWORD SECTION ══════════════════════════════════════════════ */}
+      <section className="py-12 bg-[#F7FAFD] border-t border-[#E8F0F8]">
+        <div className="container">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-[#0D2137] mb-3" style={{ fontFamily: "'Poppins', sans-serif" }}>Popular Digital Accounts &amp; Services</h2>
+            <p className="text-[#4A6080] max-w-2xl mx-auto text-sm leading-relaxed">
+              Bulnix is your one-stop marketplace to buy verified digital accounts at the best prices. Whether you need Instagram accounts, Facebook accounts, TikTok accounts, Netflix accounts, Spotify accounts, Discord accounts, Reddit accounts, Snapchat accounts, LinkedIn accounts, gaming accounts, VPN accounts, or streaming service subscriptions — we have them all with instant delivery.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 text-center">
+            {[
+              { label: "Instagram Accounts", href: "/categories" },
+              { label: "Facebook Accounts", href: "/categories" },
+              { label: "TikTok Accounts", href: "/categories" },
+              { label: "Netflix Accounts", href: "/categories" },
+              { label: "Spotify Accounts", href: "/categories" },
+              { label: "Discord Accounts", href: "/categories" },
+              { label: "Reddit Accounts", href: "/categories" },
+              { label: "Snapchat Accounts", href: "/categories" },
+              { label: "LinkedIn Accounts", href: "/categories" },
+              { label: "Gaming Credits", href: "/categories" },
+              { label: "VPN Accounts", href: "/categories" },
+              { label: "AI Tools Access", href: "/categories" },
+            ].map((item) => (
+              <Link key={item.label} href={item.href} className="block px-3 py-2 rounded-lg bg-white border border-[#E8F0F8] text-[#0050D0] text-xs font-medium hover:border-[#00C2FF]/50 hover:bg-[#F0F8FF] transition-all duration-200">
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
       <Footer/>
     </div>
   );

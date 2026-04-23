@@ -668,3 +668,10 @@
 - [x] Investigate NOWPayments partial payment 5797040697 (already credited - no action needed)
 - [x] Fix Kora Pay webhook signature verification (was signing full body, should sign only data object)
 - [x] Investigate Flutterwave NGN delay (confirmed: pending txns were abandoned/failed, not delayed)
+
+## SEO Fixes (Apr 23)
+- [x] Add keywords meta tag to index.html with 20 targeted keywords
+- [x] Improve page title to include specific product keywords (Instagram, Facebook, TikTok)
+- [x] Improve meta description with specific product names
+- [x] Add canonical link and robots meta tag
+- [x] Add keyword-rich "Popular Digital Accounts & Services" section to homepage body
