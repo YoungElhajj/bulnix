@@ -316,6 +316,7 @@ export const appRouter = router({
         .mutation(({ input }) => db.triggerProviderSync(input.providerKey, input.syncType)),
       syncLogs: adminProcedure.query(() => db.getProviderSyncLogs()),
       getAccsZoneBalance: adminProcedure.query(() => db.getAccsZoneBalance()),
+      getFaddedBalance: adminProcedure.query(() => db.getFaddedBalance()),
     }),
 
     // Categories

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { RefreshCw, Settings, Loader2, CheckCircle, AlertCircle, Clock, Zap, Activity } from "lucide-react";
+import { RefreshCw, Settings, Loader2, CheckCircle, AlertCircle, Clock, Zap, Activity, DollarSign, AlertTriangle, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,14 @@ export default function AdminProviders() {
   const { data: syncLogs, refetch: refetchLogs } = trpc.admin.providers.syncLogs.useQuery(
     undefined,
     { enabled: isAuthenticated && user?.role === "admin", retry: false, refetchInterval: syncing ? 3000 : 30000 }
+  );
+  const { data: accsZoneBalance, refetch: refetchAccsBalance } = trpc.admin.providers.getAccsZoneBalance.useQuery(
+    undefined,
+    { enabled: isAuthenticated && user?.role === "admin", retry: false, refetchInterval: 5 * 60 * 1000 }
+  );
+  const { data: faddedBalance, refetch: refetchFaddedBalance } = trpc.admin.providers.getFaddedBalance.useQuery(
+    undefined,
+    { enabled: isAuthenticated && user?.role === "admin", retry: false, refetchInterval: 5 * 60 * 1000 }
   );
 
   const updateProvider = trpc.admin.providers.update.useMutation({
@@ -88,6 +96,73 @@ export default function AdminProviders() {
         <p className="text-slate-400 text-sm mt-0.5">Manage supplier API connections and sync settings</p>
       </div>
 
+      {/* Supplier Balance Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        {/* AccsZone Balance */}
+        <div className={`bg-[#161b22] border rounded-xl p-5 ${(accsZoneBalance as any)?.lowBalance ? 'border-red-500/40 bg-red-500/5' : 'border-emerald-900/30'}`}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${(accsZoneBalance as any)?.lowBalance ? 'bg-red-500/10' : 'bg-emerald-500/10'}`}>
+                <DollarSign className={`h-4 w-4 ${(accsZoneBalance as any)?.lowBalance ? 'text-red-400' : 'text-emerald-400'}`} />
+              </div>
+              <span className="text-sm font-semibold text-white">AccsZone Balance</span>
+            </div>
+            <button onClick={() => refetchAccsBalance()} className="text-slate-400 hover:text-white transition-colors">
+              <RefreshCw className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          {(accsZoneBalance as any)?.error ? (
+            <div className="text-xs text-red-400 flex items-center gap-1"><AlertCircle className="h-3 w-3" />{(accsZoneBalance as any).error}</div>
+          ) : (
+            <>
+              <div className={`text-2xl font-bold ${(accsZoneBalance as any)?.lowBalance ? 'text-red-400' : 'text-white'}`}>
+                ${((accsZoneBalance as any)?.balance ?? 0).toFixed(2)} <span className="text-sm font-normal text-slate-400">USD</span>
+              </div>
+              {(accsZoneBalance as any)?.referralBalance > 0 && (
+                <div className="text-xs text-slate-400 mt-0.5">Referral: ${((accsZoneBalance as any).referralBalance).toFixed(2)}</div>
+              )}
+              {(accsZoneBalance as any)?.lowBalance && (
+                <div className="mt-2 flex items-center gap-1.5 text-xs text-red-400 font-medium">
+                  <AlertTriangle className="h-3 w-3" />
+                  Low balance — top up to avoid fulfillment failures
+                </div>
+              )}
+            </>
+          )}
+        </div>
+        {/* Fadded Balance */}
+        <div className={`bg-[#161b22] border rounded-xl p-5 ${(faddedBalance as any)?.lowBalance ? 'border-red-500/40 bg-red-500/5' : 'border-emerald-900/30'}`}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${(faddedBalance as any)?.lowBalance ? 'bg-red-500/10' : 'bg-emerald-500/10'}`}>
+                <TrendingDown className={`h-4 w-4 ${(faddedBalance as any)?.lowBalance ? 'text-red-400' : 'text-emerald-400'}`} />
+              </div>
+              <span className="text-sm font-semibold text-white">Fadded Balance</span>
+            </div>
+            <button onClick={() => refetchFaddedBalance()} className="text-slate-400 hover:text-white transition-colors">
+              <RefreshCw className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          {(faddedBalance as any)?.error ? (
+            <div className="text-xs text-red-400 flex items-center gap-1"><AlertCircle className="h-3 w-3" />{(faddedBalance as any).error}</div>
+          ) : (
+            <>
+              <div className={`text-2xl font-bold ${(faddedBalance as any)?.lowBalance ? 'text-red-400' : 'text-white'}`}>
+                ₦{((faddedBalance as any)?.balance ?? 0).toLocaleString()} <span className="text-sm font-normal text-slate-400">NGN</span>
+              </div>
+              {(faddedBalance as any)?.lowBalance && (
+                <div className="mt-2 flex items-center gap-1.5 text-xs text-red-400 font-medium">
+                  <AlertTriangle className="h-3 w-3" />
+                  Below ₦10,000 — top up to avoid fulfillment failures
+                </div>
+              )}
+              {!(faddedBalance as any)?.lowBalance && (
+                <div className="text-xs text-slate-400 mt-0.5">Alert threshold: ₦10,000 NGN</div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
       {/* Auto-Sync Status Banner */}
       <div className="bg-[#161b22] border border-emerald-900/30 rounded-xl p-4 mb-6 border border-[#0050D0]/20 bg-[#00C2FF]/5">
         <div className="flex items-center gap-3">

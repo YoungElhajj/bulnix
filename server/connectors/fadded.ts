@@ -271,6 +271,7 @@ export async function syncProducts(apiKey: string, markupPercent = 20, ngnToUsd 
         // Resolve or create category
         const catRow = await db.select().from(categories).where(eq(categories.slug, cat.slug)).limit(1);
         let categoryId: number | null = catRow[0]?.id ?? null;
+        let categoryImageUrl: string | null = catRow[0]?.imageUrl ?? null;
         if (!categoryId) {
           await db.insert(categories).values({
             name: cat.name,
@@ -280,6 +281,7 @@ export async function syncProducts(apiKey: string, markupPercent = 20, ngnToUsd 
           });
           const newCat = await db.select().from(categories).where(eq(categories.slug, cat.slug)).limit(1);
           categoryId = newCat[0]?.id ?? null;
+          categoryImageUrl = newCat[0]?.imageUrl ?? null;
         }
 
         // Upsert into products table
@@ -295,6 +297,10 @@ export async function syncProducts(apiKey: string, markupPercent = 20, ngnToUsd 
             customerPriceUSD: customerPriceUSD.toFixed(4),
           };
           if (categoryId) updateData.categoryId = categoryId;
+          // Assign category icon if product has no image
+          if (!existingProduct[0].imageUrl && categoryImageUrl) {
+            updateData.imageUrl = categoryImageUrl;
+          }
           // Update delivery format if we extracted one and product doesn't have a manual override
           if (deliveryFormat && !existingProduct[0].deliveryFormat) {
             updateData.deliveryFormat = deliveryFormat;
@@ -307,7 +313,7 @@ export async function syncProducts(apiKey: string, markupPercent = 20, ngnToUsd 
             title: prodName,
             slug: `${slug}-fadded-${prod.product_id}`,
             description: prod.description ?? null,
-            imageUrl: null,
+            imageUrl: categoryImageUrl,
             categoryId,
             supplierPrice: supplierPriceUSD.toFixed(4) as any,
             markupPercent: markupPercent.toFixed(2) as any,

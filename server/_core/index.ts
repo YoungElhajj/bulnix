@@ -359,7 +359,7 @@ setTimeout(() => {
 let lastRetryBalance = 0;
 async function runAutoRetry() {
   try {
-    const { getAccsZoneBalance, retryAllProcessingOrders } = await import("../db");
+    const { getAccsZoneBalance, getFaddedBalance, retryAllProcessingOrders } = await import("../db");
     const balResult = await getAccsZoneBalance();
     const balance = balResult.balance ?? 0;
     // Only trigger retry if balance has gone from $0 to positive (account was just topped up)
@@ -371,6 +371,8 @@ async function runAutoRetry() {
       }
     }
     lastRetryBalance = balance;
+    // Check Fadded balance — sends owner notification if below 10,000 NGN
+    await getFaddedBalance().catch(() => {/* silent */});
   } catch (err) {
     console.error("[AutoRetry] Error:", err);
   }

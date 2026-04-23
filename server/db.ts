@@ -1803,6 +1803,35 @@ export async function getAccsZoneBalance(): Promise<{ balance: number; referralB
   }
 }
 
+// ─── Fadded Balance ───────────────────────────────────────────────────────────
+export async function getFaddedBalance(): Promise<{ balance: number; currency: string; lowBalance: boolean; error?: string }> {
+  try {
+    const db = await getDb();
+    if (!db) return { balance: 0, currency: "NGN", lowBalance: true, error: "Database unavailable" };
+    const [config] = await db.select().from(providerConfigs).where(eq(providerConfigs.providerKey, "fadded")).limit(1);
+    if (!config?.apiKey) return { balance: 0, currency: "NGN", lowBalance: true, error: "Fadded API key not configured" };
+    const response = await fetch(`${config.baseUrl ?? "https://www.fadded.net/api/v1/reseller"}/balance`, {
+      headers: { "X-Api-Key": config.apiKey, "Accept": "application/json" },
+    });
+    if (!response.ok) return { balance: 0, currency: "NGN", lowBalance: true, error: `Fadded API error: ${response.status}` };
+    const json = await response.json() as any;
+    const balance = parseFloat(json?.data?.balance ?? "0");
+    const currency = json?.data?.currency ?? "NGN";
+    const lowBalance = balance < 10000; // Alert threshold: 10,000 NGN
+    // Send low-balance notification if balance drops below 10,000 NGN
+    if (lowBalance) {
+      const { notifyOwner } = await import("./_core/notification");
+      await notifyOwner({
+        title: "⚠️ Fadded Low Balance Alert",
+        content: `Your Fadded reseller account balance is critically low: ₦${balance.toLocaleString()} NGN. Please top up your Fadded account to avoid order fulfillment failures. Current balance: ₦${balance.toLocaleString()} NGN.`,
+      }).catch(() => {/* silent */});
+    }
+    return { balance, currency, lowBalance };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { balance: 0, currency: "NGN", lowBalance: true, error: msg };
+  }
+}
 // ─── Auto-Retry Processing Orders ─────────────────────────────────────────────
 
 export async function retryAllProcessingOrders(): Promise<{ retried: number; skipped: number }> {

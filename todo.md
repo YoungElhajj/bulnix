@@ -640,3 +640,9 @@
 - [x] Wire Fadded into autoFulfillOrder and triggerProviderSync
 - [x] Reorder all 145 categories by demand (Instagram → Facebook → TikTok → Twitter/X → Snapchat → Discord → Reddit → YouTube → WhatsApp → Telegram → LinkedIn → Streaming → Gaming → VPN → Dating → Email → Gift Cards → Other)
 - [x] Fix post-order redirect: auto-navigate to order detail page after checkout
+
+## Fadded Enhancements (Apr 23, 2026)
+- [ ] Set 20% markup for all Fadded products
+- [x] Add category icons to Fadded products (same logic as AccsZone)
+- [x] Add Fadded balance display to admin providers panel
+- [x] Notify owner when Fadded balance drops below 10,000 NGN
