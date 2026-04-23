@@ -385,15 +385,7 @@ export default function WalletPage() {
                   </p>
                 </div>
               )}
-              {/* Flutterwave USD settlement notice */}
-              {gateway === "flutterwave" && (
-                <div className="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-300/40">
-                  <p className="text-xs text-amber-700 font-semibold flex items-start gap-1.5">
-                    <span className="mt-0.5">⚠</span>
-                    <span>USD payments via Flutterwave may take <strong>3–5 business days</strong> to settle. For instant credits, use Kora Pay (NGN) or Crypto.</span>
-                  </p>
-                </div>
-              )}
+
               {/* NOWPayments partial payment notice */}
               {gateway === "nowpayments" && (
                 <div className="mb-4 p-3 rounded-xl bg-blue-50 border border-blue-200/60">

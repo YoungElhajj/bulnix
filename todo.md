@@ -662,3 +662,9 @@
 - [x] Add Flutterwave USD settlement delay notice in Wallet top-up UI
 - [x] Add NOWPayments exact-amount notice in Wallet top-up UI
 - [x] Add partial badge to transaction history
+
+## Payment Webhook Fixes (Apr 23 - Round 2)
+- [x] Remove Flutterwave yellow settlement warning from Wallet UI
+- [x] Investigate NOWPayments partial payment 5797040697 (already credited - no action needed)
+- [x] Fix Kora Pay webhook signature verification (was signing full body, should sign only data object)
+- [x] Investigate Flutterwave NGN delay (confirmed: pending txns were abandoned/failed, not delayed)

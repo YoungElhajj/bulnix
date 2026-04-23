@@ -132,14 +132,18 @@ export async function koraVerify(reference: string): Promise<KoraVerifyResult> {
 
 /**
  * Verify Kora Pay webhook signature.
- * Kora sends an `x-korapay-signature` header which is HMAC-SHA256 of the raw body
- * using your secret key.
+ * Per Kora Pay docs: x-korapay-signature is HMAC-SHA256 of ONLY the `data` object
+ * in the payload (not the full raw body), signed with your secret key.
+ * See: https://developers.korapay.com/docs/webhooks
  */
 export function verifyKoraSignature(rawBody: string, signature: string): boolean {
   try {
     const secret = ENV.korapaySecretKey;
     if (!secret) return true; // dev mode — accept all
-    const hash = createHmac("sha256", secret).update(rawBody).digest("hex");
+    // Sign only the `data` object, not the full body
+    const parsed = JSON.parse(rawBody) as Record<string, unknown>;
+    const dataObj = parsed.data ?? {};
+    const hash = createHmac("sha256", secret).update(JSON.stringify(dataObj)).digest("hex");
     return hash === signature;
   } catch {
     return false;
