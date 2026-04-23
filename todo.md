@@ -630,3 +630,13 @@
 - [ ] Improve product descriptions to supplier-style format (detailed bullets, delivery format line, important notes)
 - [ ] Raise NowPayments minimum deposit from $10 to $12
 - [ ] Format delivered credentials clearly in order delivery view (Username: xxx | Password: xxx | 2FA: xxx)
+
+## Fadded Supplier Integration (Apr 23, 2026)
+- [x] Research Fadded API documentation (fadded.net/user/reseller/docs)
+- [x] Build Fadded connector (syncProvider, placeSupplierOrder) matching AccsZone pattern
+- [x] Seed Fadded provider config in DB from FADDED_API_KEY env var on startup
+- [x] Run initial Fadded product sync (118 products imported)
+- [x] Add Fadded to 15-minute auto-sync scheduler alongside AccsZone
+- [x] Wire Fadded into autoFulfillOrder and triggerProviderSync
+- [x] Reorder all 145 categories by demand (Instagram → Facebook → TikTok → Twitter/X → Snapchat → Discord → Reddit → YouTube → WhatsApp → Telegram → LinkedIn → Streaming → Gaming → VPN → Dating → Email → Gift Cards → Other)
+- [x] Fix post-order redirect: auto-navigate to order detail page after checkout

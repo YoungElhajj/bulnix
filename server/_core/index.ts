@@ -285,25 +285,67 @@ startServer().catch(console.error);
 // ─── Auto-Run Pending Migrations on Startup ─────────────────────────────────────────
 // Runs all CREATE TABLE IF NOT EXISTS / ALTER TABLE ADD COLUMN IF NOT EXISTS
 // statements on every server boot. Safe to run multiple times (idempotent).
-import("../runMigrations").then(m => m.runPendingMigrations()).catch(e =>
+import("../runMigrations").then(m => m.runPendingMigrations()).then(async () => {
+  // After migrations run, seed API keys from env vars into provider_configs
+  try {
+    const { getDb } = await import("../db");
+    const { providerConfigs } = await import("../../drizzle/schema");
+    const { eq } = await import("drizzle-orm");
+    const db = await getDb();
+    if (db) {
+      const faddedKey = process.env.FADDED_API_KEY;
+      if (faddedKey) {
+        await db.update(providerConfigs).set({ apiKey: faddedKey }).where(eq(providerConfigs.providerKey, "fadded"));
+        console.log("[Startup] Fadded API key seeded from env.");
+      }
+      const accsKey = process.env.ACCSZONE_API_KEY;
+      if (accsKey) {
+        await db.update(providerConfigs).set({ apiKey: accsKey }).where(eq(providerConfigs.providerKey, "accszone"));
+        console.log("[Startup] AccsZone API key seeded from env.");
+      }
+      // Check if Fadded products have been synced yet; if not, trigger initial full sync
+      const { products: productsTable } = await import("../../drizzle/schema");
+      const [faddedCount] = await db.select({ count: db.$count(productsTable, eq(productsTable.providerKey, "fadded")) }).from(productsTable);
+      if (!faddedCount || (faddedCount as any).count === 0) {
+        console.log("[Startup] No Fadded products found — triggering initial full sync...");
+        import("../connectors/fadded").then(({ syncProvider }) =>
+          syncProvider("fadded", "full")
+            .then(r => console.log("[Startup] Fadded initial sync complete:", JSON.stringify(r)))
+            .catch(e => console.error("[Startup] Fadded initial sync failed:", e))
+        ).catch(e => console.error("[Startup] Fadded import failed:", e));
+      }
+    }
+  } catch (e) {
+    console.error("[Startup] Provider API key seeding failed:", e);
+  }
+}).catch(e =>
   console.error("[Migrations] Startup migration failed:", e)
 );
 
-// ─── Auto-Sync Scheduler ────────────────────────────────────────────────────
+// ─── Auto-Sync Scheduler ──────────────────────────────────────────────
 // Runs a stock+price sync every 15 minutes to keep inventory up to date
 // and prevent overselling. Full sync runs once per hour.
 let syncCycleCount = 0;
 async function runAutoSync() {
+  syncCycleCount++;
+  const syncType = syncCycleCount % 4 === 0 ? "full" : "stock";
+  // AccsZone sync
   try {
     const { syncProvider } = await import("../connectors/accszone");
-    syncCycleCount++;
-    // Every 4th cycle (1 hour) do a full sync; otherwise just stock+prices
-    const syncType = syncCycleCount % 4 === 0 ? "full" : "stock";
-    console.log(`[AutoSync] Running ${syncType} sync (cycle ${syncCycleCount})...`);
+    console.log(`[AutoSync] AccsZone ${syncType} sync (cycle ${syncCycleCount})...`);
     await syncProvider("accszone", syncType);
-    console.log(`[AutoSync] ${syncType} sync complete.`);
+    console.log(`[AutoSync] AccsZone ${syncType} sync complete.`);
   } catch (err) {
-    console.error("[AutoSync] Error:", err);
+    console.error("[AutoSync] AccsZone error:", err);
+  }
+  // Fadded sync
+  try {
+    const { syncProvider: syncFadded } = await import("../connectors/fadded");
+    console.log(`[AutoSync] Fadded ${syncType} sync (cycle ${syncCycleCount})...`);
+    await syncFadded("fadded", syncType);
+    console.log(`[AutoSync] Fadded ${syncType} sync complete.`);
+  } catch (err) {
+    console.error("[AutoSync] Fadded error:", err);
   }
 }
 // Start auto-sync after 2 minutes (allow server to fully boot), then every 15 min

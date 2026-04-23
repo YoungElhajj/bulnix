@@ -667,48 +667,59 @@ export async function autoFulfillOrder(orderId: number): Promise<void> {
       return;
     }
 
-    // Get AccsZone API key from providerConfigs
-    const [providerConfig] = await db.select().from(providerConfigs).where(eq(providerConfigs.providerKey, "accszone")).limit(1);
-    const apiKey = providerConfig?.apiKey ?? null;
-    if (!apiKey) {
-      await logSystem("error", "fulfillment", `AccsZone API key not configured — cannot fulfill order ${orderId}`);
-      await db.update(orders).set({ status: "failed" }).where(eq(orders.id, orderId));
-      return;
-    }
+    // Load API keys for all providers
+    const [accsConfig] = await db.select().from(providerConfigs).where(eq(providerConfigs.providerKey, "accszone")).limit(1);
+    const [faddedConfig] = await db.select().from(providerConfigs).where(eq(providerConfigs.providerKey, "fadded")).limit(1);
+    const accsApiKey = accsConfig?.apiKey ?? null;
+    const faddedApiKey = faddedConfig?.apiKey ?? null;
 
-    const { placeSupplierOrder } = await import("./connectors/accszone");
+    const { placeSupplierOrder: accsPlaceOrder } = await import("./connectors/accszone");
+    const { placeSupplierOrder: faddedPlaceOrder } = await import("./connectors/fadded");
     let successCount = 0;
     let failCount = 0;
 
     for (const item of items) {
-      // orderItems.supplierProductId stores the AccsZone product ID string directly (e.g. "879", "1402")
-      // NOT a FK to supplier_products.id — use it directly as the AccsZone product ID
-      let accsZoneProductId: string | null = null;
-      if (item.supplierProductId && item.providerKey === "accszone") {
-        accsZoneProductId = item.supplierProductId;
-      }
+      const itemProvider = item.providerKey ?? "accszone";
+      const supplierProductId = item.supplierProductId;
 
-      if (!accsZoneProductId) {
-        await logSystem("warn", "fulfillment", `No AccsZone product ID for order item ${item.id} (order ${orderId})`);
+      if (!supplierProductId) {
+        await logSystem("warn", "fulfillment", `No supplier product ID for order item ${item.id} (order ${orderId})`);
         await withDbRetry(() => db!.insert(fulfillmentRecords).values({
           orderId,
           orderItemId: item.id,
-          providerKey: item.providerKey ?? "accszone",
+          providerKey: itemProvider,
           status: "failed",
-          errorMessage: "Supplier product ID not found — product may not be linked to AccsZone",
+          errorMessage: "Supplier product ID not found — product may not be linked to a supplier",
         }), "autoFulfillOrder:insertFailedRecord");
         failCount++;
         continue;
       }
 
-      const result = await placeSupplierOrder(apiKey, accsZoneProductId, item.quantity, orderId);
+      // Route to the correct supplier connector
+      let result: { success: boolean; supplierOrderId?: string; deliveryData?: unknown; error?: string };
+      if (itemProvider === "fadded") {
+        if (!faddedApiKey) {
+          await logSystem("error", "fulfillment", `Fadded API key not configured — cannot fulfill order item ${item.id}`);
+          result = { success: false, error: "Fadded API key not configured" };
+        } else {
+          result = await faddedPlaceOrder(faddedApiKey, supplierProductId, item.quantity, orderId);
+        }
+      } else {
+        // Default to AccsZone
+        if (!accsApiKey) {
+          await logSystem("error", "fulfillment", `AccsZone API key not configured — cannot fulfill order item ${item.id}`);
+          result = { success: false, error: "AccsZone API key not configured" };
+        } else {
+          result = await accsPlaceOrder(accsApiKey, supplierProductId, item.quantity, orderId);
+        }
+      }
 
       if (result.success) {
         const deliveryDataStr = JSON.stringify(result.deliveryData);
         await withDbRetry(() => db!.insert(fulfillmentRecords).values({
           orderId,
           orderItemId: item.id,
-          providerKey: "accszone",
+          providerKey: itemProvider,
           supplierOrderId: result.supplierOrderId ?? null,
           status: "success",
           deliveryData: deliveryDataStr,
@@ -719,7 +730,7 @@ export async function autoFulfillOrder(orderId: number): Promise<void> {
         await withDbRetry(() => db!.insert(fulfillmentRecords).values({
           orderId,
           orderItemId: item.id,
-          providerKey: "accszone",
+          providerKey: itemProvider,
           status: "failed",
           errorMessage: result.error ?? "Unknown supplier error",
         }), "autoFulfillOrder:insertFailedRecord");
@@ -981,9 +992,14 @@ export async function triggerProviderSync(providerKey: string, syncType: "catego
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.insert(providerSyncLogs).values({ providerKey, syncType, status: "running" });
-  // The actual sync is handled by the AccsZone connector
-  const { syncProvider } = await import("./connectors/accszone");
-  syncProvider(providerKey, syncType).catch(err => console.error("[Sync] Error:", err));
+  // Route sync to the correct connector based on providerKey
+  if (providerKey === "fadded") {
+    const { syncProvider } = await import("./connectors/fadded");
+    syncProvider(providerKey, syncType).catch(err => console.error("[Sync] Fadded error:", err));
+  } else {
+    const { syncProvider } = await import("./connectors/accszone");
+    syncProvider(providerKey, syncType).catch(err => console.error("[Sync] AccsZone error:", err));
+  }
   return { success: true, message: `Sync triggered for ${providerKey}` };
 }
 
