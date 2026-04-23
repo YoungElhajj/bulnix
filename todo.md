@@ -647,3 +647,4 @@
 - [x] Add Fadded balance display to admin providers panel
 - [x] Notify owner when Fadded balance drops below 10,000 NGN
 - [x] Add Fadded wallet top-up link inside low-balance alert card in AdminProviders
+- [x] Add icons to all Fadded products/categories missing imageUrl (AI Tools, OnlyFans, Proxies, Design Tools, Phone & SMS, Apple, Other Accounts)
