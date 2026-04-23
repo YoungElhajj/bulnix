@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { RefreshCw, Settings, Loader2, CheckCircle, AlertCircle, Clock, Zap, Activity, DollarSign, AlertTriangle, TrendingDown } from "lucide-react";
+import { RefreshCw, Settings, Loader2, CheckCircle, AlertCircle, Clock, Zap, Activity, DollarSign, AlertTriangle, TrendingDown, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -151,9 +151,20 @@ export default function AdminProviders() {
                 ₦{((faddedBalance as any)?.balance ?? 0).toLocaleString()} <span className="text-sm font-normal text-slate-400">NGN</span>
               </div>
               {(faddedBalance as any)?.lowBalance && (
-                <div className="mt-2 flex items-center gap-1.5 text-xs text-red-400 font-medium">
-                  <AlertTriangle className="h-3 w-3" />
-                  Below ₦10,000 — top up to avoid fulfillment failures
+                <div className="mt-2 space-y-1.5">
+                  <div className="flex items-center gap-1.5 text-xs text-red-400 font-medium">
+                    <AlertTriangle className="h-3 w-3 shrink-0" />
+                    Below ₦10,000 — top up to avoid fulfillment failures
+                  </div>
+                  <a
+                    href="https://www.fadded.net/dashboard/wallet"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-md px-2.5 py-1 transition-colors"
+                  >
+                    <ExternalLink className="h-3 w-3 shrink-0" />
+                    Top Up Fadded Wallet
+                  </a>
                 </div>
               )}
               {!(faddedBalance as any)?.lowBalance && (

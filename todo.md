@@ -646,3 +646,4 @@
 - [x] Add category icons to Fadded products (same logic as AccsZone)
 - [x] Add Fadded balance display to admin providers panel
 - [x] Notify owner when Fadded balance drops below 10,000 NGN
+- [x] Add Fadded wallet top-up link inside low-balance alert card in AdminProviders
