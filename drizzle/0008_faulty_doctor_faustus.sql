@@ -1,0 +1,1 @@
+ALTER TABLE `wallet_transactions` MODIFY COLUMN `status` enum('pending','completed','failed','reversed','partial') NOT NULL DEFAULT 'completed';

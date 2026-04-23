@@ -1443,7 +1443,7 @@ export async function initiateWalletTopup(userId: number, amountUSD: number, gat
   return { reference, amountUSD, paymentUrl };
 }
 
-export async function confirmWalletTopup(reference: string, skipVerify = false) {
+export async function confirmWalletTopup(reference: string, skipVerify = false, overrideAmountUSD?: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const [txn] = await db.select().from(walletTransactions).where(eq(walletTransactions.reference, reference)).limit(1);
@@ -1493,15 +1493,19 @@ export async function confirmWalletTopup(reference: string, skipVerify = false) 
   }
 
   const wallet = await getOrCreateWallet(txn.userId);
-  const newBalance = Number(wallet.balanceUSD) + Number(txn.amountUSD);
-  const newDeposited = Number(wallet.totalDeposited) + Number(txn.amountUSD);
-
-    await withDbRetry(() => db!.update(wallets).set({
+  // Use overrideAmountUSD for partial payments (e.g. NOWPayments partially_paid)
+  // where the customer sent less than requested. Credit only what was actually received.
+  const creditAmount = overrideAmountUSD !== undefined ? overrideAmountUSD : Number(txn.amountUSD);
+  const isPartial = overrideAmountUSD !== undefined && overrideAmountUSD < Number(txn.amountUSD);
+  const newBalance = Number(wallet.balanceUSD) + creditAmount;
+  const newDeposited = Number(wallet.totalDeposited) + creditAmount;
+  await withDbRetry(() => db!.update(wallets).set({
     balanceUSD: newBalance.toFixed(6),
     totalDeposited: newDeposited.toFixed(6),
   }).where(eq(wallets.userId, txn.userId)), "confirmWalletTopup:updateWallet");
   await withDbRetry(() => db!.update(walletTransactions).set({
-    status: "completed",
+    status: isPartial ? "partial" : "completed",
+    amountUSD: creditAmount.toFixed(6),
     balanceAfterUSD: newBalance.toFixed(6),
   }).where(eq(walletTransactions.id, txn.id)), "confirmWalletTopup:updateTxn");
 
@@ -1513,7 +1517,7 @@ export async function confirmWalletTopup(reference: string, skipVerify = false) 
       await sendWalletTopupReceiptEmail({
         to: topupUser.email,
         name: topupUser.name ?? "",
-        amountUSD: Number(txn.amountUSD),
+        amountUSD: creditAmount,
         reference: txn.reference ?? "",
         gateway: String(txn.gateway ?? "unknown"),
         newBalanceUSD: newBalance,
@@ -1523,7 +1527,7 @@ export async function confirmWalletTopup(reference: string, skipVerify = false) 
     await logSystem("warn", "email", `Failed to send wallet top-up receipt: ${emailErr.message}`);
   }
 
-  return { success: true, newBalance };
+  return { success: true, newBalance, isPartial, creditAmount };
 }
 
 export async function adminProcessRefund(adminId: number, input: { userId: number; amountUSD: number; reason: string; orderId?: number; ticketId?: number }) {

@@ -14,7 +14,7 @@ import { storagePut } from "../storage";
 import { nanoid } from "nanoid";
 import { verifyPaystackSignature } from "../payments/paystack";
 import { verifyFlwSignature } from "../payments/flutterwave";
-import { verifyNowPaymentsIpn, isNowPaymentsSuccess } from "../payments/nowpayments";
+import { verifyNowPaymentsIpn, isNowPaymentsSuccess, isNowPaymentsPartial } from "../payments/nowpayments";
 import { verifyKoraSignature, isKoraSuccess } from "../payments/korapay";
 import { confirmWalletTopup, fulfillOrderByReference, logSystem } from "../db";
 
@@ -175,9 +175,27 @@ async function startServer() {
       const paymentStatus = payload.payment_status as string;
       const orderId = payload.order_id as string;
       if (isNowPaymentsSuccess(paymentStatus)) {
+        // For partially_paid: credit only the amount actually received in fiat.
+        // NOWPayments sends `actually_paid_at_fiat` (USD value actually received).
+        // Fall back to ratio estimate if fiat field is missing.
+        let overrideAmountUSD: number | undefined;
+        if (isNowPaymentsPartial(paymentStatus)) {
+          const fiatReceived = payload.actually_paid_at_fiat as number | undefined;
+          const cryptoReceived = payload.actually_paid as number | undefined;
+          const priceAmount = payload.price_amount as number | undefined;
+          const payAmount = payload.pay_amount as number | undefined;
+          if (fiatReceived && fiatReceived > 0) {
+            overrideAmountUSD = Math.floor(fiatReceived * 100) / 100;
+          } else if (cryptoReceived && payAmount && priceAmount && payAmount > 0) {
+            // Estimate fiat from ratio: (cryptoReceived / payAmount) * priceAmount
+            overrideAmountUSD = Math.floor((cryptoReceived / payAmount) * priceAmount * 100) / 100;
+          }
+          await logSystem("warn", "payment", `NowPayments IPN: partially_paid for orderId ${orderId} — crediting $${overrideAmountUSD ?? "unknown"} of $${priceAmount}`);
+        }
         try {
-          await confirmWalletTopup(orderId, true); // skipVerify: IPN is already verified
-          await logSystem("info", "payment", `NowPayments IPN: wallet topup confirmed for orderId ${orderId}`);
+          await confirmWalletTopup(orderId, true, overrideAmountUSD); // skipVerify: IPN is already verified
+          const suffix = isNowPaymentsPartial(paymentStatus) ? " (partial — credited actual amount received)" : "";
+          await logSystem("info", "payment", `NowPayments IPN: wallet topup confirmed for orderId ${orderId}${suffix}`);
         } catch (e: any) {
           try {
             await fulfillOrderByReference(orderId, "nowpayments");

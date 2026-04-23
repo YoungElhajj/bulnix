@@ -102,7 +102,12 @@ export function verifyNowPaymentsIpn(rawBody: string, signature: string): boolea
   }
 }
 
-/** Returns true if the payment status indicates a successful payment. */
+/** Returns true if the payment status indicates a successful payment (including partially paid). */
 export function isNowPaymentsSuccess(status: string): boolean {
-  return status === "finished" || status === "confirmed";
+  return status === "finished" || status === "confirmed" || status === "partially_paid";
+}
+
+/** Returns true if the payment was only partially paid (less than the requested amount). */
+export function isNowPaymentsPartial(status: string): boolean {
+  return status === "partially_paid";
 }

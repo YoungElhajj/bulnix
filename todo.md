@@ -655,3 +655,10 @@
 - [x] Merge duplicate AccsZone+Fadded categories (Facebook, TikTok, Instagram, Discord, Snapchat, Reddit, etc.)
 - [x] Update Fadded connector to auto-apply icons on future syncs
 - [x] Confirm markup % changes take effect instantly for all products
+
+## Payment Fixes (Apr 23)
+- [x] Fix NOWPayments partially_paid webhook to credit actual received amount
+- [x] Add partial status to walletTransactions schema + migration
+- [x] Add Flutterwave USD settlement delay notice in Wallet top-up UI
+- [x] Add NOWPayments exact-amount notice in Wallet top-up UI
+- [x] Add partial badge to transaction history

@@ -66,6 +66,7 @@ function TxStatusBadge({ status }: { status: string }) {
     pending: { color: "text-yellow-600 bg-yellow-50 border-yellow-300/40", icon: Clock, label: "Pending" },
     failed: { color: "text-red-500 bg-red-50 border-red-300/40", icon: XCircle, label: "Failed" },
     reversed: { color: "text-[#4A6080] bg-slate-100 border-slate-300/40", icon: AlertCircle, label: "Reversed" },
+    partial: { color: "text-orange-600 bg-orange-50 border-orange-300/40", icon: AlertCircle, label: "Partial" },
   };
   const s = map[status] ?? map.pending;
   return (
@@ -381,6 +382,24 @@ export default function WalletPage() {
                 <div className="mb-4 p-3 rounded-xl bg-[#EEF4FF] border border-[#0050D0]/20">
                   <p className="text-xs text-[#0050D0] font-semibold">
                     You will be charged ₦{amountNGN.toLocaleString()}
+                  </p>
+                </div>
+              )}
+              {/* Flutterwave USD settlement notice */}
+              {gateway === "flutterwave" && (
+                <div className="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-300/40">
+                  <p className="text-xs text-amber-700 font-semibold flex items-start gap-1.5">
+                    <span className="mt-0.5">⚠</span>
+                    <span>USD payments via Flutterwave may take <strong>3–5 business days</strong> to settle. For instant credits, use Kora Pay (NGN) or Crypto.</span>
+                  </p>
+                </div>
+              )}
+              {/* NOWPayments partial payment notice */}
+              {gateway === "nowpayments" && (
+                <div className="mb-4 p-3 rounded-xl bg-blue-50 border border-blue-200/60">
+                  <p className="text-xs text-blue-700 font-semibold flex items-start gap-1.5">
+                    <span className="mt-0.5">ℹ</span>
+                    <span>Send the <strong>exact amount</strong> shown. Sending less will credit only the amount received (partial payment). Network fees are not covered by Bulnix.</span>
                   </p>
                 </div>
               )}

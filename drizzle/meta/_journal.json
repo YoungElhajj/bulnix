@@ -57,6 +57,13 @@
       "when": 1776897803777,
       "tag": "0007_thin_silk_fever",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1776912270022,
+      "tag": "0008_faulty_doctor_faustus",
+      "breakpoints": true
     }
   ]
 }

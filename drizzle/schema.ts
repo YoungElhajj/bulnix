@@ -423,7 +423,7 @@ export const walletTransactions = mysqlTable("wallet_transactions", {
   reference: varchar("reference", { length: 256 }),
   orderId: int("orderId"),
   paymentId: int("paymentId"),
-  status: mysqlEnum("status", ["pending", "completed", "failed", "reversed"]).default("completed").notNull(),
+  status: mysqlEnum("status", ["pending", "completed", "failed", "reversed", "partial"]).default("completed").notNull(),
   gateway: varchar("gateway", { length: 64 }),
   gatewayRef: varchar("gatewayRef", { length: 256 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
