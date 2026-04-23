@@ -1810,7 +1810,7 @@ export async function getFaddedBalance(): Promise<{ balance: number; currency: s
     if (!db) return { balance: 0, currency: "NGN", lowBalance: true, error: "Database unavailable" };
     const [config] = await db.select().from(providerConfigs).where(eq(providerConfigs.providerKey, "fadded")).limit(1);
     if (!config?.apiKey) return { balance: 0, currency: "NGN", lowBalance: true, error: "Fadded API key not configured" };
-    const response = await fetch(`${config.baseUrl ?? "https://www.fadded.net/api/v1/reseller"}/balance`, {
+    const response = await fetch(`${config.baseUrl ?? "https://fadded.net/api/v1"}/reseller/balance`, {
       headers: { "X-Api-Key": config.apiKey, "Accept": "application/json" },
     });
     if (!response.ok) return { balance: 0, currency: "NGN", lowBalance: true, error: `Fadded API error: ${response.status}` };
@@ -1832,6 +1832,26 @@ export async function getFaddedBalance(): Promise<{ balance: number; currency: s
     return { balance: 0, currency: "NGN", lowBalance: true, error: msg };
   }
 }
+
+export async function applyMarkupToAllProducts(providerKey: string, markupPercent: number): Promise<{ updated: number }> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Get all products for this provider
+  const providerProducts = await db.select({ id: products.id, supplierPrice: products.supplierPrice })
+    .from(products)
+    .where(eq(products.providerKey, providerKey));
+  let updated = 0;
+  for (const p of providerProducts) {
+    const newPrice = Number(p.supplierPrice) * (1 + markupPercent / 100);
+    await db.update(products).set({
+      markupPercent: markupPercent.toFixed(2) as any,
+      customerPriceUSD: newPrice.toFixed(2) as any,
+    }).where(eq(products.id, p.id));
+    updated++;
+  }
+  return { updated };
+}
+
 // ─── Auto-Retry Processing Orders ─────────────────────────────────────────────
 
 export async function retryAllProcessingOrders(): Promise<{ retried: number; skipped: number }> {

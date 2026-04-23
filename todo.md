@@ -648,3 +648,10 @@
 - [x] Notify owner when Fadded balance drops below 10,000 NGN
 - [x] Add Fadded wallet top-up link inside low-balance alert card in AdminProviders
 - [x] Add icons to all Fadded products/categories missing imageUrl (AI Tools, OnlyFans, Proxies, Design Tools, Phone & SMS, Apple, Other Accounts)
+
+## Icon & Category Merge Fixes (Apr 23, 2026)
+- [x] Fix broken category icon URLs (images showing as broken thumbnails)
+- [x] Fix Fadded balance 404 API error in admin providers panel
+- [x] Merge duplicate AccsZone+Fadded categories (Facebook, TikTok, Instagram, Discord, Snapchat, Reddit, etc.)
+- [x] Update Fadded connector to auto-apply icons on future syncs
+- [x] Confirm markup % changes take effect instantly for all products

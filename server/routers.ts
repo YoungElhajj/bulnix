@@ -317,6 +317,9 @@ export const appRouter = router({
       syncLogs: adminProcedure.query(() => db.getProviderSyncLogs()),
       getAccsZoneBalance: adminProcedure.query(() => db.getAccsZoneBalance()),
       getFaddedBalance: adminProcedure.query(() => db.getFaddedBalance()),
+      applyMarkupToAll: adminProcedure
+        .input(z.object({ providerKey: z.string(), markupPercent: z.number().min(0).max(500) }))
+        .mutation(({ input }) => db.applyMarkupToAllProducts(input.providerKey, input.markupPercent)),
     }),
 
     // Categories
