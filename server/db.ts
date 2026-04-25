@@ -105,6 +105,9 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     textFields.forEach(assignNullable);
     if (user.lastSignedIn !== undefined) { values.lastSignedIn = user.lastSignedIn; updateSet.lastSignedIn = user.lastSignedIn; }
     if (user.role !== undefined) { values.role = user.role; updateSet.role = user.role; }
+    // signupIp/signupCountry: set on INSERT only (not on update)
+    if ((user as any).signupIp !== undefined) { (values as any).signupIp = (user as any).signupIp; }
+    if ((user as any).signupCountry !== undefined) { (values as any).signupCountry = (user as any).signupCountry; }
     if (!values.lastSignedIn) values.lastSignedIn = new Date();
     if (Object.keys(updateSet).length === 0) updateSet.lastSignedIn = new Date();
     return { values, updateSet };

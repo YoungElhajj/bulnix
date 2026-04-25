@@ -39,12 +39,27 @@ export function registerOAuthRoutes(app: Express) {
       );
       const isNewUser = !existingUser;
 
+      // Capture IP and country for new OAuth users
+      let signupIp: string | null = null;
+      let signupCountry: string | null = null;
+      if (isNewUser) {
+        signupIp = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ?? req.socket?.remoteAddress ?? null;
+        if (signupIp && signupIp !== "127.0.0.1" && signupIp !== "::1" && !signupIp.startsWith("192.168.") && !signupIp.startsWith("10.")) {
+          try {
+            const geoRes = await fetch(`https://ipapi.co/${signupIp}/country_name/`, { signal: AbortSignal.timeout(3000) });
+            if (geoRes.ok) { const t = (await geoRes.text()).trim(); if (t.length > 0 && t.length < 100) signupCountry = t; }
+          } catch { /* ignore */ }
+        }
+      }
+
       await db.upsertUser({
         openId: userInfo.openId,
         name: userInfo.name || null,
         email: userInfo.email ?? null,
         loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
         lastSignedIn: new Date(),
+        ...(isNewUser && signupIp ? { signupIp } : {}),
+        ...(isNewUser && signupCountry ? { signupCountry } : {}),
       });
 
       // Send welcome email to new users who have an email address
