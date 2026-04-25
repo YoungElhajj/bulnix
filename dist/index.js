@@ -4296,161 +4296,6 @@ var init_backup = __esm({
   }
 });
 
-// vite.config.ts
-var vite_config_exports = {};
-__export(vite_config_exports, {
-  default: () => vite_config_default
-});
-import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
-import fs from "node:fs";
-import path from "node:path";
-import { defineConfig } from "vite";
-function ensureLogDir() {
-  if (!fs.existsSync(LOG_DIR)) {
-    fs.mkdirSync(LOG_DIR, { recursive: true });
-  }
-}
-function trimLogFile(logPath, maxSize) {
-  try {
-    if (!fs.existsSync(logPath) || fs.statSync(logPath).size <= maxSize) {
-      return;
-    }
-    const lines = fs.readFileSync(logPath, "utf-8").split("\n");
-    const keptLines = [];
-    let keptBytes = 0;
-    const targetSize = TRIM_TARGET_BYTES;
-    for (let i = lines.length - 1; i >= 0; i--) {
-      const lineBytes = Buffer.byteLength(`${lines[i]}
-`, "utf-8");
-      if (keptBytes + lineBytes > targetSize) break;
-      keptLines.unshift(lines[i]);
-      keptBytes += lineBytes;
-    }
-    fs.writeFileSync(logPath, keptLines.join("\n"), "utf-8");
-  } catch {
-  }
-}
-function writeToLogFile(source, entries) {
-  if (entries.length === 0) return;
-  ensureLogDir();
-  const logPath = path.join(LOG_DIR, `${source}.log`);
-  const lines = entries.map((entry) => {
-    const ts = (/* @__PURE__ */ new Date()).toISOString();
-    return `[${ts}] ${JSON.stringify(entry)}`;
-  });
-  fs.appendFileSync(logPath, `${lines.join("\n")}
-`, "utf-8");
-  trimLogFile(logPath, MAX_LOG_SIZE_BYTES);
-}
-function vitePluginManusDebugCollector() {
-  return {
-    name: "manus-debug-collector",
-    transformIndexHtml(html) {
-      if (process.env.NODE_ENV === "production") {
-        return html;
-      }
-      return {
-        html,
-        tags: [
-          {
-            tag: "script",
-            attrs: {
-              src: "/__manus__/debug-collector.js",
-              defer: true
-            },
-            injectTo: "head"
-          }
-        ]
-      };
-    },
-    configureServer(server) {
-      server.middlewares.use("/__manus__/logs", (req, res, next) => {
-        if (req.method !== "POST") {
-          return next();
-        }
-        const handlePayload = (payload) => {
-          if (payload.consoleLogs?.length > 0) {
-            writeToLogFile("browserConsole", payload.consoleLogs);
-          }
-          if (payload.networkRequests?.length > 0) {
-            writeToLogFile("networkRequests", payload.networkRequests);
-          }
-          if (payload.sessionEvents?.length > 0) {
-            writeToLogFile("sessionReplay", payload.sessionEvents);
-          }
-          res.writeHead(200, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ success: true }));
-        };
-        const reqBody = req.body;
-        if (reqBody && typeof reqBody === "object") {
-          try {
-            handlePayload(reqBody);
-          } catch (e) {
-            res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: false, error: String(e) }));
-          }
-          return;
-        }
-        let body = "";
-        req.on("data", (chunk) => {
-          body += chunk.toString();
-        });
-        req.on("end", () => {
-          try {
-            const payload = JSON.parse(body);
-            handlePayload(payload);
-          } catch (e) {
-            res.writeHead(400, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: false, error: String(e) }));
-          }
-        });
-      });
-    }
-  };
-}
-var PROJECT_ROOT, LOG_DIR, MAX_LOG_SIZE_BYTES, TRIM_TARGET_BYTES, plugins, vite_config_default;
-var init_vite_config = __esm({
-  "vite.config.ts"() {
-    "use strict";
-    PROJECT_ROOT = import.meta.dirname;
-    LOG_DIR = path.join(PROJECT_ROOT, ".manus-logs");
-    MAX_LOG_SIZE_BYTES = 1 * 1024 * 1024;
-    TRIM_TARGET_BYTES = Math.floor(MAX_LOG_SIZE_BYTES * 0.6);
-    plugins = [react(), tailwindcss(), vitePluginManusDebugCollector()];
-    vite_config_default = defineConfig({
-      plugins,
-      resolve: {
-        alias: {
-          "@": path.resolve(import.meta.dirname, "client", "src"),
-          "@shared": path.resolve(import.meta.dirname, "shared"),
-          "@assets": path.resolve(import.meta.dirname, "attached_assets")
-        }
-      },
-      envDir: path.resolve(import.meta.dirname),
-      root: path.resolve(import.meta.dirname, "client"),
-      publicDir: path.resolve(import.meta.dirname, "client", "public"),
-      build: {
-        outDir: path.resolve(import.meta.dirname, "dist/public"),
-        emptyOutDir: true
-      },
-      server: {
-        host: true,
-        allowedHosts: [
-          "bulnix.com",
-          "www.bulnix.com",
-          "localhost",
-          "127.0.0.1"
-        ],
-        fs: {
-          strict: true,
-          deny: ["**/.*"]
-        }
-      }
-    });
-  }
-});
-
 // server/_core/vite.ts
 var vite_exports = {};
 __export(vite_exports, {
@@ -4458,20 +4303,18 @@ __export(vite_exports, {
   setupVite: () => setupVite
 });
 import express from "express";
-import fs2 from "fs";
+import fs from "fs";
 import { nanoid as nanoid2 } from "nanoid";
-import path2 from "path";
+import path from "path";
 async function setupVite(app, server) {
   const { createServer: createViteServer } = await import("vite");
-  const { default: viteConfig } = await Promise.resolve().then(() => (init_vite_config(), vite_config_exports));
   const serverOptions = {
     middlewareMode: true,
     hmr: { server },
     allowedHosts: true
   };
   const vite = await createViteServer({
-    ...viteConfig,
-    configFile: false,
+    configFile: path.resolve(import.meta.dirname, "../../vite.config.ts"),
     server: serverOptions,
     appType: "custom"
   });
@@ -4479,13 +4322,13 @@ async function setupVite(app, server) {
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
     try {
-      const clientTemplate = path2.resolve(
+      const clientTemplate = path.resolve(
         import.meta.dirname,
         "../..",
         "client",
         "index.html"
       );
-      let template = await fs2.promises.readFile(clientTemplate, "utf-8");
+      let template = await fs.promises.readFile(clientTemplate, "utf-8");
       template = template.replace(
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${nanoid2()}"`
@@ -4499,19 +4342,45 @@ async function setupVite(app, server) {
   });
 }
 function serveStatic(app) {
-  const distPath = process.env.NODE_ENV === "development" ? path2.resolve(import.meta.dirname, "../..", "dist", "public") : path2.resolve(import.meta.dirname, "public");
-  if (!fs2.existsSync(distPath)) {
+  const distPath = process.env.NODE_ENV === "development" ? path.resolve(import.meta.dirname, "../..", "dist", "public") : path.resolve(import.meta.dirname, "public");
+  if (!fs.existsSync(distPath)) {
     console.error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`
     );
   }
   app.use(express.static(distPath));
   app.use("*", (_req, res) => {
-    res.sendFile(path2.resolve(distPath, "index.html"));
+    res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
 var init_vite = __esm({
   "server/_core/vite.ts"() {
+    "use strict";
+  }
+});
+
+// server/_core/static.ts
+var static_exports = {};
+__export(static_exports, {
+  serveStatic: () => serveStatic2
+});
+import express2 from "express";
+import fs2 from "fs";
+import path2 from "path";
+function serveStatic2(app) {
+  const distPath = path2.resolve(import.meta.dirname, "public");
+  if (!fs2.existsSync(distPath)) {
+    console.error(
+      `Could not find the build directory: ${distPath}, make sure to build the client first`
+    );
+  }
+  app.use(express2.static(distPath));
+  app.use("*", (_req, res) => {
+    res.sendFile(path2.resolve(distPath, "index.html"));
+  });
+}
+var init_static = __esm({
+  "server/_core/static.ts"() {
     "use strict";
   }
 });
@@ -4607,7 +4476,7 @@ var init_runMigrations = __esm({
 
 // server/_core/index.ts
 import "dotenv/config";
-import express2 from "express";
+import express3 from "express";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
@@ -6156,7 +6025,7 @@ async function findAvailablePort(startPort = 3e3) {
   throw new Error(`No available port found starting from ${startPort}`);
 }
 async function startServer() {
-  const app = express2();
+  const app = express3();
   const server = createServer(app);
   app.use((req, res, next) => {
     if (process.env.NODE_ENV === "production" && req.headers["x-forwarded-proto"] && req.headers["x-forwarded-proto"] !== "https") {
@@ -6164,7 +6033,7 @@ async function startServer() {
     }
     next();
   });
-  app.post("/api/webhooks/korapay", express2.raw({ type: "application/json" }), async (req, res) => {
+  app.post("/api/webhooks/korapay", express3.raw({ type: "application/json" }), async (req, res) => {
     try {
       const signature = req.headers["x-korapay-signature"];
       const rawBody = req.body.toString("utf8");
@@ -6193,7 +6062,7 @@ async function startServer() {
       res.status(500).json({ error: "Internal error" });
     }
   });
-  app.post("/api/webhooks/paystack", express2.raw({ type: "application/json" }), async (req, res) => {
+  app.post("/api/webhooks/paystack", express3.raw({ type: "application/json" }), async (req, res) => {
     try {
       const signature = req.headers["x-paystack-signature"];
       const rawBody = req.body.toString("utf8");
@@ -6226,7 +6095,7 @@ async function startServer() {
       res.status(500).json({ error: "Internal error" });
     }
   });
-  app.post("/api/webhooks/flutterwave", express2.raw({ type: "application/json" }), async (req, res) => {
+  app.post("/api/webhooks/flutterwave", express3.raw({ type: "application/json" }), async (req, res) => {
     try {
       const hash = req.headers["verif-hash"];
       if (!verifyFlwSignature(hash)) {
@@ -6260,7 +6129,7 @@ async function startServer() {
       res.status(500).json({ error: "Internal error" });
     }
   });
-  app.post("/api/webhooks/nowpayments", express2.raw({ type: "application/json" }), async (req, res) => {
+  app.post("/api/webhooks/nowpayments", express3.raw({ type: "application/json" }), async (req, res) => {
     try {
       const signature = req.headers["x-nowpayments-sig"];
       const rawBody = req.body.toString("utf8");
@@ -6316,8 +6185,8 @@ async function startServer() {
       res.redirect(`${frontendUrl}/wallet?topup_ref=${encodeURIComponent(ref)}&status=${encodeURIComponent(status ?? "")}`);
     }
   });
-  app.use(express2.json({ limit: "50mb" }));
-  app.use(express2.urlencoded({ limit: "50mb", extended: true }));
+  app.use(express3.json({ limit: "50mb" }));
+  app.use(express3.urlencoded({ limit: "50mb", extended: true }));
   const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
   app.post("/api/upload/image", upload.single("file"), async (req, res) => {
     try {
@@ -6356,8 +6225,8 @@ async function startServer() {
     const { setupVite: setupVite2 } = await Promise.resolve().then(() => (init_vite(), vite_exports));
     await setupVite2(app, server);
   } else {
-    const { serveStatic: serveStatic2 } = await Promise.resolve().then(() => (init_vite(), vite_exports));
-    serveStatic2(app);
+    const { serveStatic: serveStatic3 } = await Promise.resolve().then(() => (init_static(), static_exports));
+    serveStatic3(app);
   }
   const preferredPort = parseInt(process.env.PORT || "3000");
   const port = await findAvailablePort(preferredPort);

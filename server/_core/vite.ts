@@ -6,7 +6,6 @@ import path from "path";
 
 export async function setupVite(app: Express, server: Server) {
   const { createServer: createViteServer } = await import("vite");
-  const { default: viteConfig } = await import("../../vite.config");
   const serverOptions = {
     middlewareMode: true,
     hmr: { server },
@@ -14,8 +13,7 @@ export async function setupVite(app: Express, server: Server) {
   };
 
   const vite = await createViteServer({
-    ...viteConfig,
-    configFile: false,
+    configFile: path.resolve(import.meta.dirname, "../../vite.config.ts"),
     server: serverOptions,
     appType: "custom",
   });
