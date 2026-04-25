@@ -299,6 +299,8 @@ export const appRouter = router({
         .mutation(({ input, ctx }) => db.adminReplyToTicket(ctx.user.id, input)),
     }),
 
+    // Generate descriptions for products missing them
+    generateFaddedDescriptions: adminProcedure.mutation(() => db.generateFaddedDescriptions()),
     // Provider configs
     providers: router({
       list: adminProcedure.query(() => db.getProviderConfigs()),

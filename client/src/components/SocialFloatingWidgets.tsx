@@ -11,7 +11,8 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 const WHATSAPP_BASE = "https://wa.me/447367061279";
-const TELEGRAM_URL = "https://t.me/bulnix";
+const TELEGRAM_URL = "https://t.me/Bulnixlimited";
+const TELEGRAM_SUPPORT_URL = "https://t.me/Bulnixlimited";
 
 // ── Triage flow definition ────────────────────────────────────────────────────
 type TriageStep = {
@@ -385,7 +386,7 @@ const TRIAGE_FLOW: Record<string, TriageStep> = {
   },
   telegram_redirect: {
     id: "telegram_redirect",
-    bot: "Join our Telegram channel for exclusive deals, discount codes, and order updates! Click below to join.",
+    bot: "Join our Telegram channel @Bulnixlimited for exclusive deals, discount codes, and order updates! Click below to join.",
     options: [
       { label: "📢 Join Telegram Channel", next: "whatsapp:Joined Telegram — looking for discount codes" },
     ],
@@ -603,7 +604,26 @@ export default function SocialFloatingWidgets() {
             </div>
           </button>
 
-          {/* Telegram */}
+          {/* Telegram Support */}
+          <a
+            href={TELEGRAM_SUPPORT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 group"
+            title="Chat on Telegram"
+          >
+            <span className="bg-white border border-gray-200 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-full shadow-md whitespace-nowrap">
+              Telegram Support
+            </span>
+            <div
+              className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 flex-shrink-0"
+              style={{ background: "#229ED9" }}
+            >
+              <Send className="w-5 h-5 text-white" />
+            </div>
+          </a>
+
+          {/* Join Telegram Channel */}
           <a
             href={TELEGRAM_URL}
             target="_blank"
@@ -616,9 +636,9 @@ export default function SocialFloatingWidgets() {
             </span>
             <div
               className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 flex-shrink-0"
-              style={{ background: "#229ED9" }}
+              style={{ background: "#1a6e9e" }}
             >
-              <Send className="w-5 h-5 text-white" />
+              <MessageCircle className="w-5 h-5 text-white" />
             </div>
           </a>
         </div>

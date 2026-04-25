@@ -1879,3 +1879,55 @@ export async function retryAllProcessingOrders(): Promise<{ retried: number; ski
     return { retried: 0, skipped: 0 };
   }
 }
+
+// ─── Generate Descriptions for Fadded Products ────────────────────────────────
+export async function generateFaddedDescriptions(): Promise<{ generated: number; skipped: number; errors: number }> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const { invokeLLM } = await import("./_core/llm");
+
+  // Find Fadded products with no description
+  const faddedProducts = await db.select({
+    id: products.id,
+    title: products.title,
+  }).from(products)
+    .where(and(
+      eq(products.providerKey, "fadded"),
+      sql`(description IS NULL OR description = '')`
+    ))
+    .limit(50);
+
+  if (faddedProducts.length === 0) return { generated: 0, skipped: 0, errors: 0 };
+
+  let generated = 0;
+  let skipped = 0;
+  let errors = 0;
+
+  for (const product of faddedProducts) {
+    try {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: "You are a product description writer for a digital accounts reseller marketplace called Bulnix. Write concise, natural, and professional product descriptions in 2-3 sentences. Do not use em-dashes, hyphens for pauses, or AI-sounding language. Be direct and informative. Do not use markdown formatting.",
+          },
+          {
+            role: "user",
+            content: `Write a product description for: "${product.title}". This is a digital product sold on Bulnix marketplace. Keep it to 2-3 sentences, natural and professional.`,
+          },
+        ],
+      });
+
+      const description = (response as any).choices?.[0]?.message?.content?.trim();
+      if (!description) { skipped++; continue; }
+
+      await db.update(products).set({ description }).where(eq(products.id, product.id));
+      generated++;
+    } catch (err) {
+      errors++;
+      console.error(`[generateFaddedDescriptions] Failed for product ${product.id}:`, err);
+    }
+  }
+
+  return { generated, skipped, errors };
+}

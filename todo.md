@@ -675,3 +675,14 @@
 - [x] Improve meta description with specific product names
 - [x] Add canonical link and robots meta tag
 - [x] Add keyword-rich "Popular Digital Accounts & Services" section to homepage body
+
+## Round 5 Fixes (Apr 25)
+- [ ] Fix broken category icons: AI Tools, Design Tools, OnlyFans (showing placeholder image)
+- [ ] Remove unnatural hyphens from all page text (AI-generated look)
+- [ ] Fix mobile responsiveness across all pages (text overflow, product description pages)
+- [ ] Update Telegram channel link to @Bulnixlimited (remove old https://t.me/bulnixupdates)
+- [ ] Add Telegram support button with automated messages (support username: @Bulnixlimited)
+- [ ] Add separate "Join Telegram Channel" button on site (like reference screenshot)
+- [ ] Hide WhatsApp number on Contact Us page
+- [ ] Auto-generate titles and descriptions for Fadded products missing them (VPNs etc.)
+- [ ] Advise on NOWPayments fee loss ($12 received → <$7 after fees)

@@ -40,10 +40,10 @@ function getLoginInstructions(title: string): {
         { title: "Disable Suspicious Login Alerts", detail: "If Instagram shows a 'Suspicious Login' warning, tap 'This Was Me' to confirm the login and dismiss the alert." },
       ],
       tips: [
-        "Use a VPN matching the account's original country if login is blocked",
-        "Do not immediately follow hundreds of accounts — warm up the account gradually",
-        "Avoid logging in from multiple devices on the same day",
-        "Profile photo and bio changes should be done gradually over a few days",
+        "Use a VPN matching the account's original country if login is blocked.",
+        "Do not immediately follow hundreds of accounts. Warm up the account gradually over the first few days.",
+        "Avoid logging in from multiple devices on the same day.",
+        "Profile photo and bio changes should be made gradually over a few days.",
       ],
       warnings: [
         "Do not share the account credentials with others",
@@ -66,10 +66,10 @@ function getLoginInstructions(title: string): {
         { title: "Add Your Email (Optional)", detail: "In Settings → General Account Settings, add your own email as a secondary contact so you can recover the account." },
       ],
       tips: [
-        "Use a VPN set to the account's original country for the first login",
-        "Avoid posting or liking content immediately — wait 24–48 hours",
-        "Business Manager accounts: verify the BM is active before making changes",
-        "If the account has 2FA enabled, the TOTP secret or backup codes are in your order",
+        "Use a VPN set to the account's original country for the first login.",
+        "Avoid posting or liking content immediately. Wait 24 to 48 hours before engaging.",
+        "Business Manager accounts: verify the BM is active before making any changes.",
+        "If the account has 2FA enabled, the TOTP secret or backup codes are included in your order.",
       ],
       warnings: [
         "Do not add your personal phone number as the primary contact immediately",
@@ -94,8 +94,8 @@ function getLoginInstructions(title: string): {
       tips: [
         "Use a VPN matching the account's original country for first login",
         "Do not tweet or retweet immediately — wait 24 hours to avoid suspension",
-        "Aged accounts with followers are more valuable — treat them carefully",
-        "If the account is monetised, do not change the payout details immediately",
+        "Aged accounts with followers are more valuable. Treat them carefully.",
+        "If the account is monetised, do not change the payout details immediately.",
       ],
       warnings: [
         "X (Twitter) may lock the account if it detects a new device login — have the email ready for verification",
@@ -119,7 +119,7 @@ function getLoginInstructions(title: string): {
       tips: [
         "Post content gradually — avoid uploading many videos in the first 24 hours",
         "Use a VPN matching the account's original region if login fails",
-        "Creator accounts may have linked payment info — check before making changes",
+        "Creator accounts may have linked payment info. Check before making any changes.",
       ],
       warnings: [
         "Do not change the username immediately on high-follower accounts",
@@ -141,8 +141,8 @@ function getLoginInstructions(title: string): {
         { title: "Access YouTube Channel", detail: "Go to youtube.com and click your profile icon. Select the channel from the account switcher." },
       ],
       tips: [
-        "Monetised channels: do not change the AdSense payout details immediately",
-        "Avoid mass-deleting or uploading videos in the first 48 hours",
+        "Monetised channels: do not change the AdSense payout details immediately.",
+        "Avoid mass-deleting or uploading videos in the first 48 hours.",
         "Enable 2FA with your own authenticator app after securing the account",
       ],
       warnings: [
@@ -165,9 +165,9 @@ function getLoginInstructions(title: string): {
         { title: "Update Email", detail: "In Account Overview → Edit Profile, update the email to your own address." },
       ],
       tips: [
-        "Premium accounts: check the subscription expiry date in Account Overview",
-        "Do not log in from more devices than the plan allows simultaneously",
-        "Family/Duo plans: do not change the plan owner details immediately",
+        "Premium accounts: check the subscription expiry date in Account Overview.",
+        "Do not log in from more devices than the plan allows at the same time.",
+        "Family or Duo plans: do not change the plan owner details immediately.",
       ],
       warnings: [
         "Sharing Premium accounts violates Spotify's Terms of Service",
@@ -188,13 +188,13 @@ function getLoginInstructions(title: string): {
         { title: "Change Password (if full account access)", detail: "If you have full account access, go to Account → Change Password and set a new password." },
       ],
       tips: [
-        "Do not change the account email or password if it is a shared/profile-only account",
+        "Do not change the account email or password if it is a shared or profile-only account.",
         "Check the plan type (Standard, Premium) in Account → Plan Details",
         "Download content for offline viewing using the Netflix app",
       ],
       warnings: [
         "Do not sign out other devices if it is a shared account",
-        "Netflix is cracking down on password sharing — use the account from the correct region",
+        "Netflix is cracking down on password sharing. Use the account from the correct region.",
         "Contact Bulnix support within 24 hours if the account is not accessible",
       ],
     };
@@ -309,7 +309,7 @@ function getLoginInstructions(title: string): {
         { title: "Check Super Duolingo Status", detail: "In Settings → Super Duolingo, verify the subscription is active and check the renewal date." },
       ],
       tips: [
-        "Super Duolingo: check the streak and XP — do not reset them",
+        "Super Duolingo: check the streak and XP. Do not reset them.",
         "Leagues and achievements are tied to the account — preserve them",
       ],
       warnings: [
@@ -355,9 +355,9 @@ function getLoginInstructions(title: string): {
         { title: "Update Recovery Email", detail: "Add your own email address as the recovery contact in Account Settings." },
       ],
       tips: [
-        "Check the account's rank, level, and inventory before making any changes",
-        "Do not trade or sell in-game items immediately — wait 24–48 hours",
-        "Steam: enable Steam Guard with your own authenticator app after securing the account",
+        "Check the account's rank, level, and inventory before making any changes.",
+        "Do not trade or sell in-game items immediately. Wait 24 to 48 hours first.",
+        "Steam: enable Steam Guard with your own authenticator app after securing the account.",
       ],
       warnings: [
         "Do not use cheats or hacks — the account will be permanently banned",
@@ -995,7 +995,7 @@ export default function ProductDetail() {
                   {/* Delivery format */}
                   <div className="p-4 bg-[#0050D0]/5 rounded-xl border border-[#0050D0]/20">
                     <p className="text-xs font-semibold text-[#0050D0] uppercase tracking-wide mb-1">Delivery Format</p>
-                    <p className="text-sm font-mono text-foreground font-semibold">{(p as any).deliveryFormat || productInfo.deliveryFormat}</p>
+                    <p className="text-sm font-mono text-foreground font-semibold break-all">{(p as any).deliveryFormat || productInfo.deliveryFormat}</p>
                     <p className="text-xs text-muted-foreground mt-1">Credentials will be displayed in this format in your order details after purchase.</p>
                   </div>
 

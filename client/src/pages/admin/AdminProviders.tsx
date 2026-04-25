@@ -45,6 +45,10 @@ export default function AdminProviders() {
     onError: e => toast.error(e.message),
   });
 
+  const generateDescs = trpc.admin.generateFaddedDescriptions.useMutation({
+    onSuccess: (data) => { toast.success(`Generated ${data.generated} descriptions (skipped: ${data.skipped}, errors: ${data.errors})`); },
+    onError: e => toast.error(e.message),
+  });
   const triggerSync = trpc.admin.providers.triggerSync.useMutation({
     onSuccess: (data) => {
       toast.success((data as any)?.message ?? "Sync triggered! Products will update in the background.");
