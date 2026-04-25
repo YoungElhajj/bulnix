@@ -714,3 +714,8 @@
 - [x] Format: "Hello Bulnix Support, my name is [name]\nEmail: [email]\nI need help with: [issue]\nMy answers: 1. ... 2. ..."
 - [x] Apply to all three Telegram redirect paths (telegramMode direct, __tg__ channel choice, legacy telegram: prefix)
 - [x] Fixed WhatsApp message to also use newHistory (includes last answer) instead of stepHistory
+
+## Support Email Fix (Apr 25, 2026)
+- [x] Add admin alert email to bulnixsupport@gmail.com on every triage submission
+- [x] Admin email includes: user name, email, issue summary, all triage steps
+- [x] User confirmation email unchanged (still goes to user with replyTo bulnixsupport@gmail.com)

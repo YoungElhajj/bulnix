@@ -459,6 +459,19 @@ export const appRouter = router({
             subject: `Your Bulnix Support Request — ${input.issueSummary.slice(0, 60)}`,
             html,
           });
+          // Also alert the Bulnix support inbox with full request details
+          const adminAlertHtml = `<html><body style="font-family:sans-serif;background:#0B0F19;color:#e2e8f0;padding:24px"><h2 style="color:#00B9E9;margin-bottom:16px">New Support Request</h2><table style="border-collapse:collapse;width:100%"><tr><td style="padding:8px 0;color:#94a3b8;width:100px">From</td><td style="padding:8px 0;color:#e2e8f0">${input.name || "Anonymous"} &lt;${input.email}&gt;</td></tr><tr><td style="padding:8px 0;color:#94a3b8">Issue</td><td style="padding:8px 0;color:#e2e8f0">${input.issueSummary}</td></tr></table><div style="margin-top:16px"><p style="color:#94a3b8;margin-bottom:8px">Steps completed:</p><ol style="margin:0;padding-left:20px">${input.steps.map(s => `<li style="margin-bottom:4px;color:#e2e8f0">${s}</li>`).join("")}</ol></div><p style="margin-top:24px;color:#475569;font-size:12px">Sent from Bulnix Support Bot &bull; bulnix.com</p></body></html>`;
+          try {
+            await client.emails.send({
+              from: `Bulnix Support <${process.env.EMAIL_FROM ?? "noreply@bulnix.com"}>`,
+              replyTo: input.email ?? "noreply@bulnix.com",
+              to: "bulnixsupport@gmail.com",
+              subject: `[Support Request] ${input.issueSummary.slice(0, 80)} — ${input.name || input.email}`,
+              html: adminAlertHtml,
+            });
+          } catch (adminEmailErr) {
+            console.error("[support.submitTriage] admin alert email error:", adminEmailErr);
+          }
           return { sent: true };
         } catch (err) {
           console.error("[support.submitTriage] email error:", err);
