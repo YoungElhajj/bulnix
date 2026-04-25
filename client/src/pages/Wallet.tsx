@@ -41,7 +41,7 @@ const GATEWAYS = [
   {
     key: "nowpayments",
     label: "Crypto",
-    desc: "BTC, ETH, USDT, and 100+ coins — min $20 (+5% fee)",
+    desc: "BTC, ETH, USDT, and 100+ coins. Min $20 (+5% fee)",
     region: "Global",
     minUSD: 20,
     icon: Bitcoin,
@@ -261,7 +261,7 @@ export default function WalletPage() {
             <div className="w-5 h-5 border-2 border-[#0050D0] border-t-transparent rounded-full animate-spin flex-shrink-0" />
             <div>
               <p className="text-sm font-semibold text-[#0050D0]">Waiting for payment confirmation...</p>
-              <p className="text-xs text-[#4A6080] mt-0.5">Your wallet will update automatically once your payment is confirmed. You can leave this page — we will credit your wallet as soon as we receive confirmation.</p>
+              <p className="text-xs text-[#4A6080] mt-0.5">Your wallet will update automatically once your payment is confirmed. You can leave this page. We will credit your wallet as soon as we receive confirmation.</p>
             </div>
           </div>
         )}

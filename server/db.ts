@@ -40,13 +40,23 @@ let _pool: ReturnType<typeof createPool> | null = null;
 
 function getPool(): ReturnType<typeof createPool> {
   if (!_pool && process.env.DATABASE_URL) {
+    // Parse the DATABASE_URL to extract connection params
+    // TiDB Cloud requires SSL - parse URL and set ssl explicitly
+    const dbUrl = new URL(process.env.DATABASE_URL);
     _pool = createPool({
-      uri: process.env.DATABASE_URL,
-      connectionLimit: 10,
+      host: dbUrl.hostname,
+      port: parseInt(dbUrl.port || "4000"),
+      user: decodeURIComponent(dbUrl.username),
+      password: decodeURIComponent(dbUrl.password),
+      database: dbUrl.pathname.replace(/^\//, ""),
+      ssl: { rejectUnauthorized: true },
+      connectionLimit: 15,
       waitForConnections: true,
-      queueLimit: 0,
+      queueLimit: 100,
       enableKeepAlive: true,
-      keepAliveInitialDelay: 10000,
+      keepAliveInitialDelay: 30000,
+      connectTimeout: 30000,
+      idleTimeout: 60000,
     });
   }
   return _pool!;
@@ -62,6 +72,14 @@ export async function getDb() {
     }
   }
   return _db;
+}
+// Reset the DB and pool on connection failure so they are recreated fresh
+export function resetDbPool() {
+  if (_pool) {
+    try { (_pool as any).end?.(); } catch {}
+    _pool = null;
+  }
+  _db = null;
 }
 
 // ─── Users ────────────────────────────────────────────────────────────────────

@@ -263,7 +263,7 @@ function CredentialCard({ account, index, onCopy }: { account: Record<string, st
                   <div className="w-8 h-8 border-2 border-[#0050D0] border-t-transparent rounded-full animate-spin flex-shrink-0" />
                   <div>
                     <div className="font-semibold text-[#0D2137] text-sm">Fulfilling your order...</div>
-                    <div className="text-xs text-[#4A6080] mt-0.5">We are retrieving your accounts from our supplier. This usually takes 5–30 seconds.</div>
+                    <div className="text-xs text-[#4A6080] mt-0.5">We are retrieving your accounts from our supplier. This usually takes 5 to 30 seconds.</div>
                   </div>
                 </div>
               </div>

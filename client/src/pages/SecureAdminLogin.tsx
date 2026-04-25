@@ -84,7 +84,7 @@ export default function SecureAdminLogin() {
               <ShieldCheck className="w-7 h-7 text-cyan-400" />
             </div>
             <h1 className="text-2xl font-bold text-white tracking-tight">Admin Access</h1>
-            <p className="text-sm text-white/40 mt-1">Restricted area — authorised personnel only</p>
+            <p className="text-sm text-white/40 mt-1">Restricted area. Authorised personnel only.</p>
           </div>
 
           {/* Step 1: Email + Password */}

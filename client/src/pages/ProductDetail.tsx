@@ -1,4 +1,5 @@
 import Navbar from "@/components/Navbar";
+import DOMPurify from "dompurify";
 import Footer from "@/components/Footer";
 import { useState } from "react";
 import { Link, useParams } from "wouter";
@@ -34,7 +35,7 @@ function getLoginInstructions(title: string): {
       steps: [
         { title: "Open Instagram Login", detail: "Go to instagram.com/accounts/login/ on your browser, or open the Instagram app on your phone." },
         { title: "Enter the Credentials", detail: "In the 'Username, email or phone' field, enter the email address or username provided in your order. Enter the password in the password field." },
-        { title: "Handle 2FA / Verification", detail: "If Instagram asks for a verification code, check the email inbox associated with the account. The email credentials are included in your order details — log into that email to retrieve the code." },
+        { title: "Handle 2FA / Verification", detail: "If Instagram asks for a verification code, check the email inbox associated with the account. The email credentials are included in your order details. Log into that email to retrieve the code." },
         { title: "Change the Password", detail: "Once logged in, go to Settings → Account → Change Password and set a new strong password immediately. This secures the account as yours." },
         { title: "Update Recovery Email (Optional)", detail: "Go to Settings → Account → Personal Information and add your own email as the recovery address. This prevents lockout." },
         { title: "Disable Suspicious Login Alerts", detail: "If Instagram shows a 'Suspicious Login' warning, tap 'This Was Me' to confirm the login and dismiss the alert." },
@@ -93,12 +94,12 @@ function getLoginInstructions(title: string): {
       ],
       tips: [
         "Use a VPN matching the account's original country for first login",
-        "Do not tweet or retweet immediately — wait 24 hours to avoid suspension",
+        "Do not tweet or retweet immediately. Wait 24 hours to avoid suspension",
         "Aged accounts with followers are more valuable. Treat them carefully.",
         "If the account is monetised, do not change the payout details immediately.",
       ],
       warnings: [
-        "X (Twitter) may lock the account if it detects a new device login — have the email ready for verification",
+        "X (Twitter) may lock the account if it detects a new device login. Have the email ready for verification",
         "Do not use third-party apps or automation tools on the first day",
         "Contact Bulnix support within 24 hours if you cannot log in",
       ],
@@ -117,7 +118,7 @@ function getLoginInstructions(title: string): {
         { title: "Update Recovery Info", detail: "Add your own email or phone number as a backup in Settings → Security → Manage Account." },
       ],
       tips: [
-        "Post content gradually — avoid uploading many videos in the first 24 hours",
+        "Post content gradually. Avoid uploading many videos in the first 24 hours",
         "Use a VPN matching the account's original region if login fails",
         "Creator accounts may have linked payment info. Check before making any changes.",
       ],
@@ -146,7 +147,7 @@ function getLoginInstructions(title: string): {
         "Enable 2FA with your own authenticator app after securing the account",
       ],
       warnings: [
-        "Google may require phone verification on new device logins — have the backup phone ready",
+        "Google may require phone verification on new device logins. Have the backup phone ready",
         "Do not violate YouTube's Terms of Service or the channel may be terminated",
         "Contact Bulnix support within 24 hours if you cannot access the account",
       ],
@@ -213,12 +214,12 @@ function getLoginInstructions(title: string): {
         { title: "Enable 2FA", detail: "Go to User Settings → My Account → Two-Factor Authentication and enable it with your own authenticator app." },
       ],
       tips: [
-        "Aged accounts with Nitro or rare badges are more valuable — do not waste them",
+        "Aged accounts with Nitro or rare badges are more valuable. Do not waste them",
         "Server ownership can be transferred to your main account after securing access",
         "Check if the account has any active bans before purchasing",
       ],
       warnings: [
-        "Do not use the account for spam or self-botting — it will be banned",
+        "Do not use the account for spam or self-botting as it will be banned",
         "Contact Bulnix support within 24 hours if you cannot log in",
       ],
     };
@@ -238,8 +239,8 @@ function getLoginInstructions(title: string): {
       ],
       tips: [
         "Prime membership: check the renewal date in Account → Prime Membership",
-        "Do not place orders on the account immediately — secure it first",
-        "Saved payment methods belong to the original owner — do not use them",
+        "Do not place orders on the account immediately. Secure it first",
+        "Saved payment methods belong to the original owner. Do not use them",
       ],
       warnings: [
         "Do not use saved payment cards or gift card balances on the account",
@@ -263,11 +264,11 @@ function getLoginInstructions(title: string): {
       ],
       tips: [
         "Canva Pro: check the subscription renewal date in Billing & Plans",
-        "All your designs are saved to the account — do not delete existing designs",
+        "All your designs are saved to the account. Do not delete existing designs",
         "You can invite team members after securing the account",
       ],
       warnings: [
-        "Do not cancel the Pro subscription immediately — verify it is active first",
+        "Do not cancel the Pro subscription immediately. Verify it is active first",
         "Contact Bulnix support within 24 hours if the account is not Pro as advertised",
       ],
     };
@@ -310,7 +311,7 @@ function getLoginInstructions(title: string): {
       ],
       tips: [
         "Super Duolingo: check the streak and XP. Do not reset them.",
-        "Leagues and achievements are tied to the account — preserve them",
+        "Leagues and achievements are tied to the account. Preserve them",
       ],
       warnings: [
         "Contact Bulnix support within 24 hours if Super Duolingo is not active as advertised",
@@ -318,25 +319,26 @@ function getLoginInstructions(title: string): {
     };
   }
 
-  if (t.includes("vpn") || t.includes("nordvpn") || t.includes("expressvpn") || t.includes("surfshark")) {
+  if (t.includes("vpn") || t.includes("nordvpn") || t.includes("expressvpn") || t.includes("surfshark") || t.includes("ipvanish") || t.includes("hma vpn") || t.includes("purevpn") || t.includes("cyberghost") || t.includes("protonvpn") || t.includes("pia vpn")) {
     return {
       platform: "VPN Service",
       loginUrl: "",
       steps: [
-        { title: "Download the VPN App", detail: "Go to the official website of the VPN service (e.g., nordvpn.com, expressvpn.com, surfshark.com) and download the app for your device." },
-        { title: "Open the App and Log In", detail: "Open the app and choose 'Log in'. Enter the email and password from your Bulnix order details." },
-        { title: "Verify via Email if Prompted", detail: "Log into the email account provided in your order to retrieve any verification code." },
-        { title: "Change Password", detail: "In the app or on the service website, go to Account Settings → Change Password. Set a new strong password." },
-        { title: "Update Recovery Email", detail: "Add your own email address as the account recovery contact." },
-        { title: "Connect to a Server", detail: "Select a server location and click Connect. Your internet traffic is now encrypted." },
+        { title: "Download the VPN App", detail: "Go to the official website of the VPN service (e.g., nordvpn.com, expressvpn.com, surfshark.com, ipvanish.com) and download the app for your device (Windows, Mac, Android, or iOS)." },
+        { title: "Open the App and Log In", detail: "Open the app and choose Log In. Enter the email and password from your Bulnix order details exactly as provided. Copy and paste to avoid typos." },
+        { title: "Verify via Email if Prompted", detail: "If the VPN app asks for a verification code, log into the email account provided in your order to retrieve it." },
+        { title: "Connect to a Server", detail: "Once logged in, select a server location and click Connect. Your internet traffic is now encrypted and protected." },
+        { title: "Check Subscription Status", detail: "In the app, go to Account to confirm your plan is active and check the expiry date." },
       ],
       tips: [
-        "Check the subscription expiry date in Account → Billing",
+        "Check the subscription expiry date in Account after logging in",
         "You can use the VPN on multiple devices simultaneously (check your plan's device limit)",
-        "Use the fastest server for streaming, or a specific country server for geo-restricted content",
+        "Use the fastest server for general browsing, or a specific country server for geo-restricted content",
+        "This is a shared premium account. Do not change the login credentials so the subscription can be renewed",
       ],
       warnings: [
-        "Do not use stored payment methods on the account",
+        "Do NOT change the account email or password. Changing login details will prevent renewal and affect other users",
+        "Do not add or change payment methods on the account",
         "Contact Bulnix support within 24 hours if the subscription is not active as advertised",
       ],
     };
@@ -360,7 +362,7 @@ function getLoginInstructions(title: string): {
         "Steam: enable Steam Guard with your own authenticator app after securing the account.",
       ],
       warnings: [
-        "Do not use cheats or hacks — the account will be permanently banned",
+        "Do not use cheats or hacks as the account will be permanently banned",
         "Do not make purchases using stored payment methods on the account",
         "Contact Bulnix support within 24 hours if you cannot log in",
       ],
@@ -388,7 +390,7 @@ function getLoginInstructions(title: string): {
     warnings: [
       "Do not share your credentials with others",
       "Do not log in from multiple devices simultaneously on the first day",
-      "Contact Bulnix support within 24 hours if credentials don't work — issues reported after 24 hours may not be covered under warranty",
+      "Contact Bulnix support within 24 hours if credentials do not work. Issues reported after 24 hours may not be covered under warranty",
     ],
   };
 }
@@ -412,8 +414,8 @@ function getProductInfo(title: string): {
       features: [
         `${followerCount}+ followers added to the account`,
         ...(hasEmail ? ["Email verified with full email access (email address + email password included)"] : []),
-        ...(has2FA ? ["2FA enabled — 2FA key/backup codes included in delivery"] : []),
-        ...(isAged ? ["Aged account — created before 2024 for higher trust score"] : []),
+        ...(has2FA ? ["2FA enabled. 2FA key and backup codes are included in delivery"] : []),
+        ...(isAged ? ["Aged account created before 2024 for higher trust score"] : []),
         ...(hasAvatar ? ["Profile fully set up with avatar and posts"] : []),
         "Registered using a US IP/proxy for location consistency",
         "Phone number added to the account",
@@ -424,7 +426,7 @@ function getProductInfo(title: string): {
         ? "Instagram Username : Password : Email : Email Password"
         : "Instagram Username : Password",
       importantNotes: [
-        "These are access-based Instagram accounts. The term 'verified' refers to email/phone association during account setup — not Meta blue-badge verification.",
+        "These are access-based Instagram accounts. The term 'verified' refers to email and phone association during account setup, not Meta blue-badge verification.",
         "We strongly recommend logging in using a US IP (mobile or high-quality residential proxy) to minimise security checks.",
         "If you face a login issue: first confirm you are using a US IP/location, and avoid VPNs, datacenter IPs, or previously flagged devices.",
         "If the issue continues, contact our support team for assistance.",
@@ -441,7 +443,7 @@ function getProductInfo(title: string): {
         "100+ followers added to the account",
         "Phone number added to the account",
         ...(hasEmail ? ["Email verified with full email access (email address + email password included)"] : []),
-        ...(has2FA ? ["2FA enabled — 2FA key/backup codes included"] : []),
+        ...(has2FA ? ["2FA enabled. 2FA key and backup codes are included"] : []),
         ...(hasBM ? ["Business Manager access included"] : []),
         "Profile fully set up with profile picture, cover photo, and basic information",
         "Latin (English) names with realistic profile details",
@@ -454,7 +456,7 @@ function getProductInfo(title: string): {
         ? "Facebook Email : Facebook Password : Email Password : Facebook ID"
         : "Facebook Email : Facebook Password : Facebook ID",
       importantNotes: [
-        "These are access-based Facebook accounts. The term 'verified' refers to email verification and phone number association during account setup — not Meta blue-badge verification.",
+        "These are access-based Facebook accounts. The term 'verified' refers to email verification and phone number association during account setup, not Meta blue-badge verification.",
         "We strongly recommend logging in using a US IP (mobile or high-quality residential proxy) to minimise security checks.",
         "If you face a login issue: first confirm you are using a US IP/location, and avoid VPNs, datacenter IPs, or previously flagged devices.",
         "Do NOT run Facebook Ads within the first 48 hours of taking ownership.",
@@ -469,7 +471,7 @@ function getProductInfo(title: string): {
       features: [
         "Aged Twitter/X account with established history",
         ...(hasEmail ? ["Full email access included (email address + email password)"] : []),
-        ...(has2FA ? ["2FA enabled — backup codes included"] : []),
+        ...(has2FA ? ["2FA enabled. Backup codes are included."] : []),
         "Profile set up with username, bio, and profile picture",
         "Registered using a US IP for location consistency",
       ],
@@ -477,7 +479,7 @@ function getProductInfo(title: string): {
         ? "Twitter Username : Password : Email : Email Password"
         : "Twitter Username : Password",
       importantNotes: [
-        "Do not tweet or retweet immediately — wait 24 hours to avoid suspension.",
+        "Do not tweet or retweet immediately. Wait 24 hours to avoid suspension.",
         "Use a VPN matching the account's original country for first login.",
         "Change the password immediately after first login.",
         "Contact Bulnix support within 24 hours if credentials are invalid.",
@@ -499,7 +501,7 @@ function getProductInfo(title: string): {
         : "TikTok Username : Password",
       importantNotes: [
         "Use a VPN matching the account's original country for first login.",
-        "Do not post content immediately — warm up the account gradually.",
+        "Do not post content immediately. Warm up the account gradually.",
         "Change the password immediately after first login.",
         "Contact Bulnix support within 24 hours if credentials are invalid.",
       ],
@@ -518,7 +520,7 @@ function getProductInfo(title: string): {
       deliveryFormat: "Google Email : Password : Recovery Email : Recovery Password",
       importantNotes: [
         "Use a VPN matching the account's original country for first login.",
-        "Do not upload videos immediately — wait 24–48 hours.",
+        "Do not upload videos immediately. Wait 24 to 48 hours.",
         "Change the password and add your own recovery email immediately after login.",
         "Contact Bulnix support within 24 hours if credentials are invalid.",
       ],
@@ -554,7 +556,7 @@ function getProductInfo(title: string): {
       importantNotes: [
         "Do not change the email address or password on the account.",
         "Do not add payment methods to the account.",
-        "Use only the profile slot assigned to you — do not modify other profiles.",
+        "Use only the profile slot assigned to you. Do not modify other profiles.",
         "Contact Bulnix support within 24 hours if access is not working.",
       ],
     };
@@ -573,7 +575,7 @@ function getProductInfo(title: string): {
         ? "Discord Email : Password : Email Password : Token"
         : "Discord Email : Password : Token",
       importantNotes: [
-        "Do not use the account for spam or self-botting — it will be banned.",
+        "Do not use the account for spam or self-botting as it will be banned.",
         "Change the password immediately after first login.",
         "Contact Bulnix support within 24 hours if credentials are invalid.",
       ],
@@ -660,7 +662,7 @@ function getProductInfo(title: string): {
         ? "Game Email : Password : 2FA Code : Account ID"
         : "Game Email : Password : Account ID",
       importantNotes: [
-        "Do not use cheats or hacks — the account will be permanently banned.",
+        "Do not use cheats or hacks as the account will be permanently banned.",
         "Do not make purchases using stored payment methods on the account.",
         "Check the account's rank, level, and inventory before making any changes.",
         "Contact Bulnix support within 24 hours if you cannot log in.",
@@ -853,8 +855,12 @@ export default function ProductDetail() {
 
             {/* Short description */}
             {(p.shortDescription || p.description) && (
-              <p className="text-muted-foreground leading-relaxed mb-5 text-sm">
-                {p.shortDescription || (p.description?.slice(0, 200) + (p.description?.length > 200 ? "..." : ""))}
+              <p className="text-foreground leading-relaxed mb-5 text-sm">
+                {p.shortDescription || (() => {
+                  const raw = p.description ?? "";
+                  const stripped = raw.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+                  return stripped.slice(0, 200) + (stripped.length > 200 ? "..." : "");
+                })()}
               </p>
             )}
 
@@ -980,7 +986,15 @@ export default function ProductDetail() {
 
                   {/* Feature list */}
                   {p.description ? (
-                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line text-sm">{p.description}</p>
+                    (() => {
+                      const raw = p.description!;
+                      const isHtml = /<[a-z][\s\S]*>/i.test(raw);
+                      if (isHtml) {
+                        const clean = DOMPurify.sanitize(raw, { ALLOWED_TAGS: ['p','br','b','strong','em','i','ul','ol','li','h1','h2','h3','h4','span','div'], ALLOWED_ATTR: [] });
+                        return <div className="text-foreground leading-relaxed text-sm prose prose-sm max-w-none [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_li]:mb-1" dangerouslySetInnerHTML={{ __html: clean }} />;
+                      }
+                      return <p className="text-foreground leading-relaxed whitespace-pre-line text-sm">{raw}</p>;
+                    })()
                   ) : (
                     <ul className="space-y-2">
                       {productInfo.features.map((f, i) => (
@@ -1084,7 +1098,7 @@ export default function ProductDetail() {
                         <p className="text-sm font-semibold text-amber-400 mb-2 flex items-center gap-1.5">
                           <AlertTriangle className="h-4 w-4" /> Important Notes
                         </p>
-                        <ul className="text-sm text-amber-300/80 space-y-1.5 list-disc list-inside">
+                        <ul className="text-sm text-amber-700 space-y-1.5 list-disc list-inside">
                           {loginInfo.warnings.map((w, i) => <li key={i}>{w}</li>)}
                         </ul>
                       </div>
@@ -1113,7 +1127,7 @@ export default function ProductDetail() {
 
                 {!isAuthenticated && (
                   <div className="mt-4 p-4 bg-blue-500/10 rounded-xl border border-blue-500/20 text-center">
-                    <p className="text-sm text-blue-300 mb-3">You need an account to purchase and access products.</p>
+                    <p className="text-sm text-blue-600 mb-3">You need an account to purchase and access products.</p>
                     <div className="flex gap-3 justify-center">
                       <Link href="/signup">
                         <Button size="sm" className="bg-[#0050D0] hover:bg-[#0040b0] text-white rounded-full px-5">Create Account</Button>
@@ -1138,10 +1152,10 @@ export default function ProductDetail() {
                 ) : null}
                 <div className="space-y-3 text-sm text-muted-foreground">
                   <div className="flex items-start gap-3 p-3 bg-green-500/10 rounded-lg border border-green-500/20">
-                    <Zap className="h-4 w-4 text-green-400 mt-0.5 shrink-0" />
+                    <Zap className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
                     <div>
-                      <p className="font-semibold text-green-400">Instant Digital Delivery</p>
-                      <p className="text-green-300/70">Your product credentials are delivered automatically to your order dashboard within minutes of payment confirmation.</p>
+                      <p className="font-semibold text-green-700">Instant Digital Delivery</p>
+                      <p className="text-green-800">Your product credentials are delivered automatically to your order dashboard within minutes of payment confirmation.</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 p-3 bg-card rounded-lg border border-border">
@@ -1180,8 +1194,8 @@ export default function ProductDetail() {
                     </ul>
                   </div>
                   <div className="p-4 bg-amber-500/10 rounded-xl border border-amber-500/20">
-                    <p className="text-amber-400 font-medium mb-1">How to Request a Refund</p>
-                    <p className="text-amber-300/70">Open a support ticket from your dashboard with your order ID and a description of the issue. Our team usually responds within 2 to 4 hours.</p>
+                    <p className="text-amber-700 font-semibold mb-1">How to Request a Refund</p>
+                    <p className="text-amber-800">Open a support ticket from your dashboard with your order ID and a description of the issue. Our team usually responds within 2 to 4 hours.</p>
                   </div>
                   <p>
                     For full details, see our <Link href="/refund" className="text-[#00C2FF] underline">Refund Policy page</Link>.

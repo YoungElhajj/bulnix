@@ -29,7 +29,7 @@ const SOCIAL_SLUGS = ["facebook-accounts", "instagram-accounts", "tiktok-account
 export default function Categories() {
   const [search, setSearch] = useState("");
   const { data: categories, isLoading } = trpc.categories.listWithCounts.useQuery(undefined, {
-    retry: 2, retryDelay: (a) => Math.min(1000 * 2 ** a, 10000)
+    retry: 4, retryDelay: (a) => Math.min(2000 * 2 ** a, 15000)
   });
 
   const allCats = (categories as any[] | undefined) ?? [];
@@ -96,9 +96,22 @@ export default function Categories() {
                   <div className="bg-white rounded-2xl p-6 border border-[#D8E8F5] cursor-pointer group hover:border-[#00C2FF]/40 hover:shadow-lg hover:shadow-[#00C2FF]/10 hover:-translate-y-1 transition-all duration-300">
                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#F0F8FF] to-[#E0EEFF] border border-[#D8E8F5] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 overflow-hidden">
                       {iconUrl ? (
-                        <img src={iconUrl} alt={cat.name} className="w-10 h-10 object-contain" />
-                      ) : (
+                        <img
+                          src={iconUrl}
+                          alt={cat.name}
+                          className="w-10 h-10 object-contain"
+                          onError={(e) => {
+                            const img = e.currentTarget;
+                            img.style.display = 'none';
+                            const fallback = img.nextElementSibling as HTMLElement | null;
+                            if (fallback) fallback.style.display = 'block';
+                          }}
+                        />
+                      ) : null}
+                      {(!iconUrl) ? (
                         <span className="text-3xl">{emoji}</span>
+                      ) : (
+                        <span className="text-3xl" style={{ display: 'none' }}>{emoji}</span>
                       )}
                     </div>
                     <h3 className="font-semibold text-[#0D2137] group-hover:text-[#0050D0] transition-colors mb-1 line-clamp-2" style={{ fontFamily: "'Poppins', sans-serif" }}>{cat.name}</h3>

@@ -57,14 +57,14 @@ export function isRetryableDbError(error: unknown): boolean {
 export async function withDbRetry<T>(
   fn: () => Promise<T>,
   label: string,
-  maxRetries = 3
+  maxRetries = 5
 ): Promise<T> {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await fn();
     } catch (error) {
       if (attempt < maxRetries && isRetryableDbError(error)) {
-        const delay = attempt * 1500; // 1.5s, 3s
+        const delay = Math.min(attempt * 1500, 6000); // 1.5s, 3s, 4.5s, 6s
         console.warn(
           `[DB] ${label} transient error (attempt ${attempt}/${maxRetries}), retrying in ${delay}ms...`
         );

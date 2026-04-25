@@ -191,7 +191,7 @@ export default function Checkout() {
                   <p className="text-amber-300 font-semibold text-sm">Wallet top-up required</p>
                   <p className="text-amber-400/70 text-sm mt-1">
                     All orders on Bulnix are paid from your wallet balance. Please top up at least <strong>${shortfall.toFixed(2)}</strong> to proceed.
-                    Your payment to Bulnix is private — no payment gateway can see what products you purchase.
+                    Your payment to Bulnix is private. No payment gateway can see what products you purchase.
                   </p>
                   <Link href="/wallet" className="inline-block mt-3">
                     <Button className="bg-amber-500 hover:bg-amber-400 text-[#0A1628] font-bold rounded-xl gap-2 h-9 text-sm">
@@ -232,7 +232,7 @@ export default function Checkout() {
               </div>
               {couponDiscount > 0 && (
                 <p className="text-green-400 text-sm mt-2 flex items-center gap-1">
-                  <CheckCircle className="h-4 w-4" /> Coupon <strong>{couponCode}</strong> applied — saving ${couponDiscount.toFixed(2)}
+                  <CheckCircle className="h-4 w-4" /> Coupon <strong>{couponCode}</strong> applied. You are saving ${couponDiscount.toFixed(2)}
                 </p>
               )}
             </div>
@@ -243,7 +243,7 @@ export default function Checkout() {
               <div>
                 <p className="text-white font-semibold text-sm">Private & Secure Checkout</p>
                 <p className="text-[#8BA5C0] text-sm mt-1">
-                  Your order is paid from your Bulnix wallet balance. Payment gateways only see your wallet top-up — they cannot track which products you purchase.
+                  Your order is paid from your Bulnix wallet balance. Payment gateways only see your wallet top-up. They cannot track which products you purchase.
                 </p>
               </div>
             </div>

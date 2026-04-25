@@ -134,10 +134,10 @@ const SOCIAL_SLUGS = ["facebook-accounts","instagram-accounts","tiktok-accounts-
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function Home() {
   const { data: featuredProducts } = trpc.products.getFeatured.useQuery(undefined, {
-    retry: 2, retryDelay: (a) => Math.min(1000 * 2 ** a, 10000)
+    retry: 4, retryDelay: (a) => Math.min(2000 * 2 ** a, 15000)
   });
   const { data: categoriesData } = trpc.categories.listWithCounts.useQuery(undefined, {
-    retry: 2, retryDelay: (a) => Math.min(1000 * 2 ** a, 10000)
+    retry: 4, retryDelay: (a) => Math.min(2000 * 2 ** a, 15000)
   });
 
   // Re-run scroll reveal whenever data loads
@@ -204,6 +204,12 @@ export default function Home() {
                       Browse Products
                     </Button>
                   </Link>
+                  <a href="https://t.me/bulnixupdates" target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="border-[#229ED9]/40 bg-[#229ED9]/8 text-[#229ED9] hover:bg-[#229ED9] hover:text-white font-semibold rounded-full px-7 py-3 h-auto text-base transition-all duration-300 flex items-center gap-2">
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-2.04 9.613c-.15.666-.543.828-1.1.516l-3.04-2.24-1.466 1.41c-.162.162-.298.298-.61.298l.218-3.086 5.62-5.078c.244-.218-.054-.338-.378-.12L7.26 14.364l-2.98-.93c-.648-.203-.66-.648.135-.96l11.64-4.49c.54-.196 1.012.12.507.264z"/></svg>
+                      Join Our Channel
+                    </Button>
+                  </a>
                 </div>
               </div>
 
@@ -505,7 +511,7 @@ export default function Home() {
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-[#0D2137] mb-3" style={{ fontFamily: "'Poppins', sans-serif" }}>Popular Digital Accounts &amp; Services</h2>
             <p className="text-[#4A6080] max-w-2xl mx-auto text-sm leading-relaxed">
-              Bulnix is your one-stop marketplace to buy verified digital accounts at the best prices. Whether you need Instagram accounts, Facebook accounts, TikTok accounts, Netflix accounts, Spotify accounts, Discord accounts, Reddit accounts, Snapchat accounts, LinkedIn accounts, gaming accounts, VPN accounts, or streaming service subscriptions — we have them all with instant delivery.
+              Bulnix is your one-stop marketplace to buy verified digital accounts at the best prices. Whether you need Instagram accounts, Facebook accounts, TikTok accounts, Netflix accounts, Spotify accounts, Discord accounts, Reddit accounts, Snapchat accounts, LinkedIn accounts, gaming accounts, VPN accounts, or streaming service subscriptions. We have them all with instant delivery.
             </p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 text-center">

@@ -39,13 +39,13 @@ const TRIAGE_FLOW: Record<string, TriageStep> = {
   // ── ORDER FLOW ───────────────────────────────────────────────────────────────
   order: {
     id: "order",
-    bot: "Got it — order issue. What best describes the problem?",
+    bot: "Got it. What best describes your order issue?",
     options: [
       { label: "Order not delivered yet", next: "order_product" },
       { label: "Order shows fulfilled but I got nothing", next: "order_fulfilled_missing" },
       { label: "Wrong item delivered", next: "order_wrong_item_product" },
       { label: "Order is taking too long (1+ hour)", next: "order_delayed_product" },
-      { label: "Partial delivery — only some items received", next: "order_partial_product" },
+      { label: "Partial delivery (only some items received)", next: "order_partial_product" },
       { label: "Product not working / invalid credentials", next: "order_not_working_product" },
     ],
   },
@@ -489,39 +489,87 @@ export default function SocialFloatingWidgets() {
 
     if (next.startsWith("whatsapp:")) {
       const issue = next.replace("whatsapp:", "");
-      const msg = encodeURIComponent(
-        `Hi Bulnix Support! 👋\n\nI need help with: *${issue}*\n\nSteps I went through:\n${newHistory.map((s, i) => `${i + 1}. ${s}`).join("\n")}\n\nPlease assist me. Thank you!`
-      );
-
+      // Show channel choice step instead of immediately redirecting
       setTimeout(() => {
         setMessages(prev => [...prev, mkMsg("bot",
-          "Connecting you to our WhatsApp support team now. They already have your issue summary. 👇\n\nYou'll also receive a confirmation email if you're signed in."
+          "Great, I have all the details I need. How would you like to contact our support team?"
         )]);
-
-        // Send email confirmation if user is logged in and has email
+        setCurrentStep({
+          id: "__channel_choice__",
+          bot: "Great, I have all the details I need. How would you like to contact our support team?",
+          options: [
+            { label: "💬 WhatsApp", next: `__wa__:${issue}` },
+            { label: "✈️ Telegram", next: `__tg__:${issue}` },
+          ],
+        });
+      }, 400);
+      return;
+    }
+    if (next.startsWith("__wa__:")) {
+      const issue = next.replace("__wa__:", "");
+      const msg = encodeURIComponent(
+        `Hi Bulnix Support! 👋\n\nI need help with: *${issue}*\n\nSteps I went through:\n${stepHistory.map((s, i) => `${i + 1}. ${s}`).join("\n")}\n\nPlease assist me. Thank you!`
+      );
+      setTimeout(() => {
+        setMessages(prev => [...prev, mkMsg("bot",
+          "Connecting you to our WhatsApp support team now. They already have your issue summary. 👇\n\nYou will also receive a confirmation email if you are signed in."
+        )]);
         if (user?.email) {
           submitTriage.mutate({
             email: user.email,
             name: user.name || undefined,
             issueSummary: issue,
-            steps: newHistory,
+            steps: stepHistory,
           });
         }
-
         setTimeout(() => {
           window.open(`${WHATSAPP_BASE}?text=${msg}`, "_blank", "noopener,noreferrer");
         }, 800);
       }, 400);
       return;
     }
-
-    if (next === "telegram_channel") {
+    if (next.startsWith("__tg__:")) {
+      const issue = next.replace("__tg__:", "");
+      setTimeout(() => {
+        setMessages(prev => [...prev, mkMsg("bot",
+          "Connecting you to our Telegram support now. They already have your issue summary. 👇"
+        )]);
+        if (user?.email) {
+          submitTriage.mutate({
+            email: user.email,
+            name: user.name || undefined,
+            issueSummary: issue,
+            steps: stepHistory,
+          });
+        }
+        setTimeout(() => {
+          window.open(`${TELEGRAM_SUPPORT_URL}?start=${encodeURIComponent(issue)}`, "_blank", "noopener,noreferrer");
+        }, 800);
+      }, 400);
+      return;
+    }
+        if (next === "telegram_channel") {
       setTimeout(() => {
         setMessages(prev => [...prev, mkMsg("bot", TRIAGE_FLOW.telegram_channel.bot)]);
         setCurrentStep(TRIAGE_FLOW.telegram_channel);
         setTimeout(() => {
           window.open(TELEGRAM_URL, "_blank", "noopener,noreferrer");
         }, 600);
+      }, 400);
+      return;
+    }
+    if (next.startsWith("telegram:")) {
+      const issue = next.replace("telegram:", "");
+      const msg = encodeURIComponent(
+        `Hi Bulnix Support! 👋\n\nI need help with: ${issue}\n\nSteps I went through:\n${newHistory.map((s, i) => `${i + 1}. ${s}`).join("\n")}\n\nPlease assist me. Thank you!`
+      );
+      setTimeout(() => {
+        setMessages(prev => [...prev, mkMsg("bot",
+          "Connecting you to our Telegram support now. They already have your issue summary. 👇"
+        )]);
+        setTimeout(() => {
+          window.open(`${TELEGRAM_SUPPORT_URL}?start=${encodeURIComponent(issue)}`, "_blank", "noopener,noreferrer");
+        }, 800);
       }, 400);
       return;
     }
@@ -558,7 +606,7 @@ export default function SocialFloatingWidgets() {
             <div className="flex-1 min-w-0">
               <div className="font-semibold text-sm">Bulnix Support</div>
               <div className="text-[10px] text-white/70 leading-tight">
-                Answer questions to connect to WhatsApp
+                Answer a few questions to get connected
               </div>
             </div>
             <div className="flex items-center gap-1">
@@ -595,7 +643,7 @@ export default function SocialFloatingWidgets() {
                     className="flex items-center justify-between gap-2 text-xs bg-white border border-[#0050D0]/25 text-[#0050D0] hover:bg-[#0050D0] hover:text-white rounded-xl px-3 py-2 transition-colors font-medium text-left"
                   >
                     <span>{opt.label}</span>
-                    {opt.next.startsWith("whatsapp:")
+                    {(opt.next.startsWith("whatsapp:") || opt.next.startsWith("telegram:"))
                       ? <ExternalLink className="w-3 h-3 flex-shrink-0" />
                       : <ChevronRight className="w-3 h-3 flex-shrink-0 opacity-50" />
                     }
