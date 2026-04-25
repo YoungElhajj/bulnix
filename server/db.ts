@@ -40,15 +40,28 @@ let _pool: ReturnType<typeof createPool> | null = null;
 
 function getPool(): ReturnType<typeof createPool> {
   if (!_pool && process.env.DATABASE_URL) {
-    // Parse the DATABASE_URL to extract connection params
-    // TiDB Cloud requires SSL - parse URL and set ssl explicitly
-    const dbUrl = new URL(process.env.DATABASE_URL);
+    // Support individual DB_* env vars to avoid URL special-character issues
+    let host: string, port: number, user: string, password: string, database: string;
+    if (process.env.DB_HOST) {
+      host = process.env.DB_HOST;
+      port = parseInt(process.env.DB_PORT || "3306");
+      user = process.env.DB_USER || "";
+      password = process.env.DB_PASS || "";
+      database = process.env.DB_NAME || "";
+    } else {
+      const dbUrl = new URL(process.env.DATABASE_URL);
+      host = dbUrl.hostname;
+      port = parseInt(dbUrl.port || "3306");
+      user = decodeURIComponent(dbUrl.username);
+      password = decodeURIComponent(dbUrl.password);
+      database = dbUrl.pathname.replace(/^\//, "");
+    }
     _pool = createPool({
-      host: dbUrl.hostname,
-      port: parseInt(dbUrl.port || "4000"),
-      user: decodeURIComponent(dbUrl.username),
-      password: decodeURIComponent(dbUrl.password),
-      database: dbUrl.pathname.replace(/^\//, ""),
+      host,
+      port,
+      user,
+      password,
+      database,
       ssl: { rejectUnauthorized: false },
       connectionLimit: 15,
       waitForConnections: true,

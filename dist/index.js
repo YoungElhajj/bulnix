@@ -2530,13 +2530,27 @@ import { createPool } from "mysql2";
 import { nanoid } from "nanoid";
 function getPool() {
   if (!_pool && process.env.DATABASE_URL) {
-    const dbUrl = new URL(process.env.DATABASE_URL);
+    let host, port, user, password, database;
+    if (process.env.DB_HOST) {
+      host = process.env.DB_HOST;
+      port = parseInt(process.env.DB_PORT || "3306");
+      user = process.env.DB_USER || "";
+      password = process.env.DB_PASS || "";
+      database = process.env.DB_NAME || "";
+    } else {
+      const dbUrl = new URL(process.env.DATABASE_URL);
+      host = dbUrl.hostname;
+      port = parseInt(dbUrl.port || "3306");
+      user = decodeURIComponent(dbUrl.username);
+      password = decodeURIComponent(dbUrl.password);
+      database = dbUrl.pathname.replace(/^\//, "");
+    }
     _pool = createPool({
-      host: dbUrl.hostname,
-      port: parseInt(dbUrl.port || "4000"),
-      user: decodeURIComponent(dbUrl.username),
-      password: decodeURIComponent(dbUrl.password),
-      database: dbUrl.pathname.replace(/^\//, ""),
+      host,
+      port,
+      user,
+      password,
+      database,
       ssl: { rejectUnauthorized: false },
       connectionLimit: 15,
       waitForConnections: true,
