@@ -146,6 +146,30 @@ export default function Home() {
   const [heroVisible, setHeroVisible] = useState(false);
   useEffect(() => { const t = setTimeout(() => setHeroVisible(true), 80); return () => clearTimeout(t); }, []);
 
+  // ── SEO: set page title, description and keywords dynamically ──────────────
+  useEffect(() => {
+    const TITLE = "Bulnix - Buy Premium Digital Accounts | Instagram, Facebook, TikTok & More";
+    const DESC = "Buy premium digital accounts instantly on Bulnix. Instagram, Facebook, TikTok, Netflix, Spotify, gaming credits, VPN and 500+ more digital products. Secure payments, instant delivery, global access.";
+    const KEYWORDS = "buy digital accounts, buy Instagram accounts, buy Facebook accounts, buy TikTok accounts, buy Netflix accounts, buy Spotify accounts, buy gaming accounts, buy VPN accounts, digital accounts marketplace, social media accounts for sale, buy streaming accounts, instant delivery digital accounts, reseller digital accounts, Bulnix";
+    document.title = TITLE;
+    const setMeta = (name: string, content: string, prop = false) => {
+      const sel = prop ? `meta[property="${name}"]` : `meta[name="${name}"]`;
+      let el = document.querySelector<HTMLMetaElement>(sel);
+      if (!el) {
+        el = document.createElement("meta");
+        if (prop) el.setAttribute("property", name); else el.setAttribute("name", name);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("content", content);
+    };
+    setMeta("description", DESC);
+    setMeta("keywords", KEYWORDS);
+    setMeta("og:title", TITLE, true);
+    setMeta("og:description", DESC, true);
+    setMeta("twitter:title", TITLE);
+    setMeta("twitter:description", DESC);
+  }, []);
+
   const heroStyle = (delay: number) => ({
     opacity: heroVisible ? 1 : 0,
     transform: heroVisible ? "translateY(0)" : "translateY(28px)",
@@ -257,8 +281,9 @@ export default function Home() {
       </section>
 
       {/* ══ STATS ═════════════════════════════════════════════════════════════ */}
-      <section className="py-14 bg-[#0F3D5E]">
+      <section className="py-14 bg-[#0F3D5E]" aria-labelledby="stats-heading">
         <div className="container">
+          <h2 id="stats-heading" className="sr-only">Bulnix by the Numbers - Trusted Digital Accounts Marketplace</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
               { label: "Happy Customers", value: 10000, suffix: "+" },
