@@ -11,8 +11,8 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 const WHATSAPP_BASE = "https://wa.me/447367061279";
-const TELEGRAM_URL = "https://t.me/Bulnixlimited";
-const TELEGRAM_SUPPORT_URL = "https://t.me/Bulnixlimited";
+const TELEGRAM_URL = "https://t.me/bulnixupdates";  // Channel for updates
+const TELEGRAM_SUPPORT_URL = "https://t.me/Bulnixlimited";  // Support DM
 
 // ── Triage flow definition ────────────────────────────────────────────────────
 type TriageStep = {
@@ -24,7 +24,7 @@ type TriageStep = {
 const TRIAGE_FLOW: Record<string, TriageStep> = {
   start: {
     id: "start",
-    bot: "Hi! 👋 I'm here to connect you with our support team on WhatsApp.\n\nTo help them assist you faster, I'll ask a few quick questions first. Please answer each one so our team has all the details they need.\n\nWhat is your issue about?",
+    bot: "Hi! 👋 Welcome to Bulnix Support.\n\nI'll ask a few quick questions to understand your issue, then connect you with the right support channel.\n\nWhat is your issue about?",
     options: [
       { label: "📦 My order / delivery", next: "order" },
       { label: "💳 Wallet top-up / payment", next: "payment" },
@@ -386,9 +386,18 @@ const TRIAGE_FLOW: Record<string, TriageStep> = {
   },
   telegram_redirect: {
     id: "telegram_redirect",
-    bot: "Join our Telegram channel @Bulnixlimited for exclusive deals, discount codes, and order updates! Click below to join.",
+    bot: "Join our Telegram channel @bulnixupdates for exclusive deals, discount codes, and order updates! Click the button below to join.",
     options: [
-      { label: "📢 Join Telegram Channel", next: "whatsapp:Joined Telegram — looking for discount codes" },
+      { label: "📢 Join @bulnixupdates Channel", next: "telegram_channel" },
+      { label: "I need a code urgently", next: "whatsapp:Requesting discount code — urgent" },
+    ],
+  },
+  telegram_channel: {
+    id: "telegram_channel",
+    bot: "Opening the Bulnix Telegram channel now. You can find all our discount codes and exclusive deals there. Is there anything else I can help you with?",
+    options: [
+      { label: "No, that's all ✅", next: "done" },
+      { label: "I still need a code", next: "whatsapp:Requesting discount code — checked Telegram — need manual code" },
     ],
   },
 
@@ -502,6 +511,17 @@ export default function SocialFloatingWidgets() {
         setTimeout(() => {
           window.open(`${WHATSAPP_BASE}?text=${msg}`, "_blank", "noopener,noreferrer");
         }, 800);
+      }, 400);
+      return;
+    }
+
+    if (next === "telegram_channel") {
+      setTimeout(() => {
+        setMessages(prev => [...prev, mkMsg("bot", TRIAGE_FLOW.telegram_channel.bot)]);
+        setCurrentStep(TRIAGE_FLOW.telegram_channel);
+        setTimeout(() => {
+          window.open(TELEGRAM_URL, "_blank", "noopener,noreferrer");
+        }, 600);
       }, 400);
       return;
     }

@@ -41,9 +41,9 @@ const GATEWAYS = [
   {
     key: "nowpayments",
     label: "Crypto",
-    desc: "BTC, ETH, USDT, and 100+ coins — min $12",
+    desc: "BTC, ETH, USDT, and 100+ coins — min $20 (+5% fee)",
     region: "Global",
-    minUSD: 12,
+    minUSD: 20,
     icon: Bitcoin,
     color: "text-[#F7931A]",
     bg: "bg-[#1a0d00]",
@@ -388,10 +388,14 @@ export default function WalletPage() {
 
               {/* NOWPayments partial payment notice */}
               {gateway === "nowpayments" && (
-                <div className="mb-4 p-3 rounded-xl bg-blue-50 border border-blue-200/60">
+                <div className="mb-4 p-3 rounded-xl bg-blue-50 border border-blue-200/60 space-y-1.5">
                   <p className="text-xs text-blue-700 font-semibold flex items-start gap-1.5">
                     <span className="mt-0.5">ℹ</span>
-                    <span>Send the <strong>exact amount</strong> shown. Sending less will credit only the amount received (partial payment). Network fees are not covered by Bulnix.</span>
+                    <span>A <strong>5% crypto processing fee</strong> is added to cover blockchain network costs. Minimum deposit is <strong>$20.00</strong>.</span>
+                  </p>
+                  <p className="text-xs text-blue-600 flex items-start gap-1.5">
+                    <span className="mt-0.5">•</span>
+                    <span>Send the <strong>exact amount</strong> shown on the payment page. Sending less will credit only the amount received.</span>
                   </p>
                 </div>
               )}

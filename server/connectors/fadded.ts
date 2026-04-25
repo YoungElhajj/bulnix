@@ -152,6 +152,55 @@ function extractDeliveryFormat(description: string | null | undefined): string |
   }
   return null;
 }
+// ─── Auto-Description Generator ───────────────────────────────────────────────
+/**
+ * Generate a product description + how-to-use guide using LLM.
+ * Called during sync for products that have no supplier description.
+ */
+async function generateProductDescription(productName: string): Promise<{ description: string; howToUse: string } | null> {
+  try {
+    const { invokeLLM } = await import("../_core/llm");
+    const response = await invokeLLM({
+      messages: [
+        {
+          role: "system",
+          content: "You are a product content writer for Bulnix, a digital accounts marketplace. Write natural, professional product descriptions without em-dashes, hyphens used as pauses, or AI-sounding phrases. Be direct and helpful. Output JSON only.",
+        },
+        {
+          role: "user",
+          content: `Write a product description and how-to-use guide for: "${productName}". This is a digital product (account, subscription, or service). Return JSON with exactly two fields: "description" (2-3 sentences about what the product is and its benefits) and "howToUse" (3-5 numbered steps explaining how to use it after purchase, starting from receiving the credentials).`,
+        },
+      ],
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "product_content",
+          strict: true,
+          schema: {
+            type: "object",
+            properties: {
+              description: { type: "string" },
+              howToUse: { type: "string" },
+            },
+            required: ["description", "howToUse"],
+            additionalProperties: false,
+          },
+        },
+      },
+    });
+    const raw = (response as any).choices?.[0]?.message?.content;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return {
+      description: parsed.description?.trim() || null,
+      howToUse: parsed.howToUse?.trim() || null,
+    };
+  } catch (err) {
+    console.warn("[Fadded] generateProductDescription failed for:", productName, err);
+    return null;
+  }
+}
+
 // ─── Category Sync (inferred from products) ────────────────────────────────────
 
 export async function syncCategories(apiKey: string): Promise<{ synced: number; errors: number }> {
@@ -296,14 +345,39 @@ export async function syncProducts(apiKey: string, markupPercent = 20, ngnToUsd 
           if (deliveryFormat && !existingProduct[0].deliveryFormat) {
             updateData.deliveryFormat = deliveryFormat;
           }
+          // Fill in missing description for existing products
+          if (!existingProduct[0].description) {
+            const supplierDesc = prod.description ?? null;
+            if (supplierDesc) {
+              updateData.description = supplierDesc;
+            } else {
+              const generated = await generateProductDescription(prodName);
+              if (generated) {
+                updateData.description = generated.description;
+                if (!existingProduct[0].deliveryNote) {
+                  updateData.deliveryNote = generated.howToUse;
+                }
+              }
+            }
+          }
           await db.update(products).set(updateData).where(eq(products.id, existingProduct[0].id));
         } else {
+          // Use supplier description if available, otherwise generate one
+          let finalDescription: string | null = prod.description ?? null;
+          let deliveryNote: string | null = null;
+          if (!finalDescription) {
+            const generated = await generateProductDescription(prodName);
+            if (generated) {
+              finalDescription = generated.description;
+              deliveryNote = generated.howToUse;
+            }
+          }
           await db.insert(products).values({
             providerKey: PROVIDER_KEY,
             supplierProductId: prod.product_id,
             title: prodName,
             slug: `${slug}-fadded-${prod.product_id}`,
-            description: prod.description ?? null,
+            description: finalDescription,
             imageUrl: categoryImageUrl,
             categoryId,
             supplierPrice: supplierPriceUSD.toFixed(4) as any,
@@ -314,6 +388,7 @@ export async function syncProducts(apiKey: string, markupPercent = 20, ngnToUsd 
             isVisible: stockQty > 0, // Only show in-stock products by default
             isFeatured: false,
             deliveryFormat: deliveryFormat ?? null,
+            deliveryNote: deliveryNote,
           });
         }
         synced++;

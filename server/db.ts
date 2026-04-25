@@ -5,6 +5,7 @@ import { npInitiate, npGetPaymentStatus, isNowPaymentsSuccess } from "./payments
 import { koraInitiate, koraVerify, isKoraSuccess } from "./payments/korapay";
 import { isRetryableDbError, sleep, withDbRetry } from "./db-retry";
 import { drizzle } from "drizzle-orm/mysql2";
+import { createPool } from "mysql2";
 import {
   adminActions,
   categories,
@@ -35,11 +36,26 @@ import { nanoid } from "nanoid";
 import { safeSendEmail, sendOrderConfirmationEmail, sendOrderStatusEmail, sendTicketReplyEmail, sendDeliveryEmail, sendWalletTopupReceiptEmail } from "./email";
 
 let _db: ReturnType<typeof drizzle> | null = null;
+let _pool: ReturnType<typeof createPool> | null = null;
+
+function getPool(): ReturnType<typeof createPool> {
+  if (!_pool && process.env.DATABASE_URL) {
+    _pool = createPool({
+      uri: process.env.DATABASE_URL,
+      connectionLimit: 10,
+      waitForConnections: true,
+      queueLimit: 0,
+      enableKeepAlive: true,
+      keepAliveInitialDelay: 10000,
+    });
+  }
+  return _pool!;
+}
 
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      _db = drizzle(getPool());
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
@@ -1399,13 +1415,15 @@ export async function initiateWalletTopup(userId: number, amountUSD: number, gat
       });
       paymentUrl = result.paymentLink;
     } else if (gateway === "nowpayments") {
-      // NowPayments minimum is $10 USD equivalent
-      if (amountUSD < 10) throw new Error("Minimum crypto deposit is $10.00");
+      // NowPayments minimum is $20 USD; a 5% crypto processing fee is added to cover network/exchange costs
+      if (amountUSD < 20) throw new Error("Minimum crypto deposit is $20.00");
+      const cryptoFeePercent = 0.05; // 5% processing fee
+      const chargeAmount = parseFloat((amountUSD * (1 + cryptoFeePercent)).toFixed(2));
       const result = await npInitiate({
-        priceAmount: amountUSD,
+        priceAmount: chargeAmount,
         priceCurrency: "usd",
         orderId: reference,
-        orderDescription: `Bulnix wallet top-up $${amountUSD.toFixed(2)}`,
+        orderDescription: `Bulnix wallet top-up $${amountUSD.toFixed(2)} (+5% crypto fee)`,
         successUrl: `${siteOrigin}/wallet?topup_ref=${reference}&status=success`,
         cancelUrl: `${siteOrigin}/wallet?topup_ref=${reference}&status=cancelled`,
         ipnCallbackUrl: `${siteOrigin}/api/webhooks/nowpayments`,
