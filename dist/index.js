@@ -4297,6 +4297,10 @@ var init_backup = __esm({
 });
 
 // vite.config.ts
+var vite_config_exports = {};
+__export(vite_config_exports, {
+  default: () => vite_config_default
+});
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import fs from "node:fs";
@@ -4457,15 +4461,16 @@ import express from "express";
 import fs2 from "fs";
 import { nanoid as nanoid2 } from "nanoid";
 import path2 from "path";
-import { createServer as createViteServer } from "vite";
 async function setupVite(app, server) {
+  const { createServer: createViteServer } = await import("vite");
+  const { default: viteConfig } = await Promise.resolve().then(() => (init_vite_config(), vite_config_exports));
   const serverOptions = {
     middlewareMode: true,
     hmr: { server },
     allowedHosts: true
   };
   const vite = await createViteServer({
-    ...vite_config_default,
+    ...viteConfig,
     configFile: false,
     server: serverOptions,
     appType: "custom"
@@ -4508,7 +4513,6 @@ function serveStatic(app) {
 var init_vite = __esm({
   "server/_core/vite.ts"() {
     "use strict";
-    init_vite_config();
   }
 });
 
