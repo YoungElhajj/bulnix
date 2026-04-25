@@ -170,6 +170,16 @@ export async function getCategories() {
   );
 }
 
+/** Admin-only: returns ALL categories including hidden ones */
+export async function getAllCategories() {
+  const db = await getDb();
+  if (!db) return [];
+  return withDbRetry(
+    () => db!.select().from(categories).orderBy(categories.sortOrder, categories.name),
+    "getAllCategories"
+  );
+}
+
 export async function getCategoriesWithCounts() {
   const db = await getDb();
   if (!db) return [];

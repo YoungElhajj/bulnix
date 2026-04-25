@@ -326,7 +326,7 @@ export const appRouter = router({
 
     // Categories
     categories: router({
-      list: adminProcedure.query(() => db.getCategories()),
+      list: adminProcedure.query(() => db.getAllCategories()),
       create: adminProcedure
         .input(z.object({ name: z.string(), slug: z.string(), description: z.string().optional(), parentId: z.number().optional() }))
         .mutation(({ input }) => db.createCategory(input)),
