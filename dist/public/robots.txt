@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /checkout
+Disallow: /cart
+Disallow: /wallet
+Disallow: /orders
+Disallow: /tickets
+Disallow: /profile
+Disallow: /wishlist
+
+# Sitemap
+Sitemap: https://bulnix.com/sitemap.xml
