@@ -2537,7 +2537,7 @@ function getPool() {
       user: decodeURIComponent(dbUrl.username),
       password: decodeURIComponent(dbUrl.password),
       database: dbUrl.pathname.replace(/^\//, ""),
-      ssl: { rejectUnauthorized: true },
+      ssl: { rejectUnauthorized: false },
       connectionLimit: 15,
       waitForConnections: true,
       queueLimit: 100,
