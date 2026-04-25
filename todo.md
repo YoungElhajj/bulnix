@@ -697,3 +697,14 @@
 - [ ] Add currency converter widget to all pages (navbar or persistent)
 - [ ] Add user spending badge/tier system to user profile
 - [ ] Add user signup location/country tracking in admin users panel
+
+## SEO Optimization (Apr 25, 2026)
+- [x] Enhanced index.html with og:site_name, og:locale, og:image:alt, twitter:site, twitter:image:alt
+- [x] Added JSON-LD Organization schema to index.html
+- [x] Added JSON-LD WebSite schema with SearchAction (Sitelinks Search Box) to index.html
+- [x] Updated robots.txt to disallow private pages (/admin/, /api/, /checkout, /cart, /wallet, /orders, /tickets, /profile, /wishlist)
+- [x] Created dynamic /sitemap.xml Express endpoint (996 URLs: 9 static + all categories + all products)
+- [x] Added JSON-LD Product + BreadcrumbList structured data to ProductDetail page
+- [x] Added JSON-LD BreadcrumbList structured data to Products/Category page
+- [x] OAuth country capture: new OAuth users get signupIp and signupCountry recorded
+- [x] upsertUser in db.ts handles signupIp/signupCountry on INSERT (not UPDATE)

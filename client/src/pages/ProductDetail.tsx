@@ -775,8 +775,45 @@ export default function ProductDetail() {
     { id: "refund", label: "Refund Policy", icon: RefreshCw },
   ];
 
+  // JSON-LD structured data for this product
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": p.title,
+    "description": p.description ? p.description.replace(/<[^>]+>/g, "").slice(0, 500) : `Buy ${p.title} on Bulnix. Instant delivery, secure payment.`,
+    "image": p.imageUrl || "https://files.manuscdn.com/user_upload_by_module/session_file/310519663404004095/UEAuHoiEheGEUEnr.jpg",
+    "url": `https://bulnix.com/products/${p.slug}`,
+    "brand": { "@type": "Brand", "name": "Bulnix" },
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "USD",
+      "price": Number(p.customerPriceUSD).toFixed(2),
+      "availability": (p.stockUnlimited || p.stockQuantity > 0) ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "seller": { "@type": "Organization", "name": "Bulnix" },
+      "url": `https://bulnix.com/products/${p.slug}`
+    }
+  };
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://bulnix.com" },
+      { "@type": "ListItem", "position": 2, "name": "Products", "item": "https://bulnix.com/products" },
+      ...(p.category?.name
+        ? [
+            { "@type": "ListItem", "position": 3, "name": p.category.name, "item": `https://bulnix.com/categories/${p.category.slug ?? ""}` },
+            { "@type": "ListItem", "position": 4, "name": p.title, "item": `https://bulnix.com/products/${p.slug}` }
+          ]
+        : [{ "@type": "ListItem", "position": 3, "name": p.title, "item": `https://bulnix.com/products/${p.slug}` }]
+      )
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/* SEO: Dynamic JSON-LD structured data */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       {/* Breadcrumb Header */}
       <div className="bg-[#0F3D5E] pt-24 pb-6">
         <div className="container">

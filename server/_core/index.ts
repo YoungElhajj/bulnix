@@ -17,6 +17,7 @@ import { verifyFlwSignature } from "../payments/flutterwave";
 import { verifyNowPaymentsIpn, isNowPaymentsSuccess, isNowPaymentsPartial } from "../payments/nowpayments";
 import { verifyKoraSignature, isKoraSuccess } from "../payments/korapay";
 import { confirmWalletTopup, fulfillOrderByReference, logSystem } from "../db";
+import { registerSitemapRoute } from "../sitemap";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -279,6 +280,8 @@ async function startServer() {
       },
     })
   );
+  // Sitemap
+  registerSitemapRoute(app);
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);

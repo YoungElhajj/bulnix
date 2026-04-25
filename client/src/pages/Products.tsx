@@ -99,8 +99,24 @@ export default function Products() {
     toast.success(`${product.title} added to cart`);
   };
 
+  // JSON-LD structured data
+  const cat = category as any;
+  const breadcrumbJsonLd = params.slug ? {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://bulnix.com" },
+      { "@type": "ListItem", "position": 2, "name": "Categories", "item": "https://bulnix.com/categories" },
+      { "@type": "ListItem", "position": 3, "name": cat?.name ?? params.slug, "item": `https://bulnix.com/categories/${params.slug}` }
+    ]
+  } : null;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/* SEO: JSON-LD structured data */}
+      {breadcrumbJsonLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      )}
       <Navbar/>
 
       {/* Page Header */}
