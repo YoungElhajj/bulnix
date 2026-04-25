@@ -719,3 +719,12 @@
 - [x] Add admin alert email to bulnixsupport@gmail.com on every triage submission
 - [x] Admin email includes: user name, email, issue summary, all triage steps
 - [x] User confirmation email unchanged (still goes to user with replyTo bulnixsupport@gmail.com)
+
+## Namecheap Migration (Apr 25, 2026)
+- [ ] Replace Manus S3 storage with Cloudinary
+- [ ] Replace Manus LLM (forge.manus.im) with direct OpenAI API calls
+- [ ] Replace Manus notification system with email-based notifications
+- [ ] Create .htaccess and cPanel Node.js deployment files
+- [ ] Create .env.example for Namecheap deployment
+- [ ] Push all changes to GitHub
+- [ ] Guide user through cPanel MySQL + Node.js App setup
