@@ -708,3 +708,9 @@
 - [x] Added JSON-LD BreadcrumbList structured data to Products/Category page
 - [x] OAuth country capture: new OAuth users get signupIp and signupCountry recorded
 - [x] upsertUser in db.ts handles signupIp/signupCountry on INSERT (not UPDATE)
+
+## Telegram Support Pre-filled Message (Apr 25, 2026)
+- [x] Build pre-filled Telegram message from triage answers (issue type, order number, description)
+- [x] Format: "Hello Bulnix Support, my name is [name]\nEmail: [email]\nI need help with: [issue]\nMy answers: 1. ... 2. ..."
+- [x] Apply to all three Telegram redirect paths (telegramMode direct, __tg__ channel choice, legacy telegram: prefix)
+- [x] Fixed WhatsApp message to also use newHistory (includes last answer) instead of stepHistory

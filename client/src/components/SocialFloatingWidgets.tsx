@@ -454,6 +454,24 @@ interface Msg { id: number; role: MsgRole; text: string }
 let _id = 0;
 const mkMsg = (role: MsgRole, text: string): Msg => ({ id: ++_id, role, text });
 
+/**
+ * Builds a rich pre-filled Telegram support message from the user's triage answers.
+ * Format: "Hello Bulnix Support 👋\n\nI need help with: [issue]\n\nMy answers:\n1. ..."
+ */
+function buildSupportMessage(
+  user: { name?: string | null; email?: string | null } | null | undefined,
+  issue: string,
+  history: string[]
+): string {
+  const greeting = user?.name ? `Hello Bulnix Support 👋, my name is ${user.name}` : "Hello Bulnix Support 👋";
+  const emailLine = user?.email ? `\nEmail: ${user.email}` : "";
+  const steps = history.length > 0
+    ? `\n\nMy answers:\n${history.map((s, i) => `${i + 1}. ${s}`).join("\n")}`
+    : "";
+  const raw = `${greeting}${emailLine}\n\nI need help with: ${issue}${steps}\n\nPlease assist me. Thank you!`;
+  return encodeURIComponent(raw);
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 type Panel = "menu" | "chat";
 
@@ -491,17 +509,18 @@ export default function SocialFloatingWidgets() {
     if (next.startsWith("whatsapp:")) {
       const issue = next.replace("whatsapp:", "");
       if (telegramMode) {
-        // In Telegram mode, skip channel choice and go directly to Telegram
+        // In Telegram mode, build a rich pre-filled Telegram message from all triage answers
+        const tgMsg = buildSupportMessage(user, issue, newHistory);
         setTimeout(() => {
           setMessages(prev => [...prev, mkMsg("bot",
             "Connecting you to our Telegram support now. They already have your issue summary. 👇"
           )]);
           setCurrentStep({ id: "__done__", bot: "", options: [] });
           if (user?.email) {
-            submitTriage.mutate({ email: user.email, name: user.name || undefined, issueSummary: issue, steps: stepHistory });
+            submitTriage.mutate({ email: user.email, name: user.name || undefined, issueSummary: issue, steps: newHistory });
           }
           setTimeout(() => {
-            window.open(`${TELEGRAM_SUPPORT_URL}`, "_blank", "noopener,noreferrer");
+            window.open(`https://t.me/Bulnixlimited?text=${tgMsg}`, "_blank", "noopener,noreferrer");
           }, 800);
         }, 400);
         return;
@@ -525,7 +544,7 @@ export default function SocialFloatingWidgets() {
     if (next.startsWith("__wa__:")) {
       const issue = next.replace("__wa__:", "");
       const msg = encodeURIComponent(
-        `Hi Bulnix Support! 👋\n\nI need help with: *${issue}*\n\nSteps I went through:\n${stepHistory.map((s, i) => `${i + 1}. ${s}`).join("\n")}\n\nPlease assist me. Thank you!`
+        `Hi Bulnix Support! 👋\n\nI need help with: *${issue}*\n\nMy answers:\n${newHistory.map((s, i) => `${i + 1}. ${s}`).join("\n")}\n\nPlease assist me. Thank you!`
       );
       setTimeout(() => {
         setMessages(prev => [...prev, mkMsg("bot",
@@ -536,7 +555,7 @@ export default function SocialFloatingWidgets() {
             email: user.email,
             name: user.name || undefined,
             issueSummary: issue,
-            steps: stepHistory,
+            steps: newHistory,
           });
         }
         setTimeout(() => {
@@ -547,6 +566,7 @@ export default function SocialFloatingWidgets() {
     }
     if (next.startsWith("__tg__:")) {
       const issue = next.replace("__tg__:", "");
+      const tgMsg = buildSupportMessage(user, issue, newHistory);
       setTimeout(() => {
         setMessages(prev => [...prev, mkMsg("bot",
           "Connecting you to our Telegram support now. They already have your issue summary. 👇"
@@ -556,11 +576,11 @@ export default function SocialFloatingWidgets() {
             email: user.email,
             name: user.name || undefined,
             issueSummary: issue,
-            steps: stepHistory,
+            steps: newHistory,
           });
         }
         setTimeout(() => {
-          window.open(`${TELEGRAM_SUPPORT_URL}?start=${encodeURIComponent(issue)}`, "_blank", "noopener,noreferrer");
+          window.open(`https://t.me/Bulnixlimited?text=${tgMsg}`, "_blank", "noopener,noreferrer");
         }, 800);
       }, 400);
       return;
@@ -577,15 +597,13 @@ export default function SocialFloatingWidgets() {
     }
     if (next.startsWith("telegram:")) {
       const issue = next.replace("telegram:", "");
-      const msg = encodeURIComponent(
-        `Hi Bulnix Support! 👋\n\nI need help with: ${issue}\n\nSteps I went through:\n${newHistory.map((s, i) => `${i + 1}. ${s}`).join("\n")}\n\nPlease assist me. Thank you!`
-      );
+      const tgMsg = buildSupportMessage(user, issue, newHistory);
       setTimeout(() => {
         setMessages(prev => [...prev, mkMsg("bot",
           "Connecting you to our Telegram support now. They already have your issue summary. 👇"
         )]);
         setTimeout(() => {
-          window.open(`${TELEGRAM_SUPPORT_URL}?start=${encodeURIComponent(issue)}`, "_blank", "noopener,noreferrer");
+          window.open(`https://t.me/Bulnixlimited?text=${tgMsg}`, "_blank", "noopener,noreferrer");
         }, 800);
       }, 400);
       return;
