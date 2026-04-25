@@ -14,6 +14,9 @@ export default function Cart() {
       {/* Header */}
       <div className="bg-[#0F3D5E] pt-24 pb-8">
         <div className="container">
+          <button onClick={() => window.history.back()} className="flex items-center gap-1.5 text-white/60 hover:text-[#00C2FF] text-sm mb-3 transition-colors">
+            ← Back
+          </button>
           <div className="flex items-center gap-2 text-sm text-white/50 mb-3">
             <Link href="/" className="hover:text-[#00C2FF] transition-colors">Home</Link>
             <ChevronRight className="w-3.5 h-3.5" />

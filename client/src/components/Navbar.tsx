@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { useCurrency, CURRENCIES } from "@/contexts/CurrencyContext";
 
 const LOGO_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663404004095/UEAuHoiEheGEUEnr.jpg";
 
@@ -89,6 +90,7 @@ export default function Navbar() {
   });
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
+  const useCurrencyHook = useCurrency();
   const isActive = (href: string) => href === "/" ? location === "/" : location === href || location.startsWith(href + "/");
 
   useEffect(() => {
@@ -177,6 +179,17 @@ export default function Navbar() {
               ))}
             </div>
 
+            {/* Currency Selector */}
+            <select
+              value={useCurrencyHook.currency}
+              onChange={e => useCurrencyHook.setCurrency(e.target.value)}
+              className="hidden sm:block bg-white/10 border border-white/20 text-white text-xs rounded-lg px-2 py-1.5 cursor-pointer hover:bg-white/15 transition-all focus:outline-none"
+              title="Select currency"
+            >
+              {CURRENCIES.map(c => (
+                <option key={c.code} value={c.code} className="bg-[#0F3D5E] text-white">{c.code}</option>
+              ))}
+            </select>
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}

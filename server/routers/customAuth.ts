@@ -40,6 +40,24 @@ async function findUserByEmail(email: string) {
   return rows[0] ?? null;
 }
 
+
+async function getClientIp(req: any): Promise<string | null> {
+  return (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ??
+    req.socket?.remoteAddress ?? null;
+}
+
+async function getCountryFromIp(ip: string | null): Promise<string | null> {
+  if (!ip || ip === "127.0.0.1" || ip === "::1" || ip.startsWith("192.168.") || ip.startsWith("10.")) return null;
+  try {
+    const res = await fetch(`https://ipapi.co/${ip}/country_name/`, { signal: AbortSignal.timeout(3000) });
+    if (!res.ok) return null;
+    const text = (await res.text()).trim();
+    return text.length > 0 && text.length < 100 ? text : null;
+  } catch {
+    return null;
+  }
+}
+
 // ─── Public/User Auth Router ──────────────────────────────────────────────────
 
 export const customAuthRouter = router({
@@ -54,7 +72,7 @@ export const customAuthRouter = router({
         password: z.string().min(8, "Password must be at least 8 characters"),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
 
@@ -81,6 +99,8 @@ export const customAuthRouter = router({
           otpPurpose: "register",
         }).where(eq(users.email, email));
       } else {
+        const signupIp = await getClientIp(ctx.req);
+        const signupCountry = await getCountryFromIp(signupIp);
         await db.insert(users).values({
           openId: generateOpenId(),
           name: input.name,
@@ -91,6 +111,8 @@ export const customAuthRouter = router({
           otpCode: otp,
           otpExpiry,
           otpPurpose: "register",
+          signupIp,
+          signupCountry,
         });
       }
 

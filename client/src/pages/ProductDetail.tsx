@@ -15,6 +15,7 @@ import { trpc } from "@/lib/trpc";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 type Tab = "description" | "how-to-login" | "delivery" | "refund";
 
@@ -779,6 +780,9 @@ export default function ProductDetail() {
       {/* Breadcrumb Header */}
       <div className="bg-[#0F3D5E] pt-24 pb-6">
         <div className="container">
+          <button onClick={() => window.history.back()} className="flex items-center gap-1.5 text-white/60 hover:text-[#00C2FF] text-sm mb-3 transition-colors">
+            <ChevronRight className="w-3.5 h-3.5 rotate-180" /> Back
+          </button>
           <div className="flex items-center gap-2 text-sm text-white/50 flex-wrap">
             <Link href="/" className="hover:text-[#00C2FF] transition-colors">Home</Link>
             <ChevronRight className="w-3.5 h-3.5 shrink-0" />
@@ -947,19 +951,19 @@ export default function ProductDetail() {
         {/* Tabs Section */}
         <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
           {/* Tab Headers */}
-          <div className="flex border-b border-border overflow-x-auto">
+          <div className="flex border-b border-border overflow-x-auto scrollbar-hide -mb-px">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-5 py-4 text-sm font-medium whitespace-nowrap transition-colors border-b-2 -mb-px ${
+                className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-5 py-3 sm:py-4 text-[11px] sm:text-sm font-medium whitespace-nowrap transition-colors border-b-2 flex-1 sm:flex-none justify-center ${
                   activeTab === tab.id
                     ? "border-[#00C2FF] text-[#00C2FF] bg-[#00C2FF]/5"
                     : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 }`}
               >
-                <tab.icon className="h-4 w-4" />
-                {tab.label}
+                <tab.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="truncate max-w-[60px] sm:max-w-none">{tab.label}</span>
               </button>
             ))}
           </div>

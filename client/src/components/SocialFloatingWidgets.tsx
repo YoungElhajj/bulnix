@@ -459,6 +459,7 @@ type Panel = "menu" | "chat";
 
 export default function SocialFloatingWidgets() {
   const [panel, setPanel] = useState<Panel | null>(null);
+  const [telegramMode, setTelegramMode] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [currentStep, setCurrentStep] = useState<TriageStep>(TRIAGE_FLOW.start);
   const [stepHistory, setStepHistory] = useState<string[]>([]);
@@ -476,7 +477,7 @@ export default function SocialFloatingWidgets() {
       setCurrentStep(TRIAGE_FLOW.start);
       setStepHistory([]);
     }
-  }, [panel]);
+  }, [panel, telegramMode]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -489,6 +490,22 @@ export default function SocialFloatingWidgets() {
 
     if (next.startsWith("whatsapp:")) {
       const issue = next.replace("whatsapp:", "");
+      if (telegramMode) {
+        // In Telegram mode, skip channel choice and go directly to Telegram
+        setTimeout(() => {
+          setMessages(prev => [...prev, mkMsg("bot",
+            "Connecting you to our Telegram support now. They already have your issue summary. 👇"
+          )]);
+          setCurrentStep({ id: "__done__", bot: "", options: [] });
+          if (user?.email) {
+            submitTriage.mutate({ email: user.email, name: user.name || undefined, issueSummary: issue, steps: stepHistory });
+          }
+          setTimeout(() => {
+            window.open(`${TELEGRAM_SUPPORT_URL}`, "_blank", "noopener,noreferrer");
+          }, 800);
+        }, 400);
+        return;
+      }
       // Show channel choice step instead of immediately redirecting
       setTimeout(() => {
         setMessages(prev => [...prev, mkMsg("bot",
@@ -589,7 +606,7 @@ export default function SocialFloatingWidgets() {
   };
 
   const close = () => { setPanel(null); };
-  const toggle = () => setPanel(p => p === null ? "menu" : null);
+  const toggle = () => { if (panel !== null) setTelegramMode(false); setPanel(p => p === null ? "menu" : null); };
 
   return (
     <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end gap-3">
@@ -661,7 +678,7 @@ export default function SocialFloatingWidgets() {
         <div className="flex flex-col items-end gap-3 animate-in slide-in-from-bottom-4 fade-in duration-200">
           {/* Live Chat / WhatsApp triage */}
           <button
-            onClick={() => setPanel("chat")}
+            onClick={() => { setTelegramMode(false); setPanel("chat"); }}
             className="flex items-center gap-3 group"
           >
             <span className="bg-white border border-gray-200 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-full shadow-md whitespace-nowrap">
@@ -672,11 +689,15 @@ export default function SocialFloatingWidgets() {
             </div>
           </button>
 
-          {/* Telegram Support */}
-          <a
-            href={TELEGRAM_SUPPORT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          {/* Telegram Support - opens triage chat in Telegram mode */}
+          <button
+            onClick={() => {
+              setTelegramMode(true);
+              setMessages([mkMsg("bot", TRIAGE_FLOW.start.bot)]);
+              setCurrentStep(TRIAGE_FLOW.start);
+              setStepHistory([]);
+              setPanel("chat");
+            }}
             className="flex items-center gap-3 group"
             title="Chat on Telegram"
           >
@@ -689,7 +710,7 @@ export default function SocialFloatingWidgets() {
             >
               <Send className="w-5 h-5 text-white" />
             </div>
-          </a>
+          </button>
 
           {/* Join Telegram Channel */}
           <a

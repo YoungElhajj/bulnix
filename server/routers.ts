@@ -412,7 +412,7 @@ export const appRouter = router({
       }))
       .mutation(({ input, ctx }) => {
         // Gateway-specific minimum validation
-        const gatewayMins: Record<string, number> = { korapay: 1, flutterwave: 1, nowpayments: 12 };
+        const gatewayMins: Record<string, number> = { korapay: 1, flutterwave: 1, nowpayments: 20 };
         const minAmount = gatewayMins[input.gateway] ?? 1;
         if (input.amountUSD < minAmount) {
           throw new TRPCError({ code: "BAD_REQUEST", message: `Minimum deposit for this payment method is $${minAmount.toFixed(2)}` });

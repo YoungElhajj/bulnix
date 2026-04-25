@@ -23,6 +23,8 @@ export const users = mysqlTable("users", {
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
   country: varchar("country", { length: 64 }),
+  signupCountry: varchar("signupCountry", { length: 64 }),
+  signupIp: varchar("signupIp", { length: 64 }),
   referralCode: varchar("referralCode", { length: 32 }),
   referredBy: varchar("referredBy", { length: 32 }),
   emailVerified: boolean("emailVerified").default(false).notNull(),

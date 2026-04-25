@@ -218,6 +218,7 @@ export default function AdminUsers() {
                   <th className="text-center p-4">Role</th>
                   <th className="text-center p-4">Status</th>
                   <th className="text-left p-4">Joined</th>
+                  <th className="text-left p-4">Country</th>
                   <th className="text-center p-4">Actions</th>
                 </tr>
               </thead>
@@ -247,6 +248,7 @@ export default function AdminUsers() {
                       </Badge>
                     </td>
                     <td className="p-4 text-slate-400 text-xs">{new Date(u.createdAt).toLocaleDateString()}</td>
+                    <td className="p-4 text-slate-400 text-xs">{(u as any).signupCountry ?? (u as any).country ?? "—"}</td>
                     <td className="p-4 text-center" onClick={e => e.stopPropagation()}>
                       {u.isSuspended ? (
                         <button

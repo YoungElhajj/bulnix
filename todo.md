@@ -686,3 +686,14 @@
 - [ ] Hide WhatsApp number on Contact Us page
 - [ ] Auto-generate titles and descriptions for Fadded products missing them (VPNs etc.)
 - [ ] Advise on NOWPayments fee loss ($12 received → <$7 after fees)
+
+## Round 8 Fixes (Apr 25, 2026)
+- [ ] Fix Telegram Support button to use same AI triage flow as WhatsApp (route to Telegram at end instead of direct link)
+- [ ] Fix missing product logos/icons on product listing pages
+- [ ] Add cart/buy button to all product listing pages (not just homepage)
+- [ ] Add back navigation button to all sub-pages
+- [ ] Fix mobile layout: overlapping tab labels on ProductDetail page
+- [ ] Fix mobile layout: text overflow on product cards and all pages
+- [ ] Add currency converter widget to all pages (navbar or persistent)
+- [ ] Add user spending badge/tier system to user profile
+- [ ] Add user signup location/country tracking in admin users panel

@@ -9,23 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { useCart } from "@/contexts/CartContext";
 
-const CURRENCIES = [
-  { code: "USD", symbol: "$", label: "USD" },
-  { code: "NGN", symbol: "₦", label: "NGN" },
-  { code: "EUR", symbol: "€", label: "EUR" },
-  { code: "GBP", symbol: "£", label: "GBP" },
-];
 
-const RATES: Record<string, number> = { USD: 1, NGN: 1600, EUR: 0.92, GBP: 0.79 };
-
-function formatPrice(usd: number, currency: string): string {
-  const cur = CURRENCIES.find(c => c.code === currency) ?? CURRENCIES[0];
-  const converted = usd * (RATES[currency] ?? 1);
-  if (currency === "NGN") return `${cur.symbol}${converted.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
-  return `${cur.symbol}${converted.toFixed(2)}`;
-}
 
 // Simple image area — show supplier image as-is on a neutral background
 function ProductImageArea({ product }: { product: any }) {
@@ -36,6 +23,7 @@ function ProductImageArea({ product }: { product: any }) {
           src={product.imageUrl}
           alt={product.title}
           className="h-20 sm:h-32 max-w-full object-contain group-hover:scale-105 transition-transform duration-300 p-2"
+          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
         />
       ) : (
         <Package className="h-12 w-12 text-[#0050D0]/30" />
@@ -63,7 +51,7 @@ export default function Products() {
   const params = useParams<{ slug?: string }>();
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<"newest" | "price_asc" | "price_desc" | "popular">("price_asc");
-  const [currency, setCurrency] = useState("USD");
+  const { currency, setCurrency, formatPrice: formatPriceGlobal } = useCurrency();
   const [page, setPage] = useState(1);
   const { addItem } = useCart();
 
@@ -196,16 +184,7 @@ export default function Products() {
               </SelectContent>
             </Select>
 
-            <Select value={currency} onValueChange={setCurrency}>
-              <SelectTrigger className="w-[90px] sm:w-[110px] bg-card border-border text-foreground h-10 rounded-xl">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-card border-border">
-                {CURRENCIES.map(c => (
-                  <SelectItem key={c.code} value={c.code}>{c.symbol} {c.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            
           </div>
         </div>
 
@@ -252,7 +231,7 @@ export default function Products() {
                       </h3>
                       <div className="flex items-center justify-between mb-2.5">
                         <span className="text-[#00C2FF] font-bold text-sm sm:text-base">
-                          {formatPrice(Number(product.customerPriceUSD), currency)}
+                          {formatPriceGlobal(Number(product.customerPriceUSD))}
                         </span>
                         <span className="text-xs text-muted-foreground">
                           {product.stockUnlimited ? "∞ stock" : `${product.stockQuantity} left`}

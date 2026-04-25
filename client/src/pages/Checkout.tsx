@@ -137,6 +137,9 @@ export default function Checkout() {
       {/* Header */}
       <div className="bg-[#0F2035] border-b border-[#1E3A5F] pt-24 pb-8">
         <div className="container">
+          <button onClick={() => window.history.back()} className="flex items-center gap-1.5 text-white/60 hover:text-[#00C2FF] text-sm mb-3 transition-colors">
+            ← Back
+          </button>
           <div className="flex items-center gap-2 text-sm text-[#8BA5C0] mb-3">
             <Link href="/" className="hover:text-[#00C2FF] transition-colors">Home</Link>
             <ChevronRight className="w-3.5 h-3.5" />
