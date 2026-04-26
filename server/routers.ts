@@ -329,7 +329,7 @@ export const appRouter = router({
       list: adminProcedure.query(() => db.getAllCategories()),
       create: adminProcedure
         .input(z.object({ name: z.string(), slug: z.string(), description: z.string().optional(), parentId: z.number().optional() }))
-        .mutation(({ input }) => db.createCategory(input)),
+        .mutation(async ({ input }) => { const r = await db.createCategory(input); db.invalidateCache('categories'); return r; }),
       update: adminProcedure
         .input(z.object({
           id: z.number(),
@@ -341,10 +341,10 @@ export const appRouter = router({
           isVisible: z.boolean().optional(),
           sortOrder: z.number().optional(),
         }))
-        .mutation(({ input }) => db.updateCategory(input)),
+        .mutation(async ({ input }) => { const r = await db.updateCategory(input); db.invalidateCache('categories'); return r; }),
       delete: adminProcedure
         .input(z.object({ id: z.number() }))
-        .mutation(({ input }) => db.deleteCategory(input.id)),
+        .mutation(async ({ input }) => { const r = await db.deleteCategory(input.id); db.invalidateCache('categories'); return r; }),
     }),
 
     // Supplier Refund Claims

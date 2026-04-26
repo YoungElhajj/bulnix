@@ -2506,6 +2506,7 @@ __export(db_exports, {
   getWalletTransactions: () => getWalletTransactions,
   initiatePayment: () => initiatePayment,
   initiateWalletTopup: () => initiateWalletTopup,
+  invalidateCache: () => invalidateCache,
   listSupplierRefundClaims: () => listSupplierRefundClaims,
   logSystem: () => logSystem,
   markNotificationRead: () => markNotificationRead,
@@ -2583,6 +2584,27 @@ function resetDbPool() {
     _pool = null;
   }
   _db = null;
+}
+function cacheGet(key) {
+  const entry = _cache.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) {
+    _cache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+function cacheSet(key, data, ttlMs) {
+  _cache.set(key, { data, expiresAt: Date.now() + ttlMs });
+}
+function invalidateCache(prefix) {
+  if (!prefix) {
+    _cache.clear();
+    return;
+  }
+  for (const key of _cache.keys()) {
+    if (key.startsWith(prefix)) _cache.delete(key);
+  }
 }
 async function upsertUser(user) {
   if (!user.openId) throw new Error("User openId is required for upsert");
@@ -2662,12 +2684,16 @@ async function updateUserProfile(userId, data) {
   return { success: true };
 }
 async function getCategories() {
+  const cached = cacheGet("categories:visible");
+  if (cached) return cached;
   const db = await getDb();
   if (!db) return [];
-  return withDbRetry(
+  const result = await withDbRetry(
     () => db.select().from(categories).where(eq3(categories.isVisible, true)).orderBy(categories.sortOrder, categories.name),
     "getCategories"
   );
+  cacheSet("categories:visible", result, CACHE_TTL_CATEGORIES);
+  return result;
 }
 async function getAllCategories() {
   const db = await getDb();
@@ -2678,6 +2704,8 @@ async function getAllCategories() {
   );
 }
 async function getCategoriesWithCounts() {
+  const cached = cacheGet("categories:withCounts");
+  if (cached) return cached;
   const db = await getDb();
   if (!db) return [];
   const cats = await withDbRetry(
@@ -2692,11 +2720,13 @@ async function getCategoriesWithCounts() {
   for (const row of counts) {
     if (row.categoryId != null) countMap.set(row.categoryId, Number(row.count));
   }
-  return cats.map((cat) => {
+  const result = cats.map((cat) => {
     const directCount = countMap.get(cat.id) ?? 0;
     const childCount = cats.filter((c) => c.parentId === cat.id).reduce((sum, c) => sum + (countMap.get(c.id) ?? 0), 0);
     return { ...cat, productCount: directCount + childCount };
   });
+  cacheSet("categories:withCounts", result, CACHE_TTL_CATEGORIES);
+  return result;
 }
 async function getSubcategoriesByParentId(parentId) {
   const db = await getDb();
@@ -4101,7 +4131,7 @@ async function generateFaddedDescriptions() {
   }
   return { generated, skipped, errors };
 }
-var _db, _pool;
+var _db, _pool, _cache, CACHE_TTL_CATEGORIES, CACHE_TTL_PRODUCTS;
 var init_db = __esm({
   "server/db.ts"() {
     "use strict";
@@ -4114,6 +4144,9 @@ var init_db = __esm({
     init_email();
     _db = null;
     _pool = null;
+    _cache = /* @__PURE__ */ new Map();
+    CACHE_TTL_CATEGORIES = 5 * 60 * 1e3;
+    CACHE_TTL_PRODUCTS = 2 * 60 * 1e3;
   }
 });
 
@@ -5159,8 +5192,11 @@ var customAuthRouter = router({
     if (!db) throw new TRPCError3({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
     const email = input.email.toLowerCase().trim();
     const user = await findUserByEmail(email);
-    if (!user || !user.passwordHash) {
+    if (!user) {
       throw new TRPCError3({ code: "UNAUTHORIZED", message: "Invalid email or password" });
+    }
+    if (!user.passwordHash) {
+      throw new TRPCError3({ code: "FORBIDDEN", message: 'No password set for this account. Please use "Forgot Password" to set one.' });
     }
     if (!user.emailVerified) {
       throw new TRPCError3({ code: "FORBIDDEN", message: "Please verify your email first. Check your inbox for a verification code." });
@@ -5233,7 +5269,7 @@ var customAuthRouter = router({
     if (!db) throw new TRPCError3({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
     const email = input.email.toLowerCase().trim();
     const user = await findUserByEmail(email);
-    if (!user || !user.emailVerified) return { success: true };
+    if (!user) return { success: true };
     const otp = generateOtp();
     await db.update(users).set({
       otpCode: otp,
@@ -5263,6 +5299,8 @@ var customAuthRouter = router({
     const passwordHash = await bcrypt.hash(input.newPassword, 12);
     await db.update(users).set({
       passwordHash,
+      emailVerified: true,
+      loginMethod: "email",
       otpCode: null,
       otpExpiry: null,
       otpPurpose: null,
@@ -5799,7 +5837,11 @@ var appRouter = router({
     // Categories
     categories: router({
       list: adminProcedure2.query(() => getAllCategories()),
-      create: adminProcedure2.input(z3.object({ name: z3.string(), slug: z3.string(), description: z3.string().optional(), parentId: z3.number().optional() })).mutation(({ input }) => createCategory(input)),
+      create: adminProcedure2.input(z3.object({ name: z3.string(), slug: z3.string(), description: z3.string().optional(), parentId: z3.number().optional() })).mutation(async ({ input }) => {
+        const r = await createCategory(input);
+        invalidateCache("categories");
+        return r;
+      }),
       update: adminProcedure2.input(z3.object({
         id: z3.number(),
         name: z3.string().optional(),
@@ -5809,8 +5851,16 @@ var appRouter = router({
         parentId: z3.number().nullable().optional(),
         isVisible: z3.boolean().optional(),
         sortOrder: z3.number().optional()
-      })).mutation(({ input }) => updateCategory(input)),
-      delete: adminProcedure2.input(z3.object({ id: z3.number() })).mutation(({ input }) => deleteCategory(input.id))
+      })).mutation(async ({ input }) => {
+        const r = await updateCategory(input);
+        invalidateCache("categories");
+        return r;
+      }),
+      delete: adminProcedure2.input(z3.object({ id: z3.number() })).mutation(async ({ input }) => {
+        const r = await deleteCategory(input.id);
+        invalidateCache("categories");
+        return r;
+      })
     }),
     // Supplier Refund Claims
     supplierRefunds: router({

@@ -95,6 +95,26 @@ export function resetDbPool() {
   _db = null;
 }
 
+// ─── In-memory cache (reduces DB load on shared hosting) ─────────────────────
+interface CacheEntry<T> { data: T; expiresAt: number; }
+const _cache = new Map<string, CacheEntry<any>>();
+function cacheGet<T>(key: string): T | null {
+  const entry = _cache.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) { _cache.delete(key); return null; }
+  return entry.data as T;
+}
+function cacheSet<T>(key: string, data: T, ttlMs: number): void {
+  _cache.set(key, { data, expiresAt: Date.now() + ttlMs });
+}
+export function invalidateCache(prefix?: string): void {
+  if (!prefix) { _cache.clear(); return; }
+  for (const key of _cache.keys()) { if (key.startsWith(prefix)) _cache.delete(key); }
+}
+const CACHE_TTL_CATEGORIES = 5 * 60 * 1000;  // 5 minutes
+const CACHE_TTL_PRODUCTS   = 2 * 60 * 1000;  // 2 minutes
+
+
 // ─── Users ────────────────────────────────────────────────────────────────────
 
 
@@ -175,12 +195,16 @@ export async function updateUserProfile(userId: number, data: {
 // ─── Categories ───────────────────────────────────────────────────────────────
 
 export async function getCategories() {
+  const cached = cacheGet<any[]>("categories:visible");
+  if (cached) return cached;
   const db = await getDb();
   if (!db) return [];
-  return withDbRetry(
+  const result = await withDbRetry(
     () => db!.select().from(categories).where(eq(categories.isVisible, true)).orderBy(categories.sortOrder, categories.name),
     "getCategories"
   );
+  cacheSet("categories:visible", result, CACHE_TTL_CATEGORIES);
+  return result;
 }
 
 /** Admin-only: returns ALL categories including hidden ones */
@@ -194,6 +218,8 @@ export async function getAllCategories() {
 }
 
 export async function getCategoriesWithCounts() {
+  const cached = cacheGet<any[]>("categories:withCounts");
+  if (cached) return cached;
   const db = await getDb();
   if (!db) return [];
   const cats = await withDbRetry(
@@ -208,11 +234,13 @@ export async function getCategoriesWithCounts() {
   for (const row of counts) {
     if (row.categoryId != null) countMap.set(row.categoryId, Number(row.count));
   }
-  return cats.map(cat => {
+  const result = cats.map(cat => {
     const directCount = countMap.get(cat.id) ?? 0;
     const childCount = cats.filter(c => c.parentId === cat.id).reduce((sum, c) => sum + (countMap.get(c.id) ?? 0), 0);
     return { ...cat, productCount: directCount + childCount };
   });
+  cacheSet("categories:withCounts", result, CACHE_TTL_CATEGORIES);
+  return result;
 }
 export async function getSubcategoriesByParentId(parentId: number) {
   const db = await getDb();

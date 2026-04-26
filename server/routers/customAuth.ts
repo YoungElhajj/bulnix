@@ -209,8 +209,11 @@ export const customAuthRouter = router({
       const email = input.email.toLowerCase().trim();
       const user = await findUserByEmail(email);
 
-      if (!user || !user.passwordHash) {
+      if (!user) {
         throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
+      }
+      if (!user.passwordHash) {
+        throw new TRPCError({ code: "FORBIDDEN", message: 'No password set for this account. Please use "Forgot Password" to set one.' });
       }
 
       if (!user.emailVerified) {
@@ -308,7 +311,7 @@ export const customAuthRouter = router({
       const email = input.email.toLowerCase().trim();
       const user = await findUserByEmail(email);
 
-      if (!user || !user.emailVerified) return { success: true };
+      if (!user) return { success: true };
 
       const otp = generateOtp();
       await db.update(users).set({
@@ -353,6 +356,8 @@ export const customAuthRouter = router({
       const passwordHash = await bcrypt.hash(input.newPassword, 12);
       await db.update(users).set({
         passwordHash,
+        emailVerified: true,
+        loginMethod: "email",
         otpCode: null,
         otpExpiry: null,
         otpPurpose: null,
