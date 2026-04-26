@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mail, MessageSquare, Clock, Send, Loader2, Phone } from "lucide-react";
+import { Mail, MessageSquare, Clock, Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,7 +23,8 @@ const WhatsAppIcon = () => (
 export default function Contact() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
-  const [chatOpen, setChatOpen] = useState(false);
+  // chatOpen: null = closed, "whatsapp" = open with WhatsApp channel, "telegram" = open with Telegram channel, "chat" = generic live chat
+  const [chatOpen, setChatOpen] = useState<null | "whatsapp" | "telegram" | "chat">(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,15 +34,6 @@ export default function Contact() {
     toast.success("Message sent! We'll respond within 2-4 hours.");
     setForm({ name: "", email: "", subject: "", message: "" });
     setLoading(false);
-  };
-
-  const openWhatsApp = () => {
-    const msg = encodeURIComponent("Hi Bulnix Support! I need help with: ");
-    window.open(`https://wa.me/447367061279?text=${msg}`, "_blank");
-  };
-
-  const openTelegram = () => {
-    window.open("https://t.me/Bulnixlimited", "_blank");
   };
 
   return (
@@ -74,8 +66,11 @@ export default function Contact() {
               </div>
             </a>
 
-            {/* WhatsApp — opens with pre-filled message */}
-            <button onClick={openWhatsApp} className="w-full text-left bg-white border border-[#D8E8F5] shadow-sm rounded-xl p-5 flex items-start gap-4 hover:border-[#25D366]/50 hover:shadow-md transition-all cursor-pointer group">
+            {/* WhatsApp — opens triage chatbot, routes to WhatsApp at end */}
+            <button
+              onClick={() => setChatOpen("whatsapp")}
+              className="w-full text-left bg-white border border-[#D8E8F5] shadow-sm rounded-xl p-5 flex items-start gap-4 hover:border-[#25D366]/50 hover:shadow-md transition-all cursor-pointer group"
+            >
               <div className="w-10 h-10 rounded-lg bg-[#F0FFF4] flex items-center justify-center flex-shrink-0 group-hover:bg-[#dcfce7] transition-colors">
                 <WhatsAppIcon />
               </div>
@@ -84,26 +79,27 @@ export default function Contact() {
                   WhatsApp Support
                   <span className="text-[10px] bg-[#25D366]/10 text-[#25D366] font-semibold px-1.5 py-0.5 rounded-full">Fastest</span>
                 </div>
-                <div className="text-[#25D366] text-sm mt-0.5">+44 7367 061279</div>
-                <div className="text-[#4A6080] text-xs mt-0.5">Chat with us on WhatsApp</div>
+                <div className="text-[#4A6080] text-xs mt-0.5">Answer a few quick questions, then chat on WhatsApp</div>
               </div>
             </button>
 
-            {/* Telegram — opens triage chatbot */}
-            <button onClick={openTelegram} className="w-full text-left bg-white border border-[#D8E8F5] shadow-sm rounded-xl p-5 flex items-start gap-4 hover:border-[#229ED9]/40 hover:shadow-md transition-all cursor-pointer group">
+            {/* Telegram — opens triage chatbot, routes to Telegram at end */}
+            <button
+              onClick={() => setChatOpen("telegram")}
+              className="w-full text-left bg-white border border-[#D8E8F5] shadow-sm rounded-xl p-5 flex items-start gap-4 hover:border-[#229ED9]/40 hover:shadow-md transition-all cursor-pointer group"
+            >
               <div className="w-10 h-10 rounded-lg bg-[#EFF8FF] flex items-center justify-center flex-shrink-0 group-hover:bg-[#dbeafe] transition-colors">
                 <TelegramIcon />
               </div>
               <div>
                 <div className="font-semibold text-[#0D2137] text-sm">Telegram Support</div>
-                <div className="text-[#229ED9] text-sm mt-0.5">@Bulnixlimited</div>
-                <div className="text-[#4A6080] text-xs mt-0.5">Message us directly on Telegram</div>
+                <div className="text-[#4A6080] text-xs mt-0.5">Answer a few quick questions, then chat on Telegram</div>
               </div>
             </button>
 
-            {/* Live Chat — opens floating widget */}
+            {/* Live Chat — opens floating widget (generic, shows channel choice at end) */}
             <button
-              onClick={() => setChatOpen(true)}
+              onClick={() => setChatOpen("chat")}
               className="w-full text-left bg-white border border-[#D8E8F5] shadow-sm rounded-xl p-5 flex items-start gap-4 hover:border-[#0050D0]/40 hover:shadow-md transition-all cursor-pointer group"
             >
               <div className="w-10 h-10 rounded-lg bg-[#EEF4FF] flex items-center justify-center flex-shrink-0 group-hover:bg-[#dbeafe] transition-colors">
@@ -169,18 +165,18 @@ export default function Contact() {
         <div className="max-w-5xl mx-auto mt-8 bg-gradient-to-r from-[#0050D0] to-[#0F3D5E] rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-white text-center sm:text-left">
             <div className="font-bold text-lg">Need instant help?</div>
-            <div className="text-white/70 text-sm mt-1">Our team is online. Chat with us right now on WhatsApp or Telegram.</div>
+            <div className="text-white/70 text-sm mt-1">Our team is online. Start a quick chat and we'll connect you right away.</div>
           </div>
           <div className="flex gap-3 flex-shrink-0">
             <button
-              onClick={openWhatsApp}
+              onClick={() => setChatOpen("whatsapp")}
               className="flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm"
             >
               <WhatsAppIcon />
               WhatsApp
             </button>
             <button
-              onClick={openTelegram}
+              onClick={() => setChatOpen("telegram")}
               className="flex items-center gap-2 bg-[#229ED9] hover:bg-[#1a8fc4] text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm"
             >
               <TelegramIcon />
@@ -191,8 +187,12 @@ export default function Contact() {
       </div>
 
       <Footer/>
-      {/* Pass chatOpen state to floating widget so clicking Live Chat opens it */}
-      <SocialFloatingWidgets forceOpen={chatOpen} onClose={() => setChatOpen(false)} />
+      {/* Triage chatbot — preferredChannel controls which platform to use at the end */}
+      <SocialFloatingWidgets
+        forceOpen={chatOpen !== null}
+        preferredChannel={chatOpen === "whatsapp" ? "whatsapp" : chatOpen === "telegram" ? "telegram" : undefined}
+        onClose={() => setChatOpen(null)}
+      />
     </div>
   );
 }

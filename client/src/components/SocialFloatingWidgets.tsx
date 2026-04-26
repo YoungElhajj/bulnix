@@ -478,16 +478,26 @@ type Panel = "menu" | "chat";
 interface SocialFloatingWidgetsProps {
   forceOpen?: boolean;
   onClose?: () => void;
+  /** When set, skips the channel-choice step at end of triage and routes directly to this platform */
+  preferredChannel?: "whatsapp" | "telegram";
 }
 
-export default function SocialFloatingWidgets({ forceOpen, onClose }: SocialFloatingWidgetsProps = {}) {
+export default function SocialFloatingWidgets({ forceOpen, onClose, preferredChannel }: SocialFloatingWidgetsProps = {}) {
   const [panel, setPanel] = useState<Panel | null>(forceOpen ? "chat" : null);
 
-  // Sync forceOpen prop
+  // Sync forceOpen prop — also reset chat so preferredChannel takes effect on each open
   useEffect(() => {
-    if (forceOpen) setPanel("chat");
+    if (forceOpen) {
+      setMessages([]);
+      setCurrentStep(TRIAGE_FLOW.start);
+      setStepHistory([]);
+      setPanel("chat");
+    }
   }, [forceOpen]);
-  const [telegramMode, setTelegramMode] = useState(false);
+  // Derive telegramMode from preferredChannel when set, otherwise use internal state
+  const [telegramModeInternal, setTelegramModeInternal] = useState(false);
+  const telegramMode = preferredChannel === "telegram" ? true : preferredChannel === "whatsapp" ? false : telegramModeInternal;
+  const setTelegramMode = (v: boolean) => { if (!preferredChannel) setTelegramModeInternal(v); };
   const [messages, setMessages] = useState<Msg[]>([]);
   const [currentStep, setCurrentStep] = useState<TriageStep>(TRIAGE_FLOW.start);
   const [stepHistory, setStepHistory] = useState<string[]>([]);
@@ -519,7 +529,7 @@ export default function SocialFloatingWidgets({ forceOpen, onClose }: SocialFloa
     if (next.startsWith("whatsapp:")) {
       const issue = next.replace("whatsapp:", "");
       if (telegramMode) {
-        // In Telegram mode, build a rich pre-filled Telegram message from all triage answers
+        // Telegram preferred — route directly to Telegram with pre-filled message
         const tgMsg = buildSupportMessage(user, issue, newHistory);
         setTimeout(() => {
           setMessages(prev => [...prev, mkMsg("bot",
@@ -535,7 +545,26 @@ export default function SocialFloatingWidgets({ forceOpen, onClose }: SocialFloa
         }, 400);
         return;
       }
-      // Show channel choice step instead of immediately redirecting
+      if (preferredChannel === "whatsapp") {
+        // WhatsApp preferred — route directly to WhatsApp with pre-filled message
+        const msg = encodeURIComponent(
+          `Hi Bulnix Support! 👋\n\nI need help with: *${issue}*\n\nMy answers:\n${newHistory.map((s, i) => `${i + 1}. ${s}`).join("\n")}\n\nPlease assist me. Thank you!`
+        );
+        setTimeout(() => {
+          setMessages(prev => [...prev, mkMsg("bot",
+            "Connecting you to our WhatsApp support team now. They already have your issue summary. 👇\n\nYou will also receive a confirmation email if you are signed in."
+          )]);
+          setCurrentStep({ id: "__done__", bot: "", options: [] });
+          if (user?.email) {
+            submitTriage.mutate({ email: user.email, name: user.name || undefined, issueSummary: issue, steps: newHistory });
+          }
+          setTimeout(() => {
+            window.open(`${WHATSAPP_BASE}?text=${msg}`, "_blank", "noopener,noreferrer");
+          }, 800);
+        }, 400);
+        return;
+      }
+      // No preferred channel — show channel choice step
       setTimeout(() => {
         setMessages(prev => [...prev, mkMsg("bot",
           "Great, I have all the details I need. How would you like to contact our support team?"

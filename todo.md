@@ -736,3 +736,13 @@
 - [ ] Add Telegram live chat button with pre-filled lead message on Contact page
 - [ ] Make Support floating button more visible / prominent
 - [ ] Add live chat triage flow (collect issue type before redirecting to WhatsApp/Telegram)
+
+## Contact Page & Triage Chatbot Fixes (Apr 26, 2026)
+- [x] Contact page: Remove WhatsApp phone number display (anti-spam)
+- [x] Contact page: Both Telegram and WhatsApp cards now open triage chatbot (not go directly to app)
+- [x] Contact page: Quick action banner buttons also open triage chatbot
+- [x] Triage chatbot: Added preferredChannel prop (whatsapp | telegram) to SocialFloatingWidgets
+- [x] Triage chatbot: When preferredChannel=whatsapp, routes directly to WhatsApp at end of flow
+- [x] Triage chatbot: When preferredChannel=telegram, routes directly to Telegram at end of flow
+- [x] Triage chatbot: When no preferredChannel, shows channel choice step as before
+- [x] Automated sync: Confirmed already running every 15 min (stock) and every 1 hour (full) via built-in scheduler
