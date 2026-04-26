@@ -728,3 +728,11 @@
 - [ ] Create .env.example for Namecheap deployment
 - [ ] Push all changes to GitHub
 - [ ] Guide user through cPanel MySQL + Node.js App setup
+
+## Category & Live Chat Fixes (Apr 26, 2026)
+- [ ] Fix TikTok products showing inside Snapchat category (mixed up)
+- [ ] Fix dating site products (bez-kompleksov, Topface, LovePlanet) in wrong category
+- [ ] Add WhatsApp live chat button with pre-filled lead message on Contact page
+- [ ] Add Telegram live chat button with pre-filled lead message on Contact page
+- [ ] Make Support floating button more visible / prominent
+- [ ] Add live chat triage flow (collect issue type before redirecting to WhatsApp/Telegram)

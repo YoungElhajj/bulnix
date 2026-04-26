@@ -475,8 +475,18 @@ function buildSupportMessage(
 // ── Component ─────────────────────────────────────────────────────────────────
 type Panel = "menu" | "chat";
 
-export default function SocialFloatingWidgets() {
-  const [panel, setPanel] = useState<Panel | null>(null);
+interface SocialFloatingWidgetsProps {
+  forceOpen?: boolean;
+  onClose?: () => void;
+}
+
+export default function SocialFloatingWidgets({ forceOpen, onClose }: SocialFloatingWidgetsProps = {}) {
+  const [panel, setPanel] = useState<Panel | null>(forceOpen ? "chat" : null);
+
+  // Sync forceOpen prop
+  useEffect(() => {
+    if (forceOpen) setPanel("chat");
+  }, [forceOpen]);
   const [telegramMode, setTelegramMode] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [currentStep, setCurrentStep] = useState<TriageStep>(TRIAGE_FLOW.start);
@@ -623,7 +633,7 @@ export default function SocialFloatingWidgets() {
     setStepHistory([]);
   };
 
-  const close = () => { setPanel(null); };
+  const close = () => { setPanel(null); onClose?.(); };
   const toggle = () => { if (panel !== null) setTelegramMode(false); setPanel(p => p === null ? "menu" : null); };
 
   return (
@@ -753,23 +763,31 @@ export default function SocialFloatingWidgets() {
 
       {/* ── MAIN TOGGLE BUTTON with label ── */}
       <div className="flex items-center gap-2">
-        <span className={`text-xs font-semibold px-3 py-1.5 rounded-full shadow-md whitespace-nowrap transition-all ${
-          isOpen ? "bg-[#334155] text-white" : "bg-white border border-gray-200 text-gray-700"
-        }`}>
-          {isOpen ? "Close" : "Support"}
-        </span>
+        {!isOpen && (
+          <span className="text-xs font-bold px-3 py-1.5 rounded-full shadow-lg whitespace-nowrap bg-white border border-[#00C2FF]/30 text-[#0050D0] animate-bounce">
+            💬 Need Help?
+          </span>
+        )}
+        {isOpen && (
+          <span className="text-xs font-semibold px-3 py-1.5 rounded-full shadow-md whitespace-nowrap bg-[#334155] text-white">
+            Close
+          </span>
+        )}
         <button
           onClick={toggle}
-          className="w-14 h-14 rounded-full flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00C2FF] flex-shrink-0"
+          className="relative w-16 h-16 rounded-full flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00C2FF] flex-shrink-0"
           style={{
-            background: isOpen ? "#334155" : "#00C2FF",
-            boxShadow: "0 0 24px rgba(0,185,233,0.4)",
+            background: isOpen ? "#334155" : "linear-gradient(135deg, #00C2FF 0%, #0050D0 100%)",
+            boxShadow: isOpen ? "0 4px 16px rgba(0,0,0,0.3)" : "0 0 0 0 rgba(0,194,255,0.4)",
           }}
           aria-label={isOpen ? "Close support menu" : "Open support menu"}
         >
+          {!isOpen && (
+            <span className="absolute inset-0 rounded-full animate-ping bg-[#00C2FF] opacity-30"></span>
+          )}
           {isOpen
-            ? <X className="w-6 h-6 text-white" />
-            : <MessageCircle className="w-6 h-6 text-white" />
+            ? <X className="w-7 h-7 text-white" />
+            : <MessageCircle className="w-7 h-7 text-white" />
           }
         </button>
       </div>
