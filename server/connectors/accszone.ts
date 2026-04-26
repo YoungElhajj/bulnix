@@ -246,7 +246,14 @@ export async function syncProducts(apiKey: string, markupPercent = 20): Promise<
           netflix:   "buy-netflix-accounts",
           reddit:    "buy-reddit-accounts",
         };
-        const titleLower = prodName.toLowerCase();
+        // Normalise title: expand common abbreviations so keyword matching works
+        const titleNormalised = prodName
+          .replace(/\bIG Accounts?\b/gi, 'Instagram Accounts')
+          .replace(/\bIG\b/g, 'Instagram')
+          .replace(/\bX\/Twitter\b/gi, 'Twitter')
+          .replace(/\bX OLD\b/gi, 'Twitter OLD')
+          .replace(/\bX Account/gi, 'Twitter Account');
+        const titleLower = titleNormalised.toLowerCase();
         for (const [platform, targetSlug] of Object.entries(PLATFORM_SLUG_MAP)) {
           if (titleLower.includes(platform)) {
             // Check if current category is already in the right platform tree

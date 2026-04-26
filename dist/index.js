@@ -1494,7 +1494,8 @@ async function syncProducts(apiKey, markupPercent = 20) {
           netflix: "buy-netflix-accounts",
           reddit: "buy-reddit-accounts"
         };
-        const titleLower = prodName.toLowerCase();
+        const titleNormalised = prodName.replace(/\bIG Accounts?\b/gi, "Instagram Accounts").replace(/\bIG\b/g, "Instagram").replace(/\bX\/Twitter\b/gi, "Twitter").replace(/\bX OLD\b/gi, "Twitter OLD").replace(/\bX Account/gi, "Twitter Account");
+        const titleLower = titleNormalised.toLowerCase();
         for (const [platform, targetSlug] of Object.entries(PLATFORM_SLUG_MAP)) {
           if (titleLower.includes(platform)) {
             const resolvedCatRow = categoryId ? await db.select().from(categories).where(eq(categories.id, categoryId)).limit(1) : [];
