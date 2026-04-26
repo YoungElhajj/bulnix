@@ -1320,7 +1320,7 @@ var init_email = __esm({
   "server/email.ts"() {
     "use strict";
     _resend = null;
-    FROM_EMAIL = process.env.EMAIL_FROM ?? "noreply@bulnix.com";
+    FROM_EMAIL = process.env.EMAIL_FROM ?? "noreply@support.bulnix.com";
     REPLY_TO = process.env.EMAIL_REPLY_TO ?? "support@bulnix.com";
     FROM_NAME = process.env.EMAIL_FROM_NAME ?? "Bulnix";
     FROM = `${FROM_NAME} <${FROM_EMAIL}>`;

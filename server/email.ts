@@ -11,7 +11,7 @@ function getResend(): Resend | null {
   if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY);
   return _resend;
 }
-const FROM_EMAIL = process.env.EMAIL_FROM ?? "noreply@bulnix.com";
+const FROM_EMAIL = process.env.EMAIL_FROM ?? "noreply@support.bulnix.com";
 const REPLY_TO = process.env.EMAIL_REPLY_TO ?? "support@bulnix.com";
 const FROM_NAME = process.env.EMAIL_FROM_NAME ?? "Bulnix";
 const FROM = `${FROM_NAME} <${FROM_EMAIL}>`;
