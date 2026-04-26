@@ -2602,7 +2602,7 @@ function invalidateCache(prefix) {
     _cache.clear();
     return;
   }
-  for (const key of _cache.keys()) {
+  for (const key of Array.from(_cache.keys())) {
     if (key.startsWith(prefix)) _cache.delete(key);
   }
 }

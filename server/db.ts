@@ -109,7 +109,7 @@ function cacheSet<T>(key: string, data: T, ttlMs: number): void {
 }
 export function invalidateCache(prefix?: string): void {
   if (!prefix) { _cache.clear(); return; }
-  for (const key of _cache.keys()) { if (key.startsWith(prefix)) _cache.delete(key); }
+  for (const key of Array.from(_cache.keys())) { if (key.startsWith(prefix)) _cache.delete(key); }
 }
 const CACHE_TTL_CATEGORIES = 5 * 60 * 1000;  // 5 minutes
 const CACHE_TTL_PRODUCTS   = 2 * 60 * 1000;  // 2 minutes
