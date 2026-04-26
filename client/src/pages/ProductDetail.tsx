@@ -768,12 +768,12 @@ export default function ProductDetail() {
     toast.success(`${qty}x ${p.title} added to cart`);
   };
 
-  const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
-    { id: "description", label: "Description", icon: Info },
-    { id: "how-to-login", label: "How to Login", icon: LogIn },
-    { id: "delivery", label: "Delivery Info", icon: Truck },
-    { id: "refund", label: "Refund Policy", icon: RefreshCw },
-  ];
+  const tabs: { id: Tab; label: string; shortLabel: string; icon: React.ElementType }[] = [
+    { id: "description", label: "Description", shortLabel: "Details", icon: Info },
+    { id: "how-to-login", label: "How to Login", shortLabel: "Login", icon: LogIn },
+    { id: "delivery", label: "Delivery Info", shortLabel: "Delivery", icon: Truck },
+    { id: "refund", label: "Refund Policy", shortLabel: "Refund", icon: RefreshCw },
+  ] as { id: Tab; label: string; shortLabel: string; icon: React.ElementType }[];
 
   // JSON-LD structured data for this product
   const productJsonLd = {
@@ -1000,7 +1000,8 @@ export default function ProductDetail() {
                 }`}
               >
                 <tab.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-                <span className="truncate max-w-[60px] sm:max-w-none">{tab.label}</span>
+                <span className="sm:hidden">{tab.shortLabel}</span>
+                <span className="hidden sm:inline">{tab.label}</span>
               </button>
             ))}
           </div>

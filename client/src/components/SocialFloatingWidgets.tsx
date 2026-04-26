@@ -11,7 +11,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 const WHATSAPP_BASE = "https://wa.me/447367061279";
-const TELEGRAM_URL = "https://t.me/bulnixupdates";  // Channel for updates
+const TELEGRAM_URL = "https://t.me/Bulnixlimited";  // Channel for updates
 const TELEGRAM_SUPPORT_URL = "https://t.me/Bulnixlimited";  // Support DM
 
 // ── Triage flow definition ────────────────────────────────────────────────────
@@ -386,9 +386,9 @@ const TRIAGE_FLOW: Record<string, TriageStep> = {
   },
   telegram_redirect: {
     id: "telegram_redirect",
-    bot: "Join our Telegram channel @bulnixupdates for exclusive deals, discount codes, and order updates! Click the button below to join.",
+    bot: "Join our Telegram channel @Bulnixlimited for exclusive deals, discount codes, and order updates! Click the button below to join.",
     options: [
-      { label: "📢 Join @bulnixupdates Channel", next: "telegram_channel" },
+      { label: "📢 Join @Bulnixlimited Channel", next: "telegram_channel" },
       { label: "I need a code urgently", next: "whatsapp:Requesting discount code — urgent" },
     ],
   },
