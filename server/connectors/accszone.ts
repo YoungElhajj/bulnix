@@ -225,6 +225,54 @@ export async function syncProducts(apiKey: string, markupPercent = 20): Promise<
             categoryId = parentCategoryId;
           }
         }
+        // ── Title-based category override ──────────────────────────────────────
+        // AccsZone sometimes places products in generic buckets (e.g. "Aged")
+        // even when the title clearly names a specific platform. We detect the
+        // platform from the title and override the category if the resolved one
+        // doesn't already belong to that platform's tree.
+        const PLATFORM_SLUG_MAP: Record<string, string> = {
+          instagram: "buy-instagram-accounts",
+          facebook:  "buy-facebook-accounts",
+          tiktok:    "buy-tiktok-accounts",
+          twitter:   "buy-twitter-x-accounts",
+          youtube:   "buy-youtube-accounts",
+          linkedin:  "buy-linkedin-accounts",
+          snapchat:  "buy-snapchat-accounts",
+          telegram:  "buy-telegram-accounts",
+          discord:   "buy-discord-accounts",
+          gmail:     "buy-gmail-accounts",
+          spotify:   "buy-spotify-accounts",
+          netflix:   "buy-netflix-accounts",
+          reddit:    "buy-reddit-accounts",
+        };
+        const titleLower = prodName.toLowerCase();
+        for (const [platform, targetSlug] of Object.entries(PLATFORM_SLUG_MAP)) {
+          if (titleLower.includes(platform)) {
+            // Check if current category is already in the right platform tree
+            const resolvedCatRow = categoryId
+              ? await db.select().from(categories).where(eq(categories.id, categoryId)).limit(1)
+              : [];
+            const resolvedSlug = resolvedCatRow[0]?.slug ?? "";
+            const resolvedParentId = resolvedCatRow[0]?.parentId ?? null;
+            // Get the target platform category
+            const targetRow = await db.select().from(categories).where(eq(categories.slug, targetSlug)).limit(1);
+            const targetId = targetRow[0]?.id ?? null;
+            if (targetId) {
+              // Only override if current category is NOT already under the target platform
+              const alreadyCorrect =
+                resolvedSlug === targetSlug ||
+                resolvedParentId === targetId ||
+                (resolvedCatRow[0]?.slug ?? "").includes(platform);
+              if (!alreadyCorrect) {
+                categoryId = targetId;
+                categoryImageUrl = targetRow[0]?.imageUrl ?? categoryImageUrl;
+              }
+            }
+            break; // Only apply the first matching platform
+          }
+        }
+        // ── End title-based override ───────────────────────────────────────────
+
         // Use product's own image, or fall back to category icon
         const resolvedImageUrl = prod.image ?? categoryImageUrl;
 

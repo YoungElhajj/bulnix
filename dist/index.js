@@ -1478,6 +1478,39 @@ async function syncProducts(apiKey, markupPercent = 20) {
             categoryId = parentCategoryId;
           }
         }
+        const PLATFORM_SLUG_MAP = {
+          instagram: "buy-instagram-accounts",
+          facebook: "buy-facebook-accounts",
+          tiktok: "buy-tiktok-accounts",
+          twitter: "buy-twitter-x-accounts",
+          youtube: "buy-youtube-accounts",
+          linkedin: "buy-linkedin-accounts",
+          snapchat: "buy-snapchat-accounts",
+          telegram: "buy-telegram-accounts",
+          discord: "buy-discord-accounts",
+          gmail: "buy-gmail-accounts",
+          spotify: "buy-spotify-accounts",
+          netflix: "buy-netflix-accounts",
+          reddit: "buy-reddit-accounts"
+        };
+        const titleLower = prodName.toLowerCase();
+        for (const [platform, targetSlug] of Object.entries(PLATFORM_SLUG_MAP)) {
+          if (titleLower.includes(platform)) {
+            const resolvedCatRow = categoryId ? await db.select().from(categories).where(eq(categories.id, categoryId)).limit(1) : [];
+            const resolvedSlug = resolvedCatRow[0]?.slug ?? "";
+            const resolvedParentId = resolvedCatRow[0]?.parentId ?? null;
+            const targetRow = await db.select().from(categories).where(eq(categories.slug, targetSlug)).limit(1);
+            const targetId = targetRow[0]?.id ?? null;
+            if (targetId) {
+              const alreadyCorrect = resolvedSlug === targetSlug || resolvedParentId === targetId || (resolvedCatRow[0]?.slug ?? "").includes(platform);
+              if (!alreadyCorrect) {
+                categoryId = targetId;
+                categoryImageUrl = targetRow[0]?.imageUrl ?? categoryImageUrl;
+              }
+            }
+            break;
+          }
+        }
         const resolvedImageUrl = prod.image ?? categoryImageUrl;
         if (existingProduct[0]) {
           const updateData = {
