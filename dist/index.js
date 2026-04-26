@@ -1488,6 +1488,7 @@ async function syncProducts(apiKey, markupPercent = 20) {
           snapchat: "buy-snapchat-accounts",
           telegram: "buy-telegram-accounts",
           discord: "buy-discord-accounts",
+          whatsapp: "buy-whatsapp-accounts",
           gmail: "buy-gmail-accounts",
           spotify: "buy-spotify-accounts",
           netflix: "buy-netflix-accounts",

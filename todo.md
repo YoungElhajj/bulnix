@@ -746,3 +746,19 @@
 - [x] Triage chatbot: When preferredChannel=telegram, routes directly to Telegram at end of flow
 - [x] Triage chatbot: When no preferredChannel, shows channel choice step as before
 - [x] Automated sync: Confirmed already running every 15 min (stock) and every 1 hour (full) via built-in scheduler
+
+## Category Fixes & Google OAuth (Apr 26, 2026)
+- [x] Fix Snapchat products (id 10, 990003) misplaced in generic "Account" category → moved to Snapchat Accounts
+- [x] Fix Discord products (11 products) misplaced in generic "Account" category → moved to Discord Accounts
+- [x] Fix WhatsApp products (ids 180, 437) in generic "Accounts" → moved to WhatsApp Accounts
+- [x] Fix Telegram aged products (4 products) in "Aged" subcategory → moved to Telegram Accounts
+- [x] Fix LinkedIn products (48 products) in subcategories → moved to LinkedIn Accounts
+- [x] Fix Reddit products (29 products) in subcategories → moved to Reddit Accounts
+- [x] Fix YouTube Accounts (23 products) in subcategories → moved to YouTube Accounts
+- [x] Fix Dating site products (22 products) in Discord generic category → moved to Dating App Accounts
+- [x] Total: 141 products correctly reassigned
+- [x] Add whatsapp to PLATFORM_SLUG_MAP in AccsZone connector to prevent future misassignments
+- [x] Google OAuth: backend fully implemented (server/googleAuth.ts), API keys confirmed set
+- [x] Google OAuth: frontend "Continue with Google" button on Login and Signup pages working
+- [x] Google OAuth: endpoint /api/auth/google correctly redirects to Google consent screen
+- [x] Google OAuth: callback URL hardcoded to https://bulnix.com/api/auth/google/callback (must be registered in Google Console)

@@ -240,6 +240,7 @@ export async function syncProducts(apiKey: string, markupPercent = 20): Promise<
           snapchat:  "buy-snapchat-accounts",
           telegram:  "buy-telegram-accounts",
           discord:   "buy-discord-accounts",
+          whatsapp:  "buy-whatsapp-accounts",
           gmail:     "buy-gmail-accounts",
           spotify:   "buy-spotify-accounts",
           netflix:   "buy-netflix-accounts",
