@@ -1,8 +1,11 @@
 import Navbar from "@/components/Navbar";
+import { SEO } from "@/components/SEO";
 import Footer from "@/components/Footer";
 export default function Refund() {
   return (
-    <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]"><Navbar/>
+    <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]">
+      <SEO title="Refund Policy | Bulnix" description="Read the Bulnix Refund Policy. Understand our warranty terms, replacement process, and how to request a refund for digital account purchases." canonical="https://bulnix.com/refund" />
+      <Navbar/>
       <div className="bg-[#0F3D5E] pt-24 pb-8"><div className="container"><h1 className="text-3xl font-bold text-white">Refund Policy</h1><p className="text-white/60 mt-1">Last updated: March 2026</p></div></div>
       <div className="container max-w-3xl mx-auto py-12">
         <div className="space-y-8 text-[#4A6080] leading-relaxed">

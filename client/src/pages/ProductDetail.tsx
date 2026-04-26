@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import DOMPurify from "dompurify";
 import Footer from "@/components/Footer";
 import { useState } from "react";
+import { SEO, breadcrumbSchema, productSchema } from "@/components/SEO";
 import { Link, useParams } from "wouter";
 import {
   Package, ShoppingCart, Shield, Zap, ChevronRight, Minus, Plus,
@@ -811,9 +812,30 @@ export default function ProductDetail() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* SEO: Dynamic JSON-LD structured data */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <SEO
+        title={`Buy ${p.title}`}
+        description={p.description ? p.description.replace(/<[^>]+>/g, "").slice(0, 155) : `Buy ${p.title} on Bulnix. Instant delivery, secure payment, and 24/7 support.`}
+        canonical={`https://bulnix.com/products/${p.slug}`}
+        image={p.imageUrl || undefined}
+        type="product"
+        jsonLd={[
+          productSchema({
+            name: p.title,
+            description: p.description ? p.description.replace(/<[^>]+>/g, "").slice(0, 500) : undefined,
+            image: p.imageUrl || undefined,
+            url: `https://bulnix.com/products/${p.slug}`,
+            priceUSD: Number(p.customerPriceUSD),
+            inStock: p.stockUnlimited || p.stockQuantity > 0,
+            category: p.category?.name,
+          }),
+          breadcrumbSchema([
+            { name: "Home", url: "https://bulnix.com" },
+            { name: "Products", url: "https://bulnix.com/products" },
+            ...(p.category?.name ? [{ name: p.category.name, url: `https://bulnix.com/categories/${p.category.slug ?? ""}` }] : []),
+            { name: p.title, url: `https://bulnix.com/products/${p.slug}` },
+          ]),
+        ]}
+      />
       {/* Breadcrumb Header */}
       <div className="bg-[#0F3D5E] pt-24 pb-6">
         <div className="container">

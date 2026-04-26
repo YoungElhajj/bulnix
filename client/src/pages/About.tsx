@@ -3,12 +3,20 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { SEO, organizationSchema } from "@/components/SEO";
 
 const LOGO_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663404004095/UEAuHoiEheGEUEnr.jpg";
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]"><Navbar/>
+    <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]">
+      <SEO
+        title="About Bulnix | Premium Digital Accounts Marketplace"
+        description="Learn about Bulnix — the trusted marketplace for premium digital accounts. We supply Instagram, Facebook, TikTok, Netflix, Spotify, gaming, VPN and 500+ digital products with instant delivery and 24/7 support."
+        canonical="https://bulnix.com/about"
+        jsonLd={[organizationSchema()]}
+      />
+      <Navbar/>
       <div className="bg-[#0F3D5E] pt-24 pb-16">
         <div className="container max-w-4xl mx-auto text-center">
           <img src={LOGO_URL} alt="Bulnix" className="h-16 w-auto mx-auto mb-8"/>

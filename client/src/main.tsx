@@ -7,6 +7,7 @@ import superjson from "superjson";
 import App from "./App";
 import "./index.css";
 import { CurrencyProvider } from "./contexts/CurrencyContext";
+import { HelmetProvider } from "react-helmet-async";
 
 const queryClient = new QueryClient();
 
@@ -55,9 +56,11 @@ const trpcClient = trpc.createClient({
 createRoot(document.getElementById("root")!).render(
   <trpc.Provider client={trpcClient} queryClient={queryClient}>
     <QueryClientProvider client={queryClient}>
-      <CurrencyProvider>
-        <App />
-      </CurrencyProvider>
+      <HelmetProvider>
+        <CurrencyProvider>
+          <App />
+        </CurrencyProvider>
+      </HelmetProvider>
     </QueryClientProvider>
   </trpc.Provider>
 );

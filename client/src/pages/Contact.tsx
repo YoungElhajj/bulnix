@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SocialFloatingWidgets from "@/components/SocialFloatingWidgets";
+import { SEO } from "@/components/SEO";
 
 const TelegramIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 text-[#229ED9]">
@@ -38,6 +39,11 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]">
+      <SEO
+        title="Contact Bulnix | 24/7 Support via Telegram & WhatsApp"
+        description="Get in touch with Bulnix support. We offer 24/7 customer support via Telegram and WhatsApp. Reach us for order issues, account questions, or general enquiries."
+        canonical="https://bulnix.com/contact"
+      />
       <Navbar/>
 
       {/* Hero */}

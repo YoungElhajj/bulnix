@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { SEO } from "@/components/SEO";
 
 const FAQS = [
   { cat: "Orders", q: "How fast is delivery?", a: "Most digital orders are fulfilled within seconds to minutes after payment confirmation. Some products may take up to 30 minutes during high demand." },
@@ -24,7 +25,13 @@ export default function FAQ() {
   const cats = Array.from(new Set(filtered.map(f => f.cat)));
 
   return (
-    <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]"><Navbar/>
+    <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]">
+      <SEO
+        title="FAQ | Bulnix Digital Accounts Marketplace"
+        description="Answers to common questions about Bulnix. Learn about delivery times, payment methods, account warranties, refund policy, and how to get support."
+        canonical="https://bulnix.com/faq"
+      />
+      <Navbar/>
       <div className="bg-[#0F3D5E] pt-24 pb-12">
         <div className="container max-w-3xl mx-auto text-center">
           <h1 className="text-4xl font-bold text-white mb-3">Frequently Asked Questions</h1>

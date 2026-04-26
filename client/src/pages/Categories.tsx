@@ -5,6 +5,7 @@ import { Link } from "wouter";
 import { Package, ChevronRight, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
+import { SEO, breadcrumbSchema } from "@/components/SEO";
 
 const FALLBACK_ICONS: Record<string, string> = {
   facebook: "📘", instagram: "📸", twitter: "🐦", tiktok: "🎵",
@@ -43,6 +44,13 @@ export default function Categories() {
 
   return (
     <div className="min-h-screen bg-[#F5F9FF]">
+      <SEO
+        title="All Categories | Buy Digital Accounts"
+        description="Browse all digital account categories on Bulnix. Instagram, Facebook, TikTok, Netflix, Spotify, gaming, VPN, Discord, LinkedIn, Reddit and 20+ more categories. Instant delivery."
+        canonical="https://bulnix.com/categories"
+        keywords="buy digital accounts categories, Instagram accounts, Facebook accounts, TikTok accounts, Netflix accounts, Spotify accounts, gaming accounts, VPN accounts, Discord accounts, LinkedIn accounts, Reddit accounts"
+        jsonLd={[breadcrumbSchema([{ name: "Home", url: "https://bulnix.com" }, { name: "Categories", url: "https://bulnix.com/categories" }])]}
+      />
       <Navbar/>
       {/* Header */}
       <div className="bg-[#0F3D5E] pt-24 pb-10">

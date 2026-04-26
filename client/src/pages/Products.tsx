@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useState } from "react";
 import { Link, useParams } from "wouter";
+import { SEO, breadcrumbSchema } from "@/components/SEO";
 import { Search, SlidersHorizontal, Package, ShoppingCart, X, ChevronRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,24 +100,35 @@ export default function Products() {
     toast.success(`${product.title} added to cart`);
   };
 
-  // JSON-LD structured data
   const cat = category as any;
-  const breadcrumbJsonLd = params.slug ? {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://bulnix.com" },
-      { "@type": "ListItem", "position": 2, "name": "Categories", "item": "https://bulnix.com/categories" },
-      { "@type": "ListItem", "position": 3, "name": cat?.name ?? params.slug, "item": `https://bulnix.com/categories/${params.slug}` }
-    ]
-  } : null;
+  const pageTitle = params.slug
+    ? `Buy ${cat?.name ?? params.slug}`
+    : "Browse All Digital Products";
+  const pageDesc = params.slug
+    ? `Shop ${cat?.name ?? params.slug} on Bulnix. Instant delivery, secure payments, and 500+ digital accounts available.`
+    : "Browse 500+ premium digital accounts on Bulnix. Instagram, Facebook, TikTok, Netflix, Spotify, gaming, VPN and more. Instant delivery, secure payments.";
+  const canonicalUrl = params.slug
+    ? `https://bulnix.com/categories/${params.slug}`
+    : "https://bulnix.com/products";
+  const breadcrumbItems = params.slug
+    ? [
+        { name: "Home", url: "https://bulnix.com" },
+        { name: "Categories", url: "https://bulnix.com/categories" },
+        { name: cat?.name ?? params.slug, url: `https://bulnix.com/categories/${params.slug}` },
+      ]
+    : [
+        { name: "Home", url: "https://bulnix.com" },
+        { name: "Products", url: "https://bulnix.com/products" },
+      ];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* SEO: JSON-LD structured data */}
-      {breadcrumbJsonLd && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      )}
+      <SEO
+        title={pageTitle}
+        description={pageDesc}
+        canonical={canonicalUrl}
+        jsonLd={[breadcrumbSchema(breadcrumbItems)]}
+      />
       <Navbar/>
 
       {/* Page Header */}
