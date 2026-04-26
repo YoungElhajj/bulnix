@@ -17,7 +17,7 @@
 import { Helmet } from "react-helmet-async";
 
 const SITE_NAME = "Bulnix";
-const DEFAULT_IMAGE = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663404004095/UEAuHoiEheGEUEnr.jpg";
+const DEFAULT_IMAGE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663404004095/6qKkSV9dybS3AerhXhrTfQ/bulnix-og-v2-cxLkL6kws9gdE3fkMFhFsU.png";
 const BASE_URL = "https://bulnix.com";
 
 interface SEOProps {
