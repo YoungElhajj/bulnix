@@ -1617,7 +1617,9 @@ async function placeSupplierOrder(apiKey, supplierProductId, quantity, orderId) 
   try {
     const response = await client.post("/purchase", {
       ad_id: Number(supplierProductId),
-      quantity
+      quantity,
+      promo_code: "SAVE5"
+      // 5% discount promo code from AccsZone
     });
     const responseData = response.data;
     const data = responseData?.data ?? responseData;
