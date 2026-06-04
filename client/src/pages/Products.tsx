@@ -262,7 +262,7 @@ export default function Products() {
                           {formatPriceGlobal(Number(product.customerPriceUSD))}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {product.stockUnlimited ? "∞ stock" : `${product.stockQuantity} left`}
+                          {product.stockUnlimited ? "∞ stock" : product.stockQuantity === 0 ? "Out of Stock" : `${product.stockQuantity} left`}
                         </span>
                       </div>
                       <Button

@@ -11,8 +11,8 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 const WHATSAPP_BASE = "https://wa.me/447367061279";
-const TELEGRAM_URL = "https://t.me/Bulnixlimited";  // Channel for updates
-const TELEGRAM_SUPPORT_URL = "https://t.me/Bulnixlimited";  // Support DM
+const TELEGRAM_URL = "https://t.me/bulnixupdates";  // Channel for updates
+const TELEGRAM_SUPPORT_URL = "https://t.me/bulnixupdates";  // Support DM
 
 // ── Triage flow definition ────────────────────────────────────────────────────
 type TriageStep = {
@@ -386,9 +386,9 @@ const TRIAGE_FLOW: Record<string, TriageStep> = {
   },
   telegram_redirect: {
     id: "telegram_redirect",
-    bot: "Join our Telegram channel @Bulnixlimited for exclusive deals, discount codes, and order updates! Click the button below to join.",
+    bot: "Join our Telegram channel @bulnixupdates for exclusive deals, discount codes, and order updates! Click the button below to join.",
     options: [
-      { label: "📢 Join @Bulnixlimited Channel", next: "telegram_channel" },
+      { label: "📢 Join @bulnixupdates Channel", next: "telegram_channel" },
       { label: "I need a code urgently", next: "whatsapp:Requesting discount code — urgent" },
     ],
   },
@@ -540,7 +540,7 @@ export default function SocialFloatingWidgets({ forceOpen, onClose, preferredCha
             submitTriage.mutate({ email: user.email, name: user.name || undefined, issueSummary: issue, steps: newHistory });
           }
           setTimeout(() => {
-            window.open(`https://t.me/Bulnixlimited?text=${tgMsg}`, "_blank", "noopener,noreferrer");
+            window.open(`https://t.me/bulnixupdates?text=${tgMsg}`, "_blank", "noopener,noreferrer");
           }, 800);
         }, 400);
         return;
@@ -619,7 +619,7 @@ export default function SocialFloatingWidgets({ forceOpen, onClose, preferredCha
           });
         }
         setTimeout(() => {
-          window.open(`https://t.me/Bulnixlimited?text=${tgMsg}`, "_blank", "noopener,noreferrer");
+          window.open(`https://t.me/bulnixupdates?text=${tgMsg}`, "_blank", "noopener,noreferrer");
         }, 800);
       }, 400);
       return;
@@ -642,7 +642,7 @@ export default function SocialFloatingWidgets({ forceOpen, onClose, preferredCha
           "Connecting you to our Telegram support now. They already have your issue summary. 👇"
         )]);
         setTimeout(() => {
-          window.open(`https://t.me/Bulnixlimited?text=${tgMsg}`, "_blank", "noopener,noreferrer");
+          window.open(`https://t.me/bulnixupdates?text=${tgMsg}`, "_blank", "noopener,noreferrer");
         }, 800);
       }, 400);
       return;

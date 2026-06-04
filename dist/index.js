@@ -896,8 +896,8 @@ function baseTemplate(title, body) {
     <div class="footer">
       <p style="margin-bottom:8px;">\xA9 ${(/* @__PURE__ */ new Date()).getFullYear()} Bulnix. All rights reserved.</p>
       <div class="social-row">
-        <a href="https://t.me/bulnix">Telegram</a>
-        <a href="https://wa.me/447916699429">WhatsApp</a>
+        <a href="https://t.me/bulnixupdates">Telegram</a>
+        <a href="https://wa.me/447988531474">WhatsApp</a>
         <a href="https://bulnix.com/privacy">Privacy</a>
         <a href="https://bulnix.com/terms">Terms</a>
       </div>
@@ -912,8 +912,8 @@ async function sendWelcomeEmail(opts) {
     <p>Your account is ready. You now have access to thousands of premium digital products \u2014 social media accounts, streaming services, gaming credits, VPNs, and more.</p>
     <a href="https://bulnix.com/categories" class="btn">Browse Products \u2192</a>
     <hr class="divider" />
-    <p style="font-size:13px;">Need help getting started? Our support team is available 24/7 via <a href="https://wa.me/447916699429" style="color:#00B9E9;">WhatsApp</a> or by opening a <a href="https://bulnix.com/support" style="color:#00B9E9;">support ticket</a>.</p>
-    <p style="font-size:13px;">Join our Telegram channel for exclusive deals and updates: <a href="https://t.me/bulnix" style="color:#00B9E9;">t.me/bulnix</a></p>`;
+    <p style="font-size:13px;">Need help getting started? Our support team is available 24/7 via <a href="https://wa.me/447988531474" style="color:#00B9E9;">WhatsApp</a> or by opening a <a href="https://bulnix.com/support" style="color:#00B9E9;">support ticket</a>.</p>
+    <p style="font-size:13px;">Join our Telegram channel for exclusive deals and updates: <a href="https://t.me/bulnixupdates" style="color:#00B9E9;">t.me/bulnixupdates</a></p>`;
   const client = getResend();
   if (!client) {
     console.warn("[email] RESEND_API_KEY not set \u2014 skipping welcome email");
@@ -955,7 +955,7 @@ async function sendOtpEmail(opts) {
     </div>
     <p style="font-size:13px;color:#94a3b8;">This code expires in <strong style="color:#e2e8f0;">10 minutes</strong>. If you didn't request this, you can safely ignore this email.</p>
     <hr class="divider" />
-    <p style="font-size:13px;">Need help? Contact us on <a href="https://wa.me/447916699429" style="color:#00B9E9;">WhatsApp</a> or open a <a href="https://bulnix.com/support" style="color:#00B9E9;">support ticket</a>.</p>`;
+    <p style="font-size:13px;">Need help? Contact us on <a href="https://wa.me/447988531474" style="color:#00B9E9;">WhatsApp</a> or open a <a href="https://bulnix.com/support" style="color:#00B9E9;">support ticket</a>.</p>`;
   const client = getResend();
   if (!client) {
     console.warn("[email] RESEND_API_KEY not set \u2014 skipping OTP email");
@@ -991,7 +991,7 @@ async function sendOrderConfirmationEmail(opts) {
     <hr class="divider" />
     <a href="https://bulnix.com/orders/${opts.orderId}" class="btn">View Order Details \u2192</a>
     <p style="font-size:13px;">Digital products are delivered automatically once payment is confirmed. Check your order page for delivery details.</p>
-    <p style="font-size:13px;">Questions? Contact us on <a href="https://wa.me/447916699429" style="color:#00B9E9;">WhatsApp</a> or open a <a href="https://bulnix.com/support" style="color:#00B9E9;">support ticket</a>.</p>`;
+    <p style="font-size:13px;">Questions? Contact us on <a href="https://wa.me/447988531474" style="color:#00B9E9;">WhatsApp</a> or open a <a href="https://bulnix.com/support" style="color:#00B9E9;">support ticket</a>.</p>`;
   const client = getResend();
   if (!client) {
     console.warn("[email] RESEND_API_KEY not set \u2014 skipping order confirmation email");
@@ -1031,7 +1031,7 @@ async function sendOrderStatusEmail(opts) {
     </div>
     ${opts.message ? `<p>${opts.message}</p>` : ""}
     <a href="https://bulnix.com/orders/${opts.orderId}" class="btn">View Order \u2192</a>
-    <p style="font-size:13px;">Need help? Contact us on <a href="https://wa.me/447916699429" style="color:#00B9E9;">WhatsApp</a> or open a <a href="https://bulnix.com/support" style="color:#00B9E9;">support ticket</a>.</p>`;
+    <p style="font-size:13px;">Need help? Contact us on <a href="https://wa.me/447988531474" style="color:#00B9E9;">WhatsApp</a> or open a <a href="https://bulnix.com/support" style="color:#00B9E9;">support ticket</a>.</p>`;
   const client = getResend();
   if (!client) {
     console.warn("[email] RESEND_API_KEY not set \u2014 skipping order status email");
@@ -1119,7 +1119,7 @@ async function sendDeliveryEmail(opts) {
     <hr class="divider" />
     <p style="font-size:13px;color:#94a3b8;">\u26A0\uFE0F <strong style="color:#e2e8f0;">Keep these credentials safe.</strong> Do not share them with anyone. If you have any issues accessing your account, please open a support ticket.</p>
     <a href="https://bulnix.com/orders/${opts.orderId}" class="btn">View Full Order \u2192</a>
-    <p style="font-size:13px;">Need help? Contact us on <a href="https://wa.me/447916699429" style="color:#00B9E9;">WhatsApp</a> or open a <a href="https://bulnix.com/tickets" style="color:#00B9E9;">support ticket</a>.</p>`;
+    <p style="font-size:13px;">Need help? Contact us on <a href="https://wa.me/447988531474" style="color:#00B9E9;">WhatsApp</a> or open a <a href="https://bulnix.com/tickets" style="color:#00B9E9;">support ticket</a>.</p>`;
   const client = getResend();
   if (!client) {
     console.warn("[email] RESEND_API_KEY not set \u2014 skipping delivery email");
@@ -1618,7 +1618,7 @@ async function placeSupplierOrder(apiKey, supplierProductId, quantity, orderId) 
     const response = await client.post("/purchase", {
       ad_id: Number(supplierProductId),
       quantity,
-      promo_code: "SAVE5"
+      promo_code: "young5"
       // 5% discount promo code from AccsZone
     });
     const responseData = response.data;

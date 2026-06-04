@@ -102,7 +102,7 @@ export function organizationSchema() {
     logo: "https://bulnix.com/logo192.png",
     description: "Bulnix is a premium digital accounts marketplace offering Instagram, Facebook, TikTok, Netflix, Spotify, gaming, VPN and 500+ more digital products with instant delivery.",
     sameAs: [
-      "https://t.me/Bulnixlimited",
+      "https://t.me/bulnixupdates",
     ],
     contactPoint: {
       "@type": "ContactPoint",

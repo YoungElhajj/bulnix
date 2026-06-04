@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 const STORAGE_KEY = "bulnix_telegram_popup_dismissed";
-const TELEGRAM_URL = "https://t.me/Bulnixlimited";
+const TELEGRAM_URL = "https://t.me/bulnixupdates";
 
 export default function TelegramJoinPopup() {
   const { isAuthenticated, loading } = useAuth();

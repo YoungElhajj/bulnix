@@ -417,7 +417,7 @@ export async function placeSupplierOrder(
     const response = await client.post("/purchase", {
       ad_id: Number(supplierProductId),
       quantity,
-      promo_code: "SAVE5", // 5% discount promo code from AccsZone
+      promo_code: "young5", // 5% discount promo code from AccsZone
     });
 
     // Response is wrapped in data: { order_id, accounts, ... }
