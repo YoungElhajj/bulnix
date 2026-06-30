@@ -229,6 +229,39 @@ async function startServer() {
     }
   });
 
+  // ─── Diagnostic endpoint (safe - masks secrets) ───────────────────────────
+  app.get("/api/debug", async (req: any, res: any) => {
+    const dbHost = process.env.DB_HOST || "(not set)";
+    const dbName = process.env.DB_NAME || "(not set)";
+    const dbUser = process.env.DB_USER || "(not set)";
+    const dbUrl = process.env.DATABASE_URL ? "(set, length=" + process.env.DATABASE_URL.length + ")" : "(not set)";
+    const jwtSecret = process.env.JWT_SECRET ? "(set, length=" + process.env.JWT_SECRET.length + ")" : "(not set)";
+    let dbStatus = "not tested";
+    let dbError = "";
+    try {
+      const { getDb } = await import("../db");
+      const db = await getDb();
+      if (db) {
+        dbStatus = "connected";
+      } else {
+        dbStatus = "null (pool failed)";
+      }
+    } catch (e: any) {
+      dbStatus = "error";
+      dbError = e.message;
+    }
+    res.json({
+      node_env: process.env.NODE_ENV,
+      db_host: dbHost,
+      db_name: dbName,
+      db_user: dbUser,
+      database_url: dbUrl,
+      jwt_secret: jwtSecret,
+      db_status: dbStatus,
+      db_error: dbError || undefined,
+    });
+  });
+
   // ─── Regular middleware ──────────────────────────────────────────────────────
 
   // Configure body parser with larger size limit for file uploads

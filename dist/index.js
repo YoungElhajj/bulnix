@@ -7104,6 +7104,37 @@ async function startServer() {
       res.redirect(`${frontendUrl}/wallet?topup_ref=${encodeURIComponent(ref)}&status=${encodeURIComponent(status ?? "")}`);
     }
   });
+  app.get("/api/debug", async (req, res) => {
+    const dbHost = process.env.DB_HOST || "(not set)";
+    const dbName = process.env.DB_NAME || "(not set)";
+    const dbUser = process.env.DB_USER || "(not set)";
+    const dbUrl = process.env.DATABASE_URL ? "(set, length=" + process.env.DATABASE_URL.length + ")" : "(not set)";
+    const jwtSecret = process.env.JWT_SECRET ? "(set, length=" + process.env.JWT_SECRET.length + ")" : "(not set)";
+    let dbStatus = "not tested";
+    let dbError = "";
+    try {
+      const { getDb: getDb2 } = await Promise.resolve().then(() => (init_db(), db_exports));
+      const db = await getDb2();
+      if (db) {
+        dbStatus = "connected";
+      } else {
+        dbStatus = "null (pool failed)";
+      }
+    } catch (e) {
+      dbStatus = "error";
+      dbError = e.message;
+    }
+    res.json({
+      node_env: process.env.NODE_ENV,
+      db_host: dbHost,
+      db_name: dbName,
+      db_user: dbUser,
+      database_url: dbUrl,
+      jwt_secret: jwtSecret,
+      db_status: dbStatus,
+      db_error: dbError || void 0
+    });
+  });
   app.use(express3.json({ limit: "50mb" }));
   app.use(express3.urlencoded({ limit: "50mb", extended: true }));
   const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
