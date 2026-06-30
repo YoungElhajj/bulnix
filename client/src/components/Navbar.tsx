@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import {
   ShoppingCart, Menu, X, ChevronDown, User, LogOut,
@@ -94,6 +94,8 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [navHeight, setNavHeight] = useState(90);
+  const navRef = useRef<HTMLElement>(null);
   // Banner is always visible — no dismiss
   const [location] = useLocation();
   const { totalItems } = useCart();
@@ -114,6 +116,17 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Measure nav height so mobile menu starts exactly below it
+  useEffect(() => {
+    const measure = () => {
+      if (navRef.current) setNavHeight(navRef.current.offsetHeight);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (navRef.current) ro.observe(navRef.current);
+    return () => ro.disconnect();
+  }, []);
+
   // Close mobile menu on route change
   useEffect(() => {
     setMobileOpen(false);
@@ -126,7 +139,7 @@ export default function Navbar() {
     : "bg-[#0F3D5E]";
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-[100] border-b border-[#1a5070]/50 ${navBg} backdrop-blur-md transition-all duration-300`}>
+    <nav ref={navRef} className={`fixed top-0 left-0 right-0 z-[100] border-b border-[#1a5070]/50 ${navBg} backdrop-blur-md transition-all duration-300`}>
       {/* Affiliate Banner — always visible, no dismiss, single line */}
       {!isActive("/affiliate") && (
         <div className="bg-gradient-to-r from-cyan-600 to-blue-700 border-b border-cyan-500/30 overflow-hidden">
@@ -364,7 +377,7 @@ export default function Navbar() {
 
       {/* Mobile Menu — positioned absolutely relative to the nav, starts right below the navbar */}
       {mobileOpen && (
-        <div className="lg:hidden bg-[#0F3D5E] overflow-y-auto" style={{ position: 'fixed', top: '100%', left: 0, right: 0, bottom: 0, zIndex: 98 }}>
+        <div className="lg:hidden bg-[#0F3D5E] overflow-y-auto" style={{ position: 'fixed', top: navHeight, left: 0, right: 0, bottom: 0, zIndex: 98 }}>
           <div className="container py-4 space-y-1">
             {/* Quick category shortcuts (mobile) */}
             <div className="pb-1">
