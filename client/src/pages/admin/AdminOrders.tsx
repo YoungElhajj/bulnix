@@ -272,15 +272,38 @@ export default function AdminOrders() {
                 <p className="text-slate-500 text-sm">No fulfillment records yet</p>
               ) : (
                 <div className="space-y-3">
-                  {detail.fulfillments.map((f: any) => (
+                  {detail.fulfillments.map((f: any) => {
+                    // Find the matching order item for this fulfillment record
+                    const matchedItem = f.orderItemId
+                      ? detail.items?.find((it: any) => it.id === f.orderItemId)
+                      : null;
+                    return (
                     <div key={f.id} className="border border-emerald-900/20 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                         <div className="flex items-center gap-2">
                           <Badge className={"text-xs border-0 " + (f.status === "success" ? "bg-emerald-500/10 text-emerald-400" : f.status === "failed" ? "bg-red-500/10 text-red-400" : "bg-yellow-500/10 text-yellow-400")}>{f.status}</Badge>
-                          <span className="text-slate-400 text-xs capitalize">{f.provider ?? "—"}</span>
+                          <span className="text-slate-400 text-xs capitalize">{f.providerKey ?? f.provider ?? "—"}</span>
                         </div>
                         <span className="text-slate-500 text-xs">{new Date(f.createdAt).toLocaleString()}</span>
                       </div>
+                      {/* Product info — always shown, critical for refund tracking */}
+                      {matchedItem ? (
+                        <div className="flex items-start justify-between gap-3 bg-slate-800/50 rounded-lg px-3 py-2 mb-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white text-xs font-medium leading-snug line-clamp-2">{matchedItem.productTitle}</p>
+                            <p className="text-slate-400 text-xs mt-0.5">Qty: {matchedItem.quantity}</p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-emerald-400 text-sm font-bold">${Number(matchedItem.totalPriceUSD).toFixed(2)}</p>
+                            <p className="text-slate-500 text-xs">${Number(matchedItem.unitPriceUSD).toFixed(2)} each</p>
+                          </div>
+                        </div>
+                      ) : (
+                        // Fallback: no orderItemId link — show providerKey as context
+                        f.status !== "success" && (
+                          <p className="text-slate-500 text-xs mb-2 italic">Item link unavailable — check Items table above for pricing</p>
+                        )
+                      )}
                       {(f.deliveredData ?? f.deliveryData) && (
                         <div className="mt-3">
                           <p className="text-slate-400 text-xs mb-2 font-semibold">Delivered Credentials:</p>
@@ -290,7 +313,8 @@ export default function AdminOrders() {
                       {f.errorMessage && <p className="text-red-400 text-xs mt-2">Error: {f.errorMessage}</p>}
                       {f.supplierOrderId && <p className="text-slate-400 text-xs mt-1">Supplier Order ID: <span className="text-white font-mono">{f.supplierOrderId}</span></p>}
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

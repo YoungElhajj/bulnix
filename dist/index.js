@@ -1327,6 +1327,98 @@ var init_email = __esm({
   }
 });
 
+// server/_core/notification.ts
+var notification_exports = {};
+__export(notification_exports, {
+  notifyOwner: () => notifyOwner
+});
+import { TRPCError } from "@trpc/server";
+async function notifyOwner(payload) {
+  const { title, content } = validatePayload(payload);
+  const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "bulnixsupport@gmail.com";
+  const resendApiKey = process.env.RESEND_API_KEY;
+  const emailFrom = process.env.EMAIL_FROM || "noreply@support.bulnix.com";
+  if (!resendApiKey) {
+    console.warn("[Notification] RESEND_API_KEY not set \u2014 skipping owner notification.");
+    return false;
+  }
+  try {
+    const htmlContent = `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+        <div style="background:#0F3D5E;padding:16px 24px;border-radius:8px 8px 0 0;">
+          <h2 style="color:#00C2FF;margin:0;font-size:18px;">\u{1F514} ${title}</h2>
+        </div>
+        <div style="background:#f9f9f9;padding:24px;border:1px solid #e0e0e0;border-top:none;border-radius:0 0 8px 8px;">
+          <pre style="white-space:pre-wrap;font-family:Arial,sans-serif;font-size:14px;color:#333;margin:0;">${content}</pre>
+          <hr style="margin:20px 0;border:none;border-top:1px solid #e0e0e0;">
+          <p style="color:#888;font-size:12px;margin:0;">Bulnix Admin Notification \u2014 ${(/* @__PURE__ */ new Date()).toUTCString()}</p>
+        </div>
+      </div>
+    `;
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${resendApiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        from: `Bulnix Alerts <${emailFrom}>`,
+        to: [adminEmail],
+        subject: `[Bulnix Alert] ${title}`,
+        html: htmlContent
+      })
+    });
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      console.warn(`[Notification] Failed to send owner email (${response.status})${detail ? `: ${detail}` : ""}`);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.warn("[Notification] Error sending owner notification email:", error);
+    return false;
+  }
+}
+var TITLE_MAX_LENGTH, CONTENT_MAX_LENGTH, trimValue, isNonEmptyString, validatePayload;
+var init_notification = __esm({
+  "server/_core/notification.ts"() {
+    "use strict";
+    TITLE_MAX_LENGTH = 1200;
+    CONTENT_MAX_LENGTH = 2e4;
+    trimValue = (value) => value.trim();
+    isNonEmptyString = (value) => typeof value === "string" && value.trim().length > 0;
+    validatePayload = (input) => {
+      if (!isNonEmptyString(input.title)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Notification title is required."
+        });
+      }
+      if (!isNonEmptyString(input.content)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Notification content is required."
+        });
+      }
+      const title = trimValue(input.title);
+      const content = trimValue(input.content);
+      if (title.length > TITLE_MAX_LENGTH) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Notification title must be at most ${TITLE_MAX_LENGTH} characters.`
+        });
+      }
+      if (content.length > CONTENT_MAX_LENGTH) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Notification content must be at most ${CONTENT_MAX_LENGTH} characters.`
+        });
+      }
+      return { title, content };
+    };
+  }
+});
+
 // server/connectors/accszone.ts
 var accszone_exports = {};
 __export(accszone_exports, {
@@ -2389,98 +2481,6 @@ var init_fadded = __esm({
   }
 });
 
-// server/_core/notification.ts
-var notification_exports = {};
-__export(notification_exports, {
-  notifyOwner: () => notifyOwner
-});
-import { TRPCError } from "@trpc/server";
-async function notifyOwner(payload) {
-  const { title, content } = validatePayload(payload);
-  const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "bulnixsupport@gmail.com";
-  const resendApiKey = process.env.RESEND_API_KEY;
-  const emailFrom = process.env.EMAIL_FROM || "noreply@support.bulnix.com";
-  if (!resendApiKey) {
-    console.warn("[Notification] RESEND_API_KEY not set \u2014 skipping owner notification.");
-    return false;
-  }
-  try {
-    const htmlContent = `
-      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
-        <div style="background:#0F3D5E;padding:16px 24px;border-radius:8px 8px 0 0;">
-          <h2 style="color:#00C2FF;margin:0;font-size:18px;">\u{1F514} ${title}</h2>
-        </div>
-        <div style="background:#f9f9f9;padding:24px;border:1px solid #e0e0e0;border-top:none;border-radius:0 0 8px 8px;">
-          <pre style="white-space:pre-wrap;font-family:Arial,sans-serif;font-size:14px;color:#333;margin:0;">${content}</pre>
-          <hr style="margin:20px 0;border:none;border-top:1px solid #e0e0e0;">
-          <p style="color:#888;font-size:12px;margin:0;">Bulnix Admin Notification \u2014 ${(/* @__PURE__ */ new Date()).toUTCString()}</p>
-        </div>
-      </div>
-    `;
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${resendApiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        from: `Bulnix Alerts <${emailFrom}>`,
-        to: [adminEmail],
-        subject: `[Bulnix Alert] ${title}`,
-        html: htmlContent
-      })
-    });
-    if (!response.ok) {
-      const detail = await response.text().catch(() => "");
-      console.warn(`[Notification] Failed to send owner email (${response.status})${detail ? `: ${detail}` : ""}`);
-      return false;
-    }
-    return true;
-  } catch (error) {
-    console.warn("[Notification] Error sending owner notification email:", error);
-    return false;
-  }
-}
-var TITLE_MAX_LENGTH, CONTENT_MAX_LENGTH, trimValue, isNonEmptyString, validatePayload;
-var init_notification = __esm({
-  "server/_core/notification.ts"() {
-    "use strict";
-    TITLE_MAX_LENGTH = 1200;
-    CONTENT_MAX_LENGTH = 2e4;
-    trimValue = (value) => value.trim();
-    isNonEmptyString = (value) => typeof value === "string" && value.trim().length > 0;
-    validatePayload = (input) => {
-      if (!isNonEmptyString(input.title)) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Notification title is required."
-        });
-      }
-      if (!isNonEmptyString(input.content)) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Notification content is required."
-        });
-      }
-      const title = trimValue(input.title);
-      const content = trimValue(input.content);
-      if (title.length > TITLE_MAX_LENGTH) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: `Notification title must be at most ${TITLE_MAX_LENGTH} characters.`
-        });
-      }
-      if (content.length > CONTENT_MAX_LENGTH) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: `Notification content must be at most ${CONTENT_MAX_LENGTH} characters.`
-        });
-      }
-      return { title, content };
-    };
-  }
-});
-
 // server/db.ts
 var db_exports = {};
 __export(db_exports, {
@@ -3121,9 +3121,35 @@ async function payOrderWithWallet(userId, orderId) {
   if (currentBalance < totalUSD) {
     throw new Error(`Insufficient wallet balance. You have $${currentBalance.toFixed(2)} but need $${totalUSD.toFixed(2)}`);
   }
+  const oldSpent = Number(wallet.totalSpent);
   const newBalance = (currentBalance - totalUSD).toFixed(6);
-  const newSpent = (Number(wallet.totalSpent) + totalUSD).toFixed(6);
+  const newSpent = (oldSpent + totalUSD).toFixed(6);
   await withDbRetry(() => db.update(wallets).set({ balanceUSD: newBalance, totalSpent: newSpent }).where(eq3(wallets.userId, userId)), "payOrderWithWallet:deductWallet");
+  const getTierName = (spent) => {
+    if (spent >= 500) return "Platinum";
+    if (spent >= 200) return "Gold";
+    if (spent >= 50) return "Silver";
+    return "Bronze";
+  };
+  const oldTier = getTierName(oldSpent);
+  const newTier = getTierName(Number(newSpent));
+  if (oldTier !== newTier) {
+    const [userRow] = await db.select({ name: users.name, email: users.email }).from(users).where(eq3(users.id, userId)).limit(1);
+    const { notifyOwner: notifyOwner2 } = await Promise.resolve().then(() => (init_notification(), notification_exports));
+    notifyOwner2({
+      title: `User Tier Upgrade: ${oldTier} \u2192 ${newTier}`,
+      content: `User ${userRow?.name ?? "(no name)"} (${userRow?.email ?? `ID ${userId}`}) has upgraded from ${oldTier} to ${newTier}.
+Total spent: $${Number(newSpent).toFixed(2)}
+Order: ${order.orderNumber}`
+    }).catch((err) => console.error("[TierNotify] Error:", err));
+    createNotification(
+      userId,
+      "tier_upgrade",
+      `You reached ${newTier} tier!`,
+      `Congratulations! You have been upgraded from ${oldTier} to ${newTier} tier. Your total spending is now $${Number(newSpent).toFixed(2)}. Enjoy your new status!`,
+      orderId
+    ).catch((err) => console.error("[TierNotify] User notification error:", err));
+  }
   const txRef = `WALLET-ORDER-${orderId}-${Date.now()}`;
   await withDbRetry(() => db.insert(walletTransactions).values({
     userId,
@@ -3691,8 +3717,12 @@ async function adminGetUsers(input) {
   if (!db) return { items: [], total: 0 };
   const offset = (input.page - 1) * input.limit;
   const conditions = input.search ? [or(like(users.email, `%${input.search}%`), like(users.name, `%${input.search}%`))] : [];
-  const items = conditions.length > 0 ? await db.select().from(users).where(and3(...conditions)).orderBy(desc(users.createdAt)).limit(input.limit).offset(offset) : await db.select().from(users).orderBy(desc(users.createdAt)).limit(input.limit).offset(offset);
+  const baseItems = conditions.length > 0 ? await db.select().from(users).where(and3(...conditions)).orderBy(desc(users.createdAt)).limit(input.limit).offset(offset) : await db.select().from(users).orderBy(desc(users.createdAt)).limit(input.limit).offset(offset);
   const countResult = conditions.length > 0 ? await db.select({ count: sql`count(*)` }).from(users).where(and3(...conditions)) : await db.select({ count: sql`count(*)` }).from(users);
+  const userIds = baseItems.map((u) => u.id);
+  const walletRows = userIds.length > 0 ? await db.select({ userId: wallets.userId, totalSpent: wallets.totalSpent }).from(wallets).where(inArray(wallets.userId, userIds)) : [];
+  const walletMap = new Map(walletRows.map((w) => [w.userId, w.totalSpent]));
+  const items = baseItems.map((u) => ({ ...u, totalSpent: walletMap.get(u.id) ?? "0" }));
   return { items, total: Number(countResult[0]?.count ?? 0) };
 }
 async function adminSuspendUser(userId, reason) {
@@ -4049,7 +4079,15 @@ async function adminGetUserDetail(userId) {
   const userTickets = await db.select().from(supportTickets).where(eq3(supportTickets.userId, userId)).orderBy(desc(supportTickets.createdAt)).limit(10);
   const [wallet] = await db.select().from(wallets).where(eq3(wallets.userId, userId)).limit(1);
   const walletTxns = await db.select().from(walletTransactions).where(eq3(walletTransactions.userId, userId)).orderBy(desc(walletTransactions.createdAt)).limit(10);
-  return { user, orders: userOrders, tickets: userTickets, wallet: wallet ?? null, walletTransactions: walletTxns };
+  const orderIds = userOrders.map((o) => o.id);
+  const allItems = orderIds.length > 0 ? await db.select().from(orderItems).where(inArray(orderItems.orderId, orderIds)) : [];
+  const allFulfillments = orderIds.length > 0 ? await db.select().from(fulfillmentRecords).where(inArray(fulfillmentRecords.orderId, orderIds)) : [];
+  const enrichedOrders = userOrders.map((order) => ({
+    ...order,
+    items: allItems.filter((item) => item.orderId === order.id),
+    fulfillments: allFulfillments.filter((f) => f.orderId === order.id)
+  }));
+  return { user, orders: enrichedOrders, tickets: userTickets, wallet: wallet ?? null, walletTransactions: walletTxns };
 }
 async function getAccsZoneBalance() {
   try {
