@@ -1,11 +1,12 @@
 import { Link } from "wouter";
-import { Package, ShoppingCart, Ticket, User, CheckCircle, Clock, Wallet, Plus, ChevronRight } from "lucide-react";
+import { Package, ShoppingCart, Ticket, User, CheckCircle, Clock, Wallet, Plus, ChevronRight, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { getUserTier, getNextTier, getProgressToNextTier } from "@/lib/tiers";
 
 const statusBadge = (s: string) => ({
   pending: "bg-yellow-50 text-yellow-700 border-yellow-200",
@@ -37,6 +38,11 @@ export default function Dashboard() {
 
   const recentOrders = (orders as any)?.items ?? (orders as any)?.orders ?? [];
   const openTickets = ((tickets as any[]) ?? []).filter((t: any) => t.status !== "closed").length;
+  const totalSpent = parseFloat((wallet as any)?.totalSpent ?? "0");
+  const tier = getUserTier(totalSpent);
+  const nextTier = getNextTier(totalSpent);
+  const progress = getProgressToNextTier(totalSpent);
+  const tierProgressColor = tier.name === "Bronze" ? "bg-amber-500" : tier.name === "Silver" ? "bg-slate-400" : tier.name === "Gold" ? "bg-yellow-500" : tier.name === "Platinum" ? "bg-cyan-500" : "bg-purple-500";
 
   return (
     <div className="min-h-screen bg-[#F5F9FF]">
@@ -70,6 +76,38 @@ export default function Dashboard() {
           </div>
         </Link>
 
+        {/* Tier Banner */}
+        <Link href="/profile">
+          <div className={`rounded-2xl border-2 ${tier.borderColor} ${tier.bgColor} p-4 mb-5 cursor-pointer hover:shadow-md transition-all`}>
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl bg-white/60 border border-white/80">
+                  {tier.emoji}
+                </div>
+                <div>
+                  <div className={`font-bold text-base ${tier.color}`}>{tier.name} Member</div>
+                  <div className="text-xs text-[#4A6080]">${totalSpent.toFixed(2)} total spent{nextTier ? ` · $${(nextTier.minSpend - totalSpent).toFixed(2)} to ${nextTier.emoji} ${nextTier.name}` : " · Top tier reached!"}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-[#4A6080]">
+                <Trophy className={`w-4 h-4 ${tier.color}`} />
+                <span>View tier details</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            {nextTier && (
+              <div className="mt-3">
+                <div className="flex justify-between text-xs text-[#4A6080] mb-1">
+                  <span>{tier.emoji} {tier.name}</span>
+                  <span>{nextTier.emoji} {nextTier.name} at ${nextTier.minSpend}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                  <div className={`h-1.5 rounded-full transition-all duration-500 ${tierProgressColor}`} style={{width:`${progress}%`}}/>
+                </div>
+              </div>
+            )}
+          </div>
+        </Link>
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[

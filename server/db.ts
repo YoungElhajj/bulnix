@@ -716,11 +716,20 @@ export async function payOrderWithWallet(userId: number, orderId: number) {
   const newTier = getTierName(Number(newSpent));
   if (oldTier !== newTier) {
     const [userRow] = await db.select({ name: users.name, email: users.email }).from(users).where(eq(users.id, userId)).limit(1);
+    // Notify admin
     const { notifyOwner } = await import("./_core/notification");
     notifyOwner({
       title: `User Tier Upgrade: ${oldTier} → ${newTier}`,
       content: `User ${userRow?.name ?? "(no name)"} (${userRow?.email ?? `ID ${userId}`}) has upgraded from ${oldTier} to ${newTier}.\nTotal spent: $${Number(newSpent).toFixed(2)}\nOrder: ${order.orderNumber}`,
     }).catch(err => console.error("[TierNotify] Error:", err));
+    // Notify the user in-app
+    createNotification(
+      userId,
+      "tier_upgrade",
+      `You reached ${newTier} tier!`,
+      `Congratulations! You have been upgraded from ${oldTier} to ${newTier} tier. Your total spending is now $${Number(newSpent).toFixed(2)}. Enjoy your new status!`,
+      orderId,
+    ).catch(err => console.error("[TierNotify] User notification error:", err));
   }
 
   // Record wallet transaction

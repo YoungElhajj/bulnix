@@ -770,3 +770,8 @@
 - [x] Add tier badges to Admin Users list table and user detail panel
 - [x] Send admin notification when a user moves up a spending tier
 - [x] Run TypeScript/build checks and deliver updated ZIP package
+
+## User Tier Features (Jun 30, 2026)
+- [x] Send in-app notification to user when they reach a new tier
+- [x] Show tier badge on user dashboard overview card
+- [x] Show tier badge and progress bar on user profile/settings page
