@@ -2701,7 +2701,8 @@ import { createPool } from "mysql2";
 import { nanoid } from "nanoid";
 import { createHash, randomBytes } from "crypto";
 function getPool() {
-  if (!_pool && process.env.DATABASE_URL) {
+  const hasDbConfig = !!(process.env.DATABASE_URL || process.env.DB_HOST);
+  if (!_pool && hasDbConfig) {
     let host, port, user, password, database;
     if (process.env.DB_HOST) {
       host = process.env.DB_HOST;
@@ -2738,13 +2739,22 @@ function getPool() {
   return _pool;
 }
 async function getDb() {
-  if (!_db && process.env.DATABASE_URL) {
+  const hasDbConfig = !!(process.env.DATABASE_URL || process.env.DB_HOST);
+  if (!_db && hasDbConfig) {
     try {
-      _db = drizzle(getPool());
+      const pool = getPool();
+      if (!pool) {
+        console.error("[Database] Pool is null - check DB_HOST/DATABASE_URL env vars");
+        return null;
+      }
+      _db = drizzle(pool);
+      console.log("[Database] Connected to", process.env.DB_HOST || "(via DATABASE_URL)");
     } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
+      console.error("[Database] Failed to initialize:", error);
       _db = null;
     }
+  } else if (!hasDbConfig) {
+    console.error("[Database] No DB config found. Set DATABASE_URL or DB_HOST env var.");
   }
   return _db;
 }

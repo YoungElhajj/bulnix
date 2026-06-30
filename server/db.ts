@@ -47,7 +47,8 @@ let _db: ReturnType<typeof drizzle> | null = null;
 let _pool: ReturnType<typeof createPool> | null = null;
 
 function getPool(): ReturnType<typeof createPool> {
-  if (!_pool && process.env.DATABASE_URL) {
+  const hasDbConfig = !!(process.env.DATABASE_URL || process.env.DB_HOST);
+  if (!_pool && hasDbConfig) {
     // Support individual DB_* env vars to avoid URL special-character issues
     let host: string, port: number, user: string, password: string, database: string;
     if (process.env.DB_HOST) {
@@ -57,7 +58,7 @@ function getPool(): ReturnType<typeof createPool> {
       password = process.env.DB_PASS || "";
       database = process.env.DB_NAME || "";
     } else {
-      const dbUrl = new URL(process.env.DATABASE_URL);
+      const dbUrl = new URL(process.env.DATABASE_URL!);
       host = dbUrl.hostname;
       port = parseInt(dbUrl.port || "3306");
       user = decodeURIComponent(dbUrl.username);
@@ -88,13 +89,22 @@ function getPool(): ReturnType<typeof createPool> {
 }
 
 export async function getDb() {
-  if (!_db && process.env.DATABASE_URL) {
+  const hasDbConfig = !!(process.env.DATABASE_URL || process.env.DB_HOST);
+  if (!_db && hasDbConfig) {
     try {
-      _db = drizzle(getPool());
+      const pool = getPool();
+      if (!pool) {
+        console.error("[Database] Pool is null - check DB_HOST/DATABASE_URL env vars");
+        return null;
+      }
+      _db = drizzle(pool);
+      console.log("[Database] Connected to", process.env.DB_HOST || "(via DATABASE_URL)");
     } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
+      console.error("[Database] Failed to initialize:", error);
       _db = null;
     }
+  } else if (!hasDbConfig) {
+    console.error("[Database] No DB config found. Set DATABASE_URL or DB_HOST env var.");
   }
   return _db;
 }
