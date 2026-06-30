@@ -357,6 +357,15 @@ export default function Navbar() {
               ))}
             </div>
 
+            {/* Wallet link (mobile, authenticated) */}
+            {isAuthenticated && (
+              <Link href="/wallet" className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors" onClick={() => setMobileOpen(false)}>
+                <Wallet className="w-4 h-4 text-[#00C2FF]" />
+                <span>My Wallet</span>
+                <span className="ml-auto text-[#00C2FF] font-bold">${walletBalance.toFixed(2)}</span>
+              </Link>
+            )}
+
             {/* Auth buttons (mobile) */}
             {!isAuthenticated && (
               <div className="flex gap-2 pt-2">

@@ -6,7 +6,7 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, ChevronRight, ExternalLink } from "lucide-react";
 
-const WHATSAPP_URL = "https://wa.me/447367061279";
+const WHATSAPP_URL = "https://wa.me/447988531474";
 const BOT_NAME = "Bulnix Support";
 
 type MessageRole = "bot" | "user";

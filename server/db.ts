@@ -1232,11 +1232,16 @@ export async function adminUpdateProduct(input: {
   return { success: true };
 }
 
-export async function adminGetOrders(input: { page: number; limit: number; status?: string }) {
+export async function adminGetOrders(input: { page: number; limit: number; status?: string; search?: string }) {
   const db = await getDb();
   if (!db) return { items: [], total: 0 };
   const offset = (input.page - 1) * input.limit;
-  const conditions = input.status ? [eq(orders.status, input.status as any)] : [];
+  const conditions: any[] = [];
+  if (input.status) conditions.push(eq(orders.status, input.status as any));
+  if (input.search) {
+    const s = `%${input.search}%`;
+    conditions.push(or(like(orders.orderNumber, s), like(orders.billingEmail, s))!);
+  }
   const items = conditions.length > 0
     ? await db.select().from(orders).where(and(...conditions)).orderBy(desc(orders.createdAt)).limit(input.limit).offset(offset)
     : await db.select().from(orders).orderBy(desc(orders.createdAt)).limit(input.limit).offset(offset);
@@ -1244,6 +1249,19 @@ export async function adminGetOrders(input: { page: number; limit: number; statu
     ? await db.select({ count: sql<number>`count(*)` }).from(orders).where(and(...conditions))
     : await db.select({ count: sql<number>`count(*)` }).from(orders);
   return { items, total: Number(countResult[0]?.count ?? 0) };
+}
+
+export async function adminGetOrderDetail(orderId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const [order] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
+  if (!order) return null;
+  const [user] = await db.select({ id: users.id, name: users.name, email: users.email }).from(users).where(eq(users.id, order.userId)).limit(1);
+  const [wallet] = await db.select({ balanceUSD: wallets.balanceUSD }).from(wallets).where(eq(wallets.userId, order.userId)).limit(1);
+  const items = await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
+  const fulfillments = await db.select().from(fulfillmentRecords).where(eq(fulfillmentRecords.orderId, orderId));
+  const paymentRows = await db.select().from(payments).where(eq(payments.orderId, orderId));
+  return { order, user: user ? { ...user, walletBalanceUSD: wallet?.balanceUSD ?? "0" } : null, items, fulfillments, payments: paymentRows };
 }
 
 export async function adminUpdateOrder(input: { id: number; status?: string; adminNotes?: string; fraudFlag?: boolean }) {

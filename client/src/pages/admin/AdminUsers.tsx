@@ -52,18 +52,22 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-3 mt-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
                 <div className="bg-[#0d1117] rounded-lg p-3 text-center">
                   <div className="text-lg font-bold text-white">{d.orders.length}</div>
                   <div className="text-xs text-slate-400">Orders</div>
                 </div>
                 <div className="bg-[#0d1117] rounded-lg p-3 text-center">
-                  <div className="text-lg font-bold text-white">{d.tickets.length}</div>
-                  <div className="text-xs text-slate-400">Tickets</div>
+                  <div className="text-lg font-bold text-emerald-400">${Number(d.wallet?.totalSpent ?? 0).toFixed(2)}</div>
+                  <div className="text-xs text-slate-400">Total Spent</div>
                 </div>
                 <div className="bg-[#0d1117] rounded-lg p-3 text-center">
-                  <div className="text-lg font-bold text-emerald-400">${Number(d.wallet?.balanceUSD ?? 0).toFixed(2)}</div>
-                  <div className="text-xs text-slate-400">Wallet</div>
+                  <div className="text-lg font-bold text-cyan-400">${Number(d.wallet?.balanceUSD ?? 0).toFixed(2)}</div>
+                  <div className="text-xs text-slate-400">Wallet Balance</div>
+                </div>
+                <div className="bg-[#0d1117] rounded-lg p-3 text-center">
+                  <div className="text-lg font-bold text-white">{d.tickets.length}</div>
+                  <div className="text-xs text-slate-400">Tickets</div>
                 </div>
               </div>
             </div>
@@ -274,6 +278,13 @@ export default function AdminUsers() {
         </div>
       )}
 
+      {total > 50 && (
+        <div className="flex items-center justify-center gap-2 p-4 mt-2">
+          <Button variant="outline" className="border-emerald-900/30 text-slate-400 hover:text-white hover:bg-[#0d1117] h-8 text-xs" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Previous</Button>
+          <span className="text-slate-400 text-xs px-3">Page {page} of {Math.ceil(total / 50)}</span>
+          <Button variant="outline" className="border-emerald-900/30 text-slate-400 hover:text-white hover:bg-[#0d1117] h-8 text-xs" disabled={userList.length < 50} onClick={() => setPage(p => p + 1)}>Next</Button>
+        </div>
+      )}
       {selectedUserId !== null && (
         <UserDetailPanel userId={selectedUserId} onClose={() => setSelectedUserId(null)} />
       )}

@@ -10,9 +10,9 @@ import { Send, X, MessageCircle, ChevronRight, ExternalLink } from "lucide-react
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 
-const WHATSAPP_BASE = "https://wa.me/447367061279";
+const WHATSAPP_BASE = "https://wa.me/447988531474";
 const TELEGRAM_URL = "https://t.me/bulnixupdates";  // Channel for updates
-const TELEGRAM_SUPPORT_URL = "https://t.me/bulnixupdates";  // Support DM
+const TELEGRAM_SUPPORT_URL = "https://t.me/bulnixlimited";  // Support DM
 
 // ── Triage flow definition ────────────────────────────────────────────────────
 type TriageStep = {
@@ -540,7 +540,7 @@ export default function SocialFloatingWidgets({ forceOpen, onClose, preferredCha
             submitTriage.mutate({ email: user.email, name: user.name || undefined, issueSummary: issue, steps: newHistory });
           }
           setTimeout(() => {
-            window.open(`https://t.me/bulnixupdates?text=${tgMsg}`, "_blank", "noopener,noreferrer");
+            window.open(`https://t.me/bulnixlimited?text=${tgMsg}`, "_blank", "noopener,noreferrer");
           }, 800);
         }, 400);
         return;
@@ -619,7 +619,7 @@ export default function SocialFloatingWidgets({ forceOpen, onClose, preferredCha
           });
         }
         setTimeout(() => {
-          window.open(`https://t.me/bulnixupdates?text=${tgMsg}`, "_blank", "noopener,noreferrer");
+          window.open(`https://t.me/bulnixlimited?text=${tgMsg}`, "_blank", "noopener,noreferrer");
         }, 800);
       }, 400);
       return;
@@ -641,13 +641,12 @@ export default function SocialFloatingWidgets({ forceOpen, onClose, preferredCha
         setMessages(prev => [...prev, mkMsg("bot",
           "Connecting you to our Telegram support now. They already have your issue summary. 👇"
         )]);
-        setTimeout(() => {
-          window.open(`https://t.me/bulnixupdates?text=${tgMsg}`, "_blank", "noopener,noreferrer");
+                setTimeout(() => {
+          window.open(`https://t.me/bulnixlimited?text=${tgMsg}`, "_blank", "noopener,noreferrer");
         }, 800);
       }, 400);
       return;
     }
-
     const step = TRIAGE_FLOW[next];
     if (!step) return;
     setCurrentStep(step);
