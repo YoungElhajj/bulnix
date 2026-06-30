@@ -54,6 +54,7 @@ vi.mock("./db", () => ({
   getProviderSyncLogs: vi.fn().mockResolvedValue([]),
   upsertUser: vi.fn().mockResolvedValue(undefined),
   getUserByOpenId: vi.fn().mockResolvedValue(undefined),
+  invalidateCache: vi.fn(),
 }));
 
 // ─── Context helpers ──────────────────────────────────────────────────────────

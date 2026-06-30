@@ -1428,7 +1428,7 @@ async function syncProducts(apiKey, markupPercent = 20) {
         const prodName = prod.title;
         const slug = prod.slug ?? String(prodName).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
         const stockQty = Number(prod.available_stock) || 0;
-        const isUnlimited = stockQty === 0 && Number(prod.sold ?? 0) > 0;
+        const isUnlimited = false;
         const existingSupplier = await db.select().from(supplierProducts).where(and(eq(supplierProducts.providerKey, PROVIDER_KEY), eq(supplierProducts.supplierProductId, String(prod.id)))).limit(1);
         if (existingSupplier[0]) {
           await db.update(supplierProducts).set({
@@ -1566,10 +1566,10 @@ async function syncStock(apiKey) {
     if (!db) throw new Error("Database not available");
     for (const item of stockData) {
       try {
-        const stockVal = item.unlimited ? 9999 : item.stock;
+        const stockVal = Number(item.stock) || 0;
         await db.update(products).set({
           stockQuantity: stockVal,
-          stockUnlimited: item.unlimited ?? false
+          stockUnlimited: false
         }).where(and(eq(products.providerKey, PROVIDER_KEY), eq(products.supplierProductId, Number(item.id))));
         updated++;
       } catch (err) {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, Search, UserX, UserCheck, ChevronRight, Package, Wallet, MessageSquare, X, ExternalLink, DollarSign } from "lucide-react";
+import { Users, Search, UserX, UserCheck, ChevronRight, Package, Wallet, MessageSquare, X, DollarSign, ChevronDown, ChevronUp, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -7,19 +7,148 @@ import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import AdminLayout from "@/components/AdminLayout";
+import { CredentialCards } from "@/components/admin/CredentialCards";
 
+// ── Tier helper ───────────────────────────────────────────────────────────────
+export function getTier(totalSpent: number): { name: string; color: string; bg: string } {
+  if (totalSpent >= 500) return { name: "Platinum", color: "text-purple-300", bg: "bg-purple-500/10" };
+  if (totalSpent >= 200) return { name: "Gold",     color: "text-yellow-300", bg: "bg-yellow-500/10" };
+  if (totalSpent >= 50)  return { name: "Silver",   color: "text-slate-300",  bg: "bg-slate-400/10" };
+  return                        { name: "Bronze",   color: "text-orange-300", bg: "bg-orange-500/10" };
+}
+
+function TierBadge({ totalSpent }: { totalSpent: number | string }) {
+  const tier = getTier(Number(totalSpent ?? 0));
+  return (
+    <Badge className={`${tier.bg} ${tier.color} border-0 text-xs font-semibold`}>
+      {tier.name}
+    </Badge>
+  );
+}
+
+// ── Order row with expandable credentials ─────────────────────────────────────
+function OrderRow({ order }: { order: any }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const statusColor: Record<string, string> = {
+    fulfilled:       "bg-emerald-500/10 text-emerald-400",
+    pending_payment: "bg-yellow-500/10 text-yellow-400",
+    processing:      "bg-blue-500/10 text-blue-400",
+    failed:          "bg-red-500/10 text-red-400",
+    refunded:        "bg-purple-500/10 text-purple-400",
+    cancelled:       "bg-slate-500/10 text-slate-400",
+    paid:            "bg-cyan-500/10 text-cyan-400",
+    partial:         "bg-orange-500/10 text-orange-400",
+  };
+
+  const hasDetails = (order.items?.length ?? 0) > 0 || (order.fulfillments?.length ?? 0) > 0;
+
+  return (
+    <div className="bg-[#161b22] border border-emerald-900/30 rounded-lg overflow-hidden">
+      {/* Row header */}
+      <button
+        type="button"
+        className="w-full flex items-center gap-3 p-3 text-left hover:bg-white/5 transition-colors"
+        onClick={() => hasDetails && setExpanded(prev => !prev)}
+      >
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-mono text-slate-400">#{order.id}</span>
+            {order.orderNumber && <span className="text-xs font-mono text-slate-400 truncate">{order.orderNumber}</span>}
+          </div>
+          <div className="text-xs text-slate-500 mt-0.5">{new Date(order.createdAt).toLocaleString()}</div>
+          {/* Product names preview */}
+          {order.items?.length > 0 && (
+            <div className="text-xs text-slate-300 mt-1 truncate">
+              {order.items.map((item: any) => item.productTitle).join(", ")}
+            </div>
+          )}
+        </div>
+        <div className="text-right shrink-0 flex flex-col items-end gap-1">
+          <div className="text-sm font-bold text-white">${Number(order.totalUSD ?? 0).toFixed(2)}</div>
+          <Badge className={`${statusColor[order.status] ?? "bg-slate-500/10 text-slate-400"} border-0 text-xs`}>
+            {order.status}
+          </Badge>
+        </div>
+        {hasDetails && (
+          <div className="shrink-0 text-slate-500">
+            {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </div>
+        )}
+      </button>
+
+      {/* Expanded detail */}
+      {expanded && hasDetails && (
+        <div className="border-t border-emerald-900/20 px-3 pb-3 pt-3 space-y-4">
+          {/* Items table */}
+          {order.items?.length > 0 && (
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Package className="h-3.5 w-3.5 text-emerald-400" />
+                <span className="text-xs font-semibold text-slate-300">Items</span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-slate-500 uppercase border-b border-emerald-900/20">
+                      <th className="text-left pb-1.5 pr-3">Product</th>
+                      <th className="text-center pb-1.5 px-2">Qty</th>
+                      <th className="text-right pb-1.5">Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {order.items.map((item: any) => (
+                      <tr key={item.id} className="border-b border-emerald-900/10 last:border-0">
+                        <td className="py-1.5 pr-3 text-white">{item.productTitle ?? `Product #${item.productId}`}</td>
+                        <td className="py-1.5 text-center text-slate-300 px-2">{item.quantity}</td>
+                        <td className="py-1.5 text-right text-emerald-400 font-semibold">${Number(item.totalPriceUSD ?? item.unitPriceUSD).toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Fulfillment records */}
+          {order.fulfillments?.length > 0 && (
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Truck className="h-3.5 w-3.5 text-emerald-400" />
+                <span className="text-xs font-semibold text-slate-300">Delivered Credentials</span>
+              </div>
+              <div className="space-y-2">
+                {order.fulfillments.map((f: any) => (
+                  <div key={f.id}>
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                      <Badge className={`text-xs border-0 ${f.status === "success" ? "bg-emerald-500/10 text-emerald-400" : f.status === "failed" ? "bg-red-500/10 text-red-400" : "bg-yellow-500/10 text-yellow-400"}`}>
+                        {f.status}
+                      </Badge>
+                      <span className="text-slate-500 text-xs capitalize">{f.providerKey ?? "—"}</span>
+                      {f.supplierOrderId && (
+                        <span className="text-slate-500 text-xs font-mono">Supplier: {f.supplierOrderId}</span>
+                      )}
+                    </div>
+                    {(f.deliveryData || f.deliveredData) ? (
+                      <CredentialCards raw={f.deliveryData ?? f.deliveredData} />
+                    ) : f.errorMessage ? (
+                      <p className="text-red-400 text-xs">Error: {f.errorMessage}</p>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── User detail side panel ────────────────────────────────────────────────────
 function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => void }) {
   const { data, isLoading } = trpc.admin.users.getDetail.useQuery({ userId }, { retry: false });
   const d = data as any;
-
-  const statusColor: Record<string, string> = {
-    fulfilled: "bg-emerald-500/10 text-emerald-400",
-    pending_payment: "bg-yellow-500/10 text-yellow-400",
-    processing: "bg-emerald-500/10 text-emerald-400",
-    failed: "bg-red-500/10 text-red-400",
-    refunded: "bg-purple-500/10 text-purple-400",
-    cancelled: "bg-slate-500/10 text-slate-400",
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-end bg-black/60 backdrop-blur-sm" onClick={onClose}>
@@ -27,11 +156,15 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
         {/* Header */}
         <div className="sticky top-0 bg-[#0d1117] border-b border-emerald-900/30 p-5 flex items-center justify-between z-10">
           <h2 className="text-lg font-bold text-white">User Details</h2>
-          <Button variant="ghost" size="icon" onClick={onClose} className="text-slate-400 hover:text-white"><X className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="icon" onClick={onClose} className="text-slate-400 hover:text-white">
+            <X className="h-4 w-4" />
+          </Button>
         </div>
 
         {isLoading ? (
-          <div className="p-6 space-y-4">{[...Array(4)].map((_, i) => <div key={i} className="h-24 rounded-xl bg-[#0d1117] animate-pulse" />)}</div>
+          <div className="p-6 space-y-4">
+            {[...Array(4)].map((_, i) => <div key={i} className="h-24 rounded-xl bg-[#161b22] animate-pulse" />)}
+          </div>
         ) : !d ? (
           <div className="p-6 text-slate-400">User not found.</div>
         ) : (
@@ -46,8 +179,13 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
                   <div className="text-lg font-bold text-white truncate">{d.user.name ?? "No name"}</div>
                   <div className="text-sm text-slate-400 truncate">{d.user.email ?? "No email"}</div>
                   <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                    <Badge className={d.user.role === "admin" ? "bg-emerald-500/10 text-emerald-400 border-0 text-xs" : "bg-slate-500/10 text-slate-400 border-0 text-xs"}>{d.user.role}</Badge>
-                    <Badge className={d.user.isSuspended ? "bg-red-500/10 text-red-400 border-0 text-xs" : "bg-emerald-500/10 text-emerald-400 border-0 text-xs"}>{d.user.isSuspended ? "Suspended" : "Active"}</Badge>
+                    <Badge className={d.user.role === "admin" ? "bg-emerald-500/10 text-emerald-400 border-0 text-xs" : "bg-slate-500/10 text-slate-400 border-0 text-xs"}>
+                      {d.user.role}
+                    </Badge>
+                    <Badge className={d.user.isSuspended ? "bg-red-500/10 text-red-400 border-0 text-xs" : "bg-emerald-500/10 text-emerald-400 border-0 text-xs"}>
+                      {d.user.isSuspended ? "Suspended" : "Active"}
+                    </Badge>
+                    <TierBadge totalSpent={d.wallet?.totalSpent ?? 0} />
                     <span className="text-xs text-slate-400">Joined {new Date(d.user.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
@@ -83,19 +221,7 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
               ) : (
                 <div className="space-y-2">
                   {d.orders.map((order: any) => (
-                    <div key={order.id} className="bg-[#161b22] border border-emerald-900/30 rounded-lg p-3 flex items-center gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-mono text-slate-400">#{order.id}</span>
-                          <span className="text-xs font-mono text-slate-400 truncate">{order.orderNumber ?? "—"}</span>
-                        </div>
-                        <div className="text-xs text-slate-400 mt-0.5">{new Date(order.createdAt).toLocaleString()}</div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div className="text-sm font-bold text-white">${Number(order.totalUSD ?? 0).toFixed(2)}</div>
-                        <Badge className={`${statusColor[order.status] ?? "bg-slate-500/10 text-slate-400"} border-0 text-xs mt-0.5`}>{order.status}</Badge>
-                      </div>
-                    </div>
+                    <OrderRow key={order.id} order={order} />
                   ))}
                 </div>
               )}
@@ -113,7 +239,8 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
                 <div className="space-y-2">
                   {d.walletTransactions.map((txn: any) => (
                     <div key={txn.id} className="bg-[#161b22] border border-emerald-900/30 rounded-lg p-3 flex items-center gap-3">
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: txn.type === "deposit" || txn.type === "refund" ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)" }}>
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                        style={{ background: txn.type === "deposit" || txn.type === "refund" ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)" }}>
                         <DollarSign className="h-3 w-3" style={{ color: txn.type === "deposit" || txn.type === "refund" ? "#00C2FF" : "#ef4444" }} />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -162,6 +289,7 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
   );
 }
 
+// ── Main users list ───────────────────────────────────────────────────────────
 export default function AdminUsers() {
   const { isAuthenticated, user } = useAuth();
   const [search, setSearch] = useState("");
@@ -204,7 +332,9 @@ export default function AdminUsers() {
       </div>
 
       {isLoading ? (
-        <div className="space-y-2">{[...Array(10)].map((_, i) => <div key={i} className="bg-[#161b22] border border-emerald-900/30 rounded-xl h-14 animate-pulse" />)}</div>
+        <div className="space-y-2">
+          {[...Array(10)].map((_, i) => <div key={i} className="bg-[#161b22] border border-emerald-900/30 rounded-xl h-14 animate-pulse" />)}
+        </div>
       ) : userList.length === 0 ? (
         <div className="bg-[#161b22] border border-emerald-900/30 rounded-xl p-12 text-center">
           <Users className="h-12 w-12 text-slate-400 mx-auto mb-4" />
@@ -219,10 +349,10 @@ export default function AdminUsers() {
                 <tr className="border-b border-emerald-900/30 text-slate-400 text-xs uppercase">
                   <th className="text-left p-4">User</th>
                   <th className="text-left p-4">Email</th>
+                  <th className="text-center p-4">Tier</th>
                   <th className="text-center p-4">Role</th>
                   <th className="text-center p-4">Status</th>
-                  <th className="text-left p-4">Joined</th>
-                  <th className="text-left p-4">Country</th>
+                  <th className="text-left p-4 hidden md:table-cell">Joined</th>
                   <th className="text-center p-4">Actions</th>
                 </tr>
               </thead>
@@ -244,15 +374,19 @@ export default function AdminUsers() {
                     </td>
                     <td className="p-4 text-slate-400">{u.email ?? "—"}</td>
                     <td className="p-4 text-center">
-                      <Badge className={u.role === "admin" ? "bg-emerald-500/10 text-emerald-400 border-0 text-xs" : "bg-slate-500/10 text-slate-400 border-0 text-xs"}>{u.role}</Badge>
+                      <TierBadge totalSpent={u.totalSpent ?? 0} />
+                    </td>
+                    <td className="p-4 text-center">
+                      <Badge className={u.role === "admin" ? "bg-emerald-500/10 text-emerald-400 border-0 text-xs" : "bg-slate-500/10 text-slate-400 border-0 text-xs"}>
+                        {u.role}
+                      </Badge>
                     </td>
                     <td className="p-4 text-center">
                       <Badge className={u.isSuspended ? "bg-red-500/10 text-red-400 border-0 text-xs" : "bg-emerald-500/10 text-emerald-400 border-0 text-xs"}>
                         {u.isSuspended ? "Suspended" : "Active"}
                       </Badge>
                     </td>
-                    <td className="p-4 text-slate-400 text-xs">{new Date(u.createdAt).toLocaleDateString()}</td>
-                    <td className="p-4 text-slate-400 text-xs">{(u as any).signupCountry ?? (u as any).country ?? "—"}</td>
+                    <td className="p-4 text-slate-400 text-xs hidden md:table-cell">{new Date(u.createdAt).toLocaleDateString()}</td>
                     <td className="p-4 text-center" onClick={e => e.stopPropagation()}>
                       {u.isSuspended ? (
                         <button
@@ -285,6 +419,7 @@ export default function AdminUsers() {
           <Button variant="outline" className="border-emerald-900/30 text-slate-400 hover:text-white hover:bg-[#0d1117] h-8 text-xs" disabled={userList.length < 50} onClick={() => setPage(p => p + 1)}>Next</Button>
         </div>
       )}
+
       {selectedUserId !== null && (
         <UserDetailPanel userId={selectedUserId} onClose={() => setSelectedUserId(null)} />
       )}

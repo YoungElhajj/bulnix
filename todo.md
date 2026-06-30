@@ -762,3 +762,11 @@
 - [x] Google OAuth: frontend "Continue with Google" button on Login and Signup pages working
 - [x] Google OAuth: endpoint /api/auth/google correctly redirects to Google consent screen
 - [x] Google OAuth: callback URL hardcoded to https://bulnix.com/api/auth/google/callback (must be registered in Google Console)
+
+## Admin Panel Enhancements (Jun 30, 2026)
+- [x] Format delivered credentials in Admin Orders detail panel with readable credential boxes
+- [x] Extend Admin Users detail data with order items and fulfillment records
+- [x] Make Admin Users order rows expandable with product details and formatted delivered credentials
+- [x] Add tier badges to Admin Users list table and user detail panel
+- [x] Send admin notification when a user moves up a spending tier
+- [x] Run TypeScript/build checks and deliver updated ZIP package

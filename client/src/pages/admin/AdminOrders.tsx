@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Package, RefreshCw, DollarSign, X, Search, ChevronLeft, User, CreditCard, Truck, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CredentialCards } from "@/components/admin/CredentialCards";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -280,10 +281,10 @@ export default function AdminOrders() {
                         </div>
                         <span className="text-slate-500 text-xs">{new Date(f.createdAt).toLocaleString()}</span>
                       </div>
-                      {f.deliveredData && (
-                        <div className="mt-2">
-                          <p className="text-slate-400 text-xs mb-1">Delivered Data:</p>
-                          <pre className="bg-[#0d1117] rounded p-3 text-emerald-300 text-xs overflow-x-auto whitespace-pre-wrap break-all">{typeof f.deliveredData === "string" ? f.deliveredData : JSON.stringify(f.deliveredData, null, 2)}</pre>
+                      {(f.deliveredData ?? f.deliveryData) && (
+                        <div className="mt-3">
+                          <p className="text-slate-400 text-xs mb-2 font-semibold">Delivered Credentials:</p>
+                          <CredentialCards raw={f.deliveredData ?? f.deliveryData} />
                         </div>
                       )}
                       {f.errorMessage && <p className="text-red-400 text-xs mt-2">Error: {f.errorMessage}</p>}

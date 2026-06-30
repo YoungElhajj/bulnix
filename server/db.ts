@@ -700,9 +700,28 @@ export async function payOrderWithWallet(userId: number, orderId: number) {
   }
 
   // Deduct from wallet
+  const oldSpent = Number(wallet.totalSpent);
   const newBalance = (currentBalance - totalUSD).toFixed(6);
-  const newSpent = (Number(wallet.totalSpent) + totalUSD).toFixed(6);
+  const newSpent = (oldSpent + totalUSD).toFixed(6);
   await withDbRetry(() => db!.update(wallets).set({ balanceUSD: newBalance, totalSpent: newSpent }).where(eq(wallets.userId, userId)), "payOrderWithWallet:deductWallet");
+
+  // Tier upgrade notification
+  const getTierName = (spent: number) => {
+    if (spent >= 500) return "Platinum";
+    if (spent >= 200) return "Gold";
+    if (spent >= 50)  return "Silver";
+    return "Bronze";
+  };
+  const oldTier = getTierName(oldSpent);
+  const newTier = getTierName(Number(newSpent));
+  if (oldTier !== newTier) {
+    const [userRow] = await db.select({ name: users.name, email: users.email }).from(users).where(eq(users.id, userId)).limit(1);
+    const { notifyOwner } = await import("./_core/notification");
+    notifyOwner({
+      title: `User Tier Upgrade: ${oldTier} → ${newTier}`,
+      content: `User ${userRow?.name ?? "(no name)"} (${userRow?.email ?? `ID ${userId}`}) has upgraded from ${oldTier} to ${newTier}.\nTotal spent: $${Number(newSpent).toFixed(2)}\nOrder: ${order.orderNumber}`,
+    }).catch(err => console.error("[TierNotify] Error:", err));
+  }
 
   // Record wallet transaction
   const txRef = `WALLET-ORDER-${orderId}-${Date.now()}`;
@@ -1398,12 +1417,19 @@ export async function adminGetUsers(input: { page: number; limit: number; search
   const conditions = input.search
     ? [or(like(users.email, `%${input.search}%`), like(users.name, `%${input.search}%`))]
     : [];
-  const items = conditions.length > 0
+  const baseItems = conditions.length > 0
     ? await db.select().from(users).where(and(...conditions)).orderBy(desc(users.createdAt)).limit(input.limit).offset(offset)
     : await db.select().from(users).orderBy(desc(users.createdAt)).limit(input.limit).offset(offset);
   const countResult = conditions.length > 0
     ? await db.select({ count: sql<number>`count(*)` }).from(users).where(and(...conditions))
     : await db.select({ count: sql<number>`count(*)` }).from(users);
+  // Enrich with wallet totalSpent for tier calculation
+  const userIds = baseItems.map(u => u.id);
+  const walletRows = userIds.length > 0
+    ? await db.select({ userId: wallets.userId, totalSpent: wallets.totalSpent }).from(wallets).where(inArray(wallets.userId, userIds))
+    : [];
+  const walletMap = new Map(walletRows.map(w => [w.userId, w.totalSpent]));
+  const items = baseItems.map(u => ({ ...u, totalSpent: walletMap.get(u.id) ?? "0" }));
   return { items, total: Number(countResult[0]?.count ?? 0) };
 }
 
@@ -1878,7 +1904,22 @@ export async function adminGetUserDetail(userId: number) {
   const [wallet] = await db.select().from(wallets).where(eq(wallets.userId, userId)).limit(1);
   const walletTxns = await db.select().from(walletTransactions).where(eq(walletTransactions.userId, userId)).orderBy(desc(walletTransactions.createdAt)).limit(10);
 
-  return { user, orders: userOrders, tickets: userTickets, wallet: wallet ?? null, walletTransactions: walletTxns };
+  // Enrich each order with its items and fulfillment records
+  const orderIds = userOrders.map(o => o.id);
+  const allItems = orderIds.length > 0
+    ? await db.select().from(orderItems).where(inArray(orderItems.orderId, orderIds))
+    : [];
+  const allFulfillments = orderIds.length > 0
+    ? await db.select().from(fulfillmentRecords).where(inArray(fulfillmentRecords.orderId, orderIds))
+    : [];
+
+  const enrichedOrders = userOrders.map(order => ({
+    ...order,
+    items: allItems.filter(item => item.orderId === order.id),
+    fulfillments: allFulfillments.filter(f => f.orderId === order.id),
+  }));
+
+  return { user, orders: enrichedOrders, tickets: userTickets, wallet: wallet ?? null, walletTransactions: walletTxns };
 }
 
 // ─── AccsZone Balance ─────────────────────────────────────────────────────────
