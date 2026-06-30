@@ -14,7 +14,13 @@ function getQueryParam(req: Request, key: string): string | undefined {
 }
 
 export function registerOAuthRoutes(app: Express) {
-  app.get("/api/oauth/callback", async (req: Request, res: Response) => {
+  // Manus OAuth is not used — Google OAuth and email/password auth are used instead
+  app.get("/api/oauth/callback", (_req: Request, res: Response) => {
+    res.redirect(302, "/");
+  });
+  return;
+  // Dead code below kept for reference only
+  app.get("/api/oauth/callback-unused", async (req: Request, res: Response) => {
     const code = getQueryParam(req, "code");
     const state = getQueryParam(req, "state");
 

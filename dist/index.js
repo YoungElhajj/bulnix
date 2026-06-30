@@ -5318,12 +5318,6 @@ var GET_USER_INFO_WITH_JWT_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInf
 var OAuthService = class {
   constructor(client) {
     this.client = client;
-    console.log("[OAuth] Initialized with baseURL:", ENV.oAuthServerUrl);
-    if (!ENV.oAuthServerUrl) {
-      console.error(
-        "[OAuth] ERROR: OAUTH_SERVER_URL is not configured! Set OAUTH_SERVER_URL environment variable."
-      );
-    }
   }
   decodeState(state) {
     const redirectUri = atob(state);
@@ -5531,7 +5525,11 @@ function getQueryParam(req, key) {
   return typeof value === "string" ? value : void 0;
 }
 function registerOAuthRoutes(app) {
-  app.get("/api/oauth/callback", async (req, res) => {
+  app.get("/api/oauth/callback", (_req, res) => {
+    res.redirect(302, "/");
+  });
+  return;
+  app.get("/api/oauth/callback-unused", async (req, res) => {
     const code = getQueryParam(req, "code");
     const state = getQueryParam(req, "state");
     if (!code || !state) {
