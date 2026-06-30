@@ -838,10 +838,16 @@
 - [x] Add back buttons to Affiliate, Rewards, ApiKeys, ApiDocs pages
 
 ## Round 6 Fixes (Jun 30 2026)
-- [ ] Build brand-logo mapping utility (brandLogos.ts) covering 100+ services
-- [ ] Wire brand logos into ProductCard, ProductDetail, streaming section on Home
-- [ ] Fix hamburger menu (3-lines) click handler — not responding
-- [ ] Fix affiliate promo banner — always visible on all pages, no permanent dismiss option
-- [ ] Verify Telegram popup works after signup (claimTelegramBonus)
-- [ ] Mobile responsiveness audit and fixes (product grid, navbar, checkout, dashboard)
-- [ ] Produce Namecheap-ready deployment ZIP
+- [x] Build brand-logo mapping utility (brandLogos.ts) covering 100+ services
+- [x] Wire brand logos into ProductCard, ProductDetail, streaming section on Home
+- [x] Fix hamburger menu (3-lines) click handler — not responding
+- [x] Fix affiliate promo banner — always visible on all pages, no permanent dismiss option
+- [x] Verify Telegram popup works after signup (claimTelegramBonus)
+- [x] Mobile responsiveness audit and fixes (product grid, navbar, checkout, dashboard)
+- [x] Produce Namecheap-ready deployment ZIP
+
+## Round 7 Fixes (Jun 30 2026)
+- [x] Fix navbar mobile display: banner single-line (whitespace-nowrap, overflow-hidden), nav z-[100], mobile menu z-98
+- [x] Fix mobile menu paddingTop to 6rem (96px) to account for banner + nav row
+- [x] Hamburger/X button always clickable (nav z-[100] is above mobile menu overlay z-98)
+- [x] Brand logos verified working: AccsZone products show AccsZone CDN images, others show brand logos or initials

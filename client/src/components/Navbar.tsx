@@ -126,18 +126,16 @@ export default function Navbar() {
     : "bg-[#0F3D5E]";
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 border-b border-[#1a5070]/50 ${navBg} backdrop-blur-md transition-all duration-300`}>
-      {/* Affiliate Banner — always visible, no dismiss */}
+    <nav className={`fixed top-0 left-0 right-0 z-[100] border-b border-[#1a5070]/50 ${navBg} backdrop-blur-md transition-all duration-300`}>
+      {/* Affiliate Banner — always visible, no dismiss, single line */}
       {!isActive("/affiliate") && (
-        <div className="bg-gradient-to-r from-cyan-600 to-blue-700 border-b border-cyan-500/30">
-          <div className="container flex items-center justify-center py-1.5 gap-2">
-            <Gift className="w-3.5 h-3.5 text-white flex-shrink-0" />
-            <span className="text-white text-xs font-medium text-center">
-              🎉 Earn up to $500 referring users to Bulnix —{" "}
-              <Link href="/affiliate" className="underline underline-offset-2 font-bold hover:text-cyan-100 transition-colors">
-                Join the Affiliate Program
-              </Link>
-            </span>
+        <div className="bg-gradient-to-r from-cyan-600 to-blue-700 border-b border-cyan-500/30 overflow-hidden">
+          <div className="flex items-center justify-center py-1 px-3 gap-1.5 min-h-0">
+            <Gift className="w-3 h-3 text-white flex-shrink-0" />
+            <Link href="/affiliate" className="text-white text-[11px] font-medium underline underline-offset-2 hover:text-cyan-100 transition-colors whitespace-nowrap">
+              <span className="hidden sm:inline">🎉 Earn up to $500 — Join Affiliate Program</span>
+              <span className="sm:hidden">🎉 Earn $500 — Join Affiliate</span>
+            </Link>
           </div>
         </div>
       )}
@@ -366,7 +364,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="lg:hidden border-t border-white/10 bg-[#0F3D5E] overflow-y-auto" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100, paddingTop: '6rem' }}>
+        <div className="lg:hidden bg-[#0F3D5E] overflow-y-auto" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 98, paddingTop: '6rem' }}>
           <div className="container py-4 space-y-1">
             {/* Quick category shortcuts (mobile) */}
             <div className="pb-1">
