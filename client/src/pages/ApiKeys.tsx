@@ -184,7 +184,7 @@ export default function ApiKeys() {
                         )}
                         {/* Show masked key prefix for active keys after acknowledgement */}
                         {k.status === "active" && k.keyPrefix && (acknowledgedKeys.has(k.id) || !k.rawKeyOnce) && (
-                          <p className="text-xs text-slate-400 font-mono mt-0.5">{k.keyPrefix}••••••••••••••••••••••••••••••••••••••••</p>
+                          <p className="text-xs text-slate-400 font-mono mt-0.5 truncate max-w-[200px] sm:max-w-xs">{k.keyPrefix}••••••••••••••</p>
                         )}
                         {k.status === "pending" && (
                           <p className="text-xs text-yellow-400/80 mt-0.5">Awaiting admin approval</p>
@@ -227,7 +227,7 @@ export default function ApiKeys() {
         )}
 
         {/* API Docs CTA */}
-        <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-2xl p-6 flex items-center justify-between gap-4">
+        <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <p className="font-semibold text-white">Ready to integrate?</p>
             <p className="text-sm text-slate-400 mt-0.5">Read our API documentation to learn how to use your key.</p>

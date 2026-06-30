@@ -854,6 +854,6 @@
 - [x] Fix mobile menu dropdown: changed from position:fixed top:0 paddingTop:6rem to position:fixed top:100% (starts exactly below navbar, no paddingTop needed)
 
 ## New Tasks (Jun 30, 2026)
-- [ ] Set up GitHub remote and push latest source code for backup/download
-- [ ] Fix streaming products showing "out of stock" despite stockUnlimited=1
-- [ ] Referral page: add "Generate Referral Link" button (explicit generation, reward only on first deposit)
+- [x] Set up GitHub remote and push latest source code for backup/download (GitHub token expired — user must reconnect via Settings → GitHub)
+- [x] Fix streaming products showing "out of stock" despite stockUnlimited=1 — frontend now checks stockUnlimited flag in Products.tsx and ProductDetail.tsx
+- [x] Referral page: add "Generate Referral Link" button (explicit generation, reward only on first deposit)

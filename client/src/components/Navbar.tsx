@@ -140,18 +140,22 @@ export default function Navbar() {
 
   return (
     <nav ref={navRef} className={`fixed top-0 left-0 right-0 z-[100] border-b border-[#1a5070]/50 ${navBg} backdrop-blur-md transition-all duration-300`}>
-      {/* Affiliate Banner — always visible, no dismiss, single line */}
-      {!isActive("/affiliate") && (
-        <div className="bg-gradient-to-r from-cyan-600 to-blue-700 border-b border-cyan-500/30 overflow-hidden">
-          <div className="flex items-center justify-center py-1 px-3 gap-1.5 min-h-0">
-            <Gift className="w-3 h-3 text-white flex-shrink-0" />
-            <Link href="/affiliate" className="text-white text-[11px] font-medium underline underline-offset-2 hover:text-cyan-100 transition-colors whitespace-nowrap">
-              <span className="hidden sm:inline">🎉 Earn up to $500 — Join Affiliate Program</span>
-              <span className="sm:hidden">🎉 Earn $500 — Join Affiliate</span>
-            </Link>
-          </div>
+      {/* Top Banner — always visible on all pages, shows Affiliate + Reseller API links */}
+      <div className="bg-gradient-to-r from-cyan-600 to-blue-700 border-b border-cyan-500/30 overflow-hidden">
+        <div className="flex items-center justify-center py-1.5 px-3 gap-2 min-h-0 flex-wrap">
+          <Link href="/affiliate" className="flex items-center gap-1 text-white text-[11px] font-medium hover:text-cyan-100 transition-colors whitespace-nowrap">
+            <Gift className="w-3 h-3 flex-shrink-0" />
+            <span className="hidden sm:inline">🎉 Earn $0.50 per referral — Affiliate Program</span>
+            <span className="sm:hidden">🎉 Affiliate — Earn $0.50</span>
+          </Link>
+          <span className="text-white/30 text-[11px] select-none">|</span>
+          <Link href="/api-docs" className="flex items-center gap-1 text-white text-[11px] font-medium hover:text-cyan-100 transition-colors whitespace-nowrap">
+            <svg className="w-3 h-3 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+            <span className="hidden sm:inline">Become a Reseller — Access API</span>
+            <span className="sm:hidden">Reseller API</span>
+          </Link>
         </div>
-      )}
+      </div>
 
       <div className="container">
         <div className="flex items-center justify-between h-16">
