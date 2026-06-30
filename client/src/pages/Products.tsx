@@ -36,10 +36,10 @@ function ProductImageArea({ product }: { product: any }) {
           <Star className="h-3 w-3 mr-0.5 fill-current" /> Featured
         </Badge>
       )}
-      {!product.stockUnlimited && product.stockQuantity <= 5 && product.stockQuantity > 0 && (
+      {product.stockQuantity <= 5 && product.stockQuantity > 0 && (
         <Badge className="absolute top-2 right-2 z-20 bg-orange-500 text-white text-xs border-0 shadow">Low Stock</Badge>
       )}
-      {!product.stockUnlimited && product.stockQuantity === 0 && (
+      {product.stockQuantity === 0 && (
         <div className="absolute inset-0 z-20 bg-black/60 flex items-center justify-center">
           <span className="text-white font-semibold text-sm bg-black/50 px-3 py-1 rounded-full">Out of Stock</span>
         </div>
@@ -82,7 +82,7 @@ export default function Products() {
   const handleAddToCart = (product: any, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!product.stockUnlimited && product.stockQuantity <= 0) {
+    if (product.stockQuantity <= 0) {
       toast.error("This product is out of stock");
       return;
     }
@@ -95,7 +95,7 @@ export default function Products() {
       providerKey: product.providerKey,
       supplierProductId: product.supplierProductId ? String(product.supplierProductId) : undefined,
       stockQuantity: product.stockQuantity,
-      stockUnlimited: product.stockUnlimited,
+
     });
     toast.success(`${product.title} added to cart`);
   };
@@ -262,14 +262,14 @@ export default function Products() {
                           {formatPriceGlobal(Number(product.customerPriceUSD))}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {product.stockUnlimited ? "In Stock" : product.stockQuantity === 0 ? "Out of Stock" : `${product.stockQuantity} left`}
+                          {product.stockQuantity === 0 ? "Out of Stock" : `${product.stockQuantity} left`}
                         </span>
                       </div>
                       <Button
                         size="sm"
                         className="w-full bg-[#00C2FF]/10 hover:bg-[#00C2FF] text-[#00C2FF] hover:text-[#0F3D5E] border border-[#00C2FF]/30 hover:border-[#00C2FF] transition-all duration-200 text-xs rounded-lg font-semibold h-8"
                         onClick={(e) => handleAddToCart(product, e)}
-                        disabled={!product.stockUnlimited && product.stockQuantity === 0}
+                        disabled={product.stockQuantity === 0}
                       >
                         <ShoppingCart className="h-3.5 w-3.5 mr-1.5" /> Add to Cart
                       </Button>

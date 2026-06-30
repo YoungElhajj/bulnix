@@ -2485,6 +2485,7 @@ var init_notification = __esm({
 var db_exports = {};
 __export(db_exports, {
   adminCreateProduct: () => adminCreateProduct,
+  adminGetOrderDetail: () => adminGetOrderDetail,
   adminGetOrders: () => adminGetOrders,
   adminGetProducts: () => adminGetProducts,
   adminGetTickets: () => adminGetTickets,
@@ -3545,10 +3546,27 @@ async function adminGetOrders(input) {
   const db = await getDb();
   if (!db) return { items: [], total: 0 };
   const offset = (input.page - 1) * input.limit;
-  const conditions = input.status ? [eq3(orders.status, input.status)] : [];
+  const conditions = [];
+  if (input.status) conditions.push(eq3(orders.status, input.status));
+  if (input.search) {
+    const s = `%${input.search}%`;
+    conditions.push(or(like(orders.orderNumber, s), like(orders.billingEmail, s)));
+  }
   const items = conditions.length > 0 ? await db.select().from(orders).where(and3(...conditions)).orderBy(desc(orders.createdAt)).limit(input.limit).offset(offset) : await db.select().from(orders).orderBy(desc(orders.createdAt)).limit(input.limit).offset(offset);
   const countResult = conditions.length > 0 ? await db.select({ count: sql`count(*)` }).from(orders).where(and3(...conditions)) : await db.select({ count: sql`count(*)` }).from(orders);
   return { items, total: Number(countResult[0]?.count ?? 0) };
+}
+async function adminGetOrderDetail(orderId) {
+  const db = await getDb();
+  if (!db) return null;
+  const [order] = await db.select().from(orders).where(eq3(orders.id, orderId)).limit(1);
+  if (!order) return null;
+  const [user] = await db.select({ id: users.id, name: users.name, email: users.email }).from(users).where(eq3(users.id, order.userId)).limit(1);
+  const [wallet] = await db.select({ balanceUSD: wallets.balanceUSD }).from(wallets).where(eq3(wallets.userId, order.userId)).limit(1);
+  const items = await db.select().from(orderItems).where(eq3(orderItems.orderId, orderId));
+  const fulfillments = await db.select().from(fulfillmentRecords).where(eq3(fulfillmentRecords.orderId, orderId));
+  const paymentRows = await db.select().from(payments).where(eq3(payments.orderId, orderId));
+  return { order, user: user ? { ...user, walletBalanceUSD: wallet?.balanceUSD ?? "0" } : null, items, fulfillments, payments: paymentRows };
 }
 async function adminUpdateOrder(input) {
   const db = await getDb();
@@ -5820,7 +5838,8 @@ var appRouter = router({
     }),
     // Orders
     orders: router({
-      list: adminProcedure2.input(z3.object({ page: z3.number().default(1), limit: z3.number().default(50), status: z3.string().optional() })).query(({ input }) => adminGetOrders(input)),
+      list: adminProcedure2.input(z3.object({ page: z3.number().default(1), limit: z3.number().default(50), status: z3.string().optional(), search: z3.string().optional() })).query(({ input }) => adminGetOrders(input)),
+      getDetail: adminProcedure2.input(z3.object({ orderId: z3.number() })).query(({ input }) => adminGetOrderDetail(input.orderId)),
       update: adminProcedure2.input(z3.object({ id: z3.number(), status: z3.string().optional(), adminNotes: z3.string().optional(), fraudFlag: z3.boolean().optional() })).mutation(({ input }) => adminUpdateOrder(input)),
       retryFulfillment: adminProcedure2.input(z3.object({ orderId: z3.number() })).mutation(({ input }) => adminRetryFulfillment(input.orderId)),
       manualRefund: adminProcedure2.input(z3.object({
@@ -5970,7 +5989,7 @@ var appRouter = router({
       const client = process.env.RESEND_API_KEY ? new Resend2(process.env.RESEND_API_KEY) : null;
       if (!client) return { sent: false };
       const stepsHtml = input.steps.map((s) => `<li style="margin-bottom:6px;color:#94a3b8;font-size:14px;">${s}</li>`).join("");
-      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><style>body{margin:0;padding:0;background:#0B0F19;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#e2e8f0}.wrapper{max-width:600px;margin:0 auto;padding:40px 20px}.card{background:#0F172A;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:40px}h1{font-size:22px;font-weight:700;color:#fff;margin:0 0 12px}p{font-size:15px;line-height:1.6;color:#94a3b8;margin:0 0 16px}.highlight{background:rgba(0,185,233,0.08);border:1px solid rgba(0,185,233,0.2);border-radius:10px;padding:20px 24px;margin:20px 0}.label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#475569;margin-bottom:4px}.footer{text-align:center;margin-top:32px;font-size:12px;color:#334155}</style></head><body><div class="wrapper"><div class="card"><img src="https://static-assets.manus.space/manus-storage/bulnix-logo-new_03e40d5d.jpg" alt="Bulnix" style="height:36px;margin-bottom:28px;"/><h1>Your Support Request Has Been Received</h1><p>Hi ${input.name || "there"}, thank you for reaching out to Bulnix Support. Here's a summary of your issue that has been shared with our team on WhatsApp.</p><div class="highlight"><div class="label">Issue Summary</div><div style="color:#e2e8f0;font-size:15px;margin-bottom:16px;">${input.issueSummary}</div><div class="label">Steps Completed</div><ul style="margin:8px 0 0;padding-left:20px;">${stepsHtml}</ul></div><p>Our support team will follow up with you on WhatsApp shortly. If you haven't connected yet, you can reach us at <a href="https://wa.me/447367061279" style="color:#00B9E9;">wa.me/447367061279</a>.</p><div class="footer">Bulnix &bull; <a href="https://bulnix.com" style="color:#475569;">bulnix.com</a></div></div></div></body></html>`;
+      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><style>body{margin:0;padding:0;background:#0B0F19;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#e2e8f0}.wrapper{max-width:600px;margin:0 auto;padding:40px 20px}.card{background:#0F172A;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:40px}h1{font-size:22px;font-weight:700;color:#fff;margin:0 0 12px}p{font-size:15px;line-height:1.6;color:#94a3b8;margin:0 0 16px}.highlight{background:rgba(0,185,233,0.08);border:1px solid rgba(0,185,233,0.2);border-radius:10px;padding:20px 24px;margin:20px 0}.label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#475569;margin-bottom:4px}.footer{text-align:center;margin-top:32px;font-size:12px;color:#334155}</style></head><body><div class="wrapper"><div class="card"><img src="https://static-assets.manus.space/manus-storage/bulnix-logo-new_03e40d5d.jpg" alt="Bulnix" style="height:36px;margin-bottom:28px;"/><h1>Your Support Request Has Been Received</h1><p>Hi ${input.name || "there"}, thank you for reaching out to Bulnix Support. Here's a summary of your issue that has been shared with our team on WhatsApp.</p><div class="highlight"><div class="label">Issue Summary</div><div style="color:#e2e8f0;font-size:15px;margin-bottom:16px;">${input.issueSummary}</div><div class="label">Steps Completed</div><ul style="margin:8px 0 0;padding-left:20px;">${stepsHtml}</ul></div><p>Our support team will follow up with you on WhatsApp shortly. If you haven't connected yet, you can reach us at <a href="https://wa.me/447988531474" style="color:#00B9E9;">wa.me/447988531474</a>.</p><div class="footer">Bulnix &bull; <a href="https://bulnix.com" style="color:#475569;">bulnix.com</a></div></div></div></body></html>`;
       try {
         await client.emails.send({
           from: `Bulnix Support <${process.env.EMAIL_FROM ?? "noreply@bulnix.com"}>`,

@@ -158,9 +158,9 @@ export async function syncProducts(apiKey: string, markupPercent = 20): Promise<
         const customerPrice = supplierPrice * (1 + markupPercent / 100);
         const prodName = prod.title; // AccsZone uses 'title'
         const slug = prod.slug ?? String(prodName).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-        // AccsZone uses 'available_stock'; no unlimited flag in listings
+        // AccsZone uses 'available_stock'; always use real stock count, never unlimited
         const stockQty = Number(prod.available_stock) || 0;
-        const isUnlimited = stockQty === 0 && Number(prod.sold ?? 0) > 0; // heuristic: sold but 0 stock = unlimited
+        const isUnlimited = false; // AccsZone always provides real stock counts
 
         // Upsert into supplier_products cache
         const existingSupplier = await db.select().from(supplierProducts)
@@ -345,10 +345,11 @@ export async function syncStock(apiKey: string): Promise<{ updated: number; erro
 
     for (const item of stockData) {
       try {
-        const stockVal = item.unlimited ? 9999 : item.stock;
+        // Always use real stock count; AccsZone provides actual availability numbers
+        const stockVal = Number(item.stock) || 0;
           await db.update(products).set({
             stockQuantity: stockVal,
-            stockUnlimited: item.unlimited ?? false,
+            stockUnlimited: false,
           }).where(and(eq(products.providerKey, PROVIDER_KEY), eq(products.supplierProductId, Number(item.id))));
           updated++;
       } catch (err: unknown) {

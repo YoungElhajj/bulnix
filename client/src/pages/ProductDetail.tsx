@@ -753,7 +753,7 @@ export default function ProductDetail() {
   );
 
   const p = product as any;
-  const inStock = p.stockUnlimited || p.stockQuantity > 0;
+  const inStock = p.stockQuantity > 0;
   const loginInfo = getLoginInstructions(p.title ?? "");
 
   const handleAdd = () => {
@@ -763,7 +763,7 @@ export default function ProductDetail() {
         id: p.id, slug: p.slug, title: p.title, imageUrl: p.imageUrl,
         priceUSD: Number(p.customerPriceUSD), providerKey: p.providerKey,
         supplierProductId: p.supplierProductId ? String(p.supplierProductId) : undefined,
-        stockQuantity: p.stockQuantity, stockUnlimited: p.stockUnlimited
+        stockQuantity: p.stockQuantity
       });
     }
     toast.success(`${qty}x ${p.title} added to cart`);
@@ -789,7 +789,7 @@ export default function ProductDetail() {
       "@type": "Offer",
       "priceCurrency": "USD",
       "price": Number(p.customerPriceUSD).toFixed(2),
-      "availability": (p.stockUnlimited || p.stockQuantity > 0) ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "availability": p.stockQuantity > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
       "seller": { "@type": "Organization", "name": "Bulnix" },
       "url": `https://bulnix.com/products/${p.slug}`
     }
@@ -825,7 +825,7 @@ export default function ProductDetail() {
             image: p.imageUrl || undefined,
             url: `https://bulnix.com/products/${p.slug}`,
             priceUSD: Number(p.customerPriceUSD),
-            inStock: p.stockUnlimited || p.stockQuantity > 0,
+            inStock: p.stockQuantity > 0,
             category: p.category?.name,
           }),
           breadcrumbSchema([
@@ -878,7 +878,7 @@ export default function ProductDetail() {
                 ? "bg-green-500/15 text-green-400 border-green-500/30 text-xs"
                 : "bg-red-500/15 text-red-400 border-red-500/30 text-xs"
               }>
-                {inStock ? (p.stockUnlimited ? "✓ In Stock" : `✓ ${p.stockQuantity} available`) : "✗ Out of Stock"}
+                {inStock ? `✓ ${p.stockQuantity} available` : "✗ Out of Stock"}
               </Badge>
               {p.category?.name && (
                 <Badge className="bg-[#00C2FF]/15 text-[#00C2FF] border-[#00C2FF]/30 text-xs">
@@ -939,7 +939,7 @@ export default function ProductDetail() {
                 </button>
                 <span className="text-foreground font-semibold w-8 text-center">{qty}</span>
                 <button
-                  onClick={() => setQty(q => Math.min(p.stockUnlimited ? 99 : p.stockQuantity, q + 1))}
+                  onClick={() => setQty(q => Math.min(p.stockQuantity, q + 1))}
                   className="text-muted-foreground hover:text-foreground transition-colors p-0.5"
                 >
                   <Plus className="h-4 w-4"/>

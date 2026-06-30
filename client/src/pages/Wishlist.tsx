@@ -43,7 +43,7 @@ export default function Wishlist() {
                   <Link href={"/products/" + p.slug}><h3 className="text-sm font-semibold text-[#0D2137] line-clamp-2 mb-3 hover:text-[#0050D0] transition-colors">{p.title}</h3></Link>
                   <div className="flex items-center justify-between mb-3"><span className="text-[#0050D0] font-bold">${Number(p.customerPriceUSD).toFixed(2)}</span></div>
                   <Button size="sm" className="w-full bg-[#EEF4FF] hover:bg-[#00C2FF] text-[#0050D0] hover:text-[#0D2137] border border-[#0050D0]/20 hover:border-[#0050D0] transition-all text-xs"
-                    onClick={()=>{addItem({id:p.id,slug:p.slug,title:p.title,imageUrl:p.imageUrl,priceUSD:Number(p.customerPriceUSD),providerKey:p.providerKey,stockQuantity:p.stockQuantity,stockUnlimited:p.stockUnlimited});toast.success("Added to cart");}}>
+                    onClick={()=>{addItem({id:p.id,slug:p.slug,title:p.title,imageUrl:p.imageUrl,priceUSD:Number(p.customerPriceUSD),providerKey:p.providerKey,stockQuantity:p.stockQuantity});toast.success("Added to cart");}}>
                     <ShoppingCart className="h-3.5 w-3.5 mr-1.5"/> Add to Cart
                   </Button>
                 </div>

@@ -10,7 +10,6 @@ export interface CartItem {
   providerKey: string;
   supplierProductId?: string;
   stockQuantity: number;
-  stockUnlimited: boolean;
 }
 
 interface CartContextType {
@@ -43,7 +42,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems(prev => {
       const existing = prev.find(i => i.id === item.id);
       if (existing) {
-        const maxQty = item.stockUnlimited ? 999 : item.stockQuantity;
+        const maxQty = item.stockQuantity;
         return prev.map(i =>
           i.id === item.id
             ? { ...i, quantity: Math.min(i.quantity + qty, maxQty) }
@@ -66,7 +65,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems(prev =>
       prev.map(i => {
         if (i.id !== id) return i;
-        const maxQty = i.stockUnlimited ? 999 : i.stockQuantity;
+        const maxQty = i.stockQuantity;
         return { ...i, quantity: Math.min(qty, maxQty) };
       })
     );
