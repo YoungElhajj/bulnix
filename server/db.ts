@@ -1758,6 +1758,26 @@ export async function confirmWalletTopup(reference: string, skipVerify = false, 
     balanceAfterUSD: newBalance.toFixed(6),
   }).where(eq(walletTransactions.id, txn.id)), "confirmWalletTopup:updateTxn");
 
+  // Credit referral bonus on first deposit (fire-and-forget)
+  try {
+    const wasFirstDeposit = Number(wallet.totalDeposited) === 0;
+    if (wasFirstDeposit) {
+      const [depositor] = await db!.select({ referredBy: users.referredBy }).from(users).where(eq(users.id, txn.userId)).limit(1);
+      if (depositor?.referredBy) {
+        const [referrer] = await db!.select({ id: users.id }).from(users).where(eq(users.referralCode, depositor.referredBy)).limit(1);
+        if (referrer) {
+          const bonus = 0.50;
+          await db!.insert(affiliateBalances).values({ userId: referrer.id, balanceUSD: bonus.toFixed(6), totalEarned: bonus.toFixed(6) })
+            .onDuplicateKeyUpdate({ set: { balanceUSD: sql`balanceUSD + ${bonus.toFixed(6)}`, totalEarned: sql`totalEarned + ${bonus.toFixed(6)}` } });
+          await db!.insert(affiliateTransactions).values({ userId: referrer.id, type: "signup_bonus", amountUSD: bonus.toFixed(6), description: "Referral first-deposit bonus ($0.50)", referredUserId: txn.userId }).catch(() => {});
+          await db!.insert(notifications).values({ userId: referrer.id, type: "affiliate_bonus", title: "You earned a $0.50 referral bonus!", message: "Your referral made their first deposit. $0.50 has been added to your affiliate balance." }).catch(() => {});
+        }
+      }
+    }
+  } catch (refErr: any) {
+    await logSystem("warn", "referral", `Referral deposit bonus failed: ${refErr.message}`);
+  }
+
   // Send receipt email to customer (fire-and-forget, don't block confirmation)
   try {
     const [topupUser] = await db!.select({ email: users.email, name: users.name })

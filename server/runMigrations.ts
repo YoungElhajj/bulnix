@@ -1,11 +1,12 @@
 /**
- * One-time migration runner — called from server startup if tables are missing.
- * This runs automatically on server start and is idempotent (safe to run multiple times).
+ * One-time migration runner — called from server startup.
+ * Uses INFORMATION_SCHEMA to check column/table existence before altering,
+ * compatible with MySQL 5.7+ (no ADD COLUMN IF NOT EXISTS needed).
  */
 import { getDb } from "./db";
 
-const MIGRATIONS: { name: string; sql: string }[] = [
-  // 0001 — main tables
+// Table-level migrations: CREATE TABLE IF NOT EXISTS is safe on all MySQL versions
+const TABLE_MIGRATIONS: { name: string; sql: string }[] = [
   { name: "admin_actions", sql: "CREATE TABLE IF NOT EXISTS `admin_actions` (`id` int AUTO_INCREMENT NOT NULL, `adminId` int NOT NULL, `action` varchar(256) NOT NULL, `targetType` varchar(64), `targetId` int, `details` json, `ipAddress` varchar(64), `createdAt` timestamp NOT NULL DEFAULT (now()), CONSTRAINT `admin_actions_id` PRIMARY KEY(`id`))" },
   { name: "categories", sql: "CREATE TABLE IF NOT EXISTS `categories` (`id` int AUTO_INCREMENT NOT NULL, `slug` varchar(128) NOT NULL, `name` varchar(256) NOT NULL, `description` text, `imageUrl` text, `parentId` int, `isVisible` boolean NOT NULL DEFAULT true, `sortOrder` int NOT NULL DEFAULT 0, `createdAt` timestamp NOT NULL DEFAULT (now()), `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP, CONSTRAINT `categories_id` PRIMARY KEY(`id`), CONSTRAINT `categories_slug_unique` UNIQUE(`slug`))" },
   { name: "coupons", sql: "CREATE TABLE IF NOT EXISTS `coupons` (`id` int AUTO_INCREMENT NOT NULL, `code` varchar(64) NOT NULL, `discountType` enum('percent','fixed_usd') NOT NULL, `discountValue` decimal(10,2) NOT NULL, `maxUses` int, `usedCount` int NOT NULL DEFAULT 0, `minOrderUSD` decimal(10,2) DEFAULT '0.00', `expiresAt` timestamp, `isActive` boolean NOT NULL DEFAULT true, `createdAt` timestamp NOT NULL DEFAULT (now()), CONSTRAINT `coupons_id` PRIMARY KEY(`id`), CONSTRAINT `coupons_code_unique` UNIQUE(`code`))" },
@@ -16,7 +17,7 @@ const MIGRATIONS: { name: string; sql: string }[] = [
   { name: "orders", sql: "CREATE TABLE IF NOT EXISTS `orders` (`id` int AUTO_INCREMENT NOT NULL, `orderNumber` varchar(64) NOT NULL, `userId` int NOT NULL, `status` enum('pending_payment','paid','processing','fulfilled','partial','failed','cancelled','refunded','disputed') NOT NULL DEFAULT 'pending_payment', `subtotalUSD` decimal(18,2) NOT NULL, `discountUSD` decimal(18,2) NOT NULL DEFAULT '0.00', `totalUSD` decimal(18,2) NOT NULL, `currency` enum('NGN','USD','EUR','GBP') NOT NULL DEFAULT 'USD', `totalInCurrency` decimal(18,2) NOT NULL, `exchangeRateSnapshot` decimal(18,6), `couponCode` varchar(64), `couponDiscountUSD` decimal(18,2) DEFAULT '0.00', `billingEmail` varchar(320), `billingCountry` varchar(64), `fraudFlag` boolean NOT NULL DEFAULT false, `fraudReason` text, `isLocked` boolean NOT NULL DEFAULT false, `adminNotes` text, `supplierOrderId` varchar(256), `supplierStatus` varchar(64), `fulfillmentRetries` int NOT NULL DEFAULT 0, `lastFulfillmentAttempt` timestamp, `createdAt` timestamp NOT NULL DEFAULT (now()), `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP, CONSTRAINT `orders_id` PRIMARY KEY(`id`), CONSTRAINT `orders_orderNumber_unique` UNIQUE(`orderNumber`))" },
   { name: "payment_events", sql: "CREATE TABLE IF NOT EXISTS `payment_events` (`id` int AUTO_INCREMENT NOT NULL, `paymentId` int, `orderId` int, `gateway` varchar(64) NOT NULL, `eventType` varchar(128) NOT NULL, `payload` json, `isProcessed` boolean NOT NULL DEFAULT false, `isDuplicate` boolean NOT NULL DEFAULT false, `processedAt` timestamp, `createdAt` timestamp NOT NULL DEFAULT (now()), CONSTRAINT `payment_events_id` PRIMARY KEY(`id`))" },
   { name: "payments", sql: "CREATE TABLE IF NOT EXISTS `payments` (`id` int AUTO_INCREMENT NOT NULL, `orderId` int NOT NULL, `userId` int NOT NULL, `gateway` varchar(64) NOT NULL, `gatewayReference` varchar(256), `gatewayTransactionId` varchar(256), `status` enum('pending','success','failed','refunded','disputed') NOT NULL DEFAULT 'pending', `amount` decimal(18,2) NOT NULL, `currency` enum('NGN','USD','EUR','GBP') NOT NULL, `amountUSD` decimal(18,2), `exchangeRate` decimal(18,6), `paymentMethod` varchar(64), `metadata` json, `webhookVerified` boolean NOT NULL DEFAULT false, `createdAt` timestamp NOT NULL DEFAULT (now()), `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP, CONSTRAINT `payments_id` PRIMARY KEY(`id`), CONSTRAINT `payments_gatewayReference_unique` UNIQUE(`gatewayReference`))" },
-  { name: "products", sql: "CREATE TABLE IF NOT EXISTS `products` (`id` int AUTO_INCREMENT NOT NULL, `slug` varchar(256) NOT NULL, `supplierProductId` varchar(256), `providerKey` varchar(64) NOT NULL, `categoryId` int, `title` varchar(512) NOT NULL, `description` text, `shortDescription` text, `imageUrl` text, `tags` json, `supplierPrice` decimal(18,8) NOT NULL, `supplierCurrency` varchar(16) NOT NULL DEFAULT 'USD', `markupPercent` decimal(10,2) NOT NULL DEFAULT '20.00', `customerPriceUSD` decimal(18,2) NOT NULL, `customerPriceNGN` decimal(18,2), `stockQuantity` int NOT NULL DEFAULT 0, `stockUnlimited` boolean NOT NULL DEFAULT false, `isVisible` boolean NOT NULL DEFAULT true, `isFeatured` boolean NOT NULL DEFAULT false, `isDigital` boolean NOT NULL DEFAULT true, `regionRestrictions` json, `allowedPaymentMethods` json, `riskFlag` boolean NOT NULL DEFAULT false, `requiresAgeVerification` boolean NOT NULL DEFAULT false, `deliveryNote` text, `refundPolicy` text, `createdAt` timestamp NOT NULL DEFAULT (now()), `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP, CONSTRAINT `products_id` PRIMARY KEY(`id`), CONSTRAINT `products_slug_unique` UNIQUE(`slug`))" },
+  { name: "products", sql: "CREATE TABLE IF NOT EXISTS `products` (`id` int AUTO_INCREMENT NOT NULL, `slug` varchar(256) NOT NULL, `supplierProductId` varchar(256), `providerKey` varchar(64) NOT NULL, `categoryId` int, `isManual` boolean NOT NULL DEFAULT false, `isSubscription` boolean NOT NULL DEFAULT false, `title` varchar(512) NOT NULL, `description` text, `shortDescription` text, `imageUrl` text, `tags` json, `supplierPrice` decimal(18,8) NOT NULL, `supplierCurrency` varchar(16) NOT NULL DEFAULT 'USD', `markupPercent` decimal(10,2) NOT NULL DEFAULT '20.00', `customerPriceUSD` decimal(18,2) NOT NULL, `customerPriceNGN` decimal(18,2), `stockQuantity` int NOT NULL DEFAULT 0, `stockUnlimited` boolean NOT NULL DEFAULT false, `isVisible` boolean NOT NULL DEFAULT true, `isFeatured` boolean NOT NULL DEFAULT false, `isDigital` boolean NOT NULL DEFAULT true, `regionRestrictions` json, `allowedPaymentMethods` json, `riskFlag` boolean NOT NULL DEFAULT false, `requiresAgeVerification` boolean NOT NULL DEFAULT false, `deliveryNote` text, `deliveryFormat` text, `refundPolicy` text, `createdAt` timestamp NOT NULL DEFAULT (now()), `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP, CONSTRAINT `products_id` PRIMARY KEY(`id`), CONSTRAINT `products_slug_unique` UNIQUE(`slug`))" },
   { name: "provider_configs", sql: "CREATE TABLE IF NOT EXISTS `provider_configs` (`id` int AUTO_INCREMENT NOT NULL, `providerKey` varchar(64) NOT NULL, `displayName` varchar(128) NOT NULL, `baseUrl` text NOT NULL, `apiKey` text, `webhookSecret` text, `isEnabled` boolean NOT NULL DEFAULT true, `syncIntervalMinutes` int NOT NULL DEFAULT 30, `lastSyncAt` timestamp, `defaultMarkupPercent` decimal(10,2) NOT NULL DEFAULT '20.00', `settings` json, `createdAt` timestamp NOT NULL DEFAULT (now()), `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP, CONSTRAINT `provider_configs_id` PRIMARY KEY(`id`), CONSTRAINT `provider_configs_providerKey_unique` UNIQUE(`providerKey`))" },
   { name: "provider_sync_logs", sql: "CREATE TABLE IF NOT EXISTS `provider_sync_logs` (`id` int AUTO_INCREMENT NOT NULL, `providerKey` varchar(64) NOT NULL, `syncType` enum('categories','products','stock','prices','full') NOT NULL, `status` enum('running','success','failed','partial') NOT NULL, `itemsSynced` int DEFAULT 0, `itemsFailed` int DEFAULT 0, `errorMessage` text, `startedAt` timestamp NOT NULL DEFAULT (now()), `completedAt` timestamp, CONSTRAINT `provider_sync_logs_id` PRIMARY KEY(`id`))" },
   { name: "saved_products", sql: "CREATE TABLE IF NOT EXISTS `saved_products` (`id` int AUTO_INCREMENT NOT NULL, `userId` int NOT NULL, `productId` int NOT NULL, `createdAt` timestamp NOT NULL DEFAULT (now()), CONSTRAINT `saved_products_id` PRIMARY KEY(`id`))" },
@@ -25,48 +26,96 @@ const MIGRATIONS: { name: string; sql: string }[] = [
   { name: "system_logs", sql: "CREATE TABLE IF NOT EXISTS `system_logs` (`id` int AUTO_INCREMENT NOT NULL, `level` enum('info','warn','error','critical') NOT NULL, `category` varchar(64) NOT NULL, `message` text NOT NULL, `details` json, `userId` int, `orderId` int, `createdAt` timestamp NOT NULL DEFAULT (now()), CONSTRAINT `system_logs_id` PRIMARY KEY(`id`))" },
   { name: "ticket_messages", sql: "CREATE TABLE IF NOT EXISTS `ticket_messages` (`id` int AUTO_INCREMENT NOT NULL, `ticketId` int NOT NULL, `senderId` int NOT NULL, `senderRole` enum('user','admin') NOT NULL, `message` text NOT NULL, `attachmentUrl` text, `createdAt` timestamp NOT NULL DEFAULT (now()), CONSTRAINT `ticket_messages_id` PRIMARY KEY(`id`))" },
   { name: "user_sessions", sql: "CREATE TABLE IF NOT EXISTS `user_sessions` (`id` int AUTO_INCREMENT NOT NULL, `userId` int NOT NULL, `sessionToken` varchar(256) NOT NULL, `ipAddress` varchar(64), `userAgent` text, `expiresAt` timestamp NOT NULL, `createdAt` timestamp NOT NULL DEFAULT (now()), CONSTRAINT `user_sessions_id` PRIMARY KEY(`id`), CONSTRAINT `user_sessions_sessionToken_unique` UNIQUE(`sessionToken`))" },
-  // 0002 — wallets
   { name: "wallet_transactions", sql: "CREATE TABLE IF NOT EXISTS `wallet_transactions` (`id` int AUTO_INCREMENT NOT NULL, `userId` int NOT NULL, `type` enum('deposit','spend','refund','adjustment') NOT NULL, `amountUSD` decimal(18,6) NOT NULL, `balanceAfterUSD` decimal(18,6) NOT NULL, `description` varchar(512) NOT NULL, `reference` varchar(256), `orderId` int, `paymentId` int, `status` enum('pending','completed','failed','reversed') NOT NULL DEFAULT 'completed', `gateway` varchar(64), `gatewayRef` varchar(256), `createdAt` timestamp NOT NULL DEFAULT (now()), CONSTRAINT `wallet_transactions_id` PRIMARY KEY(`id`))" },
   { name: "wallets", sql: "CREATE TABLE IF NOT EXISTS `wallets` (`id` int AUTO_INCREMENT NOT NULL, `userId` int NOT NULL, `balanceUSD` decimal(18,6) NOT NULL DEFAULT '0.000000', `totalDeposited` decimal(18,6) NOT NULL DEFAULT '0.000000', `totalSpent` decimal(18,6) NOT NULL DEFAULT '0.000000', `createdAt` timestamp NOT NULL DEFAULT (now()), `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP, CONSTRAINT `wallets_id` PRIMARY KEY(`id`), CONSTRAINT `wallets_userId_unique` UNIQUE(`userId`))" },
-  // 0003 — supplier refund claims
   { name: "supplier_refund_claims", sql: "CREATE TABLE IF NOT EXISTS `supplier_refund_claims` (`id` int AUTO_INCREMENT NOT NULL, `raisedByAdminId` int NOT NULL, `ticketId` int, `orderId` int, `providerKey` varchar(64) NOT NULL, `supplierOrderId` varchar(256), `claimAmountUSD` decimal(18,6) NOT NULL, `reason` text NOT NULL, `status` enum('draft','submitted','acknowledged','approved','partially_approved','rejected','resolved','cancelled') NOT NULL DEFAULT 'draft', `approvedAmountUSD` decimal(18,6), `supplierResponse` text, `supplierRefundRef` varchar(256), `adminNotes` text, `communicationLog` json, `creditedToCustomer` boolean NOT NULL DEFAULT false, `submittedAt` timestamp, `resolvedAt` timestamp, `createdAt` timestamp NOT NULL DEFAULT (now()), `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP, CONSTRAINT `supplier_refund_claims_id` PRIMARY KEY(`id`))" },
-  // users columns (0001 + 0004 + 0005)
-  { name: "users.username", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `username` varchar(64)" },
-  { name: "users.passwordHash", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `passwordHash` text" },
-  { name: "users.country", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `country` varchar(64)" },
-  { name: "users.referralCode", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `referralCode` varchar(32)" },
-  { name: "users.referredBy", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `referredBy` varchar(32)" },
-  { name: "users.emailVerified", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `emailVerified` boolean DEFAULT false NOT NULL" },
-  { name: "users.emailVerifyToken", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `emailVerifyToken` varchar(128)" },
-  { name: "users.passwordResetToken", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `passwordResetToken` varchar(128)" },
-  { name: "users.passwordResetExpiry", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `passwordResetExpiry` timestamp" },
-  { name: "users.isSuspended", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `isSuspended` boolean DEFAULT false NOT NULL" },
-  { name: "users.suspendedReason", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `suspendedReason` text" },
-  { name: "users.twoFactorEnabled", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `twoFactorEnabled` boolean DEFAULT false NOT NULL" },
-  { name: "users.twoFactorSecret", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `twoFactorSecret` varchar(64)" },
-  { name: "users.notifyEmail", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `notifyEmail` boolean DEFAULT true NOT NULL" },
-  { name: "users.notifyOrders", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `notifyOrders` boolean DEFAULT true NOT NULL" },
-  { name: "users.preferredCurrency", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `preferredCurrency` enum('NGN','USD','EUR','GBP') DEFAULT 'USD' NOT NULL" },
-  { name: "users.otpCode", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `otpCode` varchar(6)" },
-  { name: "users.otpExpiry", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `otpExpiry` timestamp" },
-  { name: "users.otpPurpose", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `otpPurpose` varchar(16)" },
-  { name: "users.lastLoginIp", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `lastLoginIp` varchar(64)" },
-  { name: "products.deliveryFormat", sql: "ALTER TABLE `products` ADD COLUMN IF NOT EXISTS `deliveryFormat` text" },
-  { name: "seed.provider.accszone", sql: "INSERT IGNORE INTO `provider_configs` (`providerKey`, `displayName`, `baseUrl`, `isEnabled`, `defaultMarkupPercent`) VALUES ('accszone', 'AccsZone', 'https://accszone.com/api/v1', 1, 20.00)" },
-  { name: "seed.provider.fadded", sql: "INSERT IGNORE INTO `provider_configs` (`providerKey`, `displayName`, `baseUrl`, `isEnabled`, `defaultMarkupPercent`) VALUES ('fadded', 'Fadded', 'https://fadded.net/api/v1', 1, 20.00)" },
-  // Reward tables
   { name: "reward_points", sql: "CREATE TABLE IF NOT EXISTS `reward_points` (`id` int AUTO_INCREMENT NOT NULL, `userId` int NOT NULL, `points` int NOT NULL DEFAULT 0, `lifetimeEarned` int NOT NULL DEFAULT 0, `createdAt` timestamp NOT NULL DEFAULT (now()), `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP, CONSTRAINT `reward_points_id` PRIMARY KEY(`id`), CONSTRAINT `reward_points_userId_unique` UNIQUE(`userId`))" },
   { name: "reward_transactions", sql: "CREATE TABLE IF NOT EXISTS `reward_transactions` (`id` int AUTO_INCREMENT NOT NULL, `userId` int NOT NULL, `type` enum('earn','redeem') NOT NULL, `points` int NOT NULL, `description` varchar(256) NOT NULL, `orderId` int, `createdAt` timestamp NOT NULL DEFAULT (now()), CONSTRAINT `reward_transactions_id` PRIMARY KEY(`id`))" },
   { name: "reward_settings", sql: "CREATE TABLE IF NOT EXISTS `reward_settings` (`id` int AUTO_INCREMENT NOT NULL, `tier` varchar(32) NOT NULL, `cashbackPercent` decimal(5,2) NOT NULL, `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP, CONSTRAINT `reward_settings_id` PRIMARY KEY(`id`), CONSTRAINT `reward_settings_tier_unique` UNIQUE(`tier`))" },
-  { name: "seed.reward_settings", sql: "INSERT IGNORE INTO `reward_settings` (`tier`, `cashbackPercent`) VALUES ('gold', 0.50), ('platinum', 0.75), ('diamond', 1.00)" },
-  // Affiliate tables
   { name: "affiliate_balances", sql: "CREATE TABLE IF NOT EXISTS `affiliate_balances` (`id` int AUTO_INCREMENT NOT NULL, `userId` int NOT NULL, `balanceUSD` decimal(18,6) NOT NULL DEFAULT '0.000000', `totalEarned` decimal(18,6) NOT NULL DEFAULT '0.000000', `createdAt` timestamp NOT NULL DEFAULT (now()), `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP, CONSTRAINT `affiliate_balances_id` PRIMARY KEY(`id`), CONSTRAINT `affiliate_balances_userId_unique` UNIQUE(`userId`))" },
   { name: "affiliate_transactions", sql: "CREATE TABLE IF NOT EXISTS `affiliate_transactions` (`id` int AUTO_INCREMENT NOT NULL, `userId` int NOT NULL, `type` enum('signup_bonus','withdrawal') NOT NULL, `amountUSD` decimal(18,6) NOT NULL, `description` varchar(256) NOT NULL, `referredUserId` int, `createdAt` timestamp NOT NULL DEFAULT (now()), CONSTRAINT `affiliate_transactions_id` PRIMARY KEY(`id`))" },
   { name: "affiliate_withdrawals", sql: "CREATE TABLE IF NOT EXISTS `affiliate_withdrawals` (`id` int AUTO_INCREMENT NOT NULL, `userId` int NOT NULL, `amountUSD` decimal(18,6) NOT NULL, `bankName` varchar(128) NOT NULL, `accountNumber` varchar(64) NOT NULL, `accountName` varchar(128) NOT NULL, `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending', `adminNote` text, `processedAt` timestamp, `createdAt` timestamp NOT NULL DEFAULT (now()), `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP, CONSTRAINT `affiliate_withdrawals_id` PRIMARY KEY(`id`))" },
-  // API Keys table
-  { name: "api_keys", sql: "CREATE TABLE IF NOT EXISTS `api_keys` (`id` int AUTO_INCREMENT NOT NULL, `userId` int NOT NULL, `keyHash` varchar(256) NOT NULL, `keyPrefix` varchar(16) NOT NULL, `label` varchar(128) NOT NULL DEFAULT 'Default', `isEnabled` boolean NOT NULL DEFAULT true, `adminEnabled` boolean NOT NULL DEFAULT true, `lastUsedAt` timestamp, `requestCount` int NOT NULL DEFAULT 0, `createdAt` timestamp NOT NULL DEFAULT (now()), `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP, CONSTRAINT `api_keys_id` PRIMARY KEY(`id`), CONSTRAINT `api_keys_keyHash_unique` UNIQUE(`keyHash`))" },
-  { name: "api_keys.status", sql: "ALTER TABLE `api_keys` ADD COLUMN IF NOT EXISTS `status` enum('pending','active','rejected') NOT NULL DEFAULT 'pending'" },
-  { name: "api_keys.adminNote", sql: "ALTER TABLE `api_keys` ADD COLUMN IF NOT EXISTS `adminNote` varchar(256)" },
+  { name: "api_keys", sql: "CREATE TABLE IF NOT EXISTS `api_keys` (`id` int AUTO_INCREMENT NOT NULL, `userId` int NOT NULL, `keyHash` varchar(256) NOT NULL, `keyPrefix` varchar(16) NOT NULL, `label` varchar(128) NOT NULL DEFAULT 'Default', `isEnabled` boolean NOT NULL DEFAULT true, `adminEnabled` boolean NOT NULL DEFAULT true, `status` enum('pending','active','rejected') NOT NULL DEFAULT 'pending', `adminNote` varchar(256), `lastUsedAt` timestamp, `requestCount` int NOT NULL DEFAULT 0, `createdAt` timestamp NOT NULL DEFAULT (now()), `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP, CONSTRAINT `api_keys_id` PRIMARY KEY(`id`), CONSTRAINT `api_keys_keyHash_unique` UNIQUE(`keyHash`))" },
+  { name: "product_credentials", sql: "CREATE TABLE IF NOT EXISTS `product_credentials` (`id` int AUTO_INCREMENT NOT NULL, `productId` int NOT NULL, `orderId` int, `userId` int, `credential` text NOT NULL, `isUsed` boolean NOT NULL DEFAULT false, `usedAt` timestamp, `createdAt` timestamp NOT NULL DEFAULT (now()), CONSTRAINT `product_credentials_id` PRIMARY KEY(`id`))" },
+];
+
+// Column-level migrations: checked via INFORMATION_SCHEMA (MySQL 5.7+ compatible)
+const COLUMN_MIGRATIONS: { table: string; column: string; sql: string }[] = [
+  { table: "users", column: "username", sql: "ALTER TABLE `users` ADD COLUMN `username` varchar(64)" },
+  { table: "users", column: "passwordHash", sql: "ALTER TABLE `users` ADD COLUMN `passwordHash` text" },
+  { table: "users", column: "country", sql: "ALTER TABLE `users` ADD COLUMN `country` varchar(64)" },
+  { table: "users", column: "signupCountry", sql: "ALTER TABLE `users` ADD COLUMN `signupCountry` varchar(64)" },
+  { table: "users", column: "signupIp", sql: "ALTER TABLE `users` ADD COLUMN `signupIp` varchar(64)" },
+  { table: "users", column: "referralCode", sql: "ALTER TABLE `users` ADD COLUMN `referralCode` varchar(32)" },
+  { table: "users", column: "referredBy", sql: "ALTER TABLE `users` ADD COLUMN `referredBy` varchar(32)" },
+  { table: "users", column: "emailVerified", sql: "ALTER TABLE `users` ADD COLUMN `emailVerified` boolean NOT NULL DEFAULT false" },
+  { table: "users", column: "emailVerifyToken", sql: "ALTER TABLE `users` ADD COLUMN `emailVerifyToken` varchar(128)" },
+  { table: "users", column: "passwordResetToken", sql: "ALTER TABLE `users` ADD COLUMN `passwordResetToken` varchar(128)" },
+  { table: "users", column: "passwordResetExpiry", sql: "ALTER TABLE `users` ADD COLUMN `passwordResetExpiry` timestamp NULL" },
+  { table: "users", column: "otpCode", sql: "ALTER TABLE `users` ADD COLUMN `otpCode` varchar(6)" },
+  { table: "users", column: "otpExpiry", sql: "ALTER TABLE `users` ADD COLUMN `otpExpiry` timestamp NULL" },
+  { table: "users", column: "otpPurpose", sql: "ALTER TABLE `users` ADD COLUMN `otpPurpose` varchar(16)" },
+  { table: "users", column: "isSuspended", sql: "ALTER TABLE `users` ADD COLUMN `isSuspended` boolean NOT NULL DEFAULT false" },
+  { table: "users", column: "suspendedReason", sql: "ALTER TABLE `users` ADD COLUMN `suspendedReason` text" },
+  { table: "users", column: "twoFactorEnabled", sql: "ALTER TABLE `users` ADD COLUMN `twoFactorEnabled` boolean NOT NULL DEFAULT false" },
+  { table: "users", column: "twoFactorSecret", sql: "ALTER TABLE `users` ADD COLUMN `twoFactorSecret` varchar(64)" },
+  { table: "users", column: "telegramBonusClaimed", sql: "ALTER TABLE `users` ADD COLUMN `telegramBonusClaimed` boolean NOT NULL DEFAULT false" },
+  { table: "users", column: "notifyEmail", sql: "ALTER TABLE `users` ADD COLUMN `notifyEmail` boolean NOT NULL DEFAULT true" },
+  { table: "users", column: "notifyOrders", sql: "ALTER TABLE `users` ADD COLUMN `notifyOrders` boolean NOT NULL DEFAULT true" },
+  { table: "users", column: "preferredCurrency", sql: "ALTER TABLE `users` ADD COLUMN `preferredCurrency` enum('NGN','USD','EUR','GBP') NOT NULL DEFAULT 'USD'" },
+  { table: "users", column: "lastLoginIp", sql: "ALTER TABLE `users` ADD COLUMN `lastLoginIp` varchar(64)" },
+  { table: "products", column: "deliveryFormat", sql: "ALTER TABLE `products` ADD COLUMN `deliveryFormat` text" },
+  { table: "products", column: "isManual", sql: "ALTER TABLE `products` ADD COLUMN `isManual` boolean NOT NULL DEFAULT false" },
+  { table: "products", column: "isSubscription", sql: "ALTER TABLE `products` ADD COLUMN `isSubscription` boolean NOT NULL DEFAULT false" },
+  { table: "api_keys", column: "status", sql: "ALTER TABLE `api_keys` ADD COLUMN `status` enum('pending','active','rejected') NOT NULL DEFAULT 'pending'" },
+  { table: "api_keys", column: "adminNote", sql: "ALTER TABLE `api_keys` ADD COLUMN `adminNote` varchar(256)" },
+  { table: "api_keys", column: "rawKeyOnce", sql: "ALTER TABLE `api_keys` ADD COLUMN `rawKeyOnce` varchar(128)" },
+];
+
+// Seed data migrations
+const SEED_MIGRATIONS: { name: string; sql: string }[] = [
+  { name: "seed.provider.accszone", sql: "INSERT IGNORE INTO `provider_configs` (`providerKey`, `displayName`, `baseUrl`, `isEnabled`, `defaultMarkupPercent`) VALUES ('accszone', 'AccsZone', 'https://accszone.com/api/v1', 1, 20.00)" },
+  { name: "seed.provider.fadded", sql: "INSERT IGNORE INTO `provider_configs` (`providerKey`, `displayName`, `baseUrl`, `isEnabled`, `defaultMarkupPercent`) VALUES ('fadded', 'Fadded', 'https://fadded.net/api/v1', 1, 20.00)" },
+  { name: "seed.reward_settings", sql: "INSERT IGNORE INTO `reward_settings` (`tier`, `cashbackPercent`) VALUES ('gold', 0.50), ('platinum', 0.75), ('diamond', 1.00)" },
+
+  // ── Streaming category ──────────────────────────────────────────────────────
+  { name: "seed.category.streaming", sql: "INSERT IGNORE INTO `categories` (`name`, `slug`, `description`, `parentId`, `sortOrder`, `isVisible`) VALUES ('Streaming', 'streaming', 'Streaming subscriptions and entertainment services', NULL, 22, 1)" },
+
+  // ── Craigslist category (separate from Google Voice) ────────────────────────
+  { name: "seed.category.craigslist", sql: "INSERT IGNORE INTO `categories` (`name`, `slug`, `description`, `parentId`, `sortOrder`, `isVisible`) VALUES ('Craigslist Accounts', 'craigslist-accounts', 'Craigslist PVA accounts', NULL, 35, 1)" },
+
+  // ── Move Craigslist products to their own category ──────────────────────────
+  { name: "seed.fix.craigslist.category", sql: "UPDATE `products` SET `categoryId` = (SELECT id FROM `categories` WHERE slug = 'craigslist-accounts' LIMIT 1) WHERE `title` LIKE '%Craigslist%' AND `categoryId` = (SELECT id FROM `categories` WHERE slug = 'buy-google-voice-accounts' LIMIT 1)" },
+
+  // ── Streaming subscription products (manual delivery) ───────────────────────────────────────────────
+  { name: "seed.product.netflix-premium", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Netflix Premium', 'sub-netflix-premium', 'Netflix Premium subscription. Delivered within 2-5 hours.', 4.5, 'USD', 0.00, 4.5, 6750.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.netflix-us", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Netflix US', 'sub-netflix-us', 'Netflix US subscription. Delivered within 2-5 hours.', 9.0, 'USD', 0.00, 9.0, 13500.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.apple-music-us-icloud", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Apple Music US + iCloud', 'sub-apple-music-us-icloud', 'Apple Music US + iCloud subscription. Delivered within 2-5 hours.', 9.0, 'USD', 0.00, 9.0, 13500.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.apple-music", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Apple Music', 'sub-apple-music', 'Apple Music subscription. Delivered within 2-5 hours.', 2.25, 'USD', 0.00, 2.25, 3375.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.youtube-premium", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'YouTube Premium + YT Music', 'sub-youtube-premium', 'YouTube Premium + YT Music subscription. Delivered within 2-5 hours.', 3.33, 'USD', 0.00, 3.33, 4995.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.amazon-prime", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Amazon Prime Video', 'sub-amazon-prime', 'Amazon Prime Video subscription. Delivered within 2-5 hours.', 2.7, 'USD', 0.00, 2.7, 4050.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.icloud-200gb", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'iCloud 200GB', 'sub-icloud-200gb', 'iCloud 200GB subscription. Delivered within 2-5 hours.', 9.45, 'USD', 0.00, 9.45, 14175.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.spotify", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Spotify', 'sub-spotify', 'Spotify subscription. Delivered within 2-5 hours.', 1.8, 'USD', 0.00, 1.8, 2700.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.paramount-champions", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Paramount+ Champions League', 'sub-paramount-champions', 'Paramount+ Champions League subscription. Delivered within 2-5 hours.', 9.0, 'USD', 0.00, 9.0, 13500.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.chatgpt-go", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'ChatGPT Go', 'sub-chatgpt-go', 'ChatGPT Go subscription. Delivered within 2-5 hours.', 9.0, 'USD', 0.00, 9.0, 13500.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.apple-tv", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Apple TV+', 'sub-apple-tv', 'Apple TV+ subscription. Delivered within 2-5 hours.', 9.0, 'USD', 0.00, 9.0, 13500.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.nba", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'NBA', 'sub-nba', 'NBA subscription. Delivered within 2-5 hours.', 5.4, 'USD', 0.00, 5.4, 8100.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.capcut-standard", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'CapCut Standard', 'sub-capcut-standard', 'CapCut Standard subscription. Delivered within 2-5 hours.', 9.0, 'USD', 0.00, 9.0, 13500.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.capcut-pro", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'CapCut Pro', 'sub-capcut-pro', 'CapCut Pro subscription. Delivered within 2-5 hours.', 18.0, 'USD', 0.00, 18.0, 27000.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.crunchyroll", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Crunchyroll Mega Fan', 'sub-crunchyroll', 'Crunchyroll Mega Fan subscription. Delivered within 2-5 hours.', 2.7, 'USD', 0.00, 2.7, 4050.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.icloud-50gb", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'iCloud 50GB', 'sub-icloud-50gb', 'iCloud 50GB subscription. Delivered within 2-5 hours.', 5.85, 'USD', 0.00, 5.85, 8775.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.apple-music-us", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Apple Music US iCloud (US)', 'sub-apple-music-us', 'Apple Music US iCloud (US) subscription. Delivered within 2-5 hours.', 9.0, 'USD', 0.00, 9.0, 13500.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.apple-arcade", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Apple Arcade', 'sub-apple-arcade', 'Apple Arcade subscription. Delivered within 2-5 hours.', 9.0, 'USD', 0.00, 9.0, 13500.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.starz", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Starz', 'sub-starz', 'Starz subscription. Delivered within 2-5 hours.', 9.0, 'USD', 0.00, 9.0, 13500.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.disney-plus", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Disney+', 'sub-disney-plus', 'Disney+ subscription. Delivered within 2-5 hours.', 9.0, 'USD', 0.00, 9.0, 13500.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.hulu", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Hulu', 'sub-hulu', 'Hulu subscription. Delivered within 2-5 hours.', 9.0, 'USD', 0.00, 9.0, 13500.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.paramount-plus", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Paramount+', 'sub-paramount-plus', 'Paramount+ subscription. Delivered within 2-5 hours.', 9.0, 'USD', 0.00, 9.0, 13500.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.peacock", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Peacock', 'sub-peacock', 'Peacock subscription. Delivered within 2-5 hours.', 9.0, 'USD', 0.00, 9.0, 13500.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.hbo-max", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'HBO Max', 'sub-hbo-max', 'HBO Max subscription. Delivered within 2-5 hours.', 9.0, 'USD', 0.00, 9.0, 13500.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.claude-pro", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Claude Pro', 'sub-claude-pro', 'Claude Pro subscription. Delivered within 2-5 hours.', 35.1, 'USD', 0.00, 35.1, 52650.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.canva-pro", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Canva Pro', 'sub-canva-pro', 'Canva Pro subscription. Delivered within 2-5 hours.', 9.9, 'USD', 0.00, 9.9, 14850.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.canva-business", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Canva Business', 'sub-canva-business', 'Canva Business subscription. Delivered within 2-5 hours.', 13.5, 'USD', 0.00, 13.5, 20250.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
+  { name: "seed.product.premier-league", sql: "INSERT IGNORE INTO `products` (`title`, `slug`, `description`, `supplierPrice`, `supplierCurrency`, `markupPercent`, `customerPriceUSD`, `customerPriceNGN`, `categoryId`, `providerKey`, `isManual`, `isSubscription`, `isVisible`, `isFeatured`, `stockUnlimited`, `deliveryNote`) SELECT 'Premier League', 'sub-premier-league', 'Premier League subscription. Delivered within 2-5 hours.', 9.0, 'USD', 0.00, 9.0, 13500.0, id, 'manual', 1, 1, 1, 0, 1, 'Your subscription credentials will be delivered within 2-5 hours after payment confirmation.' FROM `categories` WHERE slug='streaming' LIMIT 1" },
 ];
 
 export async function runPendingMigrations(): Promise<void> {
@@ -80,24 +129,63 @@ export async function runPendingMigrations(): Promise<void> {
   let skipped = 0;
   let errors = 0;
 
-  for (const m of MIGRATIONS) {
+  // Step 1: Run table-level CREATE TABLE IF NOT EXISTS (safe on all MySQL versions)
+  for (const m of TABLE_MIGRATIONS) {
     try {
       await db.execute(m.sql as any);
       ok++;
     } catch (err: any) {
       const msg = err?.message ?? String(err);
-      if (
-        msg.includes("already exists") ||
-        msg.includes("Duplicate column") ||
-        msg.includes("Multiple primary key") ||
-        msg.includes("Duplicate key name") ||
-        msg.includes("Can't DROP") ||
-        msg.includes("doesn't exist")
-      ) {
+      if (msg.includes("already exists") || msg.includes("Duplicate")) {
         skipped++;
       } else {
         errors++;
-        console.error(`[Migrations] Error on ${m.name}: ${msg}`);
+        console.error(`[Migrations] Error on table ${m.name}: ${msg}`);
+      }
+    }
+  }
+
+  // Step 2: Run column-level migrations using INFORMATION_SCHEMA check (MySQL 5.7+ compatible)
+  // Get the database name from env
+  const dbName = process.env.DB_NAME || process.env.DATABASE_URL?.match(/\/([^/?]+)(\?|$)/)?.[1] || "";
+
+  for (const m of COLUMN_MIGRATIONS) {
+    try {
+      // Check if column exists via INFORMATION_SCHEMA
+      const [rows] = await (db as any).execute(
+        `SELECT COUNT(*) as cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?`,
+        [dbName, m.table, m.column]
+      );
+      const count = (rows as any[])[0]?.cnt ?? 0;
+      if (count > 0) {
+        skipped++;
+        continue;
+      }
+      await db.execute(m.sql as any);
+      ok++;
+    } catch (err: any) {
+      const msg = err?.message ?? String(err);
+      if (msg.includes("Duplicate column") || msg.includes("already exists")) {
+        skipped++;
+      } else {
+        errors++;
+        console.error(`[Migrations] Error on column ${m.table}.${m.column}: ${msg}`);
+      }
+    }
+  }
+
+  // Step 3: Seed data
+  for (const m of SEED_MIGRATIONS) {
+    try {
+      await db.execute(m.sql as any);
+      ok++;
+    } catch (err: any) {
+      const msg = err?.message ?? String(err);
+      if (msg.includes("Duplicate") || msg.includes("already exists")) {
+        skipped++;
+      } else {
+        errors++;
+        console.error(`[Migrations] Error on seed ${m.name}: ${msg}`);
       }
     }
   }

@@ -852,3 +852,8 @@
 - [x] Hamburger/X button always clickable (nav z-[100] is above mobile menu overlay z-98)
 - [x] Brand logos verified working: AccsZone products show AccsZone CDN images, others show brand logos or initials
 - [x] Fix mobile menu dropdown: changed from position:fixed top:0 paddingTop:6rem to position:fixed top:100% (starts exactly below navbar, no paddingTop needed)
+
+## New Tasks (Jun 30, 2026)
+- [ ] Set up GitHub remote and push latest source code for backup/download
+- [ ] Fix streaming products showing "out of stock" despite stockUnlimited=1
+- [ ] Referral page: add "Generate Referral Link" button (explicit generation, reward only on first deposit)

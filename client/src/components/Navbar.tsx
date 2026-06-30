@@ -30,7 +30,7 @@ const primaryLinks = [
 ];
 // Quick-access category shortcuts shown in a scrollable bar below the navbar
 const quickCategories = [
-  { label: "🎬 Streaming", href: "/categories/streaming-subscriptions" },
+  { label: "🎬 Streaming", href: "/categories/streaming" },
   { label: "📺 Netflix", href: "/categories/buy-netflix-accounts" },
   { label: "🎵 Spotify", href: "/categories/spotify-premium-subscription" },
   { label: "📘 Facebook", href: "/categories/buy-facebook-accounts" },

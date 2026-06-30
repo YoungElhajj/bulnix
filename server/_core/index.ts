@@ -1,4 +1,8 @@
-import "dotenv/config";
+// Load .env file (for Namecheap cPanel and other non-Manus deployments)
+import { config as loadDotenv } from "dotenv";
+import { resolve as resolvePath } from "path";
+loadDotenv({ path: resolvePath(process.cwd(), ".env") });
+
 import express from "express";
 import { createServer } from "http";
 import net from "net";

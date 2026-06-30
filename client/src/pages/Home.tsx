@@ -320,7 +320,7 @@ export default function Home() {
               { name: "Twitter/X", icon: <TwitterIcon />, href: "/categories/buy-twitter-x-accounts" },
               { name: "WhatsApp", icon: <WhatsAppIcon />, href: "/categories/buy-whatsapp-accounts" },
               { name: "YouTube", icon: <YouTubeIcon />, href: "/categories/buy-youtube-accounts" },
-              { name: "Streaming", icon: <span className="text-2xl">🎬</span>, href: "/categories/streaming-media-services" },
+              { name: "Streaming", icon: <span className="text-2xl">🎬</span>, href: "/categories/streaming" },
               { name: "Gaming", icon: <span className="text-2xl">🎮</span>, href: "/categories/buy-steam-gift-cards" },
               { name: "Software", icon: <span className="text-2xl">💻</span>, href: "/categories/ai-tools" },
               { name: "Email", icon: <span className="text-2xl">📧</span>, href: "/categories/buy-gmail-accounts" },
@@ -411,16 +411,16 @@ export default function Home() {
             {[
               { name: "Netflix", logo: "https://cdn.simpleicons.org/netflix/E50914", href: "/categories/buy-netflix-accounts" },
               { name: "Spotify", logo: "https://cdn.simpleicons.org/spotify/1DB954", href: "/categories/spotify-premium-subscription" },
-              { name: "Disney+", logo: "https://cdn.simpleicons.org/disneyplus/113CCF", href: "/categories/streaming-media-services" },
+              { name: "Disney+", logo: "https://cdn.simpleicons.org/disneyplus/113CCF", href: "/categories/streaming" },
               { name: "YouTube Premium", logo: "https://cdn.simpleicons.org/youtube/FF0000", href: "/categories/buy-youtube-accounts" },
-              { name: "HBO Max", logo: "https://cdn.simpleicons.org/hbo/9B59B6", href: "/categories/streaming-media-services" },
-              { name: "Apple TV+", logo: "https://cdn.simpleicons.org/appletv/000000", href: "/categories/streaming-media-services" },
-              { name: "Amazon Prime", logo: "https://cdn.simpleicons.org/amazonprime/00A8E0", href: "/categories/streaming-media-services" },
-              { name: "Hulu", logo: "https://cdn.simpleicons.org/hulu/1CE783", href: "/categories/streaming-media-services" },
-              { name: "Canva Pro", logo: "https://cdn.simpleicons.org/canva/00C4CC", href: "/categories/streaming-media-services" },
+              { name: "HBO Max", logo: "https://cdn.simpleicons.org/hbo/9B59B6", href: "/categories/streaming" },
+              { name: "Apple TV+", logo: "https://cdn.simpleicons.org/appletv/000000", href: "/categories/streaming" },
+              { name: "Amazon Prime", logo: "https://cdn.simpleicons.org/amazonprime/00A8E0", href: "/categories/streaming" },
+              { name: "Hulu", logo: "https://cdn.simpleicons.org/hulu/1CE783", href: "/categories/streaming" },
+              { name: "Canva Pro", logo: "https://cdn.simpleicons.org/canva/00C4CC", href: "/categories/streaming" },
               { name: "NordVPN", logo: "https://cdn.simpleicons.org/nordvpn/4687FF", href: "/categories/buy-vpn-accounts" },
-              { name: "Grammarly", logo: "https://cdn.simpleicons.org/grammarly/15C39A", href: "/categories/streaming-media-services" },
-              { name: "Microsoft 365", logo: "https://cdn.simpleicons.org/microsoftoffice/D83B01", href: "/categories/streaming-media-services" },
+              { name: "Grammarly", logo: "https://cdn.simpleicons.org/grammarly/15C39A", href: "/categories/streaming" },
+              { name: "Microsoft 365", logo: "https://cdn.simpleicons.org/microsoftoffice/D83B01", href: "/categories/streaming" },
             ].map((item, i) => (
               <Link key={i} href={item.href}>
                 <div className="reveal bg-white/5 border border-white/10 rounded-2xl p-4 hover:bg-white/10 hover:border-[#00C2FF]/40 hover:-translate-y-1 transition-all duration-300 cursor-pointer text-center group"
@@ -434,7 +434,7 @@ export default function Home() {
             ))}
           </div>
           <div className="text-center mt-8 reveal">
-            <Link href="/categories/streaming-subscriptions">
+            <Link href="/categories/streaming">
               <Button className="bg-[#00C2FF] hover:bg-[#00a8e0] text-[#0F3D5E] font-bold rounded-full px-8 py-3 shadow-lg shadow-[#00C2FF]/30 transition-all duration-300">
                 Shop All Streaming Plans
                 <ChevronRight className="w-4 h-4 ml-1" />
@@ -537,6 +537,29 @@ export default function Home() {
                 {pm.name}
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══ RESELLER BANNER ══════════════════════════════════════════════════ */}
+      <section className="py-10 bg-gradient-to-r from-[#00C2FF]/10 via-[#F0F8FF] to-[#0050D0]/10 border-y border-[#D8E8F5]">
+        <div className="container">
+          <div className="reveal flex flex-col sm:flex-row items-center justify-between gap-6 bg-white rounded-2xl px-8 py-6 border border-[#D8E8F5] shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#00C2FF]/20 to-[#0050D0]/15 flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-[#0050D0]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+              </div>
+              <div>
+                <p className="text-[#0D2137] font-bold text-base" style={{ fontFamily: "'Poppins', sans-serif" }}>Become a Reseller — Access Our API</p>
+                <p className="text-[#4A6080] text-sm">Integrate Bulnix products into your own platform. Instant delivery, competitive pricing, full API access.</p>
+              </div>
+            </div>
+            <Link href="/api-docs" className="flex-shrink-0">
+              <Button className="bg-[#0050D0] hover:bg-[#0040b0] text-white font-semibold rounded-full px-6 py-2.5 h-auto text-sm shadow-md shadow-[#0050D0]/20 hover:shadow-lg transition-all duration-300 flex items-center gap-2 whitespace-nowrap">
+                View API Docs
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
