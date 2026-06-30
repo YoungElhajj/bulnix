@@ -94,9 +94,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [bannerDismissed, setBannerDismissed] = useState(() => {
-    try { return localStorage.getItem("affiliate_banner_dismissed") === "1"; } catch { return false; }
-  });
+  // Banner is always visible — no dismiss
   const [location] = useLocation();
   const { totalItems } = useCart();
   const { user, isAuthenticated } = useAuth();
@@ -122,10 +120,6 @@ export default function Navbar() {
     setMobileMoreOpen(false);
   }, [location]);
 
-  const dismissBanner = () => {
-    setBannerDismissed(true);
-    try { localStorage.setItem("affiliate_banner_dismissed", "1"); } catch {}
-  };
 
   const navBg = scrolled
     ? "bg-[#0F3D5E] shadow-lg shadow-[#0F3D5E]/40"
@@ -133,26 +127,17 @@ export default function Navbar() {
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 border-b border-[#1a5070]/50 ${navBg} backdrop-blur-md transition-all duration-300`}>
-      {/* Affiliate Banner */}
-      {!bannerDismissed && !isActive("/affiliate") && (
-        <div className="bg-gradient-to-r from-cyan-600/90 to-blue-600/90 border-b border-cyan-500/30">
-          <div className="container flex items-center justify-between py-1.5 gap-2">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <Gift className="w-3.5 h-3.5 text-white flex-shrink-0" />
-              <span className="text-white text-xs font-medium truncate">
-                🎉 Earn up to $500 referring users to Bulnix —{" "}
-                <Link href="/affiliate" className="underline underline-offset-2 hover:text-cyan-100 transition-colors">
-                  Join the Affiliate Program
-                </Link>
-              </span>
-            </div>
-            <button
-              onClick={dismissBanner}
-              className="flex-shrink-0 w-5 h-5 flex items-center justify-center rounded text-white/70 hover:text-white hover:bg-white/20 transition-all"
-              aria-label="Dismiss banner"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
+      {/* Affiliate Banner — always visible, no dismiss */}
+      {!isActive("/affiliate") && (
+        <div className="bg-gradient-to-r from-cyan-600 to-blue-700 border-b border-cyan-500/30">
+          <div className="container flex items-center justify-center py-1.5 gap-2">
+            <Gift className="w-3.5 h-3.5 text-white flex-shrink-0" />
+            <span className="text-white text-xs font-medium text-center">
+              🎉 Earn up to $500 referring users to Bulnix —{" "}
+              <Link href="/affiliate" className="underline underline-offset-2 font-bold hover:text-cyan-100 transition-colors">
+                Join the Affiliate Program
+              </Link>
+            </span>
           </div>
         </div>
       )}
@@ -381,7 +366,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="lg:hidden border-t border-white/10 bg-[#0F3D5E] overflow-y-scroll" style={{ position: 'fixed', top: '4rem', left: 0, right: 0, bottom: 0, zIndex: 49 }}>
+        <div className="lg:hidden border-t border-white/10 bg-[#0F3D5E] overflow-y-auto" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100, paddingTop: '6rem' }}>
           <div className="container py-4 space-y-1">
             {/* Quick category shortcuts (mobile) */}
             <div className="pb-1">

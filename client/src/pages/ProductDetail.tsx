@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import { getProductImageSrc } from "@/lib/brandLogos";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import BackButton from "@/components/BackButton";
@@ -692,16 +693,15 @@ function getProductInfo(title: string): {
 
 // Simple image area — show supplier image as-is on a white background
 function ProductImageArea({ product }: { product: any }) {
+  const { src, bg } = getProductImageSrc(product.title ?? "", product.imageUrl);
   return (
-    <div className="aspect-square rounded-2xl flex items-center justify-center overflow-hidden border border-border shadow-sm max-h-[480px] w-full bg-white">
-      {product.imageUrl ? (
-        <img src={product.imageUrl} alt={product.title} className="w-full h-full object-contain p-8" />
-      ) : (
-        <div className="flex flex-col items-center gap-3 text-[#0050D0]/30">
-          <Package className="h-20 w-20"/>
-          <span className="text-sm font-medium text-[#4A6080]">Digital Product</span>
-        </div>
-      )}
+    <div className="aspect-square rounded-2xl flex items-center justify-center overflow-hidden border border-border shadow-sm max-h-[480px] w-full" style={{ background: bg }}>
+      <img
+        src={src}
+        alt={product.title}
+        className="w-[70%] h-[70%] object-contain"
+        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+      />
     </div>
   );
 }

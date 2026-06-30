@@ -12,23 +12,19 @@ import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { useCart } from "@/contexts/CartContext";
+import { getProductImageSrc } from "@/lib/brandLogos";
 
-
-
-// Simple image area — show supplier image as-is on a neutral background
+// Image area — shows brand logo or initial avatar when no imageUrl is set
 function ProductImageArea({ product }: { product: any }) {
+  const { src, bg } = getProductImageSrc(product.title ?? product.name ?? "", product.imageUrl);
   return (
-    <div className="relative h-36 sm:h-44 overflow-hidden flex items-center justify-center bg-white">
-      {product.imageUrl ? (
-        <img
-          src={product.imageUrl}
-          alt={product.title}
-          className="h-20 sm:h-32 max-w-full object-contain group-hover:scale-105 transition-transform duration-300 p-2"
-          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-        />
-      ) : (
-        <Package className="h-12 w-12 text-[#0050D0]/30" />
-      )}
+    <div className="relative h-36 sm:h-44 overflow-hidden flex items-center justify-center" style={{ background: bg }}>
+      <img
+        src={src}
+        alt={product.title}
+        className="h-20 sm:h-28 max-w-[80%] object-contain group-hover:scale-105 transition-transform duration-300 p-2"
+        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+      />
 
       {/* Badges */}
       {product.isFeatured && (

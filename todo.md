@@ -836,3 +836,12 @@
 - [x] Add SEO meta tags to Dashboard.tsx (all other pages already had SEO)
 >>>>>>> Stashed changes
 - [x] Add back buttons to Affiliate, Rewards, ApiKeys, ApiDocs pages
+
+## Round 6 Fixes (Jun 30 2026)
+- [ ] Build brand-logo mapping utility (brandLogos.ts) covering 100+ services
+- [ ] Wire brand logos into ProductCard, ProductDetail, streaming section on Home
+- [ ] Fix hamburger menu (3-lines) click handler — not responding
+- [ ] Fix affiliate promo banner — always visible on all pages, no permanent dismiss option
+- [ ] Verify Telegram popup works after signup (claimTelegramBonus)
+- [ ] Mobile responsiveness audit and fixes (product grid, navbar, checkout, dashboard)
+- [ ] Produce Namecheap-ready deployment ZIP
