@@ -777,6 +777,8 @@ export async function payOrderWithWallet(userId: number, orderId: number) {
   }), "payOrderWithWallet:insertPayment");
 
   await logSystem("info", "payment", `Order ${order.orderNumber} paid with wallet by user ${userId}`, { orderId, totalUSD });
+  // Credit reward points (fire-and-forget)
+  earnRewardPoints(userId, totalUSD, orderId).catch(err => console.error("[RewardPoints] Error:", err));
   // Trigger auto-fulfillment asynchronously (don't block the payment response)
   autoFulfillOrder(orderId).catch(err => console.error("[AutoFulfill] Error:", err));
   // Earn reward points asynchronously
@@ -1795,6 +1797,57 @@ export async function adminProcessRefund(adminId: number, input: { userId: numbe
     await withDbRetry(() => db!.update(supportTickets).set({ status: "resolved", resolvedAt: new Date() }).where(eq(supportTickets.id, input.ticketId!)), "adminProcessRefund:closeTicket");
   }
 
+  return { success: true, newBalance };
+}
+
+/**
+ * Credit a user's wallet directly (for bonuses, promotions, etc.)
+ */
+export async function creditWallet(userId: number, amountUSD: number, description: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const wallet = await getOrCreateWallet(userId);
+  const newBalance = Number(wallet.balanceUSD) + amountUSD;
+  const reference = `BONUS-${userId}-${Date.now()}`;
+  await withDbRetry(() => db!.update(wallets).set({ balanceUSD: newBalance.toFixed(6) }).where(eq(wallets.userId, userId)), "creditWallet:updateWallet");
+  await withDbRetry(() => db!.insert(walletTransactions).values({
+    userId,
+    type: "bonus" as any,
+    amountUSD: amountUSD.toFixed(6),
+    balanceAfterUSD: newBalance.toFixed(6),
+    description,
+    reference,
+    status: "completed",
+  }), "creditWallet:insertTxn");
+  return { success: true, newBalance };
+}
+
+/**
+ * Admin: manually top up a user's wallet balance.
+ */
+export async function adminTopUpUserWallet(adminId: number, userId: number, amountUSD: number, note: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const wallet = await getOrCreateWallet(userId);
+  const newBalance = Number(wallet.balanceUSD) + amountUSD;
+  const reference = `ADMIN-TOPUP-${userId}-${Date.now()}`;
+  await withDbRetry(() => db!.update(wallets).set({ balanceUSD: newBalance.toFixed(6), totalDeposited: (Number(wallet.totalDeposited) + amountUSD).toFixed(6) }).where(eq(wallets.userId, userId)), "adminTopUp:updateWallet");
+  await withDbRetry(() => db!.insert(walletTransactions).values({
+    userId,
+    type: "topup" as any,
+    amountUSD: amountUSD.toFixed(6),
+    balanceAfterUSD: newBalance.toFixed(6),
+    description: `Admin top-up: ${note}`,
+    reference,
+    status: "completed",
+  }), "adminTopUp:insertTxn");
+  await withDbRetry(() => db!.insert(adminActions).values({
+    adminId,
+    action: `Manual wallet top-up of $${amountUSD.toFixed(2)} to user ${userId}`,
+    targetType: "user",
+    targetId: userId,
+    details: { amountUSD, note },
+  }), "adminTopUp:logAction");
   return { success: true, newBalance };
 }
 

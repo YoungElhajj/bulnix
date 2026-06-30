@@ -152,6 +152,7 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
   const [topUpAmount, setTopUpAmount] = useState("");
   const [topUpNote, setTopUpNote] = useState("");
   const [showTopUp, setShowTopUp] = useState(false);
+<<<<<<< Updated upstream
 
   const topUpMutation = trpc.admin.users.topUp.useMutation({
     onSuccess: (r) => {
@@ -160,6 +161,12 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
       setTopUpNote("");
       setShowTopUp(false);
       refetch();
+=======
+  const topUpMutation = trpc.admin.users.topUp.useMutation({
+    onSuccess: (r) => {
+      toast.success(`Wallet credited. New balance: $${Number(r.newBalance).toFixed(2)}`);
+      setTopUpAmount(""); setTopUpNote(""); setShowTopUp(false); refetch();
+>>>>>>> Stashed changes
     },
     onError: (e) => toast.error(e.message),
   });
@@ -228,6 +235,7 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
               </div>
             </div>
 
+<<<<<<< Updated upstream
             {/* Top-Up Form */}
             {showTopUp && (
               <div className="bg-[#161b22] border border-emerald-500/30 rounded-xl p-4 space-y-3">
@@ -265,6 +273,31 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
                 </div>
               </div>
             )}
+=======
+            {/* Admin Top-Up */}
+            <div className="bg-[#161b22] border border-emerald-900/30 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-green-400" />
+                  <h3 className="text-sm font-bold text-white">Manual Wallet Top-Up</h3>
+                </div>
+                <Button size="sm" variant="ghost" className="text-slate-400 hover:text-white h-7 px-2 text-xs" onClick={() => setShowTopUp(v => !v)}>
+                  {showTopUp ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                </Button>
+              </div>
+              {showTopUp && (
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <Input placeholder="Amount (USD)" type="number" min="0.01" step="0.01" value={topUpAmount} onChange={e => setTopUpAmount(e.target.value)} className="bg-[#0d1117] border-slate-600 text-white text-sm" />
+                    <Input placeholder="Note (optional)" value={topUpNote} onChange={e => setTopUpNote(e.target.value)} className="bg-[#0d1117] border-slate-600 text-white text-sm" />
+                  </div>
+                  <Button size="sm" className="w-full bg-green-600 hover:bg-green-700 text-white" disabled={!topUpAmount || Number(topUpAmount) <= 0 || topUpMutation.isPending} onClick={() => topUpMutation.mutate({ userId, amountUSD: Number(topUpAmount), note: topUpNote || "Admin top-up" })}>
+                    {topUpMutation.isPending ? "Processing..." : `Credit $${topUpAmount || "0.00"} to Wallet`}
+                  </Button>
+                </div>
+              )}
+            </div>
+>>>>>>> Stashed changes
 
             {/* Orders */}
             <div>

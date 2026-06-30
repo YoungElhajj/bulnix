@@ -136,6 +136,7 @@ export default function ApiKeys() {
                   </Button>
                 </div>
               </div>
+<<<<<<< Updated upstream
             ) : (
               <Button
                 className="bg-cyan-500 hover:bg-cyan-600 text-black font-semibold gap-2"
@@ -155,6 +156,29 @@ export default function ApiKeys() {
               <Key className="w-10 h-10 mx-auto mb-3 opacity-20" />
               <p>No API keys yet.</p>
               <p className="text-xs mt-1">Request your first key above to get started.</p>
+=======
+              {/* Show rawKeyOnce if available (one-time after admin approval) */}
+              {k.rawKeyOnce ? (
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2 bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+                    <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <p className="text-xs text-amber-300"><strong>Your API key is ready.</strong> Copy it now. It will not be shown again after you acknowledge.</p>
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <div className="flex-1 bg-slate-900 border border-amber-500/40 rounded-lg px-3 py-2 font-mono text-xs text-amber-300 overflow-x-auto whitespace-nowrap">{k.rawKeyOnce}</div>
+                    <Button size="sm" variant="outline" className="border-slate-600 text-slate-300 hover:text-white shrink-0" onClick={() => copyKey(k.rawKeyOnce)}><Copy className="w-3.5 h-3.5" /></Button>
+                  </div>
+                  <Button size="sm" className="w-full bg-green-600 hover:bg-green-700 text-white text-xs" onClick={() => { navigator.clipboard.writeText(k.rawKeyOnce); utils.apiKeys.list.invalidate(); toast.success("Key copied and acknowledged!"); }}>I have saved my key</Button>
+                </div>
+              ) : (
+                <div className="flex gap-2 items-center">
+                  <div className="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 font-mono text-xs text-slate-400 overflow-hidden">
+                    <span className="text-cyan-400">{k.keyPrefix}</span>{"•".repeat(48)}
+                  </div>
+                </div>
+              )}
+              <p className="text-xs text-slate-500">Created {new Date(k.createdAt).toLocaleDateString()} · Last used: {k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleDateString() : "Never"}</p>
+>>>>>>> Stashed changes
             </div>
           ) : (
             <div className="space-y-3">
@@ -244,7 +268,52 @@ export default function ApiKeys() {
           </Link>
         </div>
 
+<<<<<<< Updated upstream
       </div>
+=======
+      {/* One-time key display dialog */}
+      <Dialog open={!!newKey} onOpenChange={(open) => { if (!open) setNewKey(null); }}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <Key className="w-5 h-5 text-cyan-400" />
+              API Key Created
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-start gap-2 bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <p className="text-xs text-amber-300">
+                <strong>Copy your key now.</strong> For security reasons, the full key is shown only once and cannot be retrieved later.
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-400 mb-1.5">Label: <span className="text-white">{newKey?.label}</span></p>
+              <div className="flex gap-2">
+                <Input
+                  readOnly
+                  value={newKey?.rawKey ?? ""}
+                  className="bg-slate-800 border-slate-600 text-cyan-300 font-mono text-xs"
+                />
+                <Button
+                  size="sm"
+                  className="bg-cyan-500 hover:bg-cyan-600 text-black shrink-0"
+                  onClick={() => { navigator.clipboard.writeText(newKey?.rawKey ?? ""); toast.success("Copied!"); }}
+                >
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            <Button
+              className="w-full bg-slate-700 hover:bg-slate-600 text-white"
+              onClick={() => setNewKey(null)}
+            >
+              I have saved my key. Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+>>>>>>> Stashed changes
     </div>
   );
 }

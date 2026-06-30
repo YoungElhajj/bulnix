@@ -24,6 +24,7 @@ export default function Affiliate() {
   const { data: balance, refetch: refetchBalance } = trpc.affiliate.getBalance.useQuery();
   const { data: txns } = trpc.affiliate.getTransactions.useQuery();
 
+<<<<<<< Updated upstream
   const generateCodeMutation = trpc.auth.generateReferralCode.useMutation({
     onSuccess: (data: { referralCode: string }) => {
       setLocalReferralCode(data.referralCode);
@@ -53,6 +54,24 @@ export default function Affiliate() {
     const text = encodeURIComponent(`Buy premium digital accounts on Bulnix! Use my referral link: ${referralLink}`);
     window.open(`https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${text}`, "_blank");
   }
+=======
+  // Auto-generate referral code if user doesn't have one yet
+  const [generatedCode, setGeneratedCode] = useState<string | null>(null);
+  const generateCode = trpc.auth.generateReferralCode.useMutation({
+    onSuccess: (data) => {
+      setGeneratedCode(data.referralCode);
+      utils.auth.me.invalidate();
+    },
+  });
+  useEffect(() => {
+    if (user && !user.referralCode && !generatedCode && !generateCode.isPending) {
+      generateCode.mutate();
+    }
+  }, [user, generatedCode]);
+
+  const referralCode = generatedCode ?? user?.referralCode ?? "";
+  const referralLink = referralCode ? `${window.location.origin}?ref=${referralCode}` : "";
+>>>>>>> Stashed changes
 
   const withdrawMutation = trpc.affiliate.requestWithdrawal.useMutation({
     onSuccess: () => { toast.success("Withdrawal request submitted. We'll process it within 24–48 hours."); setShowWithdrawDialog(false); refetchBalance(); },
@@ -125,6 +144,7 @@ export default function Affiliate() {
             <Users className="w-5 h-5 text-cyan-400" />
             <h2 className="font-semibold text-white">Your Referral Link</h2>
           </div>
+<<<<<<< Updated upstream
           {referralCode ? (
             <>
               <div className="flex gap-2">
@@ -149,6 +169,15 @@ export default function Affiliate() {
           ) : (
             <div className="text-center py-4 text-slate-400 text-sm">Loading your referral link...</div>
           )}
+=======
+          <div className="flex gap-2">
+            <Input readOnly value={referralLink || (generateCode.isPending ? "Generating your link..." : "Click to generate your link")} className="bg-slate-900 border-slate-600 text-slate-300 text-xs font-mono" />
+            <Button variant="outline" className="border-slate-600 text-slate-300 hover:text-white shrink-0" onClick={copyLink}>
+              <Copy className="w-4 h-4" />
+            </Button>
+          </div>
+          <p className="text-xs text-slate-500">Share this link. When someone signs up using it, you earn $0.50 automatically.</p>
+>>>>>>> Stashed changes
         </div>
 
         {/* How it works */}

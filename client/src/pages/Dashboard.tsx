@@ -8,6 +8,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
 import { getUserTier, getNextTier, getProgressToNextTier } from "@/lib/tiers";
+import { SEO } from "@/components/SEO";
 
 const statusBadge = (s: string) => ({
   pending: "bg-yellow-50 text-yellow-700 border-yellow-200",
@@ -47,7 +48,11 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#F5F9FF]">
+<<<<<<< Updated upstream
       <SEO title="Dashboard | Bulnix" description="Manage your Bulnix account, view orders, wallet balance, and more." canonical="https://bulnix.com/dashboard" />
+=======
+      <SEO title="Dashboard" description="Manage your orders, wallet, tickets and account settings on Bulnix." />
+>>>>>>> Stashed changes
       <Navbar />
       {/* Header */}
       <div className="bg-[#0F3D5E] pt-24 pb-8">

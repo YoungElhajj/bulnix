@@ -793,6 +793,7 @@
 - [x] Add Streaming Subscriptions category and seed all 28 products from flyers
 - [x] Subscription order flow: processing status, 2-5hr message, admin manual delivery, customer notification
 
+<<<<<<< Updated upstream
 ## Round 4 Fixes (Jun 30 2026)
 - [x] Affiliate banner: show on all pages (Navbar component included on all pages)
 - [x] Fix admin panel pages white background (AdminManualProducts, AdminAffiliateWithdrawals wrapped with AdminLayout)
@@ -820,4 +821,18 @@
 - [x] Admin panel: add manual balance top-up for individual users
 - [x] Mobile responsiveness audit and fixes
 - [x] Add SEO meta tags to all pages (Wallet, Profile, Tickets, Wishlist, Orders, Dashboard, Affiliate, ApiKeys, ApiDocs, Rewards)
+=======
+## Round 5 Fixes (Jun 30 2026)
+- [x] Fix referral link showing "Loading..." - auto-generate referralCode on first visit to Affiliate page
+- [x] Fix API key display after admin approval - show rawKeyOnce with copy + acknowledge button
+- [x] Remove AI-sounding hyphens/dashes from visible page text (ApiKeys, Affiliate, About)
+- [x] Fix quick-category nav links in Home.tsx to use correct DB slugs (buy-instagram-accounts, buy-facebook-accounts, etc.)
+- [x] Fix Navbar quick-category links to use correct DB slugs
+- [x] Fix mobile menu scroll - position:fixed with full viewport height and overflow-y-scroll
+- [x] Fix streaming section homepage links to correct category slugs (buy-netflix-accounts, spotify-premium-subscription, etc.)
+- [x] Make reward points system fully active (earnRewardPoints wired into payOrderWithWallet)
+- [x] Add Telegram join popup on signup with $0.50 bonus clickbait (claimTelegramBonus procedure)
+- [x] Admin panel: add manual balance top-up for individual users (adminTopUpUserWallet + creditWallet)
+- [x] Add SEO meta tags to Dashboard.tsx (all other pages already had SEO)
+>>>>>>> Stashed changes
 - [x] Add back buttons to Affiliate, Rewards, ApiKeys, ApiDocs pages

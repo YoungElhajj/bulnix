@@ -481,6 +481,7 @@ export const customAuthRouter = router({
 
       return { success: true, name: user.name };
     }),
+<<<<<<< Updated upstream
 
   /**
    * Generate a referral code for the current user if they don't have one.
@@ -497,6 +498,40 @@ export const customAuthRouter = router({
     await db.update(users).set({ referralCode: code }).where(eq(users.id, ctx.user.id));
     return { referralCode: code };
   }),
+=======
+  /**
+   * Generate a referral code for the current user if they don't have one.
+   */
+  generateReferralCode: protectedProcedure
+    .mutation(async ({ ctx }) => {
+      const dbConn = await getDb();
+      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+      const rows = await dbConn.select({ referralCode: users.referralCode }).from(users).where(eq(users.id, ctx.user.id)).limit(1);
+      if (rows[0]?.referralCode) return { referralCode: rows[0].referralCode };
+      const { randomBytes } = await import("crypto");
+      const code = randomBytes(5).toString("hex").toUpperCase();
+      await dbConn.update(users).set({ referralCode: code }).where(eq(users.id, ctx.user.id));
+      return { referralCode: code };
+    }),
+
+  /**
+   * Claim the one-time $0.50 Telegram join bonus.
+   */
+  claimTelegramBonus: protectedProcedure
+    .mutation(async ({ ctx }) => {
+      const dbConn = await getDb();
+      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+      const rows = await dbConn.select().from(users).where(eq(users.id, ctx.user.id)).limit(1);
+      const row = rows[0] as any;
+      if (!row) throw new TRPCError({ code: "NOT_FOUND" });
+      if (row.telegramBonusClaimed) return { alreadyClaimed: true, amountUSD: 0 };
+      const bonusUSD = 0.50;
+      await dbConn.update(users).set({ telegramBonusClaimed: true } as any).where(eq(users.id, ctx.user.id));
+      const { creditWallet } = await import("../db");
+      await creditWallet(ctx.user.id, bonusUSD, "Telegram channel join bonus");
+      return { alreadyClaimed: false, amountUSD: bonusUSD };
+    }),
+>>>>>>> Stashed changes
 });
 
 // ─── Admin Account Settings Router (TOTP 2FA + Password) ─────────────────────
@@ -644,7 +679,7 @@ export const adminAccountRouter = router({
         .where(eq(users.id, ctx.user.id))
         .limit(1);
 
-      return {
+            return {
         lastSignedIn: rows[0]?.lastSignedIn ?? null,
         lastLoginIp: rows[0]?.lastLoginIp ?? null,
       };
