@@ -147,7 +147,7 @@ function OrderRow({ order }: { order: any }) {
 
 // ── User detail side panel ────────────────────────────────────────────────────
 function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => void }) {
-  const { data, isLoading } = trpc.admin.users.getDetail.useQuery({ userId }, { retry: false });
+  const { data, isLoading } = trpc.admin.users.getDetail.useQuery({ userId }, { retry: false, staleTime: 60 * 1000 });
   const d = data as any;
 
   return (
@@ -299,7 +299,7 @@ export default function AdminUsers() {
   const utils = trpc.useUtils();
   const { data, isLoading } = trpc.admin.users.list.useQuery(
     { page, limit: 50, search: search || undefined },
-    { enabled: isAuthenticated && user?.role === "admin", retry: false }
+    { enabled: isAuthenticated && user?.role === "admin", retry: false, staleTime: 2 * 60 * 1000 }
   );
   const suspend = trpc.admin.users.suspend.useMutation({
     onSuccess: () => { toast.success("User suspended"); utils.admin.users.list.invalidate(); },
@@ -343,7 +343,42 @@ export default function AdminUsers() {
         </div>
       ) : (
         <div className="bg-[#161b22] border border-emerald-900/30 rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Mobile cards */}
+          <div className="sm:hidden divide-y divide-emerald-900/30">
+            {userList.map((u: any) => (
+              <div key={u.id} className="p-4 space-y-2 cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setSelectedUserId(u.id)}>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00C2FF] to-[#0050D0] flex items-center justify-center text-xs font-bold text-white shrink-0">
+                      {(u.name ?? u.email ?? "U")[0].toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-white font-medium text-sm truncate">{u.name ?? "No name"}</div>
+                      <div className="text-slate-400 text-xs truncate">{u.email ?? "—"}</div>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-slate-400 shrink-0" />
+                </div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <TierBadge totalSpent={u.totalSpent ?? 0} />
+                  <Badge className={u.role === "admin" ? "bg-emerald-500/10 text-emerald-400 border-0 text-xs" : "bg-slate-500/10 text-slate-400 border-0 text-xs"}>{u.role}</Badge>
+                  <Badge className={u.isSuspended ? "bg-red-500/10 text-red-400 border-0 text-xs" : "bg-emerald-500/10 text-emerald-400 border-0 text-xs"}>{u.isSuspended ? "Suspended" : "Active"}</Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500">{new Date(u.createdAt).toLocaleDateString()}</span>
+                  <div onClick={e => e.stopPropagation()}>
+                    {u.isSuspended ? (
+                      <button onClick={() => reactivate.mutate({ userId: u.id })} className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 hover:bg-[#00C2FF]/20 text-xs transition-colors flex items-center gap-1"><UserCheck className="h-3 w-3" /> Reactivate</button>
+                    ) : (
+                      <button onClick={() => suspend.mutate({ userId: u.id })} className="px-2 py-1 rounded bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs transition-colors flex items-center gap-1"><UserX className="h-3 w-3" /> Suspend</button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Desktop table */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-emerald-900/30 text-slate-400 text-xs uppercase">

@@ -9,7 +9,22 @@ import "./index.css";
 import { CurrencyProvider } from "./contexts/CurrencyContext";
 import { HelmetProvider } from "react-helmet-async";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Don't refetch just because the window regained focus — prevents admin panel
+      // from hammering the server every time you switch tabs
+      refetchOnWindowFocus: false,
+      // Keep data fresh for 2 minutes before considering it stale
+      staleTime: 2 * 60 * 1000,
+      // Keep unused query data in cache for 5 minutes
+      gcTime: 5 * 60 * 1000,
+      // Retry failed requests at most once with a short delay
+      retry: 1,
+      retryDelay: 1000,
+    },
+  },
+});
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;

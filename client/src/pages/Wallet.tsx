@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BackButton from "@/components/BackButton";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Link, useLocation } from "wouter";
@@ -243,7 +244,7 @@ export default function WalletPage() {
     <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]">
       <Navbar />
       <div className="pt-24 pb-8 bg-gradient-to-b from-[#0A2540] to-[#061A2B] border-b border-[#D8E8F5]">
-        <div className="container"><button onClick={() => window.history.back()} className="flex items-center gap-1.5 text-white/60 hover:text-[#00C2FF] text-sm mb-3 transition-colors">← Back</button></div>
+        <div className="container"><BackButton className="mb-3" /></div>
         <div className="container">
           <div className="flex items-center gap-2 text-sm text-white/60 mb-4">
             <Link href="/dashboard" className="hover:text-[#00C2FF]">Dashboard</Link>

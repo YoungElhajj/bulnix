@@ -102,11 +102,11 @@ export default function AdminOrders() {
   const utils = trpc.useUtils();
   const { data, isLoading } = trpc.admin.orders.list.useQuery(
     { page, limit: 50, status: status === "all" ? undefined : status, search: search || undefined },
-    { enabled: isAuthenticated && user?.role === "admin", retry: false }
+    { enabled: isAuthenticated && user?.role === "admin", retry: false, staleTime: 2 * 60 * 1000 }
   );
   const { data: orderDetail, isLoading: detailLoading } = trpc.admin.orders.getDetail.useQuery(
     { orderId: selectedOrderId! },
-    { enabled: selectedOrderId !== null && isAuthenticated && user?.role === "admin", retry: false }
+    { enabled: selectedOrderId !== null && isAuthenticated && user?.role === "admin", retry: false, staleTime: 60 * 1000 }
   );
   const updateOrder = trpc.admin.orders.update.useMutation({
     onSuccess: () => { toast.success("Order updated"); utils.admin.orders.list.invalidate(); },
@@ -390,14 +390,42 @@ export default function AdminOrders() {
         </div>
       ) : (
         <div className="bg-[#161b22] border border-emerald-900/30 rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Mobile cards */}
+          <div className="sm:hidden divide-y divide-emerald-900/30">
+            {orders.map((order: any) => (
+              <div key={order.id} className="p-4 space-y-2 cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setSelectedOrderId(order.id)}>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <div className="font-mono text-emerald-400 text-xs">{order.orderNumber ?? `#${order.id}`}</div>
+                    <div className="text-slate-500 text-xs mt-0.5 truncate max-w-[180px]">{order.billingEmail ?? "User #" + order.userId}</div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="font-bold text-emerald-400 text-sm">${Number(order.totalUSD).toFixed(2)}</div>
+                    <Badge className={"text-xs border-0 mt-0.5 " + statusBadge(order.status)}>{order.status}</Badge>
+                  </div>
+                </div>
+                <div className="text-xs text-slate-500">{new Date(order.createdAt).toLocaleDateString()}</div>
+                <div className="flex items-center gap-1.5 flex-wrap" onClick={e => e.stopPropagation()}>
+                  {(order.status === "processing" || order.status === "failed") && (
+                    <button onClick={() => retryFulfillment.mutate({ orderId: order.id })} className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs transition-colors flex items-center gap-1"><RefreshCw className="h-3 w-3" /> Retry</button>
+                  )}
+                  {canRefund(order.status) && (
+                    <button onClick={() => setRefundTarget({ id: order.id, orderNumber: order.orderNumber, totalUSD: order.totalUSD })} className="px-2 py-1 rounded bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 text-xs transition-colors flex items-center gap-1"><DollarSign className="h-3 w-3" /> Refund</button>
+                  )}
+                  <button onClick={() => updateOrder.mutate({ id: order.id, fraudFlag: !order.fraudFlag })} className={"px-2 py-1 rounded text-xs transition-colors " + (order.fraudFlag ? "bg-red-500/20 text-red-400 hover:bg-red-500/30" : "bg-slate-500/10 text-slate-400 hover:bg-slate-500/20")}>{order.fraudFlag ? "Unflag" : "Flag"}</button>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Desktop table */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-emerald-900/30 text-slate-400 text-xs uppercase">
                   <th className="text-left p-4">Order</th>
                   <th className="text-left p-4">Customer</th>
                   <th className="text-right p-4">Total</th>
-                  <th className="text-center p-4 hidden sm:table-cell">Currency</th>
+                  <th className="text-center p-4">Currency</th>
                   <th className="text-center p-4">Status</th>
                   <th className="text-left p-4 hidden md:table-cell">Date</th>
                   <th className="text-center p-4">Actions</th>
@@ -416,7 +444,7 @@ export default function AdminOrders() {
                     </td>
                     <td className="p-4 text-slate-400 text-xs max-w-[150px] truncate">{order.billingEmail ?? "User #" + order.userId}</td>
                     <td className="p-4 text-right font-semibold text-emerald-400">${Number(order.totalUSD).toFixed(2)}</td>
-                    <td className="p-4 text-center text-slate-400 text-xs hidden sm:table-cell">{order.currency}</td>
+                    <td className="p-4 text-center text-slate-400 text-xs">{order.currency}</td>
                     <td className="p-4 text-center">
                       <Badge className={"text-xs border-0 " + statusBadge(order.status)}>{order.status}</Badge>
                     </td>

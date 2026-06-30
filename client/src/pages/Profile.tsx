@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BackButton from "@/components/BackButton";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getUserTier, getNextTier, getProgressToNextTier, TIERS } from "@/lib/tiers";
@@ -45,9 +46,7 @@ export default function Profile() {
     <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]"><Navbar/>
       <div className="bg-[#0F3D5E] pt-24 pb-8">
         <div className="container">
-          <button onClick={() => window.history.back()} className="flex items-center gap-1 text-white/70 hover:text-white text-sm mb-3 transition-colors">
-            <ChevronLeft className="w-4 h-4"/> Back
-          </button>
+          <BackButton className="mb-3" />
           <h1 className="text-3xl font-bold text-white" style={{fontFamily:"'Poppins', sans-serif"}}>Profile Settings</h1>
         </div>
       </div>

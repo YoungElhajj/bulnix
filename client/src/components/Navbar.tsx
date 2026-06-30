@@ -183,7 +183,7 @@ export default function Navbar() {
             <select
               value={useCurrencyHook.currency}
               onChange={e => useCurrencyHook.setCurrency(e.target.value)}
-              className="hidden sm:block bg-white/10 border border-white/20 text-white text-xs rounded-lg px-2 py-1.5 cursor-pointer hover:bg-white/15 transition-all focus:outline-none"
+              className="hidden md:block bg-white/10 border border-white/20 text-white text-xs rounded-lg px-2 py-1.5 cursor-pointer hover:bg-white/15 transition-all focus:outline-none"
               title="Select currency"
             >
               {CURRENCIES.map(c => (
@@ -341,8 +341,31 @@ export default function Navbar() {
               </div>
             )}
 
+            {/* Currency + Theme row (mobile) */}
+            <div className="flex items-center gap-2 px-3 pt-1 pb-1">
+              <div className="flex items-center gap-2 flex-1">
+                <span className="text-white/50 text-xs">Currency:</span>
+                <select
+                  value={useCurrencyHook.currency}
+                  onChange={e => useCurrencyHook.setCurrency(e.target.value)}
+                  className="flex-1 bg-white/10 border border-white/20 text-white text-sm rounded-lg px-2 py-1.5 cursor-pointer hover:bg-white/15 transition-all focus:outline-none"
+                >
+                  {CURRENCIES.map(c => (
+                    <option key={c.code} value={c.code} className="bg-[#0F3D5E] text-white">{c.code} — {c.symbol}</option>
+                  ))}
+                </select>
+              </div>
+              <button
+                onClick={toggleTheme}
+                className="w-9 h-9 flex items-center justify-center rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all border border-white/10"
+                title={isDark ? "Light mode" : "Dark mode"}
+              >
+                {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
+            </div>
+
             {/* Social icons row (mobile) */}
-            <div className="flex items-center gap-2 px-3 pt-2">
+            <div className="flex items-center gap-2 px-3 pt-1">
               {socialLinks.map(s => (
                 <a
                   key={s.name}

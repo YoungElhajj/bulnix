@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BackButton from "@/components/BackButton";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 
@@ -36,7 +37,7 @@ export default function TicketDetail() {
     <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]"><Navbar/>
       <div className="bg-[#0F3D5E] pt-24 pb-8">
         <div className="container">
-          <Link href="/tickets"><button className="flex items-center gap-2 text-white/60 hover:text-white text-sm mb-4 transition-colors"><ArrowLeft className="h-4 w-4"/> Back to Tickets</button></Link>
+          <BackButton href="/tickets" label="Back to Tickets" className="mb-4" />
           <div className="flex items-center gap-3 flex-wrap"><h1 className="text-2xl font-bold text-white">{t.subject}</h1><Badge className={"border-0 " + statusColor}>{t.status.replace("_"," ")}</Badge></div>
           <p className="text-white/60 text-sm mt-1">Ticket #{t.id} · {new Date(t.createdAt).toLocaleString()}</p>
         </div>

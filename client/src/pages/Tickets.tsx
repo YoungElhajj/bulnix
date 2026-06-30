@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BackButton from "@/components/BackButton";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 
@@ -38,7 +39,7 @@ export default function Tickets() {
   return (
     <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]"><Navbar/>
       <div className="bg-[#0F3D5E] pt-24 pb-8">
-        <div className="container pb-2"><button onClick={() => window.history.back()} className="flex items-center gap-1.5 text-white/60 hover:text-[#00C2FF] text-sm transition-colors">← Back</button></div>
+        <div className="container pb-2"><BackButton /></div>
         <div className="container flex items-center justify-between flex-wrap gap-4">
           <div><h1 className="text-3xl font-bold text-white">Support Tickets</h1><p className="text-white/60 mt-1">{ticketList.length} tickets</p></div>
           <Dialog open={open} onOpenChange={setOpen}>

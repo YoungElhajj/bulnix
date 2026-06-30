@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BackButton from "@/components/BackButton";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 
@@ -196,11 +197,7 @@ function CredentialCard({ account, index, onCopy }: { account: Record<string, st
       <Navbar />
       <div className="bg-[#0F3D5E] pt-24 pb-8">
         <div className="container">
-          <Link href="/orders">
-            <button className="flex items-center gap-2 text-white/60 hover:text-white text-sm mb-4 transition-colors">
-              <ArrowLeft className="h-4 w-4" /> Back to Orders
-            </button>
-          </Link>
+          <BackButton href="/orders" label="Back to Orders" className="mb-4" />
           <div className="flex items-center gap-4 flex-wrap">
             <h1 className="text-3xl font-bold text-white">Order #{o.orderNumber ?? o.id}</h1>
             <Badge className={"border " + sc.badge}>{sc.label}</Badge>

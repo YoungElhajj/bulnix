@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Link } from "wouter";
 import { ShoppingCart, Trash2, Plus, Minus, Package, ArrowRight, ChevronRight } from "lucide-react";
+import BackButton from "@/components/BackButton";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 
@@ -14,9 +15,7 @@ export default function Cart() {
       {/* Header */}
       <div className="bg-[#0F3D5E] pt-24 pb-8">
         <div className="container">
-          <button onClick={() => window.history.back()} className="flex items-center gap-1.5 text-white/60 hover:text-[#00C2FF] text-sm mb-3 transition-colors">
-            ← Back
-          </button>
+          <BackButton className="mb-3" />
           <div className="flex items-center gap-2 text-sm text-white/50 mb-3">
             <Link href="/" className="hover:text-[#00C2FF] transition-colors">Home</Link>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -44,7 +43,7 @@ export default function Cart() {
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
               {items.map(item => (
-                <div key={item.id} className="bg-white rounded-2xl p-4 flex items-center gap-4 border border-[#D8E8F5] shadow-sm hover:shadow-md transition-shadow">
+                <div key={item.id} className="bg-white rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 border border-[#D8E8F5] shadow-sm hover:shadow-md transition-shadow">
                   <div className="w-16 h-16 bg-gradient-to-br from-[#F0F8FF] to-[#E0EEFF] rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden border border-[#D8E8F5]">
                     {item.imageUrl ? (
                       <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover"/>
@@ -58,29 +57,31 @@ export default function Cart() {
                     </Link>
                     <p className="text-[#0050D0] font-bold mt-1 text-sm">${item.priceUSD.toFixed(2)} each</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      className="w-7 h-7 rounded-lg bg-[#F0F8FF] border border-[#D8E8F5] hover:bg-[#E0EEFF] flex items-center justify-center text-[#4A6080] hover:text-[#0D2137] transition-all"
-                    >
-                      <Minus className="h-3 w-3"/>
-                    </button>
-                    <span className="text-[#0D2137] font-semibold w-6 text-center">{item.quantity}</span>
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="w-7 h-7 rounded-lg bg-[#F0F8FF] border border-[#D8E8F5] hover:bg-[#E0EEFF] flex items-center justify-center text-[#4A6080] hover:text-[#0D2137] transition-all"
-                    >
-                      <Plus className="h-3 w-3"/>
-                    </button>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[#0D2137] font-bold">${(item.priceUSD * item.quantity).toFixed(2)}</p>
-                    <button
-                      onClick={() => removeItem(item.id)}
-                      className="text-red-400 hover:text-red-600 mt-1 transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4"/>
-                    </button>
+                  <div className="flex items-center justify-between sm:justify-start gap-3 sm:gap-2">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        className="w-7 h-7 rounded-lg bg-[#F0F8FF] border border-[#D8E8F5] hover:bg-[#E0EEFF] flex items-center justify-center text-[#4A6080] hover:text-[#0D2137] transition-all"
+                      >
+                        <Minus className="h-3 w-3"/>
+                      </button>
+                      <span className="text-[#0D2137] font-semibold w-6 text-center">{item.quantity}</span>
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="w-7 h-7 rounded-lg bg-[#F0F8FF] border border-[#D8E8F5] hover:bg-[#E0EEFF] flex items-center justify-center text-[#4A6080] hover:text-[#0D2137] transition-all"
+                      >
+                        <Plus className="h-3 w-3"/>
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <p className="text-[#0D2137] font-bold">${(item.priceUSD * item.quantity).toFixed(2)}</p>
+                      <button
+                        onClick={() => removeItem(item.id)}
+                        className="text-red-400 hover:text-red-600 transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4"/>
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}

@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/_core/hooks/useAuth";
+import BackButton from "@/components/BackButton";
 import { getLoginUrl } from "@/const";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
@@ -839,9 +840,7 @@ export default function ProductDetail() {
       {/* Breadcrumb Header */}
       <div className="bg-[#0F3D5E] pt-24 pb-6">
         <div className="container">
-          <button onClick={() => window.history.back()} className="flex items-center gap-1.5 text-white/60 hover:text-[#00C2FF] text-sm mb-3 transition-colors">
-            <ChevronRight className="w-3.5 h-3.5 rotate-180" /> Back
-          </button>
+          <BackButton className="mb-3" />
           <div className="flex items-center gap-2 text-sm text-white/50 flex-wrap">
             <Link href="/" className="hover:text-[#00C2FF] transition-colors">Home</Link>
             <ChevronRight className="w-3.5 h-3.5 shrink-0" />

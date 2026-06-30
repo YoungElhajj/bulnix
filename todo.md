@@ -775,3 +775,10 @@
 - [x] Send in-app notification to user when they reach a new tier
 - [x] Show tier badge on user dashboard overview card
 - [x] Show tier badge and progress bar on user profile/settings page
+
+## Performance & Mobile Fixes (Jun 30, 2026)
+- [ ] Add currency switcher to mobile navbar menu
+- [ ] Fix admin panel query staleTime/refetchOnWindowFocus to reduce unnecessary reloads
+- [ ] Add loading skeletons to admin panel pages
+- [ ] Fix mobile layout on Orders, OrderDetail, Wallet, Products, Profile, Dashboard
+- [ ] Add consistent back button on all sub-pages (desktop + mobile)

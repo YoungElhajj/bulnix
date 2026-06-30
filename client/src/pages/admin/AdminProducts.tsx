@@ -156,7 +156,40 @@ export default function AdminProducts() {
         </div>
       ) : (
         <div className="bg-[#161b22] border border-emerald-900/30 rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Mobile cards */}
+          <div className="sm:hidden divide-y divide-emerald-900/30">
+            {products.map((p: any) => (
+              <div key={p.id} className="p-4 space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-[#0d1117] flex items-center justify-center shrink-0 overflow-hidden">
+                    {p.imageUrl ? <img src={p.imageUrl} alt="" className="w-full h-full object-cover rounded-lg" /> : <Package className="h-4 w-4 text-slate-400" />}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-white font-medium text-sm truncate">{p.title}</div>
+                    <div className="text-xs text-slate-400">{p.providerKey ?? "manual"} · ${Number(p.customerPriceUSD ?? 0).toFixed(2)}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs text-slate-400">Base: ${Number(p.supplierPrice ?? 0).toFixed(2)}</span>
+                  <span className="text-xs text-slate-400">Markup: {p.markupPercent ?? 20}%</span>
+                  <span className="text-xs text-slate-400">Stock: {p.stockUnlimited ? "∞" : p.stockQuantity}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => updateProduct.mutate({ id: p.id, isVisible: !p.isVisible })} className={"px-2 py-1 rounded text-xs flex items-center gap-1 " + (p.isVisible ? "bg-emerald-500/10 text-emerald-400" : "bg-slate-500/10 text-slate-400")}>
+                    {p.isVisible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />} {p.isVisible ? "Visible" : "Hidden"}
+                  </button>
+                  <button onClick={() => updateProduct.mutate({ id: p.id, isFeatured: !p.isFeatured })} className={"px-2 py-1 rounded text-xs flex items-center gap-1 " + (p.isFeatured ? "bg-yellow-500/10 text-yellow-400" : "bg-slate-500/10 text-slate-400")}>
+                    <Star className={"h-3 w-3 " + (p.isFeatured ? "fill-yellow-400" : "")} /> Featured
+                  </button>
+                  <button onClick={() => openEdit(p)} className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 text-xs flex items-center gap-1">
+                    <Edit className="h-3 w-3" /> Edit
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Desktop table */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-emerald-900/30 text-slate-400 text-xs uppercase">

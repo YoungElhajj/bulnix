@@ -192,7 +192,31 @@ export default function AdminTickets() {
         </div>
       ) : (
         <div className="bg-[#161b22] border border-emerald-900/30 rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Mobile cards */}
+          <div className="sm:hidden divide-y divide-emerald-900/30">
+            {tickets.map((ticket: any) => (
+              <div key={ticket.id} className="p-4 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white font-medium text-sm truncate">{ticket.subject}</div>
+                    <div className="text-xs text-slate-400 mt-0.5">#{ticket.ticketNumber ?? ticket.id} · User #{ticket.userId}{ticket.orderId ? ` · Order #${ticket.orderId}` : ""}</div>
+                  </div>
+                  <Badge className={"text-xs border shrink-0 " + statusColor(ticket.status)}>{ticket.status}</Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className={"text-xs font-semibold uppercase " + priorityColor(ticket.priority)}>{ticket.priority}</span>
+                  <span className="text-xs text-slate-500">{new Date(ticket.createdAt).toLocaleDateString()}</span>
+                </div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <button onClick={() => { setSelected(ticket); setReply(""); setCloseTicket(false); setShowRefund(false); setShowSupplierClaim(false); }} className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 hover:bg-[#00C2FF]/20 text-xs transition-colors flex items-center gap-1"><MessageSquare className="h-3 w-3" /> Reply</button>
+                  <button onClick={() => { setSelected(ticket); setShowRefund(true); setReply(""); setShowSupplierClaim(false); }} className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 hover:bg-[#00C2FF]/20 text-xs transition-colors flex items-center gap-1"><DollarSign className="h-3 w-3" /> Refund</button>
+                  <button onClick={() => openSupplierClaim(ticket)} className="px-2 py-1 rounded bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 text-xs transition-colors flex items-center gap-1"><AlertCircle className="h-3 w-3" /> Supplier Claim</button>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Desktop table */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-emerald-900/30 text-slate-400 text-xs uppercase">
