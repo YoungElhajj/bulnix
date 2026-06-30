@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Ticket,
   Settings, Activity, Tag, LogOut, Menu, X, Shield,
-  DollarSign, KeyRound, ChevronRight, TrendingUp
+  DollarSign, KeyRound, ChevronRight, TrendingUp, Key
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -21,6 +21,7 @@ const navItems = [
   { label: "Payment Rates",    href: "/admin/payment-rates",     icon: TrendingUp },
   { label: "Manual Products",  href: "/admin/manual-products",   icon: Package },
   { label: "Affiliate Payouts",href: "/admin/affiliate-withdrawals", icon: DollarSign },
+  { label: "API Access",       href: "/admin/api-access",         icon: Key },
   { label: "Logs",             href: "/admin/logs",               icon: Activity },
 ];
 

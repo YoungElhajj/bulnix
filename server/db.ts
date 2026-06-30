@@ -545,7 +545,9 @@ export async function getUserOrderById(userId: number, orderId: number) {
   const result = await db.select().from(orders).where(and(eq(orders.id, orderId), eq(orders.userId, userId))).limit(1);
   if (!result[0]) return null;
   const items = await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
-  return { ...result[0], items };
+  // Detect if this is a subscription order (all items are manual/subscription)
+  const isSubscriptionOrder = items.length > 0 && items.every(item => item.providerKey === 'manual' && !item.supplierProductId);
+  return { ...result[0], items, isSubscriptionOrder };
 }
 
 export async function getOrderDelivery(userId: number, orderId: number) {
@@ -788,6 +790,21 @@ export async function autoFulfillOrder(orderId: number): Promise<void> {
     const items = await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
     if (!items.length) {
       await logSystem("warn", "fulfillment", `No order items found for order ${orderId}`);
+      return;
+    }
+
+    // Check if ALL items are subscription/manual products (providerKey='manual', no supplierProductId)
+    // These require manual delivery by admin — do NOT auto-fulfill
+    const allSubscription = items.every(item => item.providerKey === 'manual' && !item.supplierProductId);
+    if (allSubscription) {
+      await withDbRetry(() => db!.update(orders).set({ status: "processing" }).where(eq(orders.id, orderId)), "autoFulfillOrder:subscriptionPending");
+      const [orderRow] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
+      const { notifyOwner } = await import("./_core/notification");
+      notifyOwner({
+        title: `New Subscription Order: #${orderRow?.orderNumber ?? orderId}`,
+        content: `A subscription order requires manual delivery.\nOrder: #${orderRow?.orderNumber ?? orderId}\nItems: ${items.map(i => i.productTitle).join(", ")}\nTotal: $${orderRow?.totalUSD ?? "?"}\nGo to Admin > Orders to deliver.`,
+      }).catch(err => console.error("[SubscriptionNotify]", err));
+      await logSystem("info", "fulfillment", `Order ${orderId} is subscription-only — set to pending, admin notified`, { orderId });
       return;
     }
 
@@ -1297,7 +1314,8 @@ export async function adminGetOrderDetail(orderId: number) {
   const items = await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
   const fulfillments = await db.select().from(fulfillmentRecords).where(eq(fulfillmentRecords.orderId, orderId));
   const paymentRows = await db.select().from(payments).where(eq(payments.orderId, orderId));
-  return { order, user: user ? { ...user, walletBalanceUSD: wallet?.balanceUSD ?? "0" } : null, items, fulfillments, payments: paymentRows };
+  const isSubscriptionOrder = items.length > 0 && items.every(item => item.providerKey === 'manual' && !item.supplierProductId);
+  return { order, user: user ? { ...user, walletBalanceUSD: wallet?.balanceUSD ?? "0" } : null, items, fulfillments, payments: paymentRows, isSubscriptionOrder };
 }
 
 export async function adminUpdateOrder(input: { id: number; status?: string; adminNotes?: string; fraudFlag?: boolean }) {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Package, RefreshCw, DollarSign, X, Search, ChevronLeft, User, CreditCard, Truck, ShoppingCart } from "lucide-react";
+import { Package, RefreshCw, DollarSign, X, Search, ChevronLeft, User, CreditCard, Truck, ShoppingCart, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CredentialCards } from "@/components/admin/CredentialCards";
 import { Input } from "@/components/ui/input";
@@ -90,6 +90,64 @@ function RefundDialog({ order, onClose, onConfirm, isLoading }: RefundDialogProp
   );
 }
 
+function DeliverSubscriptionDialog({ order, deliveryData, setDeliveryData, onClose, onConfirm, isLoading }: {
+  order: { id: number; orderNumber?: string };
+  deliveryData: string;
+  setDeliveryData: (v: string) => void;
+  onClose: () => void;
+  onConfirm: () => void;
+  isLoading: boolean;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-[#161b22] border border-purple-900/40 rounded-2xl p-6 w-full max-w-lg shadow-2xl mx-4" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-purple-500/10">
+              <Send className="h-5 w-5 text-purple-400" />
+            </div>
+            <div>
+              <h2 className="text-white font-semibold text-lg">Deliver Subscription</h2>
+              <p className="text-slate-400 text-xs">Order #{order.orderNumber ?? order.id}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/5">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <label className="text-slate-300 text-sm font-medium block mb-1.5">Subscription Details</label>
+            <textarea
+              value={deliveryData}
+              onChange={e => setDeliveryData(e.target.value)}
+              rows={6}
+              placeholder="Enter subscription credentials, login details, or any delivery information here..."
+              className="w-full bg-[#0d1117] border border-purple-900/40 rounded-lg px-3 py-2 text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-purple-500 resize-y font-mono"
+            />
+            <p className="text-slate-500 text-xs mt-1">You can enter credentials in any format. The customer will see exactly what you type here.</p>
+          </div>
+          <div className="bg-purple-500/5 border border-purple-500/20 rounded-lg p-3 text-xs text-purple-300">
+            Once delivered, the order status will change to <strong>Fulfilled</strong> and the customer will be notified.
+          </div>
+          <div className="flex gap-3 pt-1">
+            <Button variant="outline" onClick={onClose} className="flex-1 border-purple-900/40 text-slate-400 hover:text-white hover:bg-white/5 bg-transparent">
+              Cancel
+            </Button>
+            <Button
+              onClick={onConfirm}
+              disabled={!deliveryData.trim() || isLoading}
+              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold disabled:opacity-50"
+            >
+              {isLoading ? "Delivering..." : "Deliver to Customer"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminOrders() {
   const { isAuthenticated, user } = useAuth();
   const [status, setStatus] = useState("all");
@@ -98,6 +156,8 @@ export default function AdminOrders() {
   const [searchInput, setSearchInput] = useState("");
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [refundTarget, setRefundTarget] = useState<{ id: number; orderNumber?: string; totalUSD: string | number } | null>(null);
+  const [deliverTarget, setDeliverTarget] = useState<{ id: number; orderNumber?: string } | null>(null);
+  const [deliveryData, setDeliveryData] = useState("");
 
   const utils = trpc.useUtils();
   const { data, isLoading } = trpc.admin.orders.list.useQuery(
@@ -123,6 +183,16 @@ export default function AdminOrders() {
       setRefundTarget(null);
     },
     onError: e => toast.error(e.message),
+  });
+  const deliverSubscription = trpc.manualProducts.deliverSubscription.useMutation({
+    onSuccess: () => {
+      toast.success("Subscription delivered! Customer has been notified.");
+      utils.admin.orders.getDetail.invalidate();
+      utils.admin.orders.list.invalidate();
+      setDeliverTarget(null);
+      setDeliveryData("");
+    },
+    onError: (e: any) => toast.error(e.message),
   });
 
   const orders = (data as any)?.items ?? [];
@@ -155,6 +225,16 @@ export default function AdminOrders() {
             isLoading={manualRefund.isPending}
           />
         )}
+        {deliverTarget && (
+          <DeliverSubscriptionDialog
+            order={deliverTarget}
+            deliveryData={deliveryData}
+            setDeliveryData={setDeliveryData}
+            onClose={() => { setDeliverTarget(null); setDeliveryData(""); }}
+            onConfirm={() => deliverSubscription.mutate({ orderId: deliverTarget.id, deliveryData })}
+            isLoading={deliverSubscription.isPending}
+          />
+        )}
         <div className="mb-5">
           <button onClick={() => setSelectedOrderId(null)} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm">
             <ChevronLeft className="h-4 w-4" /> Back to Orders
@@ -176,7 +256,12 @@ export default function AdminOrders() {
               </div>
               <div className="flex items-center gap-3 flex-wrap">
                 <Badge className={"text-sm border-0 px-3 py-1 " + statusBadge(detail.order.status)}>{detail.order.status}</Badge>
-                {(detail.order.status === "processing" || detail.order.status === "failed") && (
+                {detail.isSubscriptionOrder && detail.order.status === "processing" && (
+                  <Button size="sm" onClick={() => setDeliverTarget({ id: detail.order.id, orderNumber: detail.order.orderNumber })} className="bg-purple-600 hover:bg-purple-700 text-white text-xs">
+                    <Send className="h-3.5 w-3.5 mr-1.5" /> Deliver Subscription
+                  </Button>
+                )}
+                {!detail.isSubscriptionOrder && (detail.order.status === "processing" || detail.order.status === "failed") && (
                   <Button size="sm" onClick={() => retryFulfillment.mutate({ orderId: detail.order.id })} className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs">
                     <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Retry Fulfillment
                   </Button>

@@ -50,6 +50,7 @@ import AdminAccountSettings from "./pages/admin/AdminAccountSettings";
 import AdminPaymentRates from "./pages/admin/AdminPaymentRates";
 import AdminManualProducts from "./pages/admin/AdminManualProducts";
 import AdminAffiliateWithdrawals from "./pages/admin/AdminAffiliateWithdrawals";
+import AdminApiAccess from "./pages/admin/AdminApiAccess";
 import SecureAdminLogin from "./pages/SecureAdminLogin";
 import AdminRoute from "./components/AdminRoute";
 import SocialFloatingWidgets from "./components/SocialFloatingWidgets";
@@ -123,6 +124,7 @@ function Router() {
       <Route path="/admin/payment-rates">{() => <AdminRoute component={AdminPaymentRates} />}</Route>
       <Route path="/admin/manual-products">{() => <AdminRoute component={AdminManualProducts} />}</Route>
       <Route path="/admin/affiliate-withdrawals">{() => <AdminRoute component={AdminAffiliateWithdrawals} />}</Route>
+      <Route path="/admin/api-access">{() => <AdminRoute component={AdminApiAccess} />}</Route>
 
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />

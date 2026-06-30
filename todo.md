@@ -782,3 +782,13 @@
 - [ ] Add loading skeletons to admin panel pages
 - [ ] Fix mobile layout on Orders, OrderDetail, Wallet, Products, Profile, Dashboard
 - [ ] Add consistent back button on all sub-pages (desktop + mobile)
+
+## Outstanding Fixes (Jun 30 2026 - Round 3)
+- [x] Fix theme on AdminManualProducts, AdminAffiliateWithdrawals, Rewards, Affiliate, ApiKeys, ApiDocs pages
+- [x] Add Rewards, Affiliate, API Keys to user dropdown nav menu
+- [x] Add small affiliate banner sitewide
+- [x] Fix Google Voice category - remove remaining Craigslist product
+- [x] Fix API key generation to actually generate and display the key
+- [x] Add admin API access control panel (enable/disable per user)
+- [x] Add Streaming Subscriptions category and seed all 28 products from flyers
+- [x] Subscription order flow: processing status, 2-5hr message, admin manual delivery, customer notification

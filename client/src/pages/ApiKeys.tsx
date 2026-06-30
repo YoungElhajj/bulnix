@@ -2,23 +2,23 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Copy, Plus, Trash2, Key, Eye, EyeOff, Code } from "lucide-react";
+import { Copy, Plus, Trash2, Key, Code, AlertTriangle } from "lucide-react";
 import BackButton from "@/components/BackButton";
 import { Link } from "wouter";
 
 export default function ApiKeys() {
   const [label, setLabel] = useState("");
-  const [showKey, setShowKey] = useState<Record<number, boolean>>({});
+  const [newKey, setNewKey] = useState<{ rawKey: string; label: string } | null>(null);
   const utils = trpc.useUtils();
 
   const { data: keys } = trpc.apiKeys.list.useQuery();
 
   const generateMutation = trpc.apiKeys.generate.useMutation({
-    onSuccess: () => { utils.apiKeys.list.invalidate(); setLabel(""); toast.success("API key generated"); },
+    onSuccess: (data) => { utils.apiKeys.list.invalidate(); setLabel(""); setNewKey({ rawKey: data.rawKey, label: data.label }); },
     onError: (e) => toast.error(e.message),
   });
   const deleteMutation = trpc.apiKeys.delete.useMutation({
@@ -49,8 +49,15 @@ export default function ApiKeys() {
         {/* Generate */}
         <div className="bg-slate-800/40 border border-slate-700 rounded-xl p-4 space-y-3">
           <h2 className="text-sm font-semibold text-white">Generate New Key</h2>
+          <p className="text-xs text-slate-400">You can create up to 3 API keys. The full key is shown <strong>only once</strong> after creation — copy it immediately.</p>
           <div className="flex gap-2">
-            <Input value={label} onChange={e => setLabel(e.target.value)} placeholder="Key label (e.g. My Bot)" className="bg-slate-800 border-slate-600 text-white" />
+            <Input
+              value={label}
+              onChange={e => setLabel(e.target.value)}
+              placeholder="Key label (e.g. My Bot)"
+              className="bg-slate-800 border-slate-600 text-white"
+              onKeyDown={e => e.key === "Enter" && label.trim() && generateMutation.mutate({ label })}
+            />
             <Button className="bg-cyan-500 hover:bg-cyan-600 text-black shrink-0" disabled={generateMutation.isPending || !label.trim()}
               onClick={() => generateMutation.mutate({ label })}>
               <Plus className="w-4 h-4 mr-1" /> Generate
@@ -84,16 +91,10 @@ export default function ApiKeys() {
                   </Button>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <Input readOnly value={showKey[k.id] ? k.key : "•".repeat(40)}
-                  className="bg-slate-900 border-slate-600 text-slate-300 font-mono text-xs" />
-                <Button size="sm" variant="ghost" className="text-slate-400 hover:text-white shrink-0"
-                  onClick={() => setShowKey(s => ({ ...s, [k.id]: !s[k.id] }))}>
-                  {showKey[k.id] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </Button>
-                <Button size="sm" variant="ghost" className="text-slate-400 hover:text-white shrink-0" onClick={() => copyKey(k.key)}>
-                  <Copy className="w-4 h-4" />
-                </Button>
+              <div className="flex gap-2 items-center">
+                <div className="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 font-mono text-xs text-slate-400 overflow-hidden">
+                  <span className="text-cyan-400">{k.keyPrefix}</span>{"•".repeat(48)}
+                </div>
               </div>
               <p className="text-xs text-slate-500">Created {new Date(k.createdAt).toLocaleDateString()} · Last used: {k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleDateString() : "Never"}</p>
             </div>
@@ -112,6 +113,49 @@ export default function ApiKeys() {
           </Link>
         </div>
       </div>
+
+      {/* One-time key display dialog */}
+      <Dialog open={!!newKey} onOpenChange={(open) => { if (!open) setNewKey(null); }}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <Key className="w-5 h-5 text-cyan-400" />
+              API Key Created
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-start gap-2 bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <p className="text-xs text-amber-300">
+                <strong>Copy your key now.</strong> For security reasons, the full key is shown only once and cannot be retrieved later.
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-400 mb-1.5">Label: <span className="text-white">{newKey?.label}</span></p>
+              <div className="flex gap-2">
+                <Input
+                  readOnly
+                  value={newKey?.rawKey ?? ""}
+                  className="bg-slate-800 border-slate-600 text-cyan-300 font-mono text-xs"
+                />
+                <Button
+                  size="sm"
+                  className="bg-cyan-500 hover:bg-cyan-600 text-black shrink-0"
+                  onClick={() => { navigator.clipboard.writeText(newKey?.rawKey ?? ""); toast.success("Copied!"); }}
+                >
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            <Button
+              className="w-full bg-slate-700 hover:bg-slate-600 text-white"
+              onClick={() => setNewKey(null)}
+            >
+              I've saved my key — Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

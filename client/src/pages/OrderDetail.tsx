@@ -255,15 +255,29 @@ function CredentialCard({ account, index, onCopy }: { account: Record<string, st
 
             {/* Processing State */}
             {isProcessing && !hasDelivery && (
-              <div className="bg-white border border-blue-200 shadow-sm rounded-xl p-5">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 border-2 border-[#0050D0] border-t-transparent rounded-full animate-spin flex-shrink-0" />
-                  <div>
-                    <div className="font-semibold text-[#0D2137] text-sm">Fulfilling your order...</div>
-                    <div className="text-xs text-[#4A6080] mt-0.5">We are retrieving your accounts from our supplier. This usually takes 5 to 30 seconds.</div>
+              o.isSubscriptionOrder ? (
+                <div className="bg-white border border-purple-200 shadow-sm rounded-xl p-5 border-l-4 border-l-purple-400">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                      <Clock className="w-4 h-4 text-purple-600" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-[#0D2137] text-sm">Subscription Order Received ✔</div>
+                      <div className="text-xs text-[#4A6080] mt-0.5">Your subscription details will be delivered within <strong>2–5 hours</strong> after payment confirmation. You will receive a notification once your order is ready.</div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="bg-white border border-blue-200 shadow-sm rounded-xl p-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 border-2 border-[#0050D0] border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                    <div>
+                      <div className="font-semibold text-[#0D2137] text-sm">Fulfilling your order...</div>
+                      <div className="text-xs text-[#4A6080] mt-0.5">We are retrieving your accounts from our supplier. This usually takes 5 to 30 seconds.</div>
+                    </div>
+                  </div>
+                </div>
+              )
             )}
 
             {/* Awaiting Payment */}

@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import {
   ShoppingCart, Menu, X, ChevronDown, User, LogOut,
   LayoutDashboard, Package, Settings, Shield, Wallet, Sun, Moon,
-  HelpCircle, Info, FileText, Phone, Home
+  HelpCircle, Info, FileText, Phone, Home, Star, Gift, Key
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
@@ -80,6 +80,9 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(() => {
+    try { return localStorage.getItem("affiliate_banner_dismissed") === "1"; } catch { return false; }
+  });
   const [location] = useLocation();
   const { totalItems } = useCart();
   const { user, isAuthenticated } = useAuth();
@@ -105,12 +108,41 @@ export default function Navbar() {
     setMobileMoreOpen(false);
   }, [location]);
 
+  const dismissBanner = () => {
+    setBannerDismissed(true);
+    try { localStorage.setItem("affiliate_banner_dismissed", "1"); } catch {}
+  };
+
   const navBg = scrolled
     ? "bg-[#0F3D5E] shadow-lg shadow-[#0F3D5E]/40"
     : "bg-[#0F3D5E]";
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 border-b border-[#1a5070]/50 ${navBg} backdrop-blur-md transition-all duration-300`}>
+      {/* Affiliate Banner */}
+      {!bannerDismissed && !isActive("/affiliate") && (
+        <div className="bg-gradient-to-r from-cyan-600/90 to-blue-600/90 border-b border-cyan-500/30">
+          <div className="container flex items-center justify-between py-1.5 gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <Gift className="w-3.5 h-3.5 text-white flex-shrink-0" />
+              <span className="text-white text-xs font-medium truncate">
+                🎉 Earn up to $500 referring users to Bulnix —{" "}
+                <Link href="/affiliate" className="underline underline-offset-2 hover:text-cyan-100 transition-colors">
+                  Join the Affiliate Program
+                </Link>
+              </span>
+            </div>
+            <button
+              onClick={dismissBanner}
+              className="flex-shrink-0 w-5 h-5 flex items-center justify-center rounded text-white/70 hover:text-white hover:bg-white/20 transition-all"
+              aria-label="Dismiss banner"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="container">
         <div className="flex items-center justify-between h-16">
 
@@ -254,6 +286,22 @@ export default function Navbar() {
                       <Settings className="w-4 h-4" /> Profile Settings
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/rewards" className="flex items-center gap-2 cursor-pointer">
+                      <Star className="w-4 h-4 text-yellow-400" /> Reward Points
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/affiliate" className="flex items-center gap-2 cursor-pointer">
+                      <Gift className="w-4 h-4 text-cyan-400" /> Affiliate
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/api-keys" className="flex items-center gap-2 cursor-pointer">
+                      <Key className="w-4 h-4 text-slate-400" /> API Keys
+                    </Link>
+                  </DropdownMenuItem>
                   {user?.role === "admin" && (
                     <>
                       <DropdownMenuSeparator />
@@ -387,6 +435,32 @@ export default function Navbar() {
                 <span>My Wallet</span>
                 <span className="ml-auto text-[#00C2FF] font-bold">${walletBalance.toFixed(2)}</span>
               </Link>
+            )}
+
+            {/* User account links (mobile, authenticated) */}
+            {isAuthenticated && (
+              <>
+                <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors" onClick={() => setMobileOpen(false)}>
+                  <LayoutDashboard className="w-4 h-4 text-white/60" />
+                  <span>Dashboard</span>
+                </Link>
+                <Link href="/orders" className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors" onClick={() => setMobileOpen(false)}>
+                  <Package className="w-4 h-4 text-white/60" />
+                  <span>My Orders</span>
+                </Link>
+                <Link href="/rewards" className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors" onClick={() => setMobileOpen(false)}>
+                  <Star className="w-4 h-4 text-yellow-400" />
+                  <span>Reward Points</span>
+                </Link>
+                <Link href="/affiliate" className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors" onClick={() => setMobileOpen(false)}>
+                  <Gift className="w-4 h-4 text-cyan-400" />
+                  <span>Affiliate Program</span>
+                </Link>
+                <Link href="/api-keys" className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors" onClick={() => setMobileOpen(false)}>
+                  <Key className="w-4 h-4 text-slate-400" />
+                  <span>API Keys</span>
+                </Link>
+              </>
             )}
 
             {/* Auth buttons (mobile) */}
