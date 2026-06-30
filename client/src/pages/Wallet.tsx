@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BackButton from "@/components/BackButton";
+import { SEO } from "@/components/SEO";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Link, useLocation } from "wouter";
@@ -242,6 +243,7 @@ export default function WalletPage() {
 
   return (
     <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]">
+      <SEO title="My Wallet | Bulnix" description="Manage your Bulnix wallet balance. Top up with Paystack, Flutterwave, or crypto and pay for digital accounts instantly." canonical="https://bulnix.com/wallet" />
       <Navbar />
       <div className="pt-24 pb-8 bg-gradient-to-b from-[#0A2540] to-[#061A2B] border-b border-[#D8E8F5]">
         <div className="container"><BackButton className="mb-3" /></div>

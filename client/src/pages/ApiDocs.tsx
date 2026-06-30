@@ -2,6 +2,8 @@ import Navbar from "@/components/Navbar";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { SEO } from "@/components/SEO";
 
 const BASE = typeof window !== "undefined" ? window.location.origin : "https://bulnix.com";
 
@@ -69,8 +71,16 @@ const methodColor: Record<string, string> = {
 export default function ApiDocs() {
   return (
     <div className="min-h-screen bg-[#0B0F19]">
+      <SEO
+        title="API Documentation | Bulnix"
+        description="Integrate Bulnix into your platform with our REST API. Full documentation with endpoints, authentication, and code examples."
+        canonical="https://bulnix.com/api-docs"
+      />
       <Navbar />
       <div className="container max-w-3xl py-6 space-y-8 pt-28">
+        <Link href="/api-keys" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white text-sm transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back to API Keys
+        </Link>
         <div>
           <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-4 py-1.5 text-xs text-cyan-400 font-medium mb-3">
             API Documentation

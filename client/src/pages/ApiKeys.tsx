@@ -4,13 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Key, Plus, Trash2, Clock, CheckCircle2, XCircle, BookOpen, AlertCircle, Code } from "lucide-react";
+import { Key, Plus, Trash2, Clock, CheckCircle2, XCircle, BookOpen, AlertCircle, Code, Copy, Eye, ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Link } from "wouter";
+import { SEO } from "@/components/SEO";
 
 export default function ApiKeys() {
   const [label, setLabel] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [acknowledgedKeys, setAcknowledgedKeys] = useState<Set<number>>(new Set());
   const utils = trpc.useUtils();
   const { data: keys } = trpc.apiKeys.list.useQuery();
 
@@ -29,12 +31,34 @@ export default function ApiKeys() {
     onError: (e) => toast.error(e.message),
   });
 
+  const clearRawKeyMutation = trpc.apiKeys.clearRawKeyOnce.useMutation({
+    onSuccess: () => utils.apiKeys.list.invalidate(),
+  });
+
+  function copyKey(key: string) {
+    navigator.clipboard.writeText(key);
+    toast.success("API key copied to clipboard!");
+  }
+
+  function acknowledgeKey(id: number) {
+    setAcknowledgedKeys(prev => { const s = new Set(prev); s.add(id); return s; });
+    clearRawKeyMutation.mutate({ id });
+  }
+
   const hasPendingRequest = keys?.some((k: any) => k.status === "pending");
 
   return (
     <div className="min-h-screen bg-[#0B0F19]">
+      <SEO
+        title="API Keys | Bulnix"
+        description="Manage your Bulnix API keys. Request access and integrate Bulnix into your applications."
+        canonical="https://bulnix.com/api-keys"
+      />
       <Navbar />
       <div className="container max-w-3xl py-8 space-y-8 pt-28">
+        <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white text-sm transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+        </Link>
 
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
@@ -148,7 +172,23 @@ export default function ApiKeys() {
                       </div>
                       <div className="min-w-0">
                         <p className="font-semibold text-white truncate">{k.label}</p>
-                        {k.status === "active" && k.keyPrefix && (
+                        {k.status === "active" && k.rawKeyOnce && !acknowledgedKeys.has(k.id) && (
+                          <div className="mt-2 space-y-2">
+                            <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
+                              <p className="text-xs text-green-300 font-semibold mb-1 flex items-center gap-1"><Eye className="w-3 h-3" /> Your full API key (shown once — copy it now!):</p>
+                              <div className="flex items-center gap-2">
+                                <code className="text-xs text-cyan-300 font-mono bg-slate-900 px-2 py-1 rounded flex-1 break-all">{k.rawKeyOnce}</code>
+                                <Button size="sm" className="bg-cyan-500 hover:bg-cyan-600 text-black h-7 px-2 shrink-0" onClick={() => copyKey(k.rawKeyOnce)}>
+                                  <Copy className="w-3 h-3" />
+                                </Button>
+                              </div>
+                              <Button size="sm" variant="ghost" className="text-slate-400 hover:text-white text-xs mt-2 h-6" onClick={() => acknowledgeKey(k.id)}>
+                                I have saved my key, hide it
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                        {k.status === "active" && k.keyPrefix && (acknowledgedKeys.has(k.id) || !k.rawKeyOnce) && (
                           <p className="text-xs text-slate-400 font-mono mt-0.5">{k.keyPrefix}••••••••••••••••••••••••••••••••••••••••</p>
                         )}
                         {k.status === "pending" && (

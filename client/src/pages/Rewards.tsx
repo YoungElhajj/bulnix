@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Star, ArrowDownToLine, Gift, TrendingUp, ShoppingBag } from "lucide-react";
+import { Star, ArrowDownToLine, Gift, TrendingUp, ShoppingBag, ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import { Link } from "wouter";
+import { SEO } from "@/components/SEO";
 
 const POINT_VALUE_USD = 0.01; // 1 point = $0.01
 
@@ -32,8 +34,16 @@ export default function Rewards() {
 
   return (
     <div className="min-h-screen bg-[#0B0F19]">
+      <SEO
+        title="Reward Points | Bulnix"
+        description="Earn reward points on every purchase at Bulnix. Redeem points for wallet credit and save on your next order."
+        canonical="https://bulnix.com/rewards"
+      />
       <Navbar />
       <div className="container max-w-3xl py-8 space-y-8 pt-28">
+        <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white text-sm transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+        </Link>
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 rounded-full px-4 py-1.5 text-xs text-yellow-400 font-medium mb-2">

@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BackButton from "@/components/BackButton";
+import { SEO } from "@/components/SEO";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -82,7 +83,9 @@ export default function Orders() {
   }[s] ?? s);
 
   return (
-    <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]"><Navbar/>
+    <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]">
+      <SEO title="My Orders | Bulnix" description="View and track all your Bulnix orders. Check order status, delivery details, and credentials." canonical="https://bulnix.com/orders" />
+      <Navbar/>
       <div className="bg-[#0F3D5E] pt-24 pb-8">
         <div className="container pb-2"><BackButton /></div>
         <div className="container flex items-center justify-between flex-wrap gap-4">

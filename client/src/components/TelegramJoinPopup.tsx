@@ -1,12 +1,15 @@
 /**
  * TelegramJoinPopup
  * Shows once after a user logs in, prompting them to join the Bulnix Telegram channel.
+ * Joining credits $0.50 to the user's wallet (one-time bonus).
  * Dismissed state is stored in localStorage so it never shows again once closed or joined.
  */
 import { useEffect, useState } from "react";
-import { X, Send } from "lucide-react";
+import { X, Send, Gift, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 const STORAGE_KEY = "bulnix_telegram_popup_dismissed";
 const TELEGRAM_URL = "https://t.me/bulnixupdates";
@@ -14,6 +17,16 @@ const TELEGRAM_URL = "https://t.me/bulnixupdates";
 export default function TelegramJoinPopup() {
   const { isAuthenticated, loading } = useAuth();
   const [visible, setVisible] = useState(false);
+  const utils = trpc.useUtils();
+
+  const claimBonusMutation = trpc.auth.claimTelegramBonus.useMutation({
+    onSuccess: (data) => {
+      if (!data.alreadyClaimed && data.amountUSD > 0) {
+        toast.success(`$${data.amountUSD.toFixed(2)} has been added to your wallet!`);
+        utils.auth.me.invalidate();
+      }
+    },
+  });
 
   useEffect(() => {
     if (loading) return;
@@ -33,6 +46,9 @@ export default function TelegramJoinPopup() {
   const handleJoin = () => {
     localStorage.setItem(STORAGE_KEY, "1");
     setVisible(false);
+    // Claim the $0.50 bonus
+    claimBonusMutation.mutate();
+    // Open Telegram channel
     window.open(TELEGRAM_URL, "_blank", "noopener,noreferrer");
   };
 
@@ -42,7 +58,7 @@ export default function TelegramJoinPopup() {
     <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4 sm:p-0">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={dismiss}
         aria-hidden="true"
       />
@@ -50,7 +66,7 @@ export default function TelegramJoinPopup() {
       {/* Card */}
       <div className="relative z-10 w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-6 fade-in duration-300">
         {/* Top accent */}
-        <div className="h-1 w-full bg-gradient-to-r from-[#229ED9] to-[#00C2FF]" />
+        <div className="h-1.5 w-full bg-gradient-to-r from-[#229ED9] to-[#00C2FF]" />
 
         {/* Close button */}
         <button
@@ -62,35 +78,50 @@ export default function TelegramJoinPopup() {
         </button>
 
         <div className="p-6 pt-5">
+          {/* Bonus badge */}
+          <div className="flex items-center justify-center mb-4">
+            <div className="inline-flex items-center gap-1.5 bg-green-50 border border-green-200 text-green-700 text-xs font-bold px-3 py-1.5 rounded-full">
+              <Gift className="w-3.5 h-3.5" />
+              FREE $0.50 BONUS
+            </div>
+          </div>
+
           {/* Icon */}
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 mx-auto"
-            style={{ background: "#229ED9" }}>
-            <Send className="w-7 h-7 text-white" />
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 mx-auto shadow-lg"
+            style={{ background: "linear-gradient(135deg, #229ED9, #00C2FF)" }}>
+            <Send className="w-8 h-8 text-white" />
           </div>
 
           {/* Text */}
           <h2 className="text-xl font-bold text-[#0D2137] text-center mb-2">
-            Join the Bulnix Channel
+            Join & Get <span className="text-green-600">$0.50 Free!</span>
           </h2>
-          <p className="text-sm text-gray-500 text-center leading-relaxed mb-6">
-            Get instant updates on new products, exclusive deals, and order alerts — all on Telegram.
+          <p className="text-sm text-gray-500 text-center leading-relaxed mb-2">
+            Join the <strong>Bulnix Telegram Channel</strong> and get <strong className="text-green-600">$0.50 instantly deposited</strong> to your wallet. No strings attached!
           </p>
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-5 text-center">
+            <p className="text-xs text-blue-700 font-medium flex items-center justify-center gap-1">
+              <Zap className="w-3.5 h-3.5 text-yellow-500" />
+              Get exclusive deals, new products & order alerts on Telegram
+            </p>
+          </div>
 
           {/* Actions */}
           <div className="flex flex-col gap-2">
             <Button
               onClick={handleJoin}
-              className="w-full h-11 font-semibold text-white rounded-xl"
-              style={{ background: "#229ED9" }}
+              disabled={claimBonusMutation.isPending}
+              className="w-full h-12 font-bold text-white rounded-xl text-base shadow-lg"
+              style={{ background: "linear-gradient(135deg, #229ED9, #0099cc)" }}
             >
               <Send className="w-4 h-4 mr-2" />
-              Join Channel
+              {claimBonusMutation.isPending ? "Claiming bonus..." : "Join & Claim $0.50"}
             </Button>
             <button
               onClick={dismiss}
               className="w-full h-10 text-sm text-gray-400 hover:text-gray-600 transition-colors"
             >
-              Maybe later
+              Skip (no bonus)
             </button>
           </div>
         </div>

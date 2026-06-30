@@ -481,6 +481,22 @@ export const customAuthRouter = router({
 
       return { success: true, name: user.name };
     }),
+
+  /**
+   * Generate a referral code for the current user if they don't have one.
+   * Called from the Affiliate page when referralCode is null.
+   */
+  generateReferralCode: protectedProcedure.mutation(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
+    const [user] = await db.select({ referralCode: users.referralCode }).from(users).where(eq(users.id, ctx.user.id)).limit(1);
+    if (user?.referralCode) return { referralCode: user.referralCode };
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let code = "BX";
+    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    await db.update(users).set({ referralCode: code }).where(eq(users.id, ctx.user.id));
+    return { referralCode: code };
+  }),
 });
 
 // ─── Admin Account Settings Router (TOTP 2FA + Password) ─────────────────────

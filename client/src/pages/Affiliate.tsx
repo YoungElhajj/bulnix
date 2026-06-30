@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,9 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Copy, Users, DollarSign, ArrowDownToLine, Wallet, Share2, TrendingUp, ExternalLink, Gift } from "lucide-react";
+import { Copy, Users, DollarSign, ArrowDownToLine, Wallet, Share2, TrendingUp, ExternalLink, Gift, ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { SEO } from "@/components/SEO";
+import { Link } from "wouter";
 
 export default function Affiliate() {
   const { user } = useAuth();
@@ -16,13 +18,28 @@ export default function Affiliate() {
   const [showConvertDialog, setShowConvertDialog] = useState(false);
   const [convertAmount, setConvertAmount] = useState("");
   const [withdrawForm, setWithdrawForm] = useState({ amountUSD: "", bankName: "", accountNumber: "", accountName: "" });
+  const [localReferralCode, setLocalReferralCode] = useState("");
   const utils = trpc.useUtils();
 
   const { data: balance, refetch: refetchBalance } = trpc.affiliate.getBalance.useQuery();
   const { data: txns } = trpc.affiliate.getTransactions.useQuery();
 
-  const referralCode = user?.referralCode ?? "";
+  const generateCodeMutation = trpc.auth.generateReferralCode.useMutation({
+    onSuccess: (data: { referralCode: string }) => {
+      setLocalReferralCode(data.referralCode);
+      utils.auth.me.invalidate();
+    },
+  });
+
+  const referralCode = localReferralCode || user?.referralCode || "";
   const referralLink = referralCode ? `${window.location.origin}/signup?ref=${referralCode}` : "";
+
+  // Auto-generate referral code if user doesn't have one
+  useEffect(() => {
+    if (user && !user.referralCode && !localReferralCode && !generateCodeMutation.isPending) {
+      generateCodeMutation.mutate();
+    }
+  }, [user]);
 
   function shareOnWhatsApp() {
     const text = encodeURIComponent(`🛒 Buy premium digital accounts on Bulnix! Use my referral link: ${referralLink}`);
@@ -64,8 +81,17 @@ export default function Affiliate() {
 
   return (
     <div className="min-h-screen bg-[#0B0F19]">
+      <SEO
+        title="Affiliate Program | Bulnix"
+        description="Earn $0.50 for every user you refer to Bulnix. Share your unique link and earn unlimited referral commissions."
+        canonical="https://bulnix.com/affiliate"
+      />
       <Navbar />
       <div className="container max-w-3xl py-8 space-y-8 pt-28">
+        {/* Back button */}
+        <Link href="/" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white text-sm transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back to Home
+        </Link>
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-4 py-1.5 text-xs text-cyan-400 font-medium mb-2">
@@ -73,7 +99,7 @@ export default function Affiliate() {
           </div>
           <h1 className="text-3xl font-extrabold text-white">Earn up to <span className="text-cyan-400">$500</span> referring users</h1>
           <p className="text-slate-400 text-sm max-w-md mx-auto">
-            Share your unique link. Earn $0.50 for every person who signs up. No limits — the more you share, the more you earn.
+            Share your unique link. Earn $0.50 for every person who signs up. No limits. The more you share, the more you earn.
           </p>
         </div>
 
@@ -148,7 +174,7 @@ export default function Affiliate() {
         <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-4 text-xs text-slate-500 space-y-1">
           <p className="font-medium text-slate-400">Program Terms</p>
           <p>• Earn $0.50 for each new user who signs up using your referral link and verifies their email.</p>
-          <p>• Minimum withdrawal: $10.00. Payouts processed within 24–48 hours.</p>
+          <p>• Minimum withdrawal: $10.00. Payouts processed within 24 to 48 hours.</p>
           <p>• Self-referrals and fraudulent signups will be disqualified.</p>
           <p>• Bulnix reserves the right to modify or terminate the program at any time.</p>
         </div>

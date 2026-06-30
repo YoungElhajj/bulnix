@@ -807,3 +807,17 @@
 - [x] Change API key flow to request-approval (user requests, admin approves, key generated on approval)
 - [x] Build complete API Docs page with all endpoints, auth guide, code examples
 - [ ] Fix Google same-email OAuth duplicate account issue (deferred to next round)
+
+## Round 5 Fixes (Jun 30 2026)
+- [x] Fix referral link showing "Loading..." — auto-generate referralCode on first visit to Affiliate page
+- [x] Fix API key display after admin approval — show rawKeyOnce with copy+acknowledge button
+- [x] Remove AI-sounding hyphens/dashes from all page text content
+- [x] Fix quick-category nav links to use correct category slugs from DB
+- [x] Fix mobile menu scroll — changed to position:fixed with full viewport height
+- [x] Fix streaming section homepage links to go to correct category products page
+- [x] Make reward points system fully active (earnRewardPoints wired into payOrderWithWallet + fulfillOrderByReference)
+- [x] Add Telegram join popup on signup with $0.50 bonus clickbait
+- [x] Admin panel: add manual balance top-up for individual users
+- [x] Mobile responsiveness audit and fixes
+- [x] Add SEO meta tags to all pages (Wallet, Profile, Tickets, Wishlist, Orders, Dashboard, Affiliate, ApiKeys, ApiDocs, Rewards)
+- [x] Add back buttons to Affiliate, Rewards, ApiKeys, ApiDocs pages

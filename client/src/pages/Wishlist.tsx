@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BackButton from "@/components/BackButton";
+import { SEO } from "@/components/SEO";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useCart } from "@/contexts/CartContext";
@@ -26,7 +27,9 @@ export default function Wishlist() {
   const products = (saved as any[]) ?? [];
 
   return (
-    <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]"><Navbar/>
+    <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]">
+      <SEO title="Wishlist | Bulnix" description="View your saved products on Bulnix. Add to cart and checkout when ready." canonical="https://bulnix.com/wishlist" />
+      <Navbar/>
       <div className="pt-24 pb-8 border-b border-[#D8E8F5]"><div className="container"><BackButton className="mb-3" /><h1 className="text-3xl font-bold text-[#0D2137]">Wishlist</h1><p className="text-[#4A6080] mt-1">{products.length} saved items</p></div></div>
       <div className="container py-8">
         {isLoading ? <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">{[...Array(4)].map((_,i)=><div key={i} className="bg-white border border-[#D8E8F5] shadow-sm rounded-xl h-48 animate-pulse"/>)}</div>

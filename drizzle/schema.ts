@@ -38,6 +38,7 @@ export const users = mysqlTable("users", {
   suspendedReason: text("suspendedReason"),
   twoFactorEnabled: boolean("twoFactorEnabled").default(false).notNull(),
   twoFactorSecret: varchar("twoFactorSecret", { length: 64 }),
+  telegramBonusClaimed: boolean("telegramBonusClaimed").default(false).notNull(),
   notifyEmail: boolean("notifyEmail").default(true).notNull(),
   notifyOrders: boolean("notifyOrders").default(true).notNull(),
   preferredCurrency: mysqlEnum("preferredCurrency", ["NGN", "USD", "EUR", "GBP"]).default("USD").notNull(),
@@ -589,6 +590,7 @@ export const apiKeys = mysqlTable("api_keys", {
   isEnabled: boolean("isEnabled").default(true).notNull(),
   adminEnabled: boolean("adminEnabled").default(true).notNull(), // admin can disable
   adminNote: varchar("adminNote", { length: 256 }), // admin rejection reason
+  rawKeyOnce: varchar("rawKeyOnce", { length: 128 }), // full key shown once to user, then cleared
   lastUsedAt: timestamp("lastUsedAt"),
   requestCount: int("requestCount").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

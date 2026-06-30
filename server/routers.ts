@@ -37,6 +37,8 @@ export const appRouter = router({
     resetPassword: customAuthRouter.resetPassword,
     changePassword: customAuthRouter.changePassword,
     adminLogin: customAuthRouter.adminLogin,
+    generateReferralCode: customAuthRouter.generateReferralCode,
+    claimTelegramBonus: protectedProcedure.mutation(({ ctx }) => db.claimTelegramBonus(ctx.user.id)),
     // Admin account settings (2FA + password)
     changeAdminPassword: adminAccountRouter.changeAdminPassword,
     setupTotp: adminAccountRouter.setupTotp,
@@ -277,6 +279,9 @@ export const appRouter = router({
       reactivate: adminProcedure
         .input(z.object({ userId: z.number() }))
         .mutation(({ input }) => db.adminReactivateUser(input.userId)),
+      topUp: adminProcedure
+        .input(z.object({ userId: z.number(), amountUSD: z.number().positive(), note: z.string().optional() }))
+        .mutation(({ input, ctx }) => db.adminTopUpUserWallet(ctx.user.id, input.userId, input.amountUSD, input.note ?? "Manual top-up by admin")),
     }),
 
     // Refunds
@@ -551,6 +556,7 @@ export const appRouter = router({
     adminToggle: adminProcedure.input(z.object({ id: z.number(), adminEnabled: z.boolean() })).mutation(({ input }) => db.adminToggleApiKey(input.id, input.adminEnabled)),
     adminApprove: adminProcedure.input(z.object({ id: z.number() })).mutation(({ input }) => db.adminApproveApiKey(input.id)),
     adminReject: adminProcedure.input(z.object({ id: z.number(), reason: z.string().min(1).max(256) })).mutation(({ input }) => db.adminRejectApiKey(input.id, input.reason)),
+    clearRawKeyOnce: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ ctx, input }) => db.clearRawKeyOnce(input.id, ctx.user.id)),
   }),
 
   // ── One-time Migrations (admin only) ─────────────────────────────────────

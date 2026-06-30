@@ -320,11 +320,11 @@ export default function Home() {
               { name: "Twitter/X", icon: <TwitterIcon />, href: "/categories/twitter-x-accounts" },
               { name: "WhatsApp", icon: <WhatsAppIcon />, href: "/categories/whatsapp-accounts" },
               { name: "YouTube", icon: <YouTubeIcon />, href: "/categories/youtube-accounts-channels" },
-              { name: "Streaming", icon: <span className="text-2xl">🎬</span>, href: "/categories/streaming" },
-              { name: "Gaming", icon: <span className="text-2xl">🎮</span>, href: "/categories/gaming" },
-              { name: "Software", icon: <span className="text-2xl">💻</span>, href: "/categories/software" },
-              { name: "Email", icon: <span className="text-2xl">📧</span>, href: "/categories/gmail-accounts" },
-              { name: "VPN", icon: <span className="text-2xl">🔒</span>, href: "/categories/vpn" },
+              { name: "Streaming", icon: <span className="text-2xl">🎬</span>, href: "/categories/streaming-subscriptions" },
+              { name: "Gaming", icon: <span className="text-2xl">🎮</span>, href: "/categories/buy-steam-gift-cards" },
+              { name: "Software", icon: <span className="text-2xl">💻</span>, href: "/categories/buy-software-licenses" },
+              { name: "Email", icon: <span className="text-2xl">📧</span>, href: "/categories/buy-google-voice-accounts" },
+              { name: "VPN", icon: <span className="text-2xl">🔒</span>, href: "/categories/buy-vpn-accounts" },
               { name: "More →", icon: <span className="text-2xl">➕</span>, href: "/categories" },
             ];
 
@@ -403,23 +403,23 @@ export default function Home() {
               Premium Streaming Accounts
             </h2>
             <p className="text-white/60 max-w-xl mx-auto text-sm">
-              Netflix, Spotify, Disney+, and 25+ more — delivered within 2–5 hours. Subscription details sent directly to your dashboard.
+              Netflix, Spotify, Disney+, and 25+ more. Delivered within 2 to 5 hours. Subscription details sent directly to your dashboard.
             </p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {[
-              { name: "Netflix", logo: "https://cdn.simpleicons.org/netflix/E50914", href: "/categories/streaming" },
-              { name: "Spotify", logo: "https://cdn.simpleicons.org/spotify/1DB954", href: "/categories/streaming" },
-              { name: "Disney+", logo: "https://cdn.simpleicons.org/disneyplus/113CCF", href: "/categories/streaming" },
-              { name: "YouTube Premium", logo: "https://cdn.simpleicons.org/youtube/FF0000", href: "/categories/streaming" },
-              { name: "HBO Max", logo: "https://cdn.simpleicons.org/hbo/9B59B6", href: "/categories/streaming" },
-              { name: "Apple TV+", logo: "https://cdn.simpleicons.org/appletv/000000", href: "/categories/streaming" },
-              { name: "Amazon Prime", logo: "https://cdn.simpleicons.org/amazonprime/00A8E0", href: "/categories/streaming" },
-              { name: "Hulu", logo: "https://cdn.simpleicons.org/hulu/1CE783", href: "/categories/streaming" },
-              { name: "Canva Pro", logo: "https://cdn.simpleicons.org/canva/00C4CC", href: "/categories/streaming" },
-              { name: "NordVPN", logo: "https://cdn.simpleicons.org/nordvpn/4687FF", href: "/categories/streaming" },
-              { name: "Grammarly", logo: "https://cdn.simpleicons.org/grammarly/15C39A", href: "/categories/streaming" },
-              { name: "Microsoft 365", logo: "https://cdn.simpleicons.org/microsoftoffice/D83B01", href: "/categories/streaming" },
+              { name: "Netflix", logo: "https://cdn.simpleicons.org/netflix/E50914", href: "/categories/buy-netflix-accounts" },
+              { name: "Spotify", logo: "https://cdn.simpleicons.org/spotify/1DB954", href: "/categories/spotify-premium-subscription" },
+              { name: "Disney+", logo: "https://cdn.simpleicons.org/disneyplus/113CCF", href: "/categories/streaming-media-services" },
+              { name: "YouTube Premium", logo: "https://cdn.simpleicons.org/youtube/FF0000", href: "/categories/buy-youtube-accounts" },
+              { name: "HBO Max", logo: "https://cdn.simpleicons.org/hbo/9B59B6", href: "/categories/streaming-media-services" },
+              { name: "Apple TV+", logo: "https://cdn.simpleicons.org/appletv/000000", href: "/categories/streaming-media-services" },
+              { name: "Amazon Prime", logo: "https://cdn.simpleicons.org/amazonprime/00A8E0", href: "/categories/streaming-media-services" },
+              { name: "Hulu", logo: "https://cdn.simpleicons.org/hulu/1CE783", href: "/categories/streaming-media-services" },
+              { name: "Canva Pro", logo: "https://cdn.simpleicons.org/canva/00C4CC", href: "/categories/streaming-media-services" },
+              { name: "NordVPN", logo: "https://cdn.simpleicons.org/nordvpn/4687FF", href: "/categories/buy-vpn-accounts" },
+              { name: "Grammarly", logo: "https://cdn.simpleicons.org/grammarly/15C39A", href: "/categories/streaming-media-services" },
+              { name: "Microsoft 365", logo: "https://cdn.simpleicons.org/microsoftoffice/D83B01", href: "/categories/streaming-media-services" },
             ].map((item, i) => (
               <Link key={i} href={item.href}>
                 <div className="reveal bg-white/5 border border-white/10 rounded-2xl p-4 hover:bg-white/10 hover:border-[#00C2FF]/40 hover:-translate-y-1 transition-all duration-300 cursor-pointer text-center group"
@@ -433,7 +433,7 @@ export default function Home() {
             ))}
           </div>
           <div className="text-center mt-8 reveal">
-            <Link href="/categories/streaming">
+            <Link href="/categories/streaming-subscriptions">
               <Button className="bg-[#00C2FF] hover:bg-[#00a8e0] text-[#0F3D5E] font-bold rounded-full px-8 py-3 shadow-lg shadow-[#00C2FF]/30 transition-all duration-300">
                 Shop All Streaming Plans
                 <ChevronRight className="w-4 h-4 ml-1" />

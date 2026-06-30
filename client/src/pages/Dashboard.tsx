@@ -6,6 +6,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { SEO } from "@/components/SEO";
 import { getUserTier, getNextTier, getProgressToNextTier } from "@/lib/tiers";
 
 const statusBadge = (s: string) => ({
@@ -46,6 +47,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#F5F9FF]">
+      <SEO title="Dashboard | Bulnix" description="Manage your Bulnix account, view orders, wallet balance, and more." canonical="https://bulnix.com/dashboard" />
       <Navbar />
       {/* Header */}
       <div className="bg-[#0F3D5E] pt-24 pb-8">

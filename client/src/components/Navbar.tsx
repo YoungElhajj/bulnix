@@ -30,18 +30,17 @@ const primaryLinks = [
 ];
 // Quick-access category shortcuts shown in a scrollable bar below the navbar
 const quickCategories = [
-  { label: "🎬 Streaming", href: "/categories/streaming" },
-  { label: "📺 Netflix", href: "/categories/netflix" },
-  { label: "📱 Social Media", href: "/categories/social-media" },
-  { label: "🎮 Gaming", href: "/categories/gaming" },
-  { label: "🔒 VPN", href: "/categories/vpn" },
-  { label: "📧 Gmail", href: "/categories/gmail" },
-  { label: "📘 Facebook", href: "/categories/facebook" },
-  { label: "📸 Instagram", href: "/categories/instagram" },
-  { label: "🎵 TikTok", href: "/categories/tiktok" },
-  { label: "💼 LinkedIn", href: "/categories/linkedin" },
-  { label: "🔑 Google Voice", href: "/categories/google-voice" },
-  { label: "📋 Craigslist", href: "/categories/craigslist" },
+  { label: "🎬 Streaming", href: "/categories/streaming-subscriptions" },
+  { label: "📺 Netflix", href: "/categories/buy-netflix-accounts" },
+  { label: "🎵 Spotify", href: "/categories/spotify-premium-subscription" },
+  { label: "📘 Facebook", href: "/categories/buy-facebook-accounts" },
+  { label: "📸 Instagram", href: "/categories/buy-instagram-accounts" },
+  { label: "🎵 TikTok", href: "/categories/buy-tiktok-accounts" },
+  { label: "💼 LinkedIn", href: "/categories/buy-linkedin-accounts" },
+  { label: "🎮 Gaming", href: "/categories/buy-steam-gift-cards" },
+  { label: "🔒 VPN", href: "/categories/buy-vpn-accounts" },
+  { label: "🔑 Google Voice", href: "/categories/buy-google-voice-accounts" },
+  { label: "📋 Craigslist", href: "/categories/buy-craigslist-accounts" },
 ];
 
 // Secondary links shown in "More" dropdown and mobile menu
@@ -367,9 +366,9 @@ export default function Navbar() {
       <div className="hidden lg:block border-t border-white/10 bg-[#0a2d45]">
         <div className="container">
           <div className="flex items-center gap-0.5 py-1 overflow-x-auto scrollbar-none">
-            {quickCategories.map(cat => (
+            {quickCategories.map((cat, i) => (
               <Link
-                key={cat.href}
+                key={i}
                 href={cat.href}
                 className="flex-shrink-0 px-3 py-1 text-xs text-white/70 hover:text-white hover:bg-white/10 rounded-md transition-colors whitespace-nowrap"
               >
@@ -382,7 +381,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="lg:hidden border-t border-white/10 bg-[#0F3D5E]">
+        <div className="lg:hidden border-t border-white/10 bg-[#0F3D5E] overflow-y-scroll" style={{ position: 'fixed', top: '4rem', left: 0, right: 0, bottom: 0, zIndex: 49 }}>
           <div className="container py-4 space-y-1">
             {/* Quick category shortcuts (mobile) */}
             <div className="pb-1">

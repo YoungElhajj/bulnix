@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BackButton from "@/components/BackButton";
+import { SEO } from "@/components/SEO";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getUserTier, getNextTier, getProgressToNextTier, TIERS } from "@/lib/tiers";
@@ -43,7 +44,9 @@ export default function Profile() {
   const tierProgressColor = tier.name === 'Bronze' ? 'bg-amber-500' : tier.name === 'Silver' ? 'bg-slate-400' : tier.name === 'Gold' ? 'bg-yellow-500' : tier.name === 'Platinum' ? 'bg-cyan-500' : 'bg-purple-500';
 
   return (
-    <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]"><Navbar/>
+    <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]">
+      <SEO title="Profile Settings | Bulnix" description="Manage your Bulnix account profile, notification preferences, and security settings." canonical="https://bulnix.com/profile" />
+      <Navbar/>
       <div className="bg-[#0F3D5E] pt-24 pb-8">
         <div className="container">
           <BackButton className="mb-3" />

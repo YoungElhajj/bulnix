@@ -684,6 +684,11 @@ export async function fulfillOrderByReference(reference: string, gateway: string
   await logSystem("info", "payment", `Order ${payment.orderId} payment confirmed via ${gateway} webhook`, { reference, gateway });
   // Trigger auto-fulfillment asynchronously (don't block the webhook response)
   autoFulfillOrder(payment.orderId).catch(err => console.error("[AutoFulfill] Error:", err));
+  // Earn reward points asynchronously
+  if (payment.userId) {
+    const amountUSD = Number(payment.amount);
+    earnRewardPoints(payment.userId, amountUSD, payment.orderId).catch(err => console.error("[RewardPoints] Error:", err));
+  }
   return { success: true, orderId: payment.orderId };
 }
 
@@ -774,6 +779,8 @@ export async function payOrderWithWallet(userId: number, orderId: number) {
   await logSystem("info", "payment", `Order ${order.orderNumber} paid with wallet by user ${userId}`, { orderId, totalUSD });
   // Trigger auto-fulfillment asynchronously (don't block the payment response)
   autoFulfillOrder(orderId).catch(err => console.error("[AutoFulfill] Error:", err));
+  // Earn reward points asynchronously
+  earnRewardPoints(userId, totalUSD, orderId).catch(err => console.error("[RewardPoints] Error:", err));
   return { success: true, orderId, orderNumber: order.orderNumber, amountDeducted: totalUSD, newBalance: Number(newBalance) };
 }
 
@@ -1443,6 +1450,63 @@ export async function adminOrderManualRefund(adminId: number, input: { orderId: 
     }));
   }
   return { success: true, newBalance, orderNumber: order.orderNumber };
+}
+
+export async function adminTopUpUserWallet(adminId: number, userId: number, amountUSD: number, note: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const wallet = await getOrCreateWallet(userId);
+  const newBalance = Number(wallet.balanceUSD) + amountUSD;
+  const reference = `TOPUP-ADMIN-${userId}-${Date.now()}`;
+  await withDbRetry(() => db!.update(wallets).set({ balanceUSD: newBalance.toFixed(6), totalDeposited: sql`totalDeposited + ${amountUSD.toFixed(6)}` }).where(eq(wallets.userId, userId)), "adminTopUp:wallet");
+  await withDbRetry(() => db!.insert(walletTransactions).values({
+    userId,
+    type: "deposit",
+    amountUSD: amountUSD.toFixed(6),
+    balanceAfterUSD: newBalance.toFixed(6),
+    description: note,
+    reference,
+    status: "completed",
+    gateway: "manual",
+  }), "adminTopUp:txn");
+  await withDbRetry(() => db!.insert(adminActions).values({
+    adminId,
+    action: `Manual top-up of $${amountUSD.toFixed(2)} for user ${userId}`,
+    targetType: "user",
+    targetId: userId,
+    details: { amountUSD, note, newBalance },
+  }), "adminTopUp:log");
+  await db.insert(notifications).values({
+    userId, type: "wallet",
+    title: `Wallet Top-Up: +$${amountUSD.toFixed(2)}`,
+    message: `$${amountUSD.toFixed(2)} has been added to your wallet. ${note}`,
+  }).catch(() => {});
+  return { success: true, newBalance };
+}
+
+export async function claimTelegramBonus(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Check if already claimed
+  const [user] = await db.select({ telegramBonusClaimed: users.telegramBonusClaimed }).from(users).where(eq(users.id, userId)).limit(1);
+  if (!user) throw new Error("User not found");
+  if (user.telegramBonusClaimed) return { success: true, alreadyClaimed: true, amountUSD: 0 };
+  const bonusUSD = 0.50;
+  const wallet = await getOrCreateWallet(userId);
+  const newBalance = Number(wallet.balanceUSD) + bonusUSD;
+  const reference = `TELEGRAM-BONUS-${userId}-${Date.now()}`;
+  await withDbRetry(() => db!.update(users).set({ telegramBonusClaimed: true }).where(eq(users.id, userId)), "claimTelegramBonus:user");
+  await withDbRetry(() => db!.update(wallets).set({ balanceUSD: newBalance.toFixed(6) }).where(eq(wallets.userId, userId)), "claimTelegramBonus:wallet");
+  await withDbRetry(() => db!.insert(walletTransactions).values({
+    userId, type: "deposit", amountUSD: bonusUSD.toFixed(6), balanceAfterUSD: newBalance.toFixed(6),
+    description: "Telegram channel join bonus", reference, status: "completed", gateway: "bonus",
+  }), "claimTelegramBonus:txn");
+  await db.insert(notifications).values({
+    userId, type: "wallet",
+    title: "Telegram Bonus Credited!",
+    message: `$${bonusUSD.toFixed(2)} has been added to your wallet for joining the Bulnix Telegram channel!`,
+  }).catch(() => {});
+  return { success: true, alreadyClaimed: false, amountUSD: bonusUSD };
 }
 
 export async function adminGetUsers(input: { page: number; limit: number; search?: string }) {
@@ -2469,13 +2533,13 @@ export async function adminApproveApiKey(id: number) {
   const rawKey = "blx_" + randomBytes(32).toString("hex");
   const keyHash = createHash("sha256").update(rawKey).digest("hex");
   const keyPrefix = rawKey.substring(0, 12);
-  await db.update(apiKeys).set({ keyHash, keyPrefix, status: "active", adminNote: null }).where(eq(apiKeys.id, id));
+  await db.update(apiKeys).set({ keyHash, keyPrefix, status: "active", adminNote: null, rawKeyOnce: rawKey }).where(eq(apiKeys.id, id));
   // Notify the user
   const [key] = await db.select().from(apiKeys).where(eq(apiKeys.id, id)).limit(1);
   if (key) {
     await db.insert(notifications).values({
       userId: key.userId, type: "order", title: "API Key Approved",
-      message: `Your API key request has been approved. Your key prefix is: ${keyPrefix}. Log in to view your key.`,
+      message: `Your API key request has been approved. Log in to your API Keys page to view your full key (shown once).`,
     }).catch(() => {});
   }
   return { rawKey, keyPrefix }; // rawKey shown once to admin for delivery
@@ -2507,8 +2571,16 @@ export async function getUserApiKeys(userId: number) {
     id: apiKeys.id, keyPrefix: apiKeys.keyPrefix, label: apiKeys.label,
     status: apiKeys.status, adminNote: apiKeys.adminNote,
     isEnabled: apiKeys.isEnabled, adminEnabled: apiKeys.adminEnabled,
+    rawKeyOnce: apiKeys.rawKeyOnce,
     lastUsedAt: apiKeys.lastUsedAt, requestCount: apiKeys.requestCount, createdAt: apiKeys.createdAt,
   }).from(apiKeys).where(eq(apiKeys.userId, userId)).orderBy(desc(apiKeys.createdAt));
+}
+
+export async function clearRawKeyOnce(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(apiKeys).set({ rawKeyOnce: null }).where(and(eq(apiKeys.id, id), eq(apiKeys.userId, userId)));
+  return { success: true };
 }
 
 export async function deleteApiKey(id: number, userId: number) {

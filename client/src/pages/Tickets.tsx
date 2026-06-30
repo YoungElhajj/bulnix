@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BackButton from "@/components/BackButton";
+import { SEO } from "@/components/SEO";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 
@@ -37,7 +38,9 @@ export default function Tickets() {
   const statusColor = (s: string) => ({ open: "bg-[#EEF4FF] text-[#0050D0]", in_progress: "bg-yellow-500/10 text-yellow-400", resolved: "bg-[#EEF4FF] text-[#0050D0]", closed: "bg-slate-500/10 text-[#4A6080]" }[s] ?? "bg-slate-500/10 text-[#4A6080]");
 
   return (
-    <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]"><Navbar/>
+    <div className="min-h-screen bg-[#F5F9FF] text-[#0D2137]">
+      <SEO title="Support Tickets | Bulnix" description="Manage your Bulnix support tickets. Get help with orders, accounts, and payments." canonical="https://bulnix.com/tickets" />
+      <Navbar/>
       <div className="bg-[#0F3D5E] pt-24 pb-8">
         <div className="container pb-2"><BackButton /></div>
         <div className="container flex items-center justify-between flex-wrap gap-4">
