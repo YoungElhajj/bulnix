@@ -1,19 +1,11 @@
 /**
  * TelegramJoinPopup
  * Shows once after a user logs in, prompting them to join the Bulnix Telegram channel.
-<<<<<<< Updated upstream
- * Joining credits $0.50 to the user's wallet (one-time bonus).
- * Dismissed state is stored in localStorage so it never shows again once closed or joined.
- */
-import { useEffect, useState } from "react";
-import { X, Send, Gift, Zap } from "lucide-react";
-=======
  * Joining credits $0.50 to their wallet (one-time, server-enforced).
  * Dismissed state is stored in localStorage so it never shows again once closed or joined.
  */
 import { useEffect, useState } from "react";
-import { X, Send, Gift } from "lucide-react";
->>>>>>> Stashed changes
+import { X, Send, Gift, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
@@ -25,17 +17,6 @@ const TELEGRAM_URL = "https://t.me/bulnixupdates";
 export default function TelegramJoinPopup() {
   const { isAuthenticated, loading } = useAuth();
   const [visible, setVisible] = useState(false);
-<<<<<<< Updated upstream
-  const utils = trpc.useUtils();
-
-  const claimBonusMutation = trpc.auth.claimTelegramBonus.useMutation({
-    onSuccess: (data) => {
-      if (!data.alreadyClaimed && data.amountUSD > 0) {
-        toast.success(`$${data.amountUSD.toFixed(2)} has been added to your wallet!`);
-        utils.auth.me.invalidate();
-      }
-    },
-=======
   const [claiming, setClaiming] = useState(false);
   const utils = trpc.useUtils();
 
@@ -49,7 +30,6 @@ export default function TelegramJoinPopup() {
     onError: () => {
       // Silently ignore — still open Telegram
     },
->>>>>>> Stashed changes
   });
 
   useEffect(() => {
@@ -71,10 +51,9 @@ export default function TelegramJoinPopup() {
     setClaiming(true);
     localStorage.setItem(STORAGE_KEY, "1");
     setVisible(false);
-    // Claim the $0.50 bonus
-    claimBonusMutation.mutate();
     // Open Telegram channel
     window.open(TELEGRAM_URL, "_blank", "noopener,noreferrer");
+    // Claim the $0.50 bonus
     try {
       await claimBonus.mutateAsync();
     } catch {
@@ -111,19 +90,11 @@ export default function TelegramJoinPopup() {
 
         <div className="p-6 pt-5">
           {/* Bonus badge */}
-<<<<<<< Updated upstream
-          <div className="flex items-center justify-center mb-4">
-            <div className="inline-flex items-center gap-1.5 bg-green-50 border border-green-200 text-green-700 text-xs font-bold px-3 py-1.5 rounded-full">
-              <Gift className="w-3.5 h-3.5" />
-              FREE $0.50 BONUS
-            </div>
-=======
           <div className="flex items-center justify-center mb-3">
             <span className="inline-flex items-center gap-1.5 bg-green-50 border border-green-200 text-green-700 text-xs font-bold px-3 py-1 rounded-full">
               <Gift className="w-3.5 h-3.5" />
               FREE BONUS OFFER
             </span>
->>>>>>> Stashed changes
           </div>
 
           {/* Icon */}
@@ -133,13 +104,6 @@ export default function TelegramJoinPopup() {
           </div>
 
           {/* Text */}
-<<<<<<< Updated upstream
-          <h2 className="text-xl font-bold text-[#0D2137] text-center mb-2">
-            Join & Get <span className="text-green-600">$0.50 Free!</span>
-          </h2>
-          <p className="text-sm text-gray-500 text-center leading-relaxed mb-2">
-            Join the <strong>Bulnix Telegram Channel</strong> and get <strong className="text-green-600">$0.50 instantly deposited</strong> to your wallet. No strings attached!
-=======
           <h2 className="text-xl font-bold text-[#0D2137] text-center mb-1">
             Join Bulnix on Telegram
           </h2>
@@ -148,7 +112,6 @@ export default function TelegramJoinPopup() {
           </p>
           <p className="text-sm text-gray-500 text-center leading-relaxed mb-5">
             Join our official Telegram channel and we will instantly deposit <strong>$0.50</strong> into your Bulnix wallet. Get exclusive deals, new product alerts, and order updates too!
->>>>>>> Stashed changes
           </p>
           <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-5 text-center">
             <p className="text-xs text-blue-700 font-medium flex items-center justify-center gap-1">
@@ -161,31 +124,18 @@ export default function TelegramJoinPopup() {
           <div className="flex flex-col gap-2">
             <Button
               onClick={handleJoin}
-<<<<<<< Updated upstream
-              disabled={claimBonusMutation.isPending}
-              className="w-full h-12 font-bold text-white rounded-xl text-base shadow-lg"
-              style={{ background: "linear-gradient(135deg, #229ED9, #0099cc)" }}
-            >
-              <Send className="w-4 h-4 mr-2" />
-              {claimBonusMutation.isPending ? "Claiming bonus..." : "Join & Claim $0.50"}
-=======
               disabled={claiming}
               className="w-full h-12 font-bold text-white rounded-xl text-base shadow-lg"
               style={{ background: "linear-gradient(135deg, #229ED9, #00a8e0)" }}
             >
               <Send className="w-4 h-4 mr-2" />
               {claiming ? "Claiming bonus..." : "Join & Claim $0.50 Now"}
->>>>>>> Stashed changes
             </Button>
             <button
               onClick={dismiss}
               className="w-full h-10 text-sm text-gray-400 hover:text-gray-600 transition-colors"
             >
-<<<<<<< Updated upstream
-              Skip (no bonus)
-=======
               No thanks, skip the bonus
->>>>>>> Stashed changes
             </button>
           </div>
         </div>

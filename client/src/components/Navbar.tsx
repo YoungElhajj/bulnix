@@ -43,21 +43,6 @@ const quickCategories = [
   { label: "📋 Craigslist", href: "/categories/buy-craigslist-accounts" },
 ];
 
-// Quick-access category shortcuts shown in a scrollable bar below the navbar
-const quickCategories = [
-  { label: "🎬 Streaming", href: "/categories/streaming-subscriptions" },
-  { label: "📺 Netflix", href: "/categories/buy-netflix-accounts" },
-  { label: "🎵 Spotify", href: "/categories/spotify-premium-subscription" },
-  { label: "📘 Facebook", href: "/categories/buy-facebook-accounts" },
-  { label: "📸 Instagram", href: "/categories/buy-instagram-accounts" },
-  { label: "🎵 TikTok", href: "/categories/buy-tiktok-accounts" },
-  { label: "💼 LinkedIn", href: "/categories/buy-linkedin-accounts" },
-  { label: "🎮 Gaming", href: "/categories/buy-steam-gift-cards" },
-  { label: "🔒 VPN", href: "/categories/buy-vpn-accounts" },
-  { label: "🔑 Google Voice", href: "/categories/buy-google-voice-accounts" },
-  { label: "📋 Craigslist", href: "/categories/buy-craigslist-accounts" },
-];
-
 // Secondary links shown in "More" dropdown and mobile menu
 const moreLinks = [
   { label: "FAQ", href: "/faq", icon: HelpCircle },
@@ -377,11 +362,7 @@ export default function Navbar() {
         </div>
       </div>
 
-<<<<<<< Updated upstream
-      {/* Category Quick-Access Bar */}
-=======
       {/* Quick-category bar (desktop) */}
->>>>>>> Stashed changes
       <div className="hidden lg:block border-t border-white/10 bg-[#0a2d45]">
         <div className="container">
           <div className="flex items-center gap-0.5 py-1 overflow-x-auto scrollbar-none">
@@ -389,11 +370,7 @@ export default function Navbar() {
               <Link
                 key={i}
                 href={cat.href}
-<<<<<<< Updated upstream
-                className="flex-shrink-0 px-3 py-1 text-xs text-white/70 hover:text-white hover:bg-white/10 rounded-md transition-colors whitespace-nowrap"
-=======
                 className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors whitespace-nowrap"
->>>>>>> Stashed changes
               >
                 {cat.label}
               </Link>
@@ -410,15 +387,9 @@ export default function Navbar() {
             <div className="pb-1">
               <p className="px-3 py-1 text-xs text-white/40 uppercase tracking-wider font-semibold">Quick Categories</p>
               <div className="grid grid-cols-2 gap-1">
-<<<<<<< Updated upstream
-                {quickCategories.map(cat => (
-                  <Link
-                    key={cat.href}
-=======
                 {quickCategories.map((cat, i) => (
                   <Link
                     key={i}
->>>>>>> Stashed changes
                     href={cat.href}
                     className="flex items-center px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors"
                     onClick={() => setMobileOpen(false)}

@@ -481,57 +481,39 @@ export const customAuthRouter = router({
 
       return { success: true, name: user.name };
     }),
-<<<<<<< Updated upstream
 
   /**
    * Generate a referral code for the current user if they don't have one.
    * Called from the Affiliate page when referralCode is null.
    */
   generateReferralCode: protectedProcedure.mutation(async ({ ctx }) => {
-    const db = await getDb();
-    if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
-    const [user] = await db.select({ referralCode: users.referralCode }).from(users).where(eq(users.id, ctx.user.id)).limit(1);
+    const dbConn = await getDb();
+    if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
+    const [user] = await dbConn.select({ referralCode: users.referralCode }).from(users).where(eq(users.id, ctx.user.id)).limit(1);
     if (user?.referralCode) return { referralCode: user.referralCode };
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     let code = "BX";
     for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-    await db.update(users).set({ referralCode: code }).where(eq(users.id, ctx.user.id));
+    await dbConn.update(users).set({ referralCode: code }).where(eq(users.id, ctx.user.id));
     return { referralCode: code };
   }),
-=======
-  /**
-   * Generate a referral code for the current user if they don't have one.
-   */
-  generateReferralCode: protectedProcedure
-    .mutation(async ({ ctx }) => {
-      const dbConn = await getDb();
-      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
-      const rows = await dbConn.select({ referralCode: users.referralCode }).from(users).where(eq(users.id, ctx.user.id)).limit(1);
-      if (rows[0]?.referralCode) return { referralCode: rows[0].referralCode };
-      const { randomBytes } = await import("crypto");
-      const code = randomBytes(5).toString("hex").toUpperCase();
-      await dbConn.update(users).set({ referralCode: code }).where(eq(users.id, ctx.user.id));
-      return { referralCode: code };
-    }),
 
   /**
    * Claim the one-time $0.50 Telegram join bonus.
    */
-  claimTelegramBonus: protectedProcedure
-    .mutation(async ({ ctx }) => {
-      const dbConn = await getDb();
-      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
-      const rows = await dbConn.select().from(users).where(eq(users.id, ctx.user.id)).limit(1);
-      const row = rows[0] as any;
-      if (!row) throw new TRPCError({ code: "NOT_FOUND" });
-      if (row.telegramBonusClaimed) return { alreadyClaimed: true, amountUSD: 0 };
-      const bonusUSD = 0.50;
-      await dbConn.update(users).set({ telegramBonusClaimed: true } as any).where(eq(users.id, ctx.user.id));
-      const { creditWallet } = await import("../db");
-      await creditWallet(ctx.user.id, bonusUSD, "Telegram channel join bonus");
-      return { alreadyClaimed: false, amountUSD: bonusUSD };
-    }),
->>>>>>> Stashed changes
+  claimTelegramBonus: protectedProcedure.mutation(async ({ ctx }) => {
+    const dbConn = await getDb();
+    if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+    const rows = await dbConn.select().from(users).where(eq(users.id, ctx.user.id)).limit(1);
+    const row = rows[0] as any;
+    if (!row) throw new TRPCError({ code: "NOT_FOUND" });
+    if (row.telegramBonusClaimed) return { alreadyClaimed: true, amountUSD: 0 };
+    const bonusUSD = 0.50;
+    await dbConn.update(users).set({ telegramBonusClaimed: true } as any).where(eq(users.id, ctx.user.id));
+    const { creditWallet } = await import("../db");
+    await creditWallet(ctx.user.id, bonusUSD, "Telegram channel join bonus");
+    return { alreadyClaimed: false, amountUSD: bonusUSD };
+  }),
 });
 
 // ─── Admin Account Settings Router (TOTP 2FA + Password) ─────────────────────

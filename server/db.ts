@@ -1822,34 +1822,7 @@ export async function creditWallet(userId: number, amountUSD: number, descriptio
   return { success: true, newBalance };
 }
 
-/**
- * Admin: manually top up a user's wallet balance.
- */
-export async function adminTopUpUserWallet(adminId: number, userId: number, amountUSD: number, note: string) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  const wallet = await getOrCreateWallet(userId);
-  const newBalance = Number(wallet.balanceUSD) + amountUSD;
-  const reference = `ADMIN-TOPUP-${userId}-${Date.now()}`;
-  await withDbRetry(() => db!.update(wallets).set({ balanceUSD: newBalance.toFixed(6), totalDeposited: (Number(wallet.totalDeposited) + amountUSD).toFixed(6) }).where(eq(wallets.userId, userId)), "adminTopUp:updateWallet");
-  await withDbRetry(() => db!.insert(walletTransactions).values({
-    userId,
-    type: "topup" as any,
-    amountUSD: amountUSD.toFixed(6),
-    balanceAfterUSD: newBalance.toFixed(6),
-    description: `Admin top-up: ${note}`,
-    reference,
-    status: "completed",
-  }), "adminTopUp:insertTxn");
-  await withDbRetry(() => db!.insert(adminActions).values({
-    adminId,
-    action: `Manual wallet top-up of $${amountUSD.toFixed(2)} to user ${userId}`,
-    targetType: "user",
-    targetId: userId,
-    details: { amountUSD, note },
-  }), "adminTopUp:logAction");
-  return { success: true, newBalance };
-}
+
 
 
 // ─── Supplier Refund Claims ──────────────────────────────────────────────────

@@ -469,6 +469,7 @@ var init_schema = __esm({
       suspendedReason: text("suspendedReason"),
       twoFactorEnabled: boolean("twoFactorEnabled").default(false).notNull(),
       twoFactorSecret: varchar("twoFactorSecret", { length: 64 }),
+      telegramBonusClaimed: boolean("telegramBonusClaimed").default(false).notNull(),
       notifyEmail: boolean("notifyEmail").default(true).notNull(),
       notifyOrders: boolean("notifyOrders").default(true).notNull(),
       preferredCurrency: mysqlEnum("preferredCurrency", ["NGN", "USD", "EUR", "GBP"]).default("USD").notNull(),
@@ -904,13 +905,18 @@ var init_schema = __esm({
       id: int("id").autoincrement().primaryKey(),
       userId: int("userId").notNull(),
       keyHash: varchar("keyHash", { length: 256 }).notNull().unique(),
-      // SHA-256 of the key
+      // SHA-256 of the key (empty for pending requests)
       keyPrefix: varchar("keyPrefix", { length: 16 }).notNull(),
-      // first 8 chars for display
+      // first 8 chars for display (empty for pending)
       label: varchar("label", { length: 128 }).default("Default").notNull(),
+      status: mysqlEnum("status", ["pending", "active", "rejected"]).default("pending").notNull(),
       isEnabled: boolean("isEnabled").default(true).notNull(),
       adminEnabled: boolean("adminEnabled").default(true).notNull(),
       // admin can disable
+      adminNote: varchar("adminNote", { length: 256 }),
+      // admin rejection reason
+      rawKeyOnce: varchar("rawKeyOnce", { length: 128 }),
+      // full key shown once to user, then cleared
       lastUsedAt: timestamp("lastUsedAt"),
       requestCount: int("requestCount").default(0).notNull(),
       createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -2578,6 +2584,7 @@ var init_fadded = __esm({
 var db_exports = {};
 __export(db_exports, {
   addProductCredentials: () => addProductCredentials,
+  adminApproveApiKey: () => adminApproveApiKey,
   adminCreateManualProduct: () => adminCreateManualProduct,
   adminCreateProduct: () => adminCreateProduct,
   adminDeleteManualProduct: () => adminDeleteManualProduct,
@@ -2594,16 +2601,20 @@ __export(db_exports, {
   adminProcessRefund: () => adminProcessRefund,
   adminProcessWithdrawal: () => adminProcessWithdrawal,
   adminReactivateUser: () => adminReactivateUser,
+  adminRejectApiKey: () => adminRejectApiKey,
   adminReplyToTicket: () => adminReplyToTicket,
   adminRetryFulfillment: () => adminRetryFulfillment,
   adminSuspendUser: () => adminSuspendUser,
   adminToggleApiKey: () => adminToggleApiKey,
+  adminTopUpUserWallet: () => adminTopUpUserWallet,
   adminUpdateManualProduct: () => adminUpdateManualProduct,
   adminUpdateOrder: () => adminUpdateOrder,
   adminUpdateProduct: () => adminUpdateProduct,
   applyMarkupToAllProducts: () => applyMarkupToAllProducts,
   autoFulfillOrder: () => autoFulfillOrder,
   claimManualCredential: () => claimManualCredential,
+  claimTelegramBonus: () => claimTelegramBonus,
+  clearRawKeyOnce: () => clearRawKeyOnce,
   confirmWalletTopup: () => confirmWalletTopup,
   convertAffiliateToWallet: () => convertAffiliateToWallet,
   createCategory: () => createCategory,
@@ -2612,6 +2623,7 @@ __export(db_exports, {
   createSupplierRefundClaim: () => createSupplierRefundClaim,
   createTicket: () => createTicket,
   creditAffiliateSignupBonus: () => creditAffiliateSignupBonus,
+  creditWallet: () => creditWallet,
   deleteApiKey: () => deleteApiKey,
   deleteCategory: () => deleteCategory,
   deleteProductCredential: () => deleteProductCredential,
@@ -2666,6 +2678,7 @@ __export(db_exports, {
   redeemPointsToWallet: () => redeemPointsToWallet,
   replyToTicket: () => replyToTicket,
   requestAffiliateWithdrawal: () => requestAffiliateWithdrawal,
+  requestApiKey: () => requestApiKey,
   resetDbPool: () => resetDbPool,
   retryAllProcessingOrders: () => retryAllProcessingOrders,
   submitSupplierRefundClaim: () => submitSupplierRefundClaim,
@@ -3122,7 +3135,8 @@ async function getUserOrderById(userId, orderId) {
   const result = await db.select().from(orders).where(and3(eq3(orders.id, orderId), eq3(orders.userId, userId))).limit(1);
   if (!result[0]) return null;
   const items = await db.select().from(orderItems).where(eq3(orderItems.orderId, orderId));
-  return { ...result[0], items };
+  const isSubscriptionOrder = items.length > 0 && items.every((item) => item.providerKey === "manual" && !item.supplierProductId);
+  return { ...result[0], items, isSubscriptionOrder };
 }
 async function getOrderDelivery(userId, orderId) {
   const db = await getDb();
@@ -3229,6 +3243,10 @@ async function fulfillOrderByReference(reference, gateway) {
   await withDbRetry(() => db.update(orders).set({ status: "processing" }).where(eq3(orders.id, payment.orderId)), "fulfillOrderByReference:updateOrder");
   await logSystem("info", "payment", `Order ${payment.orderId} payment confirmed via ${gateway} webhook`, { reference, gateway });
   autoFulfillOrder(payment.orderId).catch((err) => console.error("[AutoFulfill] Error:", err));
+  if (payment.userId) {
+    const amountUSD = Number(payment.amount);
+    earnRewardPoints(payment.userId, amountUSD, payment.orderId).catch((err) => console.error("[RewardPoints] Error:", err));
+  }
   return { success: true, orderId: payment.orderId };
 }
 async function payOrderWithWallet(userId, orderId) {
@@ -3296,7 +3314,9 @@ Order: ${order.orderNumber}`
     webhookVerified: true
   }), "payOrderWithWallet:insertPayment");
   await logSystem("info", "payment", `Order ${order.orderNumber} paid with wallet by user ${userId}`, { orderId, totalUSD });
+  earnRewardPoints(userId, totalUSD, orderId).catch((err) => console.error("[RewardPoints] Error:", err));
   autoFulfillOrder(orderId).catch((err) => console.error("[AutoFulfill] Error:", err));
+  earnRewardPoints(userId, totalUSD, orderId).catch((err) => console.error("[RewardPoints] Error:", err));
   return { success: true, orderId, orderNumber: order.orderNumber, amountDeducted: totalUSD, newBalance: Number(newBalance) };
 }
 async function autoFulfillOrder(orderId) {
@@ -3306,6 +3326,22 @@ async function autoFulfillOrder(orderId) {
     const items = await db.select().from(orderItems).where(eq3(orderItems.orderId, orderId));
     if (!items.length) {
       await logSystem("warn", "fulfillment", `No order items found for order ${orderId}`);
+      return;
+    }
+    const allSubscription = items.every((item) => item.providerKey === "manual" && !item.supplierProductId);
+    if (allSubscription) {
+      await withDbRetry(() => db.update(orders).set({ status: "processing" }).where(eq3(orders.id, orderId)), "autoFulfillOrder:subscriptionPending");
+      const [orderRow] = await db.select().from(orders).where(eq3(orders.id, orderId)).limit(1);
+      const { notifyOwner: notifyOwner2 } = await Promise.resolve().then(() => (init_notification(), notification_exports));
+      notifyOwner2({
+        title: `New Subscription Order: #${orderRow?.orderNumber ?? orderId}`,
+        content: `A subscription order requires manual delivery.
+Order: #${orderRow?.orderNumber ?? orderId}
+Items: ${items.map((i) => i.productTitle).join(", ")}
+Total: $${orderRow?.totalUSD ?? "?"}
+Go to Admin > Orders to deliver.`
+      }).catch((err) => console.error("[SubscriptionNotify]", err));
+      await logSystem("info", "fulfillment", `Order ${orderId} is subscription-only \u2014 set to pending, admin notified`, { orderId });
       return;
     }
     const [accsConfig] = await db.select().from(providerConfigs).where(eq3(providerConfigs.providerKey, "accszone")).limit(1);
@@ -3714,7 +3750,8 @@ async function adminGetOrderDetail(orderId) {
   const items = await db.select().from(orderItems).where(eq3(orderItems.orderId, orderId));
   const fulfillments = await db.select().from(fulfillmentRecords).where(eq3(fulfillmentRecords.orderId, orderId));
   const paymentRows = await db.select().from(payments).where(eq3(payments.orderId, orderId));
-  return { order, user: user ? { ...user, walletBalanceUSD: wallet?.balanceUSD ?? "0" } : null, items, fulfillments, payments: paymentRows };
+  const isSubscriptionOrder = items.length > 0 && items.every((item) => item.providerKey === "manual" && !item.supplierProductId);
+  return { order, user: user ? { ...user, walletBalanceUSD: wallet?.balanceUSD ?? "0" } : null, items, fulfillments, payments: paymentRows, isSubscriptionOrder };
 }
 async function adminUpdateOrder(input) {
   const db = await getDb();
@@ -3833,6 +3870,70 @@ async function adminOrderManualRefund(adminId, input) {
     }));
   }
   return { success: true, newBalance, orderNumber: order.orderNumber };
+}
+async function adminTopUpUserWallet(adminId, userId, amountUSD, note) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const wallet = await getOrCreateWallet(userId);
+  const newBalance = Number(wallet.balanceUSD) + amountUSD;
+  const reference = `TOPUP-ADMIN-${userId}-${Date.now()}`;
+  await withDbRetry(() => db.update(wallets).set({ balanceUSD: newBalance.toFixed(6), totalDeposited: sql`totalDeposited + ${amountUSD.toFixed(6)}` }).where(eq3(wallets.userId, userId)), "adminTopUp:wallet");
+  await withDbRetry(() => db.insert(walletTransactions).values({
+    userId,
+    type: "deposit",
+    amountUSD: amountUSD.toFixed(6),
+    balanceAfterUSD: newBalance.toFixed(6),
+    description: note,
+    reference,
+    status: "completed",
+    gateway: "manual"
+  }), "adminTopUp:txn");
+  await withDbRetry(() => db.insert(adminActions).values({
+    adminId,
+    action: `Manual top-up of $${amountUSD.toFixed(2)} for user ${userId}`,
+    targetType: "user",
+    targetId: userId,
+    details: { amountUSD, note, newBalance }
+  }), "adminTopUp:log");
+  await db.insert(notifications).values({
+    userId,
+    type: "wallet",
+    title: `Wallet Top-Up: +$${amountUSD.toFixed(2)}`,
+    message: `$${amountUSD.toFixed(2)} has been added to your wallet. ${note}`
+  }).catch(() => {
+  });
+  return { success: true, newBalance };
+}
+async function claimTelegramBonus(userId) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [user] = await db.select({ telegramBonusClaimed: users.telegramBonusClaimed }).from(users).where(eq3(users.id, userId)).limit(1);
+  if (!user) throw new Error("User not found");
+  if (user.telegramBonusClaimed) return { success: true, alreadyClaimed: true, amountUSD: 0 };
+  const bonusUSD = 0.5;
+  const wallet = await getOrCreateWallet(userId);
+  const newBalance = Number(wallet.balanceUSD) + bonusUSD;
+  const reference = `TELEGRAM-BONUS-${userId}-${Date.now()}`;
+  await withDbRetry(() => db.update(users).set({ telegramBonusClaimed: true }).where(eq3(users.id, userId)), "claimTelegramBonus:user");
+  await withDbRetry(() => db.update(wallets).set({ balanceUSD: newBalance.toFixed(6) }).where(eq3(wallets.userId, userId)), "claimTelegramBonus:wallet");
+  await withDbRetry(() => db.insert(walletTransactions).values({
+    userId,
+    type: "deposit",
+    amountUSD: bonusUSD.toFixed(6),
+    balanceAfterUSD: newBalance.toFixed(6),
+    description: "Telegram channel join bonus",
+    reference,
+    status: "completed",
+    gateway: "bonus"
+  }), "claimTelegramBonus:txn");
+  await db.insert(notifications).values({
+    userId,
+    type: "wallet",
+    title: "Telegram Bonus Credited!",
+    message: `$${bonusUSD.toFixed(2)} has been added to your wallet for joining the Bulnix Telegram channel!`
+  }).catch(() => {
+  });
+  return { success: true, alreadyClaimed: false, amountUSD: bonusUSD };
 }
 async function adminGetUsers(input) {
   const db = await getDb();
@@ -4064,6 +4165,24 @@ async function adminProcessRefund(adminId, input) {
   if (input.ticketId) {
     await withDbRetry(() => db.update(supportTickets).set({ status: "resolved", resolvedAt: /* @__PURE__ */ new Date() }).where(eq3(supportTickets.id, input.ticketId)), "adminProcessRefund:closeTicket");
   }
+  return { success: true, newBalance };
+}
+async function creditWallet(userId, amountUSD, description) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const wallet = await getOrCreateWallet(userId);
+  const newBalance = Number(wallet.balanceUSD) + amountUSD;
+  const reference = `BONUS-${userId}-${Date.now()}`;
+  await withDbRetry(() => db.update(wallets).set({ balanceUSD: newBalance.toFixed(6) }).where(eq3(wallets.userId, userId)), "creditWallet:updateWallet");
+  await withDbRetry(() => db.insert(walletTransactions).values({
+    userId,
+    type: "bonus",
+    amountUSD: amountUSD.toFixed(6),
+    balanceAfterUSD: newBalance.toFixed(6),
+    description,
+    reference,
+    status: "completed"
+  }), "creditWallet:insertTxn");
   return { success: true, newBalance };
 }
 async function createSupplierRefundClaim(adminId, input) {
@@ -4611,16 +4730,59 @@ async function adminProcessWithdrawal(id, action, adminNote) {
   });
   return { success: true };
 }
-async function generateApiKey(userId, label) {
+async function requestApiKey(userId, label) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const existing = await db.select().from(apiKeys).where(eq3(apiKeys.userId, userId));
   if (existing.length >= 3) throw new Error("Maximum 3 API keys allowed");
+  const pending = existing.find((k) => k.status === "pending");
+  if (pending) throw new Error("You already have a pending API key request");
+  const [result] = await db.insert(apiKeys).values({
+    userId,
+    keyHash: "",
+    keyPrefix: "",
+    label,
+    status: "pending"
+  }).$returningId();
+  return { id: result.id, label, status: "pending" };
+}
+async function adminApproveApiKey(id) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
   const rawKey = "blx_" + randomBytes(32).toString("hex");
   const keyHash = createHash("sha256").update(rawKey).digest("hex");
   const keyPrefix = rawKey.substring(0, 12);
-  await db.insert(apiKeys).values({ userId, keyHash, keyPrefix, label });
-  return { rawKey, keyPrefix, label };
+  await db.update(apiKeys).set({ keyHash, keyPrefix, status: "active", adminNote: null, rawKeyOnce: rawKey }).where(eq3(apiKeys.id, id));
+  const [key] = await db.select().from(apiKeys).where(eq3(apiKeys.id, id)).limit(1);
+  if (key) {
+    await db.insert(notifications).values({
+      userId: key.userId,
+      type: "order",
+      title: "API Key Approved",
+      message: `Your API key request has been approved. Log in to your API Keys page to view your full key (shown once).`
+    }).catch(() => {
+    });
+  }
+  return { rawKey, keyPrefix };
+}
+async function adminRejectApiKey(id, reason) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(apiKeys).set({ status: "rejected", adminNote: reason }).where(eq3(apiKeys.id, id));
+  const [key] = await db.select().from(apiKeys).where(eq3(apiKeys.id, id)).limit(1);
+  if (key) {
+    await db.insert(notifications).values({
+      userId: key.userId,
+      type: "order",
+      title: "API Key Request Rejected",
+      message: `Your API key request was rejected. Reason: ${reason}`
+    }).catch(() => {
+    });
+  }
+  return { success: true };
+}
+async function generateApiKey(userId, label) {
+  return requestApiKey(userId, label);
 }
 async function getUserApiKeys(userId) {
   const db = await getDb();
@@ -4629,12 +4791,21 @@ async function getUserApiKeys(userId) {
     id: apiKeys.id,
     keyPrefix: apiKeys.keyPrefix,
     label: apiKeys.label,
+    status: apiKeys.status,
+    adminNote: apiKeys.adminNote,
     isEnabled: apiKeys.isEnabled,
     adminEnabled: apiKeys.adminEnabled,
+    rawKeyOnce: apiKeys.rawKeyOnce,
     lastUsedAt: apiKeys.lastUsedAt,
     requestCount: apiKeys.requestCount,
     createdAt: apiKeys.createdAt
   }).from(apiKeys).where(eq3(apiKeys.userId, userId)).orderBy(desc(apiKeys.createdAt));
+}
+async function clearRawKeyOnce(id, userId) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(apiKeys).set({ rawKeyOnce: null }).where(and3(eq3(apiKeys.id, id), eq3(apiKeys.userId, userId)));
+  return { success: true };
 }
 async function deleteApiKey(id, userId) {
   const db = await getDb();
@@ -4665,6 +4836,8 @@ async function adminGetApiKeys() {
     id: apiKeys.id,
     keyPrefix: apiKeys.keyPrefix,
     label: apiKeys.label,
+    status: apiKeys.status,
+    adminNote: apiKeys.adminNote,
     isEnabled: apiKeys.isEnabled,
     adminEnabled: apiKeys.adminEnabled,
     lastUsedAt: apiKeys.lastUsedAt,
@@ -5066,7 +5239,20 @@ var init_runMigrations = __esm({
       { name: "users.lastLoginIp", sql: "ALTER TABLE `users` ADD COLUMN IF NOT EXISTS `lastLoginIp` varchar(64)" },
       { name: "products.deliveryFormat", sql: "ALTER TABLE `products` ADD COLUMN IF NOT EXISTS `deliveryFormat` text" },
       { name: "seed.provider.accszone", sql: "INSERT IGNORE INTO `provider_configs` (`providerKey`, `displayName`, `baseUrl`, `isEnabled`, `defaultMarkupPercent`) VALUES ('accszone', 'AccsZone', 'https://accszone.com/api/v1', 1, 20.00)" },
-      { name: "seed.provider.fadded", sql: "INSERT IGNORE INTO `provider_configs` (`providerKey`, `displayName`, `baseUrl`, `isEnabled`, `defaultMarkupPercent`) VALUES ('fadded', 'Fadded', 'https://fadded.net/api/v1', 1, 20.00)" }
+      { name: "seed.provider.fadded", sql: "INSERT IGNORE INTO `provider_configs` (`providerKey`, `displayName`, `baseUrl`, `isEnabled`, `defaultMarkupPercent`) VALUES ('fadded', 'Fadded', 'https://fadded.net/api/v1', 1, 20.00)" },
+      // Reward tables
+      { name: "reward_points", sql: "CREATE TABLE IF NOT EXISTS `reward_points` (`id` int AUTO_INCREMENT NOT NULL, `userId` int NOT NULL, `points` int NOT NULL DEFAULT 0, `lifetimeEarned` int NOT NULL DEFAULT 0, `createdAt` timestamp NOT NULL DEFAULT (now()), `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP, CONSTRAINT `reward_points_id` PRIMARY KEY(`id`), CONSTRAINT `reward_points_userId_unique` UNIQUE(`userId`))" },
+      { name: "reward_transactions", sql: "CREATE TABLE IF NOT EXISTS `reward_transactions` (`id` int AUTO_INCREMENT NOT NULL, `userId` int NOT NULL, `type` enum('earn','redeem') NOT NULL, `points` int NOT NULL, `description` varchar(256) NOT NULL, `orderId` int, `createdAt` timestamp NOT NULL DEFAULT (now()), CONSTRAINT `reward_transactions_id` PRIMARY KEY(`id`))" },
+      { name: "reward_settings", sql: "CREATE TABLE IF NOT EXISTS `reward_settings` (`id` int AUTO_INCREMENT NOT NULL, `tier` varchar(32) NOT NULL, `cashbackPercent` decimal(5,2) NOT NULL, `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP, CONSTRAINT `reward_settings_id` PRIMARY KEY(`id`), CONSTRAINT `reward_settings_tier_unique` UNIQUE(`tier`))" },
+      { name: "seed.reward_settings", sql: "INSERT IGNORE INTO `reward_settings` (`tier`, `cashbackPercent`) VALUES ('gold', 0.50), ('platinum', 0.75), ('diamond', 1.00)" },
+      // Affiliate tables
+      { name: "affiliate_balances", sql: "CREATE TABLE IF NOT EXISTS `affiliate_balances` (`id` int AUTO_INCREMENT NOT NULL, `userId` int NOT NULL, `balanceUSD` decimal(18,6) NOT NULL DEFAULT '0.000000', `totalEarned` decimal(18,6) NOT NULL DEFAULT '0.000000', `createdAt` timestamp NOT NULL DEFAULT (now()), `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP, CONSTRAINT `affiliate_balances_id` PRIMARY KEY(`id`), CONSTRAINT `affiliate_balances_userId_unique` UNIQUE(`userId`))" },
+      { name: "affiliate_transactions", sql: "CREATE TABLE IF NOT EXISTS `affiliate_transactions` (`id` int AUTO_INCREMENT NOT NULL, `userId` int NOT NULL, `type` enum('signup_bonus','withdrawal') NOT NULL, `amountUSD` decimal(18,6) NOT NULL, `description` varchar(256) NOT NULL, `referredUserId` int, `createdAt` timestamp NOT NULL DEFAULT (now()), CONSTRAINT `affiliate_transactions_id` PRIMARY KEY(`id`))" },
+      { name: "affiliate_withdrawals", sql: "CREATE TABLE IF NOT EXISTS `affiliate_withdrawals` (`id` int AUTO_INCREMENT NOT NULL, `userId` int NOT NULL, `amountUSD` decimal(18,6) NOT NULL, `bankName` varchar(128) NOT NULL, `accountNumber` varchar(64) NOT NULL, `accountName` varchar(128) NOT NULL, `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending', `adminNote` text, `processedAt` timestamp, `createdAt` timestamp NOT NULL DEFAULT (now()), `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP, CONSTRAINT `affiliate_withdrawals_id` PRIMARY KEY(`id`))" },
+      // API Keys table
+      { name: "api_keys", sql: "CREATE TABLE IF NOT EXISTS `api_keys` (`id` int AUTO_INCREMENT NOT NULL, `userId` int NOT NULL, `keyHash` varchar(256) NOT NULL, `keyPrefix` varchar(16) NOT NULL, `label` varchar(128) NOT NULL DEFAULT 'Default', `isEnabled` boolean NOT NULL DEFAULT true, `adminEnabled` boolean NOT NULL DEFAULT true, `lastUsedAt` timestamp, `requestCount` int NOT NULL DEFAULT 0, `createdAt` timestamp NOT NULL DEFAULT (now()), `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP, CONSTRAINT `api_keys_id` PRIMARY KEY(`id`), CONSTRAINT `api_keys_keyHash_unique` UNIQUE(`keyHash`))" },
+      { name: "api_keys.status", sql: "ALTER TABLE `api_keys` ADD COLUMN IF NOT EXISTS `status` enum('pending','active','rejected') NOT NULL DEFAULT 'pending'" },
+      { name: "api_keys.adminNote", sql: "ALTER TABLE `api_keys` ADD COLUMN IF NOT EXISTS `adminNote` varchar(256)" }
     ];
   }
 });
@@ -5628,7 +5814,8 @@ var customAuthRouter = router({
     z.object({
       name: z.string().min(2, "Name must be at least 2 characters"),
       email: z.email("Invalid email address"),
-      password: z.string().min(8, "Password must be at least 8 characters")
+      password: z.string().min(8, "Password must be at least 8 characters"),
+      referralCode: z.string().optional()
     })
   ).mutation(async ({ input, ctx }) => {
     const db = await getDb();
@@ -5644,13 +5831,16 @@ var customAuthRouter = router({
     const otp = generateOtp();
     const otpExpiry = otpExpiresAt();
     const passwordHash = await bcrypt.hash(input.password, 12);
+    const newReferralCode = `BX${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
     if (existing) {
       await db.update(users).set({
         name: input.name,
         passwordHash,
         otpCode: otp,
         otpExpiry,
-        otpPurpose: "register"
+        otpPurpose: "register",
+        referralCode: existing.referralCode ?? newReferralCode,
+        referredBy: input.referralCode ?? existing.referredBy
       }).where(eq4(users.email, email));
     } else {
       const signupIp = await getClientIp(ctx.req);
@@ -5666,7 +5856,9 @@ var customAuthRouter = router({
         otpExpiry,
         otpPurpose: "register",
         signupIp,
-        signupCountry
+        signupCountry,
+        referralCode: newReferralCode,
+        referredBy: input.referralCode ?? null
       });
     }
     await safeSendEmail(
@@ -5721,6 +5913,20 @@ var customAuthRouter = router({
       await safeSendEmail(
         () => sendWelcomeEmail({ to: email, name: user.name ?? "" })
       );
+      if (user.referredBy) {
+        try {
+          const db2 = await getDb();
+          if (db2) {
+            const [referrer] = await db2.select({ id: users.id }).from(users).where(eq4(users.referralCode, user.referredBy)).limit(1);
+            if (referrer) {
+              const { creditAffiliateSignupBonus: creditAffiliateSignupBonus2 } = await Promise.resolve().then(() => (init_db(), db_exports));
+              await creditAffiliateSignupBonus2(referrer.id, user.id);
+            }
+          }
+        } catch (e) {
+          console.error("[Referral] Failed to credit bonus:", e);
+        }
+      }
     }
     return {
       success: true,
@@ -5918,6 +6124,37 @@ var customAuthRouter = router({
     const cookieOptions = getSessionCookieOptions(ctx.req);
     ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: TWENTY_FOUR_HOURS_MS3 });
     return { success: true, name: user.name };
+  }),
+  /**
+   * Generate a referral code for the current user if they don't have one.
+   * Called from the Affiliate page when referralCode is null.
+   */
+  generateReferralCode: protectedProcedure.mutation(async ({ ctx }) => {
+    const dbConn = await getDb();
+    if (!dbConn) throw new TRPCError3({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
+    const [user] = await dbConn.select({ referralCode: users.referralCode }).from(users).where(eq4(users.id, ctx.user.id)).limit(1);
+    if (user?.referralCode) return { referralCode: user.referralCode };
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let code = "BX";
+    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    await dbConn.update(users).set({ referralCode: code }).where(eq4(users.id, ctx.user.id));
+    return { referralCode: code };
+  }),
+  /**
+   * Claim the one-time $0.50 Telegram join bonus.
+   */
+  claimTelegramBonus: protectedProcedure.mutation(async ({ ctx }) => {
+    const dbConn = await getDb();
+    if (!dbConn) throw new TRPCError3({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+    const rows = await dbConn.select().from(users).where(eq4(users.id, ctx.user.id)).limit(1);
+    const row = rows[0];
+    if (!row) throw new TRPCError3({ code: "NOT_FOUND" });
+    if (row.telegramBonusClaimed) return { alreadyClaimed: true, amountUSD: 0 };
+    const bonusUSD = 0.5;
+    await dbConn.update(users).set({ telegramBonusClaimed: true }).where(eq4(users.id, ctx.user.id));
+    const { creditWallet: creditWallet2 } = await Promise.resolve().then(() => (init_db(), db_exports));
+    await creditWallet2(ctx.user.id, bonusUSD, "Telegram channel join bonus");
+    return { alreadyClaimed: false, amountUSD: bonusUSD };
   })
 });
 var adminAccountRouter = router({
@@ -6198,6 +6435,8 @@ var appRouter = router({
     resetPassword: customAuthRouter.resetPassword,
     changePassword: customAuthRouter.changePassword,
     adminLogin: customAuthRouter.adminLogin,
+    generateReferralCode: customAuthRouter.generateReferralCode,
+    claimTelegramBonus: protectedProcedure.mutation(({ ctx }) => claimTelegramBonus(ctx.user.id)),
     // Admin account settings (2FA + password)
     changeAdminPassword: adminAccountRouter.changeAdminPassword,
     setupTotp: adminAccountRouter.setupTotp,
@@ -6350,7 +6589,8 @@ var appRouter = router({
       list: adminProcedure2.input(z3.object({ page: z3.number().default(1), limit: z3.number().default(50), search: z3.string().optional() })).query(({ input }) => adminGetUsers(input)),
       getDetail: adminProcedure2.input(z3.object({ userId: z3.number() })).query(({ input }) => adminGetUserDetail(input.userId)),
       suspend: adminProcedure2.input(z3.object({ userId: z3.number(), reason: z3.string().optional() })).mutation(({ input }) => adminSuspendUser(input.userId, input.reason)),
-      reactivate: adminProcedure2.input(z3.object({ userId: z3.number() })).mutation(({ input }) => adminReactivateUser(input.userId))
+      reactivate: adminProcedure2.input(z3.object({ userId: z3.number() })).mutation(({ input }) => adminReactivateUser(input.userId)),
+      topUp: adminProcedure2.input(z3.object({ userId: z3.number(), amountUSD: z3.number().positive(), note: z3.string().optional() })).mutation(({ input, ctx }) => adminTopUpUserWallet(ctx.user.id, input.userId, input.amountUSD, input.note ?? "Manual top-up by admin"))
     }),
     // Refunds
     refunds: router({
@@ -6574,11 +6814,15 @@ var appRouter = router({
   // ── Customer API Keys ─────────────────────────────────────────────────────
   apiKeys: router({
     list: protectedProcedure.query(({ ctx }) => getUserApiKeys(ctx.user.id)),
-    generate: protectedProcedure.input(z3.object({ label: z3.string().min(1).max(64) })).mutation(({ ctx, input }) => generateApiKey(ctx.user.id, input.label)),
+    request: protectedProcedure.input(z3.object({ label: z3.string().min(1).max(64) })).mutation(({ ctx, input }) => requestApiKey(ctx.user.id, input.label)),
+    generate: protectedProcedure.input(z3.object({ label: z3.string().min(1).max(64) })).mutation(({ ctx, input }) => requestApiKey(ctx.user.id, input.label)),
     delete: protectedProcedure.input(z3.object({ id: z3.number() })).mutation(({ ctx, input }) => deleteApiKey(input.id, ctx.user.id)),
     toggle: protectedProcedure.input(z3.object({ id: z3.number(), isEnabled: z3.boolean() })).mutation(({ ctx, input }) => toggleApiKey(input.id, ctx.user.id, input.isEnabled)),
     adminList: adminProcedure2.query(() => adminGetApiKeys()),
-    adminToggle: adminProcedure2.input(z3.object({ id: z3.number(), adminEnabled: z3.boolean() })).mutation(({ input }) => adminToggleApiKey(input.id, input.adminEnabled))
+    adminToggle: adminProcedure2.input(z3.object({ id: z3.number(), adminEnabled: z3.boolean() })).mutation(({ input }) => adminToggleApiKey(input.id, input.adminEnabled)),
+    adminApprove: adminProcedure2.input(z3.object({ id: z3.number() })).mutation(({ input }) => adminApproveApiKey(input.id)),
+    adminReject: adminProcedure2.input(z3.object({ id: z3.number(), reason: z3.string().min(1).max(256) })).mutation(({ input }) => adminRejectApiKey(input.id, input.reason)),
+    clearRawKeyOnce: protectedProcedure.input(z3.object({ id: z3.number() })).mutation(({ ctx, input }) => clearRawKeyOnce(input.id, ctx.user.id))
   }),
   // ── One-time Migrations (admin only) ─────────────────────────────────────
   migrations: migrationsRouter

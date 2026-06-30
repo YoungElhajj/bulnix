@@ -152,21 +152,10 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
   const [topUpAmount, setTopUpAmount] = useState("");
   const [topUpNote, setTopUpNote] = useState("");
   const [showTopUp, setShowTopUp] = useState(false);
-<<<<<<< Updated upstream
-
-  const topUpMutation = trpc.admin.users.topUp.useMutation({
-    onSuccess: (r) => {
-      toast.success(`Wallet topped up! New balance: $${Number(r.newBalance).toFixed(2)}`);
-      setTopUpAmount("");
-      setTopUpNote("");
-      setShowTopUp(false);
-      refetch();
-=======
   const topUpMutation = trpc.admin.users.topUp.useMutation({
     onSuccess: (r) => {
       toast.success(`Wallet credited. New balance: $${Number(r.newBalance).toFixed(2)}`);
       setTopUpAmount(""); setTopUpNote(""); setShowTopUp(false); refetch();
->>>>>>> Stashed changes
     },
     onError: (e) => toast.error(e.message),
   });
@@ -235,45 +224,6 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
               </div>
             </div>
 
-<<<<<<< Updated upstream
-            {/* Top-Up Form */}
-            {showTopUp && (
-              <div className="bg-[#161b22] border border-emerald-500/30 rounded-xl p-4 space-y-3">
-                <h3 className="text-sm font-bold text-emerald-400 flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" /> Manual Wallet Top-Up
-                </h3>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs text-slate-400 mb-1 block">Amount (USD)</label>
-                    <Input
-                      type="number" min="0.01" step="0.01" placeholder="e.g. 5.00"
-                      value={topUpAmount} onChange={e => setTopUpAmount(e.target.value)}
-                      className="bg-[#0d1117] border-slate-700 text-white h-9 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-slate-400 mb-1 block">Note (optional)</label>
-                    <Input
-                      placeholder="Reason for top-up"
-                      value={topUpNote} onChange={e => setTopUpNote(e.target.value)}
-                      className="bg-[#0d1117] border-slate-700 text-white h-9 text-sm"
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    className="bg-emerald-500 hover:bg-emerald-600 text-black font-semibold"
-                    disabled={!topUpAmount || Number(topUpAmount) <= 0 || topUpMutation.isPending}
-                    onClick={() => topUpMutation.mutate({ userId, amountUSD: Number(topUpAmount), note: topUpNote || "Manual top-up by admin" })}
-                  >
-                    {topUpMutation.isPending ? "Processing..." : `Add $${Number(topUpAmount || 0).toFixed(2)}`}
-                  </Button>
-                  <Button size="sm" variant="ghost" className="text-slate-400" onClick={() => setShowTopUp(false)}>Cancel</Button>
-                </div>
-              </div>
-            )}
-=======
             {/* Admin Top-Up */}
             <div className="bg-[#161b22] border border-emerald-900/30 rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
@@ -297,7 +247,6 @@ function UserDetailPanel({ userId, onClose }: { userId: number; onClose: () => v
                 </div>
               )}
             </div>
->>>>>>> Stashed changes
 
             {/* Orders */}
             <div>

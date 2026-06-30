@@ -314,18 +314,6 @@ export default function Home() {
             ].slice(0, 12);
 
             const fallback = [
-<<<<<<< Updated upstream
-              { name: "Instagram", icon: <InstagramIcon />, href: "/categories/instagram-accounts" },
-              { name: "TikTok", icon: <TikTokIcon />, href: "/categories/tiktok-accounts-followers" },
-              { name: "Facebook", icon: <FacebookIcon />, href: "/categories/facebook-accounts" },
-              { name: "Twitter/X", icon: <TwitterIcon />, href: "/categories/twitter-x-accounts" },
-              { name: "WhatsApp", icon: <WhatsAppIcon />, href: "/categories/whatsapp-accounts" },
-              { name: "YouTube", icon: <YouTubeIcon />, href: "/categories/youtube-accounts-channels" },
-              { name: "Streaming", icon: <span className="text-2xl">🎬</span>, href: "/categories/streaming-subscriptions" },
-              { name: "Gaming", icon: <span className="text-2xl">🎮</span>, href: "/categories/buy-steam-gift-cards" },
-              { name: "Software", icon: <span className="text-2xl">💻</span>, href: "/categories/buy-software-licenses" },
-              { name: "Email", icon: <span className="text-2xl">📧</span>, href: "/categories/buy-google-voice-accounts" },
-=======
               { name: "Instagram", icon: <InstagramIcon />, href: "/categories/buy-instagram-accounts" },
               { name: "TikTok", icon: <TikTokIcon />, href: "/categories/buy-tiktok-accounts" },
               { name: "Facebook", icon: <FacebookIcon />, href: "/categories/buy-facebook-accounts" },
@@ -336,7 +324,6 @@ export default function Home() {
               { name: "Gaming", icon: <span className="text-2xl">🎮</span>, href: "/categories/buy-steam-gift-cards" },
               { name: "Software", icon: <span className="text-2xl">💻</span>, href: "/categories/ai-tools" },
               { name: "Email", icon: <span className="text-2xl">📧</span>, href: "/categories/buy-gmail-accounts" },
->>>>>>> Stashed changes
               { name: "VPN", icon: <span className="text-2xl">🔒</span>, href: "/categories/buy-vpn-accounts" },
               { name: "More →", icon: <span className="text-2xl">➕</span>, href: "/categories" },
             ];
@@ -405,20 +392,6 @@ export default function Home() {
         </div>
       </section>
 
-<<<<<<< Updated upstream
-      {/* ══ STREAMING SUBSCRIPTIONS ══════════════════════════════════════ */}
-      <section className="py-16 bg-gradient-to-br from-[#0D2137] to-[#0F3D5E]">
-        <div className="container">
-          <div className="text-center mb-10 reveal">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#00C2FF]/20 border border-[#00C2FF]/30 text-[#00C2FF] text-sm font-semibold mb-4">
-              🎬 Streaming Subscriptions
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3" style={{ fontFamily: "'Poppins', sans-serif" }}>
-              Premium Streaming Accounts
-            </h2>
-            <p className="text-white/60 max-w-xl mx-auto text-sm">
-              Netflix, Spotify, Disney+, and 25+ more. Delivered within 2 to 5 hours. Subscription details sent directly to your dashboard.
-=======
       {/* ══ STREAMING & SUBSCRIPTIONS ════════════════════════════════════════ */}
       <section className="py-20 bg-gradient-to-br from-[#0F3D5E] to-[#0a2d45]">
         <div className="container">
@@ -432,7 +405,6 @@ export default function Home() {
             </h2>
             <p className="text-white/60 max-w-xl mx-auto">
               Get instant access to Netflix, Spotify, Disney+, YouTube Premium and more at the best prices.
->>>>>>> Stashed changes
             </p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -453,13 +425,8 @@ export default function Home() {
               <Link key={i} href={item.href}>
                 <div className="reveal bg-white/5 border border-white/10 rounded-2xl p-4 hover:bg-white/10 hover:border-[#00C2FF]/40 hover:-translate-y-1 transition-all duration-300 cursor-pointer text-center group"
                   style={{ transitionDelay: `${i * 40}ms` }}>
-<<<<<<< Updated upstream
-                  <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
-                    <img src={item.logo} alt={item.name} className="w-8 h-8 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />
-=======
                   <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300 shadow-md">
                     <img src={item.logo} alt={item.name} className="w-8 h-8 object-contain" />
->>>>>>> Stashed changes
                   </div>
                   <p className="text-white/90 font-semibold text-xs line-clamp-2">{item.name}</p>
                 </div>

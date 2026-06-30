@@ -46,7 +46,6 @@ export const users = mysqlTable("users", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
   lastLoginIp: varchar("lastLoginIp", { length: 64 }),
-  telegramBonusClaimed: boolean("telegramBonusClaimed").default(false).notNull(),
 });
 
 export type User = typeof users.$inferSelect;
@@ -594,7 +593,6 @@ export const apiKeys = mysqlTable("api_keys", {
   rawKeyOnce: varchar("rawKeyOnce", { length: 128 }), // full key shown once to user, then cleared
   lastUsedAt: timestamp("lastUsedAt"),
   requestCount: int("requestCount").default(0).notNull(),
-  rawKeyOnce: varchar("rawKeyOnce", { length: 64 }), // shown once after approval, then cleared
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

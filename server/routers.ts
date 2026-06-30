@@ -46,9 +46,6 @@ export const appRouter = router({
     disableTotp: adminAccountRouter.disableTotp,
     getTotpStatus: adminAccountRouter.getTotpStatus,
     getSessionInfo: adminAccountRouter.getSessionInfo,
-    // Referral & bonuses
-    generateReferralCode: customAuthRouter.generateReferralCode,
-    claimTelegramBonus: customAuthRouter.claimTelegramBonus,
   }),
 
   // ── Categories ──────────────────────────────────────────────────────────
@@ -283,13 +280,8 @@ export const appRouter = router({
         .input(z.object({ userId: z.number() }))
         .mutation(({ input }) => db.adminReactivateUser(input.userId)),
       topUp: adminProcedure
-<<<<<<< Updated upstream
         .input(z.object({ userId: z.number(), amountUSD: z.number().positive(), note: z.string().optional() }))
         .mutation(({ input, ctx }) => db.adminTopUpUserWallet(ctx.user.id, input.userId, input.amountUSD, input.note ?? "Manual top-up by admin")),
-=======
-        .input(z.object({ userId: z.number(), amountUSD: z.number().min(0.01), note: z.string().default("Admin top-up") }))
-        .mutation(({ ctx, input }) => db.adminTopUpUserWallet(ctx.user.id, input.userId, input.amountUSD, input.note)),
->>>>>>> Stashed changes
     }),
 
     // Refunds

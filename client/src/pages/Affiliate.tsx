@@ -24,37 +24,6 @@ export default function Affiliate() {
   const { data: balance, refetch: refetchBalance } = trpc.affiliate.getBalance.useQuery();
   const { data: txns } = trpc.affiliate.getTransactions.useQuery();
 
-<<<<<<< Updated upstream
-  const generateCodeMutation = trpc.auth.generateReferralCode.useMutation({
-    onSuccess: (data: { referralCode: string }) => {
-      setLocalReferralCode(data.referralCode);
-      utils.auth.me.invalidate();
-    },
-  });
-
-  const referralCode = localReferralCode || user?.referralCode || "";
-  const referralLink = referralCode ? `${window.location.origin}/signup?ref=${referralCode}` : "";
-
-  // Auto-generate referral code if user doesn't have one
-  useEffect(() => {
-    if (user && !user.referralCode && !localReferralCode && !generateCodeMutation.isPending) {
-      generateCodeMutation.mutate();
-    }
-  }, [user]);
-
-  function shareOnWhatsApp() {
-    const text = encodeURIComponent(`🛒 Buy premium digital accounts on Bulnix! Use my referral link: ${referralLink}`);
-    window.open(`https://wa.me/?text=${text}`, "_blank");
-  }
-  function shareOnTwitter() {
-    const text = encodeURIComponent(`Buy premium digital accounts on Bulnix! 🚀 Use my link: ${referralLink}`);
-    window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
-  }
-  function shareOnTelegram() {
-    const text = encodeURIComponent(`Buy premium digital accounts on Bulnix! Use my referral link: ${referralLink}`);
-    window.open(`https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${text}`, "_blank");
-  }
-=======
   // Auto-generate referral code if user doesn't have one yet
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const generateCode = trpc.auth.generateReferralCode.useMutation({
@@ -71,7 +40,6 @@ export default function Affiliate() {
 
   const referralCode = generatedCode ?? user?.referralCode ?? "";
   const referralLink = referralCode ? `${window.location.origin}?ref=${referralCode}` : "";
->>>>>>> Stashed changes
 
   const withdrawMutation = trpc.affiliate.requestWithdrawal.useMutation({
     onSuccess: () => { toast.success("Withdrawal request submitted. We'll process it within 24–48 hours."); setShowWithdrawDialog(false); refetchBalance(); },
@@ -144,32 +112,6 @@ export default function Affiliate() {
             <Users className="w-5 h-5 text-cyan-400" />
             <h2 className="font-semibold text-white">Your Referral Link</h2>
           </div>
-<<<<<<< Updated upstream
-          {referralCode ? (
-            <>
-              <div className="flex gap-2">
-                <Input readOnly value={referralLink} className="bg-slate-900 border-slate-600 text-slate-300 text-sm font-mono flex-1" />
-                <Button className="bg-cyan-500 hover:bg-cyan-600 text-black font-semibold shrink-0" onClick={copyLink}>
-                  <Copy className="w-4 h-4 mr-1.5" /> Copy
-                </Button>
-              </div>
-              <p className="text-xs text-slate-500">Share this link. When someone signs up using it, you earn <strong className="text-white">$0.50</strong> automatically.</p>
-              <div className="flex gap-2 flex-wrap">
-                <Button size="sm" variant="outline" className="border-green-500/30 text-green-400 hover:bg-green-500/10 gap-1.5" onClick={shareOnWhatsApp}>
-                  <ExternalLink className="w-3.5 h-3.5" /> WhatsApp
-                </Button>
-                <Button size="sm" variant="outline" className="border-sky-500/30 text-sky-400 hover:bg-sky-500/10 gap-1.5" onClick={shareOnTwitter}>
-                  <ExternalLink className="w-3.5 h-3.5" /> Twitter/X
-                </Button>
-                <Button size="sm" variant="outline" className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10 gap-1.5" onClick={shareOnTelegram}>
-                  <ExternalLink className="w-3.5 h-3.5" /> Telegram
-                </Button>
-              </div>
-            </>
-          ) : (
-            <div className="text-center py-4 text-slate-400 text-sm">Loading your referral link...</div>
-          )}
-=======
           <div className="flex gap-2">
             <Input readOnly value={referralLink || (generateCode.isPending ? "Generating your link..." : "Click to generate your link")} className="bg-slate-900 border-slate-600 text-slate-300 text-xs font-mono" />
             <Button variant="outline" className="border-slate-600 text-slate-300 hover:text-white shrink-0" onClick={copyLink}>
@@ -177,7 +119,6 @@ export default function Affiliate() {
             </Button>
           </div>
           <p className="text-xs text-slate-500">Share this link. When someone signs up using it, you earn $0.50 automatically.</p>
->>>>>>> Stashed changes
         </div>
 
         {/* How it works */}
