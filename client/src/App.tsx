@@ -48,9 +48,15 @@ import AdminLogs from "./pages/admin/AdminLogs";
 import AdminSupplierRefunds from "./pages/admin/AdminSupplierRefunds";
 import AdminAccountSettings from "./pages/admin/AdminAccountSettings";
 import AdminPaymentRates from "./pages/admin/AdminPaymentRates";
+import AdminManualProducts from "./pages/admin/AdminManualProducts";
+import AdminAffiliateWithdrawals from "./pages/admin/AdminAffiliateWithdrawals";
 import SecureAdminLogin from "./pages/SecureAdminLogin";
 import AdminRoute from "./components/AdminRoute";
 import SocialFloatingWidgets from "./components/SocialFloatingWidgets";
+import Rewards from "./pages/Rewards";
+import Affiliate from "./pages/Affiliate";
+import ApiKeys from "./pages/ApiKeys";
+import ApiDocs from "./pages/ApiDocs";
 import TelegramBanner from "./components/TelegramBanner";
 import TelegramJoinPopup from "./components/TelegramJoinPopup";
 
@@ -97,6 +103,10 @@ function Router() {
       <Route path="/tickets/:id" component={TicketDetail} />
       <Route path="/wishlist" component={Wishlist} />
       <Route path="/wallet" component={WalletPage} />
+      <Route path="/rewards" component={Rewards} />
+      <Route path="/affiliate" component={Affiliate} />
+      <Route path="/api-keys" component={ApiKeys} />
+      <Route path="/api-docs" component={ApiDocs} />
 
       {/* Admin — hidden login, not linked from public site */}
       <Route path="/secure-admin" component={SecureAdminLogin} />
@@ -111,6 +121,8 @@ function Router() {
       <Route path="/admin/supplier-refunds">{() => <AdminRoute component={AdminSupplierRefunds} />}</Route>
       <Route path="/admin/account">{() => <AdminRoute component={AdminAccountSettings} />}</Route>
       <Route path="/admin/payment-rates">{() => <AdminRoute component={AdminPaymentRates} />}</Route>
+      <Route path="/admin/manual-products">{() => <AdminRoute component={AdminManualProducts} />}</Route>
+      <Route path="/admin/affiliate-withdrawals">{() => <AdminRoute component={AdminAffiliateWithdrawals} />}</Route>
 
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />

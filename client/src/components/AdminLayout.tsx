@@ -19,6 +19,8 @@ const navItems = [
   { label: "Providers",        href: "/admin/providers",          icon: Settings },
   { label: "Supplier Refunds", href: "/admin/supplier-refunds",   icon: DollarSign },
   { label: "Payment Rates",    href: "/admin/payment-rates",     icon: TrendingUp },
+  { label: "Manual Products",  href: "/admin/manual-products",   icon: Package },
+  { label: "Affiliate Payouts",href: "/admin/affiliate-withdrawals", icon: DollarSign },
   { label: "Logs",             href: "/admin/logs",               icon: Activity },
 ];
 

@@ -138,6 +138,10 @@ export const products = mysqlTable("products", {
   providerKey: varchar("providerKey", { length: 64 }).notNull(),
   categoryId: int("categoryId"),
 
+  // Manual product flags
+  isManual: boolean("isManual").default(false).notNull(),
+  isSubscription: boolean("isSubscription").default(false).notNull(),
+
   // Overrideable fields
   title: varchar("title", { length: 512 }).notNull(),
   description: text("description"),
@@ -482,3 +486,115 @@ export const supplierRefundClaims = mysqlTable("supplier_refund_claims", {
 });
 export type SupplierRefundClaim = typeof supplierRefundClaims.$inferSelect;
 export type InsertSupplierRefundClaim = typeof supplierRefundClaims.$inferInsert;
+
+// ─── Manual Product Credentials ──────────────────────────────────────────────
+
+export const productCredentials = mysqlTable("product_credentials", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull(),
+  data: text("data").notNull(), // raw credential string e.g. "email:pass:2fa" or JSON
+  isUsed: boolean("isUsed").default(false).notNull(),
+  usedByOrderId: int("usedByOrderId"),
+  usedByUserId: int("usedByUserId"),
+  usedAt: timestamp("usedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ProductCredential = typeof productCredentials.$inferSelect;
+
+// ─── Reward Points ────────────────────────────────────────────────────────────
+
+export const rewardPoints = mysqlTable("reward_points", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  points: int("points").default(0).notNull(), // 1 point = $0.01
+  lifetimeEarned: int("lifetimeEarned").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type RewardPoints = typeof rewardPoints.$inferSelect;
+
+export const rewardTransactions = mysqlTable("reward_transactions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  type: mysqlEnum("type", ["earn", "redeem"]).notNull(),
+  points: int("points").notNull(),
+  description: varchar("description", { length: 256 }).notNull(),
+  orderId: int("orderId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type RewardTransaction = typeof rewardTransactions.$inferSelect;
+
+export const rewardSettings = mysqlTable("reward_settings", {
+  id: int("id").autoincrement().primaryKey(),
+  tier: varchar("tier", { length: 32 }).notNull().unique(), // gold | platinum | diamond
+  cashbackPercent: decimal("cashbackPercent", { precision: 5, scale: 2 }).notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type RewardSetting = typeof rewardSettings.$inferSelect;
+
+// ─── Affiliate Program ────────────────────────────────────────────────────────
+
+export const affiliateBalances = mysqlTable("affiliate_balances", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  balanceUSD: decimal("balanceUSD", { precision: 18, scale: 6 }).default("0.000000").notNull(),
+  totalEarned: decimal("totalEarned", { precision: 18, scale: 6 }).default("0.000000").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AffiliateBalance = typeof affiliateBalances.$inferSelect;
+
+export const affiliateTransactions = mysqlTable("affiliate_transactions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  type: mysqlEnum("type", ["signup_bonus", "withdrawal"]).notNull(),
+  amountUSD: decimal("amountUSD", { precision: 18, scale: 6 }).notNull(),
+  description: varchar("description", { length: 256 }).notNull(),
+  referredUserId: int("referredUserId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AffiliateTransaction = typeof affiliateTransactions.$inferSelect;
+
+export const affiliateWithdrawals = mysqlTable("affiliate_withdrawals", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  amountUSD: decimal("amountUSD", { precision: 18, scale: 6 }).notNull(),
+  bankName: varchar("bankName", { length: 128 }).notNull(),
+  accountNumber: varchar("accountNumber", { length: 64 }).notNull(),
+  accountName: varchar("accountName", { length: 128 }).notNull(),
+  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  adminNote: text("adminNote"),
+  processedAt: timestamp("processedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AffiliateWithdrawal = typeof affiliateWithdrawals.$inferSelect;
+
+// ─── Customer API Keys ────────────────────────────────────────────────────────
+
+export const apiKeys = mysqlTable("api_keys", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  keyHash: varchar("keyHash", { length: 256 }).notNull().unique(), // SHA-256 of the key
+  keyPrefix: varchar("keyPrefix", { length: 16 }).notNull(), // first 8 chars for display
+  label: varchar("label", { length: 128 }).default("Default").notNull(),
+  isEnabled: boolean("isEnabled").default(true).notNull(),
+  adminEnabled: boolean("adminEnabled").default(true).notNull(), // admin can disable
+  lastUsedAt: timestamp("lastUsedAt"),
+  requestCount: int("requestCount").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ApiKey = typeof apiKeys.$inferSelect;
+
+// ─── Products: add isManual + isSubscription flags ────────────────────────────
+// Note: these are added via ALTER TABLE migration below (schema already has products table)
+

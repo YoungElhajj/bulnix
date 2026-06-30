@@ -483,6 +483,73 @@ export const appRouter = router({
       }),
   }),
 
+  // ── Manual Products (admin) ──────────────────────────────────────────────
+  manualProducts: router({
+    create: adminProcedure.input(z.object({
+      title: z.string().min(2),
+      description: z.string().optional(),
+      shortDescription: z.string().optional(),
+      categoryId: z.number().optional(),
+      customerPriceUSD: z.number().positive(),
+      imageUrl: z.string().optional(),
+      isSubscription: z.boolean().optional(),
+      deliveryNote: z.string().optional(),
+      isVisible: z.boolean().optional(),
+    })).mutation(({ input }) => db.adminCreateManualProduct(input)),
+    update: adminProcedure.input(z.object({
+      id: z.number(),
+      title: z.string().optional(),
+      description: z.string().optional(),
+      shortDescription: z.string().optional(),
+      categoryId: z.number().nullable().optional(),
+      customerPriceUSD: z.number().positive().optional(),
+      imageUrl: z.string().optional(),
+      isSubscription: z.boolean().optional(),
+      deliveryNote: z.string().optional(),
+      isVisible: z.boolean().optional(),
+      isFeatured: z.boolean().optional(),
+    })).mutation(({ input }) => { const { id, ...rest } = input; return db.adminUpdateManualProduct(id, rest); }),
+    delete: adminProcedure.input(z.object({ id: z.number() })).mutation(({ input }) => db.adminDeleteManualProduct(input.id)),
+    addCredentials: adminProcedure.input(z.object({ productId: z.number(), lines: z.array(z.string()) })).mutation(({ input }) => db.addProductCredentials(input.productId, input.lines)),
+    getCredentials: adminProcedure.input(z.object({ productId: z.number(), includeUsed: z.boolean().optional() })).query(({ input }) => db.getProductCredentials(input.productId, input.includeUsed)),
+    deleteCredential: adminProcedure.input(z.object({ id: z.number() })).mutation(({ input }) => db.deleteProductCredential(input.id)),
+    deliverSubscription: adminProcedure.input(z.object({ orderId: z.number(), deliveryData: z.string().min(1) })).mutation(({ input }) => db.adminDeliverSubscription(input.orderId, input.deliveryData)),
+  }),
+
+  // ── Reward Points ─────────────────────────────────────────────────────────
+  rewards: router({
+    getPoints: protectedProcedure.query(({ ctx }) => db.getUserRewardPoints(ctx.user.id)),
+    getTransactions: protectedProcedure.query(({ ctx }) => db.getRewardTransactions(ctx.user.id)),
+    redeem: protectedProcedure.input(z.object({ points: z.number().int().positive() })).mutation(({ ctx, input }) => db.redeemPointsToWallet(ctx.user.id, input.points)),
+    getSettings: adminProcedure.query(() => db.getRewardSettings()),
+    updateSetting: adminProcedure.input(z.object({ tier: z.string(), cashbackPercent: z.number().min(0).max(100) })).mutation(({ input }) => db.updateRewardSetting(input.tier, input.cashbackPercent)),
+  }),
+
+  // ── Affiliate Program ─────────────────────────────────────────────────────
+  affiliate: router({
+    getBalance: protectedProcedure.query(({ ctx }) => db.getOrCreateAffiliateBalance(ctx.user.id)),
+    getTransactions: protectedProcedure.query(({ ctx }) => db.getAffiliateTransactions(ctx.user.id)),
+    requestWithdrawal: protectedProcedure.input(z.object({
+      amountUSD: z.number().positive(),
+      bankName: z.string().min(2),
+      accountNumber: z.string().min(5),
+      accountName: z.string().min(2),
+    })).mutation(({ ctx, input }) => db.requestAffiliateWithdrawal(ctx.user.id, input)),
+    convertToWallet: protectedProcedure.input(z.object({ amountUSD: z.number().positive() })).mutation(({ ctx, input }) => db.convertAffiliateToWallet(ctx.user.id, input.amountUSD)),
+    adminGetWithdrawals: adminProcedure.input(z.object({ status: z.enum(["pending","approved","rejected"]).optional() })).query(({ input }) => db.adminGetAffiliateWithdrawals(input.status)),
+    adminProcess: adminProcedure.input(z.object({ id: z.number(), action: z.enum(["approved","rejected"]), adminNote: z.string().optional() })).mutation(({ input }) => db.adminProcessWithdrawal(input.id, input.action, input.adminNote)),
+  }),
+
+  // ── Customer API Keys ─────────────────────────────────────────────────────
+  apiKeys: router({
+    list: protectedProcedure.query(({ ctx }) => db.getUserApiKeys(ctx.user.id)),
+    generate: protectedProcedure.input(z.object({ label: z.string().min(1).max(64) })).mutation(({ ctx, input }) => db.generateApiKey(ctx.user.id, input.label)),
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ ctx, input }) => db.deleteApiKey(input.id, ctx.user.id)),
+    toggle: protectedProcedure.input(z.object({ id: z.number(), isEnabled: z.boolean() })).mutation(({ ctx, input }) => db.toggleApiKey(input.id, ctx.user.id, input.isEnabled)),
+    adminList: adminProcedure.query(() => db.adminGetApiKeys()),
+    adminToggle: adminProcedure.input(z.object({ id: z.number(), adminEnabled: z.boolean() })).mutation(({ input }) => db.adminToggleApiKey(input.id, input.adminEnabled)),
+  }),
+
   // ── One-time Migrations (admin only) ─────────────────────────────────────
   migrations: migrationsRouter,
 });

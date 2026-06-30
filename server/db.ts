@@ -29,6 +29,14 @@ import {
   wallets,
   walletTransactions,
   supplierRefundClaims,
+  productCredentials,
+  rewardPoints,
+  rewardTransactions,
+  rewardSettings,
+  affiliateBalances,
+  affiliateTransactions,
+  affiliateWithdrawals,
+  apiKeys,
   type InsertUser,
   type InsertSupplierRefundClaim,
 } from "../drizzle/schema";
@@ -2088,4 +2096,402 @@ export async function generateFaddedDescriptions(): Promise<{ generated: number;
   }
 
   return { generated, skipped, errors };
+}
+
+// ─── Manual Product Credentials ───────────────────────────────────────────────
+
+export async function addProductCredentials(productId: number, lines: string[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  if (lines.length === 0) return { added: 0 };
+  await db.insert(productCredentials).values(lines.map(data => ({ productId, data: data.trim() })));
+  // Update stock count to reflect unused credentials
+  const [{ count }] = await db.select({ count: sql<number>`count(*)` }).from(productCredentials)
+    .where(and(eq(productCredentials.productId, productId), eq(productCredentials.isUsed, false)));
+  await db.update(products).set({ stockQuantity: Number(count) }).where(eq(products.id, productId));
+  return { added: lines.length };
+}
+
+export async function getProductCredentials(productId: number, includeUsed = false) {
+  const db = await getDb();
+  if (!db) return [];
+  const conds = [eq(productCredentials.productId, productId)];
+  if (!includeUsed) conds.push(eq(productCredentials.isUsed, false));
+  return db.select().from(productCredentials).where(and(...conds)).orderBy(productCredentials.createdAt);
+}
+
+export async function deleteProductCredential(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [cred] = await db.select().from(productCredentials).where(eq(productCredentials.id, id)).limit(1);
+  if (!cred) throw new Error("Credential not found");
+  if (cred.isUsed) throw new Error("Cannot delete a used credential");
+  await db.delete(productCredentials).where(eq(productCredentials.id, id));
+  // Recalculate stock
+  const [{ count }] = await db.select({ count: sql<number>`count(*)` }).from(productCredentials)
+    .where(and(eq(productCredentials.productId, cred.productId), eq(productCredentials.isUsed, false)));
+  await db.update(products).set({ stockQuantity: Number(count) }).where(eq(products.id, cred.productId));
+  return { success: true };
+}
+
+/** Called during order fulfillment for manual products — picks one unused credential */
+export async function claimManualCredential(productId: number, orderId: number, userId: number): Promise<string | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const [cred] = await db.select().from(productCredentials)
+    .where(and(eq(productCredentials.productId, productId), eq(productCredentials.isUsed, false)))
+    .orderBy(productCredentials.createdAt).limit(1);
+  if (!cred) return null;
+  await db.update(productCredentials).set({ isUsed: true, usedByOrderId: orderId, usedByUserId: userId, usedAt: new Date() })
+    .where(eq(productCredentials.id, cred.id));
+  // Decrement stock
+  const [{ count }] = await db.select({ count: sql<number>`count(*)` }).from(productCredentials)
+    .where(and(eq(productCredentials.productId, productId), eq(productCredentials.isUsed, false)));
+  await db.update(products).set({ stockQuantity: Number(count) }).where(eq(products.id, productId));
+  return cred.data;
+}
+
+// ─── Manual Product Admin CRUD ────────────────────────────────────────────────
+
+export async function adminCreateManualProduct(data: {
+  title: string; description?: string; shortDescription?: string;
+  categoryId?: number; customerPriceUSD: number; imageUrl?: string;
+  isSubscription?: boolean; deliveryNote?: string; isVisible?: boolean;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + nanoid(6);
+  await db.insert(products).values({
+    slug,
+    providerKey: "manual",
+    isManual: true,
+    isSubscription: data.isSubscription ?? false,
+    title: data.title,
+    description: data.description ?? null,
+    shortDescription: data.shortDescription ?? null,
+    categoryId: data.categoryId ?? null,
+    imageUrl: data.imageUrl ?? null,
+    supplierPrice: "0",
+    supplierCurrency: "USD",
+    markupPercent: "0",
+    customerPriceUSD: String(data.customerPriceUSD),
+    stockQuantity: 0,
+    stockUnlimited: data.isSubscription ? true : false,
+    isVisible: data.isVisible ?? false,
+    deliveryNote: data.deliveryNote ?? null,
+  });
+  const [created] = await db.select().from(products).where(eq(products.slug, slug)).limit(1);
+  invalidateCache("categories:");
+  return created;
+}
+
+export async function adminUpdateManualProduct(id: number, data: {
+  title?: string; description?: string; shortDescription?: string;
+  categoryId?: number | null; customerPriceUSD?: number; imageUrl?: string;
+  isSubscription?: boolean; deliveryNote?: string; isVisible?: boolean; isFeatured?: boolean;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const updateData: Record<string, unknown> = {};
+  if (data.title !== undefined) updateData.title = data.title;
+  if (data.description !== undefined) updateData.description = data.description;
+  if (data.shortDescription !== undefined) updateData.shortDescription = data.shortDescription;
+  if (data.categoryId !== undefined) updateData.categoryId = data.categoryId;
+  if (data.customerPriceUSD !== undefined) updateData.customerPriceUSD = String(data.customerPriceUSD);
+  if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl;
+  if (data.isSubscription !== undefined) updateData.isSubscription = data.isSubscription;
+  if (data.deliveryNote !== undefined) updateData.deliveryNote = data.deliveryNote;
+  if (data.isVisible !== undefined) updateData.isVisible = data.isVisible;
+  if (data.isFeatured !== undefined) updateData.isFeatured = data.isFeatured;
+  if (Object.keys(updateData).length > 0) {
+    await db.update(products).set(updateData).where(and(eq(products.id, id), eq(products.isManual, true)));
+  }
+  invalidateCache("categories:");
+  return { success: true };
+}
+
+export async function adminDeleteManualProduct(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(productCredentials).where(eq(productCredentials.productId, id));
+  await db.delete(products).where(and(eq(products.id, id), eq(products.isManual, true)));
+  invalidateCache("categories:");
+  return { success: true };
+}
+
+/** Admin: manually deliver subscription credentials to a fulfilled order */
+export async function adminDeliverSubscription(orderId: number, deliveryData: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [order] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
+  if (!order) throw new Error("Order not found");
+  // Upsert fulfillment record
+  const existing = await db.select().from(fulfillmentRecords).where(eq(fulfillmentRecords.orderId, orderId)).limit(1);
+  if (existing.length > 0) {
+    await db.update(fulfillmentRecords).set({ deliveryData, status: "success", updatedAt: new Date() }).where(eq(fulfillmentRecords.orderId, orderId));
+  } else {
+    await db.insert(fulfillmentRecords).values({ orderId, providerKey: "manual", status: "success", deliveryData });
+  }
+  await db.update(orders).set({ status: "fulfilled" }).where(eq(orders.id, orderId));
+  // Notify user
+  const [user] = await db.select().from(users).where(eq(users.id, order.userId)).limit(1);
+  if (user) {
+    await db.insert(notifications).values({
+      userId: user.id,
+      type: "order_delivered",
+      title: "Your subscription is ready!",
+      message: `Your order #${order.orderNumber} has been delivered. Check your order page for details.`,
+      relatedOrderId: orderId,
+    });
+  }
+  return { success: true };
+}
+
+// ─── Reward Points ────────────────────────────────────────────────────────────
+
+const TIER_ORDER = ["bronze", "silver", "gold", "platinum", "diamond"];
+function getTierFromSpend(totalSpent: number): string {
+  if (totalSpent >= 1000) return "diamond";
+  if (totalSpent >= 500) return "platinum";
+  if (totalSpent >= 200) return "gold";
+  if (totalSpent >= 50) return "silver";
+  return "bronze";
+}
+
+export async function earnRewardPoints(userId: number, orderAmountUSD: number, orderId: number) {
+  const db = await getDb();
+  if (!db) return;
+  // Get tier from wallet totalSpent
+  const [wallet] = await db.select().from(wallets).where(eq(wallets.userId, userId)).limit(1);
+  if (!wallet) return;
+  const tier = getTierFromSpend(Number(wallet.totalSpent));
+  if (!["gold", "platinum", "diamond"].includes(tier)) return; // Bronze/Silver earn nothing
+  // Get cashback rate
+  const [setting] = await db.select().from(rewardSettings).where(eq(rewardSettings.tier, tier)).limit(1);
+  if (!setting) return;
+  const rate = Number(setting.cashbackPercent) / 100;
+  const pointsEarned = Math.floor(orderAmountUSD * rate * 100); // 1 point = $0.01
+  if (pointsEarned <= 0) return;
+  // Upsert reward_points
+  await db.insert(rewardPoints).values({ userId, points: pointsEarned, lifetimeEarned: pointsEarned })
+    .onDuplicateKeyUpdate({ set: { points: sql`points + ${pointsEarned}`, lifetimeEarned: sql`lifetimeEarned + ${pointsEarned}` } });
+  await db.insert(rewardTransactions).values({ userId, type: "earn", points: pointsEarned, description: `Cashback from order #${orderId}`, orderId });
+  // Notify user
+  await db.insert(notifications).values({
+    userId, type: "reward_points",
+    title: `You earned ${pointsEarned} reward points!`,
+    message: `${pointsEarned} points added to your account from your recent order. 1 point = $0.01.`,
+    relatedOrderId: orderId,
+  });
+}
+
+export async function getUserRewardPoints(userId: number) {
+  const db = await getDb();
+  if (!db) return { points: 0, lifetimeEarned: 0 };
+  const [row] = await db.select().from(rewardPoints).where(eq(rewardPoints.userId, userId)).limit(1);
+  return row ?? { points: 0, lifetimeEarned: 0 };
+}
+
+export async function redeemPointsToWallet(userId: number, pointsToRedeem: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [rp] = await db.select().from(rewardPoints).where(eq(rewardPoints.userId, userId)).limit(1);
+  if (!rp || rp.points < pointsToRedeem) throw new Error("Insufficient points");
+  const amountUSD = pointsToRedeem * 0.01;
+  // Deduct points
+  await db.update(rewardPoints).set({ points: sql`points - ${pointsToRedeem}` }).where(eq(rewardPoints.userId, userId));
+  await db.insert(rewardTransactions).values({ userId, type: "redeem", points: -pointsToRedeem, description: `Redeemed ${pointsToRedeem} points for $${amountUSD.toFixed(2)} wallet credit` });
+  // Credit wallet
+  const [wallet] = await db.select().from(wallets).where(eq(wallets.userId, userId)).limit(1);
+  if (!wallet) throw new Error("Wallet not found");
+  const newBalance = Number(wallet.balanceUSD) + amountUSD;
+  await db.update(wallets).set({ balanceUSD: String(newBalance) }).where(eq(wallets.userId, userId));
+  await db.insert(walletTransactions).values({
+    userId, type: "deposit", amountUSD: String(amountUSD), balanceAfterUSD: String(newBalance),
+    description: `Redeemed ${pointsToRedeem} reward points`, status: "completed",
+  });
+  return { amountUSD, newBalance };
+}
+
+export async function getRewardSettings() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(rewardSettings).orderBy(rewardSettings.tier);
+}
+
+export async function updateRewardSetting(tier: string, cashbackPercent: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(rewardSettings).set({ cashbackPercent: String(cashbackPercent) }).where(eq(rewardSettings.tier, tier));
+  return { success: true };
+}
+
+export async function getRewardTransactions(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(rewardTransactions).where(eq(rewardTransactions.userId, userId)).orderBy(desc(rewardTransactions.createdAt)).limit(50);
+}
+
+// ─── Affiliate Program ────────────────────────────────────────────────────────
+
+export async function getOrCreateAffiliateBalance(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(affiliateBalances).values({ userId }).onDuplicateKeyUpdate({ set: { userId } });
+  const [row] = await db.select().from(affiliateBalances).where(eq(affiliateBalances.userId, userId)).limit(1);
+  return row!;
+}
+
+export async function creditAffiliateSignupBonus(referrerId: number, newUserId: number) {
+  const db = await getDb();
+  if (!db) return;
+  const bonus = 0.50;
+  await db.insert(affiliateBalances).values({ userId: referrerId, balanceUSD: String(bonus), totalEarned: String(bonus) })
+    .onDuplicateKeyUpdate({ set: { balanceUSD: sql`balanceUSD + ${bonus}`, totalEarned: sql`totalEarned + ${bonus}` } });
+  await db.insert(affiliateTransactions).values({ userId: referrerId, type: "signup_bonus", amountUSD: String(bonus), description: "Referral signup bonus", referredUserId: newUserId });
+  await db.insert(notifications).values({
+    userId: referrerId, type: "affiliate_bonus",
+    title: "You earned a $0.50 referral bonus!",
+    message: "Someone signed up using your referral link. $0.50 has been added to your affiliate balance.",
+  });
+}
+
+export async function getAffiliateTransactions(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(affiliateTransactions).where(eq(affiliateTransactions.userId, userId)).orderBy(desc(affiliateTransactions.createdAt)).limit(50);
+}
+
+export async function requestAffiliateWithdrawal(userId: number, data: { amountUSD: number; bankName: string; accountNumber: string; accountName: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [bal] = await db.select().from(affiliateBalances).where(eq(affiliateBalances.userId, userId)).limit(1);
+  if (!bal || Number(bal.balanceUSD) < data.amountUSD) throw new Error("Insufficient affiliate balance");
+  if (data.amountUSD < 10) throw new Error("Minimum withdrawal is $10");
+  // Hold the balance
+  await db.update(affiliateBalances).set({ balanceUSD: sql`balanceUSD - ${data.amountUSD}` }).where(eq(affiliateBalances.userId, userId));
+  await db.insert(affiliateWithdrawals).values({ userId, amountUSD: String(data.amountUSD), bankName: data.bankName, accountNumber: data.accountNumber, accountName: data.accountName });
+  return { success: true };
+}
+
+export async function convertAffiliateToWallet(userId: number, amountUSD: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [bal] = await db.select().from(affiliateBalances).where(eq(affiliateBalances.userId, userId)).limit(1);
+  if (!bal || Number(bal.balanceUSD) < amountUSD) throw new Error("Insufficient affiliate balance");
+  await db.update(affiliateBalances).set({ balanceUSD: sql`balanceUSD - ${amountUSD}` }).where(eq(affiliateBalances.userId, userId));
+  const [wallet] = await db.select().from(wallets).where(eq(wallets.userId, userId)).limit(1);
+  if (!wallet) throw new Error("Wallet not found");
+  const newBalance = Number(wallet.balanceUSD) + amountUSD;
+  await db.update(wallets).set({ balanceUSD: String(newBalance) }).where(eq(wallets.userId, userId));
+  await db.insert(walletTransactions).values({ userId, type: "deposit", amountUSD: String(amountUSD), balanceAfterUSD: String(newBalance), description: "Converted from affiliate balance", status: "completed" });
+  await db.insert(affiliateTransactions).values({ userId, type: "withdrawal", amountUSD: String(amountUSD), description: "Converted to wallet balance" });
+  return { newBalance };
+}
+
+export async function adminGetAffiliateWithdrawals(status?: "pending" | "approved" | "rejected") {
+  const db = await getDb();
+  if (!db) return [];
+  const conds = status ? [eq(affiliateWithdrawals.status, status)] : [];
+  const rows = await db.select({
+    w: affiliateWithdrawals,
+    userName: users.name,
+    userEmail: users.email,
+  }).from(affiliateWithdrawals)
+    .leftJoin(users, eq(users.id, affiliateWithdrawals.userId))
+    .where(conds.length > 0 ? and(...conds) : undefined)
+    .orderBy(desc(affiliateWithdrawals.createdAt));
+  return rows;
+}
+
+export async function adminProcessWithdrawal(id: number, action: "approved" | "rejected", adminNote?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [wd] = await db.select().from(affiliateWithdrawals).where(eq(affiliateWithdrawals.id, id)).limit(1);
+  if (!wd) throw new Error("Withdrawal not found");
+  if (wd.status !== "pending") throw new Error("Already processed");
+  await db.update(affiliateWithdrawals).set({ status: action, adminNote: adminNote ?? null, processedAt: new Date() }).where(eq(affiliateWithdrawals.id, id));
+  if (action === "rejected") {
+    // Refund the held balance
+    await db.update(affiliateBalances).set({ balanceUSD: sql`balanceUSD + ${Number(wd.amountUSD)}` }).where(eq(affiliateBalances.userId, wd.userId));
+  }
+  await db.insert(notifications).values({
+    userId: wd.userId, type: "affiliate_withdrawal",
+    title: action === "approved" ? "Withdrawal Approved" : "Withdrawal Rejected",
+    message: action === "approved"
+      ? `Your withdrawal of $${Number(wd.amountUSD).toFixed(2)} has been approved. Payment will be sent to your bank.`
+      : `Your withdrawal of $${Number(wd.amountUSD).toFixed(2)} was rejected. ${adminNote ?? ""}. The amount has been returned to your affiliate balance.`,
+  });
+  return { success: true };
+}
+
+// ─── Customer API Keys ────────────────────────────────────────────────────────
+
+import { createHash, randomBytes } from "crypto";
+
+export async function generateApiKey(userId: number, label: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Check if user already has a key — max 3
+  const existing = await db.select().from(apiKeys).where(eq(apiKeys.userId, userId));
+  if (existing.length >= 3) throw new Error("Maximum 3 API keys allowed");
+  const rawKey = "blx_" + randomBytes(32).toString("hex");
+  const keyHash = createHash("sha256").update(rawKey).digest("hex");
+  const keyPrefix = rawKey.substring(0, 12);
+  await db.insert(apiKeys).values({ userId, keyHash, keyPrefix, label });
+  return { rawKey, keyPrefix, label }; // rawKey shown once only
+}
+
+export async function getUserApiKeys(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({
+    id: apiKeys.id, keyPrefix: apiKeys.keyPrefix, label: apiKeys.label,
+    isEnabled: apiKeys.isEnabled, adminEnabled: apiKeys.adminEnabled,
+    lastUsedAt: apiKeys.lastUsedAt, requestCount: apiKeys.requestCount, createdAt: apiKeys.createdAt,
+  }).from(apiKeys).where(eq(apiKeys.userId, userId)).orderBy(desc(apiKeys.createdAt));
+}
+
+export async function deleteApiKey(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(apiKeys).where(and(eq(apiKeys.id, id), eq(apiKeys.userId, userId)));
+  return { success: true };
+}
+
+export async function toggleApiKey(id: number, userId: number, isEnabled: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(apiKeys).set({ isEnabled }).where(and(eq(apiKeys.id, id), eq(apiKeys.userId, userId)));
+  return { success: true };
+}
+
+export async function validateApiKey(rawKey: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const keyHash = createHash("sha256").update(rawKey).digest("hex");
+  const [key] = await db.select().from(apiKeys).where(eq(apiKeys.keyHash, keyHash)).limit(1);
+  if (!key || !key.isEnabled || !key.adminEnabled) return null;
+  // Update last used
+  await db.update(apiKeys).set({ lastUsedAt: new Date(), requestCount: sql`requestCount + 1` }).where(eq(apiKeys.id, key.id));
+  const [user] = await db.select().from(users).where(eq(users.id, key.userId)).limit(1);
+  return user ?? null;
+}
+
+export async function adminGetApiKeys() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({
+    id: apiKeys.id, keyPrefix: apiKeys.keyPrefix, label: apiKeys.label,
+    isEnabled: apiKeys.isEnabled, adminEnabled: apiKeys.adminEnabled,
+    lastUsedAt: apiKeys.lastUsedAt, requestCount: apiKeys.requestCount, createdAt: apiKeys.createdAt,
+    userId: apiKeys.userId, userName: users.name, userEmail: users.email,
+  }).from(apiKeys).leftJoin(users, eq(users.id, apiKeys.userId)).orderBy(desc(apiKeys.createdAt));
+}
+
+export async function adminToggleApiKey(id: number, adminEnabled: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(apiKeys).set({ adminEnabled }).where(eq(apiKeys.id, id));
+  return { success: true };
 }

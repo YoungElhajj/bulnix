@@ -64,6 +64,13 @@
       "when": 1776912270022,
       "tag": "0008_faulty_doctor_faustus",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1782817292019,
+      "tag": "0009_right_magneto",
+      "breakpoints": true
     }
   ]
 }

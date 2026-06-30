@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Package, ShoppingCart, Ticket, User, CheckCircle, Clock, Wallet, Plus, ChevronRight, Trophy } from "lucide-react";
+import { Package, ShoppingCart, Ticket, User, CheckCircle, Clock, Wallet, Plus, ChevronRight, Trophy, Star, Users, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
@@ -181,6 +181,9 @@ export default function Dashboard() {
                 { icon: Package, label: "My Orders", href: "/orders", color: "#0050D0", bg: "#EEF4FF" },
                 { icon: Ticket, label: "Support Tickets", href: "/tickets", color: "#D97706", bg: "#FFFBEB" },
                 { icon: User, label: "Profile Settings", href: "/profile", color: "#7C3AED", bg: "#F5F3FF" },
+                { icon: Star, label: "Reward Points", href: "/rewards", color: "#D97706", bg: "#FFFBEB" },
+                { icon: Users, label: "Affiliate Program", href: "/affiliate", color: "#059669", bg: "#ECFDF5" },
+                { icon: Key, label: "API Keys", href: "/api-keys", color: "#0891B2", bg: "#ECFEFF" },
               ].map((a, i) => (
                 <Link key={i} href={a.href}>
                   <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-[#F5F9FF] transition-colors cursor-pointer group">

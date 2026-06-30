@@ -398,6 +398,10 @@ var init_db_retry = __esm({
 var schema_exports = {};
 __export(schema_exports, {
   adminActions: () => adminActions,
+  affiliateBalances: () => affiliateBalances,
+  affiliateTransactions: () => affiliateTransactions,
+  affiliateWithdrawals: () => affiliateWithdrawals,
+  apiKeys: () => apiKeys,
   categories: () => categories,
   coupons: () => coupons,
   exchangeRates: () => exchangeRates,
@@ -407,9 +411,13 @@ __export(schema_exports, {
   orders: () => orders,
   paymentEvents: () => paymentEvents,
   payments: () => payments,
+  productCredentials: () => productCredentials,
   products: () => products,
   providerConfigs: () => providerConfigs,
   providerSyncLogs: () => providerSyncLogs,
+  rewardPoints: () => rewardPoints,
+  rewardSettings: () => rewardSettings,
+  rewardTransactions: () => rewardTransactions,
   savedProducts: () => savedProducts,
   supplierProducts: () => supplierProducts,
   supplierRefundClaims: () => supplierRefundClaims,
@@ -432,7 +440,7 @@ import {
   timestamp,
   varchar
 } from "drizzle-orm/mysql-core";
-var users, userSessions, categories, providerConfigs, providerSyncLogs, supplierProducts, products, orders, orderItems, fulfillmentRecords, payments, paymentEvents, coupons, supportTickets, ticketMessages, notifications, adminActions, systemLogs, savedProducts, exchangeRates, wallets, walletTransactions, supplierRefundClaims;
+var users, userSessions, categories, providerConfigs, providerSyncLogs, supplierProducts, products, orders, orderItems, fulfillmentRecords, payments, paymentEvents, coupons, supportTickets, ticketMessages, notifications, adminActions, systemLogs, savedProducts, exchangeRates, wallets, walletTransactions, supplierRefundClaims, productCredentials, rewardPoints, rewardTransactions, rewardSettings, affiliateBalances, affiliateTransactions, affiliateWithdrawals, apiKeys;
 var init_schema = __esm({
   "drizzle/schema.ts"() {
     "use strict";
@@ -542,6 +550,9 @@ var init_schema = __esm({
       // FK to supplierProducts.id
       providerKey: varchar("providerKey", { length: 64 }).notNull(),
       categoryId: int("categoryId"),
+      // Manual product flags
+      isManual: boolean("isManual").default(false).notNull(),
+      isSubscription: boolean("isSubscription").default(false).notNull(),
       // Overrideable fields
       title: varchar("title", { length: 512 }).notNull(),
       description: text("description"),
@@ -820,6 +831,88 @@ var init_schema = __esm({
       creditedToCustomer: boolean("creditedToCustomer").default(false).notNull(),
       submittedAt: timestamp("submittedAt"),
       resolvedAt: timestamp("resolvedAt"),
+      createdAt: timestamp("createdAt").defaultNow().notNull(),
+      updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull()
+    });
+    productCredentials = mysqlTable("product_credentials", {
+      id: int("id").autoincrement().primaryKey(),
+      productId: int("productId").notNull(),
+      data: text("data").notNull(),
+      // raw credential string e.g. "email:pass:2fa" or JSON
+      isUsed: boolean("isUsed").default(false).notNull(),
+      usedByOrderId: int("usedByOrderId"),
+      usedByUserId: int("usedByUserId"),
+      usedAt: timestamp("usedAt"),
+      createdAt: timestamp("createdAt").defaultNow().notNull()
+    });
+    rewardPoints = mysqlTable("reward_points", {
+      id: int("id").autoincrement().primaryKey(),
+      userId: int("userId").notNull().unique(),
+      points: int("points").default(0).notNull(),
+      // 1 point = $0.01
+      lifetimeEarned: int("lifetimeEarned").default(0).notNull(),
+      createdAt: timestamp("createdAt").defaultNow().notNull(),
+      updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull()
+    });
+    rewardTransactions = mysqlTable("reward_transactions", {
+      id: int("id").autoincrement().primaryKey(),
+      userId: int("userId").notNull(),
+      type: mysqlEnum("type", ["earn", "redeem"]).notNull(),
+      points: int("points").notNull(),
+      description: varchar("description", { length: 256 }).notNull(),
+      orderId: int("orderId"),
+      createdAt: timestamp("createdAt").defaultNow().notNull()
+    });
+    rewardSettings = mysqlTable("reward_settings", {
+      id: int("id").autoincrement().primaryKey(),
+      tier: varchar("tier", { length: 32 }).notNull().unique(),
+      // gold | platinum | diamond
+      cashbackPercent: decimal("cashbackPercent", { precision: 5, scale: 2 }).notNull(),
+      updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull()
+    });
+    affiliateBalances = mysqlTable("affiliate_balances", {
+      id: int("id").autoincrement().primaryKey(),
+      userId: int("userId").notNull().unique(),
+      balanceUSD: decimal("balanceUSD", { precision: 18, scale: 6 }).default("0.000000").notNull(),
+      totalEarned: decimal("totalEarned", { precision: 18, scale: 6 }).default("0.000000").notNull(),
+      createdAt: timestamp("createdAt").defaultNow().notNull(),
+      updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull()
+    });
+    affiliateTransactions = mysqlTable("affiliate_transactions", {
+      id: int("id").autoincrement().primaryKey(),
+      userId: int("userId").notNull(),
+      type: mysqlEnum("type", ["signup_bonus", "withdrawal"]).notNull(),
+      amountUSD: decimal("amountUSD", { precision: 18, scale: 6 }).notNull(),
+      description: varchar("description", { length: 256 }).notNull(),
+      referredUserId: int("referredUserId"),
+      createdAt: timestamp("createdAt").defaultNow().notNull()
+    });
+    affiliateWithdrawals = mysqlTable("affiliate_withdrawals", {
+      id: int("id").autoincrement().primaryKey(),
+      userId: int("userId").notNull(),
+      amountUSD: decimal("amountUSD", { precision: 18, scale: 6 }).notNull(),
+      bankName: varchar("bankName", { length: 128 }).notNull(),
+      accountNumber: varchar("accountNumber", { length: 64 }).notNull(),
+      accountName: varchar("accountName", { length: 128 }).notNull(),
+      status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+      adminNote: text("adminNote"),
+      processedAt: timestamp("processedAt"),
+      createdAt: timestamp("createdAt").defaultNow().notNull(),
+      updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull()
+    });
+    apiKeys = mysqlTable("api_keys", {
+      id: int("id").autoincrement().primaryKey(),
+      userId: int("userId").notNull(),
+      keyHash: varchar("keyHash", { length: 256 }).notNull().unique(),
+      // SHA-256 of the key
+      keyPrefix: varchar("keyPrefix", { length: 16 }).notNull(),
+      // first 8 chars for display
+      label: varchar("label", { length: 128 }).default("Default").notNull(),
+      isEnabled: boolean("isEnabled").default(true).notNull(),
+      adminEnabled: boolean("adminEnabled").default(true).notNull(),
+      // admin can disable
+      lastUsedAt: timestamp("lastUsedAt"),
+      requestCount: int("requestCount").default(0).notNull(),
       createdAt: timestamp("createdAt").defaultNow().notNull(),
       updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull()
     });
@@ -2484,7 +2577,13 @@ var init_fadded = __esm({
 // server/db.ts
 var db_exports = {};
 __export(db_exports, {
+  addProductCredentials: () => addProductCredentials,
+  adminCreateManualProduct: () => adminCreateManualProduct,
   adminCreateProduct: () => adminCreateProduct,
+  adminDeleteManualProduct: () => adminDeleteManualProduct,
+  adminDeliverSubscription: () => adminDeliverSubscription,
+  adminGetAffiliateWithdrawals: () => adminGetAffiliateWithdrawals,
+  adminGetApiKeys: () => adminGetApiKeys,
   adminGetOrderDetail: () => adminGetOrderDetail,
   adminGetOrders: () => adminGetOrders,
   adminGetProducts: () => adminGetProducts,
@@ -2493,26 +2592,37 @@ __export(db_exports, {
   adminGetUsers: () => adminGetUsers,
   adminOrderManualRefund: () => adminOrderManualRefund,
   adminProcessRefund: () => adminProcessRefund,
+  adminProcessWithdrawal: () => adminProcessWithdrawal,
   adminReactivateUser: () => adminReactivateUser,
   adminReplyToTicket: () => adminReplyToTicket,
   adminRetryFulfillment: () => adminRetryFulfillment,
   adminSuspendUser: () => adminSuspendUser,
+  adminToggleApiKey: () => adminToggleApiKey,
+  adminUpdateManualProduct: () => adminUpdateManualProduct,
   adminUpdateOrder: () => adminUpdateOrder,
   adminUpdateProduct: () => adminUpdateProduct,
   applyMarkupToAllProducts: () => applyMarkupToAllProducts,
   autoFulfillOrder: () => autoFulfillOrder,
+  claimManualCredential: () => claimManualCredential,
   confirmWalletTopup: () => confirmWalletTopup,
+  convertAffiliateToWallet: () => convertAffiliateToWallet,
   createCategory: () => createCategory,
   createNotification: () => createNotification,
   createOrder: () => createOrder,
   createSupplierRefundClaim: () => createSupplierRefundClaim,
   createTicket: () => createTicket,
+  creditAffiliateSignupBonus: () => creditAffiliateSignupBonus,
+  deleteApiKey: () => deleteApiKey,
   deleteCategory: () => deleteCategory,
+  deleteProductCredential: () => deleteProductCredential,
+  earnRewardPoints: () => earnRewardPoints,
   fetchAndCacheExchangeRates: () => fetchAndCacheExchangeRates,
   fulfillOrderByReference: () => fulfillOrderByReference,
+  generateApiKey: () => generateApiKey,
   generateFaddedDescriptions: () => generateFaddedDescriptions,
   getAccsZoneBalance: () => getAccsZoneBalance,
   getAdminStats: () => getAdminStats,
+  getAffiliateTransactions: () => getAffiliateTransactions,
   getAllCategories: () => getAllCategories,
   getCategories: () => getCategories,
   getCategoriesWithCounts: () => getCategoriesWithCounts,
@@ -2521,23 +2631,29 @@ __export(db_exports, {
   getExchangeRates: () => getExchangeRates,
   getFaddedBalance: () => getFaddedBalance,
   getFeaturedProducts: () => getFeaturedProducts,
+  getOrCreateAffiliateBalance: () => getOrCreateAffiliateBalance,
   getOrCreateWallet: () => getOrCreateWallet,
   getOrderDelivery: () => getOrderDelivery,
   getPaymentStatus: () => getPaymentStatus,
   getProductById: () => getProductById,
   getProductBySlug: () => getProductBySlug,
+  getProductCredentials: () => getProductCredentials,
   getProducts: () => getProducts,
   getProviderConfigs: () => getProviderConfigs,
   getProviderSyncLogs: () => getProviderSyncLogs,
+  getRewardSettings: () => getRewardSettings,
+  getRewardTransactions: () => getRewardTransactions,
   getSavedProducts: () => getSavedProducts,
   getSubcategoriesByParentId: () => getSubcategoriesByParentId,
   getSupplierRefundClaim: () => getSupplierRefundClaim,
   getSystemLogs: () => getSystemLogs,
   getTicketById: () => getTicketById,
+  getUserApiKeys: () => getUserApiKeys,
   getUserByOpenId: () => getUserByOpenId,
   getUserNotifications: () => getUserNotifications,
   getUserOrderById: () => getUserOrderById,
   getUserOrders: () => getUserOrders,
+  getUserRewardPoints: () => getUserRewardPoints,
   getUserTickets: () => getUserTickets,
   getWalletTransactions: () => getWalletTransactions,
   initiatePayment: () => initiatePayment,
@@ -2547,24 +2663,30 @@ __export(db_exports, {
   logSystem: () => logSystem,
   markNotificationRead: () => markNotificationRead,
   payOrderWithWallet: () => payOrderWithWallet,
+  redeemPointsToWallet: () => redeemPointsToWallet,
   replyToTicket: () => replyToTicket,
+  requestAffiliateWithdrawal: () => requestAffiliateWithdrawal,
   resetDbPool: () => resetDbPool,
   retryAllProcessingOrders: () => retryAllProcessingOrders,
   submitSupplierRefundClaim: () => submitSupplierRefundClaim,
+  toggleApiKey: () => toggleApiKey,
   toggleSavedProduct: () => toggleSavedProduct,
   triggerProviderSync: () => triggerProviderSync,
   updateCategory: () => updateCategory,
   updateExchangeRate: () => updateExchangeRate,
   updateProviderConfig: () => updateProviderConfig,
+  updateRewardSetting: () => updateRewardSetting,
   updateSupplierRefundClaim: () => updateSupplierRefundClaim,
   updateUserProfile: () => updateUserProfile,
   upsertUser: () => upsertUser,
+  validateApiKey: () => validateApiKey,
   validateCoupon: () => validateCoupon
 });
 import { and as and3, asc, desc, eq as eq3, inArray, like, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { createPool } from "mysql2";
 import { nanoid } from "nanoid";
+import { createHash, randomBytes } from "crypto";
 function getPool() {
   if (!_pool && process.env.DATABASE_URL) {
     let host, port, user, password, database;
@@ -4221,6 +4343,343 @@ async function generateFaddedDescriptions() {
     }
   }
   return { generated, skipped, errors };
+}
+async function addProductCredentials(productId, lines) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  if (lines.length === 0) return { added: 0 };
+  await db.insert(productCredentials).values(lines.map((data) => ({ productId, data: data.trim() })));
+  const [{ count }] = await db.select({ count: sql`count(*)` }).from(productCredentials).where(and3(eq3(productCredentials.productId, productId), eq3(productCredentials.isUsed, false)));
+  await db.update(products).set({ stockQuantity: Number(count) }).where(eq3(products.id, productId));
+  return { added: lines.length };
+}
+async function getProductCredentials(productId, includeUsed = false) {
+  const db = await getDb();
+  if (!db) return [];
+  const conds = [eq3(productCredentials.productId, productId)];
+  if (!includeUsed) conds.push(eq3(productCredentials.isUsed, false));
+  return db.select().from(productCredentials).where(and3(...conds)).orderBy(productCredentials.createdAt);
+}
+async function deleteProductCredential(id) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [cred] = await db.select().from(productCredentials).where(eq3(productCredentials.id, id)).limit(1);
+  if (!cred) throw new Error("Credential not found");
+  if (cred.isUsed) throw new Error("Cannot delete a used credential");
+  await db.delete(productCredentials).where(eq3(productCredentials.id, id));
+  const [{ count }] = await db.select({ count: sql`count(*)` }).from(productCredentials).where(and3(eq3(productCredentials.productId, cred.productId), eq3(productCredentials.isUsed, false)));
+  await db.update(products).set({ stockQuantity: Number(count) }).where(eq3(products.id, cred.productId));
+  return { success: true };
+}
+async function claimManualCredential(productId, orderId, userId) {
+  const db = await getDb();
+  if (!db) return null;
+  const [cred] = await db.select().from(productCredentials).where(and3(eq3(productCredentials.productId, productId), eq3(productCredentials.isUsed, false))).orderBy(productCredentials.createdAt).limit(1);
+  if (!cred) return null;
+  await db.update(productCredentials).set({ isUsed: true, usedByOrderId: orderId, usedByUserId: userId, usedAt: /* @__PURE__ */ new Date() }).where(eq3(productCredentials.id, cred.id));
+  const [{ count }] = await db.select({ count: sql`count(*)` }).from(productCredentials).where(and3(eq3(productCredentials.productId, productId), eq3(productCredentials.isUsed, false)));
+  await db.update(products).set({ stockQuantity: Number(count) }).where(eq3(products.id, productId));
+  return cred.data;
+}
+async function adminCreateManualProduct(data) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-" + nanoid(6);
+  await db.insert(products).values({
+    slug,
+    providerKey: "manual",
+    isManual: true,
+    isSubscription: data.isSubscription ?? false,
+    title: data.title,
+    description: data.description ?? null,
+    shortDescription: data.shortDescription ?? null,
+    categoryId: data.categoryId ?? null,
+    imageUrl: data.imageUrl ?? null,
+    supplierPrice: "0",
+    supplierCurrency: "USD",
+    markupPercent: "0",
+    customerPriceUSD: String(data.customerPriceUSD),
+    stockQuantity: 0,
+    stockUnlimited: data.isSubscription ? true : false,
+    isVisible: data.isVisible ?? false,
+    deliveryNote: data.deliveryNote ?? null
+  });
+  const [created] = await db.select().from(products).where(eq3(products.slug, slug)).limit(1);
+  invalidateCache("categories:");
+  return created;
+}
+async function adminUpdateManualProduct(id, data) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const updateData = {};
+  if (data.title !== void 0) updateData.title = data.title;
+  if (data.description !== void 0) updateData.description = data.description;
+  if (data.shortDescription !== void 0) updateData.shortDescription = data.shortDescription;
+  if (data.categoryId !== void 0) updateData.categoryId = data.categoryId;
+  if (data.customerPriceUSD !== void 0) updateData.customerPriceUSD = String(data.customerPriceUSD);
+  if (data.imageUrl !== void 0) updateData.imageUrl = data.imageUrl;
+  if (data.isSubscription !== void 0) updateData.isSubscription = data.isSubscription;
+  if (data.deliveryNote !== void 0) updateData.deliveryNote = data.deliveryNote;
+  if (data.isVisible !== void 0) updateData.isVisible = data.isVisible;
+  if (data.isFeatured !== void 0) updateData.isFeatured = data.isFeatured;
+  if (Object.keys(updateData).length > 0) {
+    await db.update(products).set(updateData).where(and3(eq3(products.id, id), eq3(products.isManual, true)));
+  }
+  invalidateCache("categories:");
+  return { success: true };
+}
+async function adminDeleteManualProduct(id) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(productCredentials).where(eq3(productCredentials.productId, id));
+  await db.delete(products).where(and3(eq3(products.id, id), eq3(products.isManual, true)));
+  invalidateCache("categories:");
+  return { success: true };
+}
+async function adminDeliverSubscription(orderId, deliveryData) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [order] = await db.select().from(orders).where(eq3(orders.id, orderId)).limit(1);
+  if (!order) throw new Error("Order not found");
+  const existing = await db.select().from(fulfillmentRecords).where(eq3(fulfillmentRecords.orderId, orderId)).limit(1);
+  if (existing.length > 0) {
+    await db.update(fulfillmentRecords).set({ deliveryData, status: "success", updatedAt: /* @__PURE__ */ new Date() }).where(eq3(fulfillmentRecords.orderId, orderId));
+  } else {
+    await db.insert(fulfillmentRecords).values({ orderId, providerKey: "manual", status: "success", deliveryData });
+  }
+  await db.update(orders).set({ status: "fulfilled" }).where(eq3(orders.id, orderId));
+  const [user] = await db.select().from(users).where(eq3(users.id, order.userId)).limit(1);
+  if (user) {
+    await db.insert(notifications).values({
+      userId: user.id,
+      type: "order_delivered",
+      title: "Your subscription is ready!",
+      message: `Your order #${order.orderNumber} has been delivered. Check your order page for details.`,
+      relatedOrderId: orderId
+    });
+  }
+  return { success: true };
+}
+function getTierFromSpend(totalSpent) {
+  if (totalSpent >= 1e3) return "diamond";
+  if (totalSpent >= 500) return "platinum";
+  if (totalSpent >= 200) return "gold";
+  if (totalSpent >= 50) return "silver";
+  return "bronze";
+}
+async function earnRewardPoints(userId, orderAmountUSD, orderId) {
+  const db = await getDb();
+  if (!db) return;
+  const [wallet] = await db.select().from(wallets).where(eq3(wallets.userId, userId)).limit(1);
+  if (!wallet) return;
+  const tier = getTierFromSpend(Number(wallet.totalSpent));
+  if (!["gold", "platinum", "diamond"].includes(tier)) return;
+  const [setting] = await db.select().from(rewardSettings).where(eq3(rewardSettings.tier, tier)).limit(1);
+  if (!setting) return;
+  const rate = Number(setting.cashbackPercent) / 100;
+  const pointsEarned = Math.floor(orderAmountUSD * rate * 100);
+  if (pointsEarned <= 0) return;
+  await db.insert(rewardPoints).values({ userId, points: pointsEarned, lifetimeEarned: pointsEarned }).onDuplicateKeyUpdate({ set: { points: sql`points + ${pointsEarned}`, lifetimeEarned: sql`lifetimeEarned + ${pointsEarned}` } });
+  await db.insert(rewardTransactions).values({ userId, type: "earn", points: pointsEarned, description: `Cashback from order #${orderId}`, orderId });
+  await db.insert(notifications).values({
+    userId,
+    type: "reward_points",
+    title: `You earned ${pointsEarned} reward points!`,
+    message: `${pointsEarned} points added to your account from your recent order. 1 point = $0.01.`,
+    relatedOrderId: orderId
+  });
+}
+async function getUserRewardPoints(userId) {
+  const db = await getDb();
+  if (!db) return { points: 0, lifetimeEarned: 0 };
+  const [row] = await db.select().from(rewardPoints).where(eq3(rewardPoints.userId, userId)).limit(1);
+  return row ?? { points: 0, lifetimeEarned: 0 };
+}
+async function redeemPointsToWallet(userId, pointsToRedeem) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [rp] = await db.select().from(rewardPoints).where(eq3(rewardPoints.userId, userId)).limit(1);
+  if (!rp || rp.points < pointsToRedeem) throw new Error("Insufficient points");
+  const amountUSD = pointsToRedeem * 0.01;
+  await db.update(rewardPoints).set({ points: sql`points - ${pointsToRedeem}` }).where(eq3(rewardPoints.userId, userId));
+  await db.insert(rewardTransactions).values({ userId, type: "redeem", points: -pointsToRedeem, description: `Redeemed ${pointsToRedeem} points for $${amountUSD.toFixed(2)} wallet credit` });
+  const [wallet] = await db.select().from(wallets).where(eq3(wallets.userId, userId)).limit(1);
+  if (!wallet) throw new Error("Wallet not found");
+  const newBalance = Number(wallet.balanceUSD) + amountUSD;
+  await db.update(wallets).set({ balanceUSD: String(newBalance) }).where(eq3(wallets.userId, userId));
+  await db.insert(walletTransactions).values({
+    userId,
+    type: "deposit",
+    amountUSD: String(amountUSD),
+    balanceAfterUSD: String(newBalance),
+    description: `Redeemed ${pointsToRedeem} reward points`,
+    status: "completed"
+  });
+  return { amountUSD, newBalance };
+}
+async function getRewardSettings() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(rewardSettings).orderBy(rewardSettings.tier);
+}
+async function updateRewardSetting(tier, cashbackPercent) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(rewardSettings).set({ cashbackPercent: String(cashbackPercent) }).where(eq3(rewardSettings.tier, tier));
+  return { success: true };
+}
+async function getRewardTransactions(userId) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(rewardTransactions).where(eq3(rewardTransactions.userId, userId)).orderBy(desc(rewardTransactions.createdAt)).limit(50);
+}
+async function getOrCreateAffiliateBalance(userId) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(affiliateBalances).values({ userId }).onDuplicateKeyUpdate({ set: { userId } });
+  const [row] = await db.select().from(affiliateBalances).where(eq3(affiliateBalances.userId, userId)).limit(1);
+  return row;
+}
+async function creditAffiliateSignupBonus(referrerId, newUserId) {
+  const db = await getDb();
+  if (!db) return;
+  const bonus = 0.5;
+  await db.insert(affiliateBalances).values({ userId: referrerId, balanceUSD: String(bonus), totalEarned: String(bonus) }).onDuplicateKeyUpdate({ set: { balanceUSD: sql`balanceUSD + ${bonus}`, totalEarned: sql`totalEarned + ${bonus}` } });
+  await db.insert(affiliateTransactions).values({ userId: referrerId, type: "signup_bonus", amountUSD: String(bonus), description: "Referral signup bonus", referredUserId: newUserId });
+  await db.insert(notifications).values({
+    userId: referrerId,
+    type: "affiliate_bonus",
+    title: "You earned a $0.50 referral bonus!",
+    message: "Someone signed up using your referral link. $0.50 has been added to your affiliate balance."
+  });
+}
+async function getAffiliateTransactions(userId) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(affiliateTransactions).where(eq3(affiliateTransactions.userId, userId)).orderBy(desc(affiliateTransactions.createdAt)).limit(50);
+}
+async function requestAffiliateWithdrawal(userId, data) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [bal] = await db.select().from(affiliateBalances).where(eq3(affiliateBalances.userId, userId)).limit(1);
+  if (!bal || Number(bal.balanceUSD) < data.amountUSD) throw new Error("Insufficient affiliate balance");
+  if (data.amountUSD < 10) throw new Error("Minimum withdrawal is $10");
+  await db.update(affiliateBalances).set({ balanceUSD: sql`balanceUSD - ${data.amountUSD}` }).where(eq3(affiliateBalances.userId, userId));
+  await db.insert(affiliateWithdrawals).values({ userId, amountUSD: String(data.amountUSD), bankName: data.bankName, accountNumber: data.accountNumber, accountName: data.accountName });
+  return { success: true };
+}
+async function convertAffiliateToWallet(userId, amountUSD) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [bal] = await db.select().from(affiliateBalances).where(eq3(affiliateBalances.userId, userId)).limit(1);
+  if (!bal || Number(bal.balanceUSD) < amountUSD) throw new Error("Insufficient affiliate balance");
+  await db.update(affiliateBalances).set({ balanceUSD: sql`balanceUSD - ${amountUSD}` }).where(eq3(affiliateBalances.userId, userId));
+  const [wallet] = await db.select().from(wallets).where(eq3(wallets.userId, userId)).limit(1);
+  if (!wallet) throw new Error("Wallet not found");
+  const newBalance = Number(wallet.balanceUSD) + amountUSD;
+  await db.update(wallets).set({ balanceUSD: String(newBalance) }).where(eq3(wallets.userId, userId));
+  await db.insert(walletTransactions).values({ userId, type: "deposit", amountUSD: String(amountUSD), balanceAfterUSD: String(newBalance), description: "Converted from affiliate balance", status: "completed" });
+  await db.insert(affiliateTransactions).values({ userId, type: "withdrawal", amountUSD: String(amountUSD), description: "Converted to wallet balance" });
+  return { newBalance };
+}
+async function adminGetAffiliateWithdrawals(status) {
+  const db = await getDb();
+  if (!db) return [];
+  const conds = status ? [eq3(affiliateWithdrawals.status, status)] : [];
+  const rows = await db.select({
+    w: affiliateWithdrawals,
+    userName: users.name,
+    userEmail: users.email
+  }).from(affiliateWithdrawals).leftJoin(users, eq3(users.id, affiliateWithdrawals.userId)).where(conds.length > 0 ? and3(...conds) : void 0).orderBy(desc(affiliateWithdrawals.createdAt));
+  return rows;
+}
+async function adminProcessWithdrawal(id, action, adminNote) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [wd] = await db.select().from(affiliateWithdrawals).where(eq3(affiliateWithdrawals.id, id)).limit(1);
+  if (!wd) throw new Error("Withdrawal not found");
+  if (wd.status !== "pending") throw new Error("Already processed");
+  await db.update(affiliateWithdrawals).set({ status: action, adminNote: adminNote ?? null, processedAt: /* @__PURE__ */ new Date() }).where(eq3(affiliateWithdrawals.id, id));
+  if (action === "rejected") {
+    await db.update(affiliateBalances).set({ balanceUSD: sql`balanceUSD + ${Number(wd.amountUSD)}` }).where(eq3(affiliateBalances.userId, wd.userId));
+  }
+  await db.insert(notifications).values({
+    userId: wd.userId,
+    type: "affiliate_withdrawal",
+    title: action === "approved" ? "Withdrawal Approved" : "Withdrawal Rejected",
+    message: action === "approved" ? `Your withdrawal of $${Number(wd.amountUSD).toFixed(2)} has been approved. Payment will be sent to your bank.` : `Your withdrawal of $${Number(wd.amountUSD).toFixed(2)} was rejected. ${adminNote ?? ""}. The amount has been returned to your affiliate balance.`
+  });
+  return { success: true };
+}
+async function generateApiKey(userId, label) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await db.select().from(apiKeys).where(eq3(apiKeys.userId, userId));
+  if (existing.length >= 3) throw new Error("Maximum 3 API keys allowed");
+  const rawKey = "blx_" + randomBytes(32).toString("hex");
+  const keyHash = createHash("sha256").update(rawKey).digest("hex");
+  const keyPrefix = rawKey.substring(0, 12);
+  await db.insert(apiKeys).values({ userId, keyHash, keyPrefix, label });
+  return { rawKey, keyPrefix, label };
+}
+async function getUserApiKeys(userId) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({
+    id: apiKeys.id,
+    keyPrefix: apiKeys.keyPrefix,
+    label: apiKeys.label,
+    isEnabled: apiKeys.isEnabled,
+    adminEnabled: apiKeys.adminEnabled,
+    lastUsedAt: apiKeys.lastUsedAt,
+    requestCount: apiKeys.requestCount,
+    createdAt: apiKeys.createdAt
+  }).from(apiKeys).where(eq3(apiKeys.userId, userId)).orderBy(desc(apiKeys.createdAt));
+}
+async function deleteApiKey(id, userId) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(apiKeys).where(and3(eq3(apiKeys.id, id), eq3(apiKeys.userId, userId)));
+  return { success: true };
+}
+async function toggleApiKey(id, userId, isEnabled) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(apiKeys).set({ isEnabled }).where(and3(eq3(apiKeys.id, id), eq3(apiKeys.userId, userId)));
+  return { success: true };
+}
+async function validateApiKey(rawKey) {
+  const db = await getDb();
+  if (!db) return null;
+  const keyHash = createHash("sha256").update(rawKey).digest("hex");
+  const [key] = await db.select().from(apiKeys).where(eq3(apiKeys.keyHash, keyHash)).limit(1);
+  if (!key || !key.isEnabled || !key.adminEnabled) return null;
+  await db.update(apiKeys).set({ lastUsedAt: /* @__PURE__ */ new Date(), requestCount: sql`requestCount + 1` }).where(eq3(apiKeys.id, key.id));
+  const [user] = await db.select().from(users).where(eq3(users.id, key.userId)).limit(1);
+  return user ?? null;
+}
+async function adminGetApiKeys() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({
+    id: apiKeys.id,
+    keyPrefix: apiKeys.keyPrefix,
+    label: apiKeys.label,
+    isEnabled: apiKeys.isEnabled,
+    adminEnabled: apiKeys.adminEnabled,
+    lastUsedAt: apiKeys.lastUsedAt,
+    requestCount: apiKeys.requestCount,
+    createdAt: apiKeys.createdAt,
+    userId: apiKeys.userId,
+    userName: users.name,
+    userEmail: users.email
+  }).from(apiKeys).leftJoin(users, eq3(users.id, apiKeys.userId)).orderBy(desc(apiKeys.createdAt));
+}
+async function adminToggleApiKey(id, adminEnabled) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(apiKeys).set({ adminEnabled }).where(eq3(apiKeys.id, id));
+  return { success: true };
 }
 var _db, _pool, _cache, CACHE_TTL_CATEGORIES, CACHE_TTL_PRODUCTS;
 var init_db = __esm({
@@ -6054,6 +6513,72 @@ var appRouter = router({
         return { sent: false };
       }
     })
+  }),
+  // ── Manual Products (admin) ──────────────────────────────────────────────
+  manualProducts: router({
+    create: adminProcedure2.input(z3.object({
+      title: z3.string().min(2),
+      description: z3.string().optional(),
+      shortDescription: z3.string().optional(),
+      categoryId: z3.number().optional(),
+      customerPriceUSD: z3.number().positive(),
+      imageUrl: z3.string().optional(),
+      isSubscription: z3.boolean().optional(),
+      deliveryNote: z3.string().optional(),
+      isVisible: z3.boolean().optional()
+    })).mutation(({ input }) => adminCreateManualProduct(input)),
+    update: adminProcedure2.input(z3.object({
+      id: z3.number(),
+      title: z3.string().optional(),
+      description: z3.string().optional(),
+      shortDescription: z3.string().optional(),
+      categoryId: z3.number().nullable().optional(),
+      customerPriceUSD: z3.number().positive().optional(),
+      imageUrl: z3.string().optional(),
+      isSubscription: z3.boolean().optional(),
+      deliveryNote: z3.string().optional(),
+      isVisible: z3.boolean().optional(),
+      isFeatured: z3.boolean().optional()
+    })).mutation(({ input }) => {
+      const { id, ...rest } = input;
+      return adminUpdateManualProduct(id, rest);
+    }),
+    delete: adminProcedure2.input(z3.object({ id: z3.number() })).mutation(({ input }) => adminDeleteManualProduct(input.id)),
+    addCredentials: adminProcedure2.input(z3.object({ productId: z3.number(), lines: z3.array(z3.string()) })).mutation(({ input }) => addProductCredentials(input.productId, input.lines)),
+    getCredentials: adminProcedure2.input(z3.object({ productId: z3.number(), includeUsed: z3.boolean().optional() })).query(({ input }) => getProductCredentials(input.productId, input.includeUsed)),
+    deleteCredential: adminProcedure2.input(z3.object({ id: z3.number() })).mutation(({ input }) => deleteProductCredential(input.id)),
+    deliverSubscription: adminProcedure2.input(z3.object({ orderId: z3.number(), deliveryData: z3.string().min(1) })).mutation(({ input }) => adminDeliverSubscription(input.orderId, input.deliveryData))
+  }),
+  // ── Reward Points ─────────────────────────────────────────────────────────
+  rewards: router({
+    getPoints: protectedProcedure.query(({ ctx }) => getUserRewardPoints(ctx.user.id)),
+    getTransactions: protectedProcedure.query(({ ctx }) => getRewardTransactions(ctx.user.id)),
+    redeem: protectedProcedure.input(z3.object({ points: z3.number().int().positive() })).mutation(({ ctx, input }) => redeemPointsToWallet(ctx.user.id, input.points)),
+    getSettings: adminProcedure2.query(() => getRewardSettings()),
+    updateSetting: adminProcedure2.input(z3.object({ tier: z3.string(), cashbackPercent: z3.number().min(0).max(100) })).mutation(({ input }) => updateRewardSetting(input.tier, input.cashbackPercent))
+  }),
+  // ── Affiliate Program ─────────────────────────────────────────────────────
+  affiliate: router({
+    getBalance: protectedProcedure.query(({ ctx }) => getOrCreateAffiliateBalance(ctx.user.id)),
+    getTransactions: protectedProcedure.query(({ ctx }) => getAffiliateTransactions(ctx.user.id)),
+    requestWithdrawal: protectedProcedure.input(z3.object({
+      amountUSD: z3.number().positive(),
+      bankName: z3.string().min(2),
+      accountNumber: z3.string().min(5),
+      accountName: z3.string().min(2)
+    })).mutation(({ ctx, input }) => requestAffiliateWithdrawal(ctx.user.id, input)),
+    convertToWallet: protectedProcedure.input(z3.object({ amountUSD: z3.number().positive() })).mutation(({ ctx, input }) => convertAffiliateToWallet(ctx.user.id, input.amountUSD)),
+    adminGetWithdrawals: adminProcedure2.input(z3.object({ status: z3.enum(["pending", "approved", "rejected"]).optional() })).query(({ input }) => adminGetAffiliateWithdrawals(input.status)),
+    adminProcess: adminProcedure2.input(z3.object({ id: z3.number(), action: z3.enum(["approved", "rejected"]), adminNote: z3.string().optional() })).mutation(({ input }) => adminProcessWithdrawal(input.id, input.action, input.adminNote))
+  }),
+  // ── Customer API Keys ─────────────────────────────────────────────────────
+  apiKeys: router({
+    list: protectedProcedure.query(({ ctx }) => getUserApiKeys(ctx.user.id)),
+    generate: protectedProcedure.input(z3.object({ label: z3.string().min(1).max(64) })).mutation(({ ctx, input }) => generateApiKey(ctx.user.id, input.label)),
+    delete: protectedProcedure.input(z3.object({ id: z3.number() })).mutation(({ ctx, input }) => deleteApiKey(input.id, ctx.user.id)),
+    toggle: protectedProcedure.input(z3.object({ id: z3.number(), isEnabled: z3.boolean() })).mutation(({ ctx, input }) => toggleApiKey(input.id, ctx.user.id, input.isEnabled)),
+    adminList: adminProcedure2.query(() => adminGetApiKeys()),
+    adminToggle: adminProcedure2.input(z3.object({ id: z3.number(), adminEnabled: z3.boolean() })).mutation(({ input }) => adminToggleApiKey(input.id, input.adminEnabled))
   }),
   // ── One-time Migrations (admin only) ─────────────────────────────────────
   migrations: migrationsRouter
