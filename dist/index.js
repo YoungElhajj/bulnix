@@ -5491,22 +5491,6 @@ var SDKServer = class {
     const signedInAt = /* @__PURE__ */ new Date();
     let user = await getUserByOpenId(sessionUserId);
     if (!user) {
-      try {
-        const userInfo = await this.getUserInfoWithJwt(sessionCookie ?? "");
-        await upsertUser({
-          openId: userInfo.openId,
-          name: userInfo.name || null,
-          email: userInfo.email ?? null,
-          loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
-          lastSignedIn: signedInAt
-        });
-        user = await getUserByOpenId(userInfo.openId);
-      } catch (error) {
-        console.error("[Auth] Failed to sync user from OAuth:", error);
-        throw ForbiddenError("Failed to sync user info");
-      }
-    }
-    if (!user) {
       throw ForbiddenError("User not found");
     }
     await upsertUser({
