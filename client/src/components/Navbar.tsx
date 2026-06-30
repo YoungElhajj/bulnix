@@ -362,9 +362,9 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu — positioned absolutely relative to the nav, starts right below the navbar */}
       {mobileOpen && (
-        <div className="lg:hidden bg-[#0F3D5E] overflow-y-auto" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 98, paddingTop: '6rem' }}>
+        <div className="lg:hidden bg-[#0F3D5E] overflow-y-auto" style={{ position: 'fixed', top: '100%', left: 0, right: 0, bottom: 0, zIndex: 98 }}>
           <div className="container py-4 space-y-1">
             {/* Quick category shortcuts (mobile) */}
             <div className="pb-1">

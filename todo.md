@@ -851,3 +851,4 @@
 - [x] Fix mobile menu paddingTop to 6rem (96px) to account for banner + nav row
 - [x] Hamburger/X button always clickable (nav z-[100] is above mobile menu overlay z-98)
 - [x] Brand logos verified working: AccsZone products show AccsZone CDN images, others show brand logos or initials
+- [x] Fix mobile menu dropdown: changed from position:fixed top:0 paddingTop:6rem to position:fixed top:100% (starts exactly below navbar, no paddingTop needed)
