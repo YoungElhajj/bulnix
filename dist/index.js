@@ -2717,13 +2717,15 @@ function getPool() {
       password = decodeURIComponent(dbUrl.password);
       database = dbUrl.pathname.replace(/^\//, "");
     }
+    const isLocalhost = host === "localhost" || host === "127.0.0.1" || host === "::1";
+    const useSSL = !isLocalhost && process.env.DB_SSL !== "false";
     _pool = createPool({
       host,
       port,
       user,
       password,
       database,
-      ssl: { rejectUnauthorized: false },
+      ...useSSL ? { ssl: { rejectUnauthorized: false } } : {},
       connectionLimit: 15,
       waitForConnections: true,
       queueLimit: 100,

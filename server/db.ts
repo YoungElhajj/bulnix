@@ -64,13 +64,17 @@ function getPool(): ReturnType<typeof createPool> {
       password = decodeURIComponent(dbUrl.password);
       database = dbUrl.pathname.replace(/^\//, "");
     }
+    // Only use SSL for remote/cloud databases (not localhost).
+    // Namecheap cPanel MySQL runs on localhost and does not support SSL.
+    const isLocalhost = host === 'localhost' || host === '127.0.0.1' || host === '::1';
+    const useSSL = !isLocalhost && process.env.DB_SSL !== 'false';
     _pool = createPool({
       host,
       port,
       user,
       password,
       database,
-      ssl: { rejectUnauthorized: false },
+      ...(useSSL ? { ssl: { rejectUnauthorized: false } } : {}),
       connectionLimit: 15,
       waitForConnections: true,
       queueLimit: 100,
