@@ -145,8 +145,8 @@ export default function Navbar() {
         <div className="flex items-center justify-center py-1.5 px-3 gap-2 min-h-0 flex-wrap">
           <Link href="/affiliate" className="flex items-center gap-1 text-white text-[11px] font-medium hover:text-cyan-100 transition-colors whitespace-nowrap">
             <Gift className="w-3 h-3 flex-shrink-0" />
-            <span className="hidden sm:inline">🎉 Earn $0.50 per referral — Affiliate Program</span>
-            <span className="sm:hidden">🎉 Affiliate — Earn $0.50</span>
+            <span className="hidden sm:inline">🎉 Earn up to $500 — Join Affiliate Program</span>
+            <span className="sm:hidden">🎉 Earn up to $500 — Affiliate</span>
           </Link>
           <span className="text-white/30 text-[11px] select-none">|</span>
           <Link href="/api-docs" className="flex items-center gap-1 text-white text-[11px] font-medium hover:text-cyan-100 transition-colors whitespace-nowrap">
