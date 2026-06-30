@@ -582,11 +582,13 @@ export type AffiliateWithdrawal = typeof affiliateWithdrawals.$inferSelect;
 export const apiKeys = mysqlTable("api_keys", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
-  keyHash: varchar("keyHash", { length: 256 }).notNull().unique(), // SHA-256 of the key
-  keyPrefix: varchar("keyPrefix", { length: 16 }).notNull(), // first 8 chars for display
+  keyHash: varchar("keyHash", { length: 256 }).notNull().unique(), // SHA-256 of the key (empty for pending requests)
+  keyPrefix: varchar("keyPrefix", { length: 16 }).notNull(), // first 8 chars for display (empty for pending)
   label: varchar("label", { length: 128 }).default("Default").notNull(),
+  status: mysqlEnum("status", ["pending", "active", "rejected"]).default("pending").notNull(),
   isEnabled: boolean("isEnabled").default(true).notNull(),
   adminEnabled: boolean("adminEnabled").default(true).notNull(), // admin can disable
+  adminNote: varchar("adminNote", { length: 256 }), // admin rejection reason
   lastUsedAt: timestamp("lastUsedAt"),
   requestCount: int("requestCount").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

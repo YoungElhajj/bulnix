@@ -2447,17 +2447,57 @@ export async function adminProcessWithdrawal(id: number, action: "approved" | "r
 
 import { createHash, randomBytes } from "crypto";
 
-export async function generateApiKey(userId: number, label: string) {
+export async function requestApiKey(userId: number, label: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  // Check if user already has a key — max 3
+  // Check if user already has active/pending key — max 3 total
   const existing = await db.select().from(apiKeys).where(eq(apiKeys.userId, userId));
   if (existing.length >= 3) throw new Error("Maximum 3 API keys allowed");
+  // Check for existing pending request
+  const pending = existing.find(k => k.status === "pending");
+  if (pending) throw new Error("You already have a pending API key request");
+  // Create a pending request (no key generated yet)
+  const [result] = await db.insert(apiKeys).values({
+    userId, keyHash: "", keyPrefix: "", label, status: "pending",
+  }).$returningId();
+  return { id: result.id, label, status: "pending" };
+}
+
+export async function adminApproveApiKey(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
   const rawKey = "blx_" + randomBytes(32).toString("hex");
   const keyHash = createHash("sha256").update(rawKey).digest("hex");
   const keyPrefix = rawKey.substring(0, 12);
-  await db.insert(apiKeys).values({ userId, keyHash, keyPrefix, label });
-  return { rawKey, keyPrefix, label }; // rawKey shown once only
+  await db.update(apiKeys).set({ keyHash, keyPrefix, status: "active", adminNote: null }).where(eq(apiKeys.id, id));
+  // Notify the user
+  const [key] = await db.select().from(apiKeys).where(eq(apiKeys.id, id)).limit(1);
+  if (key) {
+    await db.insert(notifications).values({
+      userId: key.userId, type: "order", title: "API Key Approved",
+      message: `Your API key request has been approved. Your key prefix is: ${keyPrefix}. Log in to view your key.`,
+    }).catch(() => {});
+  }
+  return { rawKey, keyPrefix }; // rawKey shown once to admin for delivery
+}
+
+export async function adminRejectApiKey(id: number, reason: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(apiKeys).set({ status: "rejected", adminNote: reason }).where(eq(apiKeys.id, id));
+  const [key] = await db.select().from(apiKeys).where(eq(apiKeys.id, id)).limit(1);
+  if (key) {
+    await db.insert(notifications).values({
+      userId: key.userId, type: "order", title: "API Key Request Rejected",
+      message: `Your API key request was rejected. Reason: ${reason}`,
+    }).catch(() => {});
+  }
+  return { success: true };
+}
+
+// Keep old function name as alias for backward compat
+export async function generateApiKey(userId: number, label: string) {
+  return requestApiKey(userId, label);
 }
 
 export async function getUserApiKeys(userId: number) {
@@ -2465,6 +2505,7 @@ export async function getUserApiKeys(userId: number) {
   if (!db) return [];
   return db.select({
     id: apiKeys.id, keyPrefix: apiKeys.keyPrefix, label: apiKeys.label,
+    status: apiKeys.status, adminNote: apiKeys.adminNote,
     isEnabled: apiKeys.isEnabled, adminEnabled: apiKeys.adminEnabled,
     lastUsedAt: apiKeys.lastUsedAt, requestCount: apiKeys.requestCount, createdAt: apiKeys.createdAt,
   }).from(apiKeys).where(eq(apiKeys.userId, userId)).orderBy(desc(apiKeys.createdAt));
@@ -2501,6 +2542,7 @@ export async function adminGetApiKeys() {
   if (!db) return [];
   return db.select({
     id: apiKeys.id, keyPrefix: apiKeys.keyPrefix, label: apiKeys.label,
+    status: apiKeys.status, adminNote: apiKeys.adminNote,
     isEnabled: apiKeys.isEnabled, adminEnabled: apiKeys.adminEnabled,
     lastUsedAt: apiKeys.lastUsedAt, requestCount: apiKeys.requestCount, createdAt: apiKeys.createdAt,
     userId: apiKeys.userId, userName: users.name, userEmail: users.email,

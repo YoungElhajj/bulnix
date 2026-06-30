@@ -1,4 +1,4 @@
-import BackButton from "@/components/BackButton";
+import Navbar from "@/components/Navbar";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -69,13 +69,14 @@ const methodColor: Record<string, string> = {
 export default function ApiDocs() {
   return (
     <div className="min-h-screen bg-[#0B0F19]">
-      <div className="container max-w-3xl py-6 space-y-8">
-        <div className="flex items-center gap-3">
-          <BackButton />
-          <div>
-            <h1 className="text-xl font-bold text-white">API Documentation</h1>
-            <p className="text-sm text-slate-400">Integrate Bulnix into your platform</p>
+      <Navbar />
+      <div className="container max-w-3xl py-6 space-y-8 pt-28">
+        <div>
+          <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-4 py-1.5 text-xs text-cyan-400 font-medium mb-3">
+            API Documentation
           </div>
+          <h1 className="text-3xl font-extrabold text-white">API Documentation</h1>
+          <p className="text-slate-400 text-sm mt-1">Integrate Bulnix into your platform with our REST API.</p>
         </div>
 
         {/* Auth */}

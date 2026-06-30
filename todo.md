@@ -792,3 +792,18 @@
 - [x] Add admin API access control panel (enable/disable per user)
 - [x] Add Streaming Subscriptions category and seed all 28 products from flyers
 - [x] Subscription order flow: processing status, 2-5hr message, admin manual delivery, customer notification
+
+## Round 4 Fixes (Jun 30 2026)
+- [x] Affiliate banner: show on all pages (Navbar component included on all pages)
+- [x] Fix admin panel pages white background (AdminManualProducts, AdminAffiliateWithdrawals wrapped with AdminLayout)
+- [x] Add quick-access navigation bar below main navbar for key sections
+- [x] Add Streaming Subscriptions to featured/recommended categories on homepage
+- [x] Assign correct logos/icons to all 28 subscription products
+- [x] Build full working affiliate referral link system (unique code per user, track signups)
+- [x] Wire referral tracking on signup (apply commission when referred user registers)
+- [x] Redesign Affiliate page: full dark theme, referral link, stats, earnings history, withdrawal
+- [x] Redesign Rewards page: full dark theme, points balance, how to earn, history
+- [x] Redesign API Keys page: full dark theme, request flow, status display
+- [x] Change API key flow to request-approval (user requests, admin approves, key generated on approval)
+- [x] Build complete API Docs page with all endpoints, auth guide, code examples
+- [ ] Fix Google same-email OAuth duplicate account issue (deferred to next round)

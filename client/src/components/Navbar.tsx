@@ -28,6 +28,21 @@ const primaryLinks = [
   { label: "Products", href: "/products" },
   { label: "Categories", href: "/categories" },
 ];
+// Quick-access category shortcuts shown in a scrollable bar below the navbar
+const quickCategories = [
+  { label: "🎬 Streaming", href: "/categories/streaming" },
+  { label: "📺 Netflix", href: "/categories/netflix" },
+  { label: "📱 Social Media", href: "/categories/social-media" },
+  { label: "🎮 Gaming", href: "/categories/gaming" },
+  { label: "🔒 VPN", href: "/categories/vpn" },
+  { label: "📧 Gmail", href: "/categories/gmail" },
+  { label: "📘 Facebook", href: "/categories/facebook" },
+  { label: "📸 Instagram", href: "/categories/instagram" },
+  { label: "🎵 TikTok", href: "/categories/tiktok" },
+  { label: "💼 LinkedIn", href: "/categories/linkedin" },
+  { label: "🔑 Google Voice", href: "/categories/google-voice" },
+  { label: "📋 Craigslist", href: "/categories/craigslist" },
+];
 
 // Secondary links shown in "More" dropdown and mobile menu
 const moreLinks = [
@@ -348,10 +363,44 @@ export default function Navbar() {
         </div>
       </div>
 
+      {/* Category Quick-Access Bar */}
+      <div className="hidden lg:block border-t border-white/10 bg-[#0a2d45]">
+        <div className="container">
+          <div className="flex items-center gap-0.5 py-1 overflow-x-auto scrollbar-none">
+            {quickCategories.map(cat => (
+              <Link
+                key={cat.href}
+                href={cat.href}
+                className="flex-shrink-0 px-3 py-1 text-xs text-white/70 hover:text-white hover:bg-white/10 rounded-md transition-colors whitespace-nowrap"
+              >
+                {cat.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Mobile Menu */}
       {mobileOpen && (
         <div className="lg:hidden border-t border-white/10 bg-[#0F3D5E]">
           <div className="container py-4 space-y-1">
+            {/* Quick category shortcuts (mobile) */}
+            <div className="pb-1">
+              <p className="px-3 py-1 text-xs text-white/40 uppercase tracking-wider font-semibold">Quick Categories</p>
+              <div className="grid grid-cols-2 gap-1">
+                {quickCategories.map(cat => (
+                  <Link
+                    key={cat.href}
+                    href={cat.href}
+                    className="flex items-center px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {cat.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <div className="border-t border-white/10 my-1" />
             {/* Primary links */}
             {primaryLinks.map(link => (
               <Link

@@ -392,8 +392,56 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ══ FEATURED PRODUCTS ═════════════════════════════════════════════════ */}
-      {/* Featured products section removed — replaced by Categories section */}
+      {/* ══ STREAMING SUBSCRIPTIONS ══════════════════════════════════════ */}
+      <section className="py-16 bg-gradient-to-br from-[#0D2137] to-[#0F3D5E]">
+        <div className="container">
+          <div className="text-center mb-10 reveal">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#00C2FF]/20 border border-[#00C2FF]/30 text-[#00C2FF] text-sm font-semibold mb-4">
+              🎬 Streaming Subscriptions
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3" style={{ fontFamily: "'Poppins', sans-serif" }}>
+              Premium Streaming Accounts
+            </h2>
+            <p className="text-white/60 max-w-xl mx-auto text-sm">
+              Netflix, Spotify, Disney+, and 25+ more — delivered within 2–5 hours. Subscription details sent directly to your dashboard.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {[
+              { name: "Netflix", logo: "https://cdn.simpleicons.org/netflix/E50914", href: "/categories/streaming" },
+              { name: "Spotify", logo: "https://cdn.simpleicons.org/spotify/1DB954", href: "/categories/streaming" },
+              { name: "Disney+", logo: "https://cdn.simpleicons.org/disneyplus/113CCF", href: "/categories/streaming" },
+              { name: "YouTube Premium", logo: "https://cdn.simpleicons.org/youtube/FF0000", href: "/categories/streaming" },
+              { name: "HBO Max", logo: "https://cdn.simpleicons.org/hbo/9B59B6", href: "/categories/streaming" },
+              { name: "Apple TV+", logo: "https://cdn.simpleicons.org/appletv/000000", href: "/categories/streaming" },
+              { name: "Amazon Prime", logo: "https://cdn.simpleicons.org/amazonprime/00A8E0", href: "/categories/streaming" },
+              { name: "Hulu", logo: "https://cdn.simpleicons.org/hulu/1CE783", href: "/categories/streaming" },
+              { name: "Canva Pro", logo: "https://cdn.simpleicons.org/canva/00C4CC", href: "/categories/streaming" },
+              { name: "NordVPN", logo: "https://cdn.simpleicons.org/nordvpn/4687FF", href: "/categories/streaming" },
+              { name: "Grammarly", logo: "https://cdn.simpleicons.org/grammarly/15C39A", href: "/categories/streaming" },
+              { name: "Microsoft 365", logo: "https://cdn.simpleicons.org/microsoftoffice/D83B01", href: "/categories/streaming" },
+            ].map((item, i) => (
+              <Link key={i} href={item.href}>
+                <div className="reveal bg-white/5 border border-white/10 rounded-2xl p-4 hover:bg-white/10 hover:border-[#00C2FF]/40 hover:-translate-y-1 transition-all duration-300 cursor-pointer text-center group"
+                  style={{ transitionDelay: `${i * 40}ms` }}>
+                  <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <img src={item.logo} alt={item.name} className="w-8 h-8 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display='none'; }} />
+                  </div>
+                  <p className="text-white/90 font-semibold text-xs line-clamp-2">{item.name}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <div className="text-center mt-8 reveal">
+            <Link href="/categories/streaming">
+              <Button className="bg-[#00C2FF] hover:bg-[#00a8e0] text-[#0F3D5E] font-bold rounded-full px-8 py-3 shadow-lg shadow-[#00C2FF]/30 transition-all duration-300">
+                Shop All Streaming Plans
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* ══ HOW IT WORKS ══════════════════════════════════════════════════════ */}
       <section className="py-20 bg-white">

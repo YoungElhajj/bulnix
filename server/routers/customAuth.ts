@@ -70,6 +70,7 @@ export const customAuthRouter = router({
         name: z.string().min(2, "Name must be at least 2 characters"),
         email: z.email("Invalid email address"),
         password: z.string().min(8, "Password must be at least 8 characters"),
+        referralCode: z.string().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -89,6 +90,8 @@ export const customAuthRouter = router({
       const otp = generateOtp();
       const otpExpiry = otpExpiresAt();
       const passwordHash = await bcrypt.hash(input.password, 12);
+      // Generate a unique referral code for this user
+      const newReferralCode = `BX${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
       if (existing) {
         await db.update(users).set({
@@ -97,6 +100,8 @@ export const customAuthRouter = router({
           otpCode: otp,
           otpExpiry,
           otpPurpose: "register",
+          referralCode: existing.referralCode ?? newReferralCode,
+          referredBy: input.referralCode ?? existing.referredBy,
         }).where(eq(users.email, email));
       } else {
         const signupIp = await getClientIp(ctx.req);
@@ -113,6 +118,8 @@ export const customAuthRouter = router({
           otpPurpose: "register",
           signupIp,
           signupCountry,
+          referralCode: newReferralCode,
+          referredBy: input.referralCode ?? null,
         });
       }
 
@@ -182,6 +189,23 @@ export const customAuthRouter = router({
         await safeSendEmail(() =>
           sendWelcomeEmail({ to: email, name: user.name ?? "" })
         );
+        // Credit referral bonus if this user was referred
+        if (user.referredBy) {
+          try {
+            const db2 = await getDb();
+            if (db2) {
+              const [referrer] = await db2.select({ id: users.id }).from(users)
+                .where(eq(users.referralCode, user.referredBy)).limit(1);
+              if (referrer) {
+                const { creditAffiliateSignupBonus } = await import("../db");
+                await creditAffiliateSignupBonus(referrer.id, user.id);
+              }
+            }
+          } catch (e) {
+            // Non-fatal: referral bonus failure should not block registration
+            console.error("[Referral] Failed to credit bonus:", e);
+          }
+        }
       }
 
       return {

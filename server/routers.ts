@@ -543,11 +543,14 @@ export const appRouter = router({
   // ── Customer API Keys ─────────────────────────────────────────────────────
   apiKeys: router({
     list: protectedProcedure.query(({ ctx }) => db.getUserApiKeys(ctx.user.id)),
-    generate: protectedProcedure.input(z.object({ label: z.string().min(1).max(64) })).mutation(({ ctx, input }) => db.generateApiKey(ctx.user.id, input.label)),
+    request: protectedProcedure.input(z.object({ label: z.string().min(1).max(64) })).mutation(({ ctx, input }) => db.requestApiKey(ctx.user.id, input.label)),
+    generate: protectedProcedure.input(z.object({ label: z.string().min(1).max(64) })).mutation(({ ctx, input }) => db.requestApiKey(ctx.user.id, input.label)),
     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ ctx, input }) => db.deleteApiKey(input.id, ctx.user.id)),
     toggle: protectedProcedure.input(z.object({ id: z.number(), isEnabled: z.boolean() })).mutation(({ ctx, input }) => db.toggleApiKey(input.id, ctx.user.id, input.isEnabled)),
     adminList: adminProcedure.query(() => db.adminGetApiKeys()),
     adminToggle: adminProcedure.input(z.object({ id: z.number(), adminEnabled: z.boolean() })).mutation(({ input }) => db.adminToggleApiKey(input.id, input.adminEnabled)),
+    adminApprove: adminProcedure.input(z.object({ id: z.number() })).mutation(({ input }) => db.adminApproveApiKey(input.id)),
+    adminReject: adminProcedure.input(z.object({ id: z.number(), reason: z.string().min(1).max(256) })).mutation(({ input }) => db.adminRejectApiKey(input.id, input.reason)),
   }),
 
   // ── One-time Migrations (admin only) ─────────────────────────────────────

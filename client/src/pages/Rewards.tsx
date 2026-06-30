@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Star, ArrowDownToLine, Gift, TrendingUp } from "lucide-react";
-import BackButton from "@/components/BackButton";
+import { Star, ArrowDownToLine, Gift, TrendingUp, ShoppingBag } from "lucide-react";
+import Navbar from "@/components/Navbar";
 
 const POINT_VALUE_USD = 0.01; // 1 point = $0.01
 
@@ -32,50 +32,68 @@ export default function Rewards() {
 
   return (
     <div className="min-h-screen bg-[#0B0F19]">
-      <div className="container max-w-2xl py-6 space-y-6">
-        <div className="flex items-center gap-3">
-          <BackButton />
-          <div>
-            <h1 className="text-xl font-bold text-white">Reward Points</h1>
-            <p className="text-sm text-slate-400">Earn points on every purchase and redeem for wallet credit</p>
+      <Navbar />
+      <div className="container max-w-3xl py-8 space-y-8 pt-28">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 rounded-full px-4 py-1.5 text-xs text-yellow-400 font-medium mb-2">
+            <Star className="w-3.5 h-3.5" /> Reward Points
           </div>
+          <h1 className="text-3xl font-extrabold text-white">Earn points on every <span className="text-yellow-400">purchase</span></h1>
+          <p className="text-slate-400 text-sm max-w-md mx-auto">Shop on Bulnix and earn reward points automatically. Redeem them for wallet credit anytime.</p>
         </div>
 
         {/* Balance Card */}
-        <div className="bg-gradient-to-br from-yellow-500/10 to-amber-500/5 border border-yellow-500/20 rounded-2xl p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-yellow-500/20 flex items-center justify-center">
-              <Star className="w-5 h-5 text-yellow-400" />
+        <div className="bg-gradient-to-br from-yellow-500/15 to-amber-500/5 border border-yellow-500/30 rounded-2xl p-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-yellow-500/20 flex items-center justify-center">
+                <Star className="w-7 h-7 text-yellow-400" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-400 uppercase tracking-wide font-medium">Your Points Balance</p>
+                <p className="text-4xl font-black text-yellow-400">{totalPoints.toLocaleString()}</p>
+                <p className="text-xs text-slate-400 mt-0.5">pts ≈ <span className="text-white font-medium">${walletValue}</span> wallet value</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-slate-400 uppercase tracking-wide">Your Points Balance</p>
-              <p className="text-3xl font-bold text-yellow-400">{totalPoints.toLocaleString()} pts</p>
-            </div>
+            {totalPoints >= 100 && (
+              <div className="text-right">
+                <p className="text-xs text-slate-400 mb-1">Ready to redeem</p>
+                <div className="bg-green-500/20 border border-green-500/30 rounded-lg px-3 py-1.5 text-green-400 text-sm font-semibold">
+                  Redeem below ↓
+                </div>
+              </div>
+            )}
           </div>
-          <p className="text-sm text-slate-400">≈ <span className="text-white font-medium">${walletValue}</span> wallet value</p>
         </div>
 
         {/* How to Earn */}
-        <div className="bg-slate-800/40 border border-slate-700 rounded-xl p-4 space-y-3">
-          <div className="flex items-center gap-2 mb-1">
-            <TrendingUp className="w-4 h-4 text-cyan-400" />
-            <h2 className="text-sm font-semibold text-white">How to Earn Points</h2>
+        <div className="bg-slate-800/40 border border-slate-700 rounded-2xl p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-cyan-400" />
+            <h2 className="font-semibold text-white">Loyalty Tiers & Cashback</h2>
           </div>
-          <div className="grid grid-cols-2 gap-3 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
-              { tier: "Bronze", rate: "0%", color: "text-orange-400" },
-              { tier: "Silver", rate: "0%", color: "text-slate-300" },
-              { tier: "Gold", rate: "0.5%", color: "text-yellow-400" },
-              { tier: "Platinum", rate: "0.75%", color: "text-cyan-400" },
-              { tier: "Diamond", rate: "1%", color: "text-purple-400" },
+              { tier: "Bronze", rate: "0%", color: "text-orange-400", bg: "bg-orange-500/10 border-orange-500/20", desc: "New members" },
+              { tier: "Silver", rate: "0%", color: "text-slate-300", bg: "bg-slate-600/20 border-slate-500/20", desc: "$50+ spent" },
+              { tier: "Gold", rate: "0.5%", color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/20", desc: "$200+ spent" },
+              { tier: "Platinum", rate: "0.75%", color: "text-cyan-400", bg: "bg-cyan-500/10 border-cyan-500/20", desc: "$500+ spent" },
+              { tier: "Diamond", rate: "1%", color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500/20", desc: "$1,000+ spent" },
             ].map(t => (
-              <div key={t.tier} className="flex items-center justify-between bg-slate-800 rounded-lg px-3 py-2">
-                <span className={`font-medium ${t.color}`}>{t.tier}</span>
-                <span className="text-slate-300">{t.rate} cashback</span>
+              <div key={t.tier} className={`flex items-center justify-between rounded-xl px-4 py-3 border ${t.bg}`}>
+                <div>
+                  <span className={`font-semibold text-sm ${t.color}`}>{t.tier}</span>
+                  <p className="text-xs text-slate-500 mt-0.5">{t.desc}</p>
+                </div>
+                <span className={`font-bold text-sm ${t.color}`}>{t.rate} cashback</span>
               </div>
             ))}
           </div>
-          <p className="text-xs text-slate-500">Points are awarded automatically after each completed purchase. 100 points = $1.00</p>
+          <div className="flex items-start gap-2 bg-slate-700/30 rounded-lg p-3">
+            <ShoppingBag className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+            <p className="text-xs text-slate-400">Points are awarded automatically after each completed purchase. <strong className="text-white">100 points = $1.00</strong> wallet credit.</p>
+          </div>
         </div>
 
         {/* Redeem */}
@@ -103,12 +121,13 @@ export default function Rewards() {
         )}
 
         {/* Transaction History */}
-        <div className="space-y-2">
-          <h2 className="text-sm font-semibold text-white">Points History</h2>
+        <div className="space-y-3">
+          <h2 className="font-semibold text-white">Points History</h2>
           {!txns || txns.length === 0 ? (
-            <div className="text-center py-8 text-slate-500 text-sm">
-              <Star className="w-8 h-8 mx-auto mb-2 opacity-30" />
-              No points earned yet. Start shopping to earn rewards!
+            <div className="text-center py-10 text-slate-500 text-sm bg-slate-800/30 border border-slate-700/50 rounded-2xl">
+              <Star className="w-10 h-10 mx-auto mb-3 opacity-20" />
+              <p>No points earned yet.</p>
+              <p className="text-xs mt-1">Start shopping to earn rewards!</p>
             </div>
           ) : (
             <div className="space-y-2">

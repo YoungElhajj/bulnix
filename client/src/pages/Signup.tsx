@@ -68,6 +68,11 @@ export default function SignUp() {
   const [otp, setOtp] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
   const [passwordError, setPasswordError] = useState("");
+  // Read referral code from URL ?ref=CODE
+  const [referralCode] = useState<string | undefined>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("ref") ?? undefined;
+  });
 
   useEffect(() => {
     if (isAuthenticated) navigate("/dashboard");
@@ -104,7 +109,7 @@ export default function SignUp() {
     if (password.length < 8) { setPasswordError("Password must be at least 8 characters."); return; }
     if (!agreed) { toast.error("Please agree to the Terms & Conditions"); return; }
     setPasswordError("");
-    registerMutation.mutate({ name, email, password });
+    registerMutation.mutate({ name, email, password, referralCode });
   };
 
   const handleVerify = (e: React.FormEvent) => {

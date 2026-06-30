@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { CheckCircle, XCircle, DollarSign } from "lucide-react";
+import AdminLayout from "@/components/AdminLayout";
 
 type Withdrawal = {
   id: number; userId: number; amountUSD: string; bankName: string;
@@ -33,7 +34,8 @@ export default function AdminAffiliateWithdrawals() {
   });
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <AdminLayout title="Affiliate Withdrawals">
+    <div className="space-y-6">
       <div>
         <h1 className="text-xl font-bold text-white">Affiliate Withdrawals</h1>
         <p className="text-sm text-slate-400 mt-0.5">Review and process affiliate payout requests</p>
@@ -119,5 +121,6 @@ export default function AdminAffiliateWithdrawals() {
         </DialogContent>
       </Dialog>
     </div>
+    </AdminLayout>
   );
 }

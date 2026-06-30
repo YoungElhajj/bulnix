@@ -6,8 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Copy, Users, DollarSign, ArrowDownToLine, Wallet } from "lucide-react";
-import BackButton from "@/components/BackButton";
+import { Copy, Users, DollarSign, ArrowDownToLine, Wallet, Share2, TrendingUp, ExternalLink, Gift } from "lucide-react";
+import Navbar from "@/components/Navbar";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function Affiliate() {
@@ -22,7 +22,20 @@ export default function Affiliate() {
   const { data: txns } = trpc.affiliate.getTransactions.useQuery();
 
   const referralCode = user?.referralCode ?? "";
-  const referralLink = referralCode ? `${window.location.origin}?ref=${referralCode}` : "";
+  const referralLink = referralCode ? `${window.location.origin}/signup?ref=${referralCode}` : "";
+
+  function shareOnWhatsApp() {
+    const text = encodeURIComponent(`🛒 Buy premium digital accounts on Bulnix! Use my referral link: ${referralLink}`);
+    window.open(`https://wa.me/?text=${text}`, "_blank");
+  }
+  function shareOnTwitter() {
+    const text = encodeURIComponent(`Buy premium digital accounts on Bulnix! 🚀 Use my link: ${referralLink}`);
+    window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
+  }
+  function shareOnTelegram() {
+    const text = encodeURIComponent(`Buy premium digital accounts on Bulnix! Use my referral link: ${referralLink}`);
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${text}`, "_blank");
+  }
 
   const withdrawMutation = trpc.affiliate.requestWithdrawal.useMutation({
     onSuccess: () => { toast.success("Withdrawal request submitted. We'll process it within 24–48 hours."); setShowWithdrawDialog(false); refetchBalance(); },
@@ -40,69 +53,126 @@ export default function Affiliate() {
 
   const affiliateBalance = Number(balance?.balanceUSD ?? 0);
   const totalEarned = Number(balance?.totalEarned ?? 0);
-  const totalReferrals = 0; // tracked via transactions count
+  const totalReferrals = txns?.filter((t: any) => t.type === "signup_bonus").length ?? 0;
+
+  const steps = [
+    { icon: <Share2 className="w-5 h-5 text-cyan-400" />, title: "Share your link", desc: "Share your unique referral link with friends, on social media, or your website." },
+    { icon: <Users className="w-5 h-5 text-green-400" />, title: "They sign up", desc: "When someone clicks your link and creates a Bulnix account, they're tracked as your referral." },
+    { icon: <DollarSign className="w-5 h-5 text-yellow-400" />, title: "You earn $0.50", desc: "You automatically receive $0.50 in your affiliate balance for every successful signup." },
+    { icon: <Wallet className="w-5 h-5 text-purple-400" />, title: "Cash out", desc: "Withdraw to your bank account or move earnings to your Bulnix wallet for purchases." },
+  ];
 
   return (
     <div className="min-h-screen bg-[#0B0F19]">
-      <div className="container max-w-2xl py-6 space-y-6">
-        <div className="flex items-center gap-3">
-          <BackButton />
-          <div>
-            <h1 className="text-xl font-bold text-white">Affiliate Program</h1>
-            <p className="text-sm text-slate-400">Earn $0.50 for every new user who signs up with your link</p>
+      <Navbar />
+      <div className="container max-w-3xl py-8 space-y-8 pt-28">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-4 py-1.5 text-xs text-cyan-400 font-medium mb-2">
+            <Gift className="w-3.5 h-3.5" /> Affiliate Program
           </div>
+          <h1 className="text-3xl font-extrabold text-white">Earn up to <span className="text-cyan-400">$500</span> referring users</h1>
+          <p className="text-slate-400 text-sm max-w-md mx-auto">
+            Share your unique link. Earn $0.50 for every person who signs up. No limits — the more you share, the more you earn.
+          </p>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-green-400">${affiliateBalance.toFixed(2)}</p>
-            <p className="text-xs text-slate-400 mt-1">Available</p>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 rounded-2xl p-5 text-center">
+            <p className="text-3xl font-bold text-green-400">${affiliateBalance.toFixed(2)}</p>
+            <p className="text-xs text-slate-400 mt-1 font-medium">Available Balance</p>
           </div>
-          <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-cyan-400">${totalEarned.toFixed(2)}</p>
-            <p className="text-xs text-slate-400 mt-1">Total Earned</p>
+          <div className="bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 border border-cyan-500/20 rounded-2xl p-5 text-center">
+            <p className="text-3xl font-bold text-cyan-400">${totalEarned.toFixed(2)}</p>
+            <p className="text-xs text-slate-400 mt-1 font-medium">Total Earned</p>
           </div>
-          <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-4 text-center">
-            <p className="text-2xl font-bold text-white">{totalReferrals}</p>
-            <p className="text-xs text-slate-400 mt-1">Referrals</p>
+          <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-2xl p-5 text-center">
+            <p className="text-3xl font-bold text-white">{totalReferrals}</p>
+            <p className="text-xs text-slate-400 mt-1 font-medium">Referrals</p>
           </div>
         </div>
 
         {/* Referral Link */}
-        <div className="bg-slate-800/40 border border-slate-700 rounded-xl p-4 space-y-3">
+        <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 space-y-4">
           <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-cyan-400" />
-            <h2 className="text-sm font-semibold text-white">Your Referral Link</h2>
+            <Users className="w-5 h-5 text-cyan-400" />
+            <h2 className="font-semibold text-white">Your Referral Link</h2>
           </div>
-          <div className="flex gap-2">
-            <Input readOnly value={referralLink || "Loading..."} className="bg-slate-900 border-slate-600 text-slate-300 text-xs font-mono" />
-            <Button variant="outline" className="border-slate-600 text-slate-300 hover:text-white shrink-0" onClick={copyLink}>
-              <Copy className="w-4 h-4" />
-            </Button>
-          </div>
-          <p className="text-xs text-slate-500">Share this link. When someone signs up using it, you earn $0.50 automatically.</p>
+          {referralCode ? (
+            <>
+              <div className="flex gap-2">
+                <Input readOnly value={referralLink} className="bg-slate-900 border-slate-600 text-slate-300 text-sm font-mono flex-1" />
+                <Button className="bg-cyan-500 hover:bg-cyan-600 text-black font-semibold shrink-0" onClick={copyLink}>
+                  <Copy className="w-4 h-4 mr-1.5" /> Copy
+                </Button>
+              </div>
+              <p className="text-xs text-slate-500">Share this link. When someone signs up using it, you earn <strong className="text-white">$0.50</strong> automatically.</p>
+              <div className="flex gap-2 flex-wrap">
+                <Button size="sm" variant="outline" className="border-green-500/30 text-green-400 hover:bg-green-500/10 gap-1.5" onClick={shareOnWhatsApp}>
+                  <ExternalLink className="w-3.5 h-3.5" /> WhatsApp
+                </Button>
+                <Button size="sm" variant="outline" className="border-sky-500/30 text-sky-400 hover:bg-sky-500/10 gap-1.5" onClick={shareOnTwitter}>
+                  <ExternalLink className="w-3.5 h-3.5" /> Twitter/X
+                </Button>
+                <Button size="sm" variant="outline" className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10 gap-1.5" onClick={shareOnTelegram}>
+                  <ExternalLink className="w-3.5 h-3.5" /> Telegram
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-4 text-slate-400 text-sm">Loading your referral link...</div>
+          )}
         </div>
 
-        {/* Actions */}
+        {/* How it works */}
+        <div className="bg-slate-800/40 border border-slate-700 rounded-2xl p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-yellow-400" />
+            <h2 className="font-semibold text-white">How It Works</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {steps.map((step, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-slate-700/60 flex items-center justify-center shrink-0 mt-0.5">{step.icon}</div>
+                <div>
+                  <p className="text-sm font-semibold text-white">{step.title}</p>
+                  <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{step.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Terms */}
+        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-4 text-xs text-slate-500 space-y-1">
+          <p className="font-medium text-slate-400">Program Terms</p>
+          <p>• Earn $0.50 for each new user who signs up using your referral link and verifies their email.</p>
+          <p>• Minimum withdrawal: $10.00. Payouts processed within 24–48 hours.</p>
+          <p>• Self-referrals and fraudulent signups will be disqualified.</p>
+          <p>• Bulnix reserves the right to modify or terminate the program at any time.</p>
+        </div>
+
+        {/* Payout Actions */}
         {affiliateBalance > 0 && (
-          <div className="flex gap-3">
-            <Button className="flex-1 bg-green-500 hover:bg-green-600 text-black" onClick={() => setShowWithdrawDialog(true)}>
+          <div className="grid grid-cols-2 gap-4">
+            <Button className="bg-green-500 hover:bg-green-600 text-black font-semibold h-12" onClick={() => setShowWithdrawDialog(true)}>
               <ArrowDownToLine className="w-4 h-4 mr-2" /> Withdraw to Bank
             </Button>
-            <Button className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-black" onClick={() => setShowConvertDialog(true)}>
+            <Button variant="outline" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 h-12 font-semibold" onClick={() => setShowConvertDialog(true)}>
               <Wallet className="w-4 h-4 mr-2" /> Move to Wallet
             </Button>
           </div>
         )}
 
         {/* Transaction History */}
-        <div className="space-y-2">
-          <h2 className="text-sm font-semibold text-white">Earnings History</h2>
+        <div className="space-y-3">
+          <h2 className="font-semibold text-white">Earnings History</h2>
           {!txns || txns.length === 0 ? (
-            <div className="text-center py-8 text-slate-500 text-sm">
-              <Users className="w-8 h-8 mx-auto mb-2 opacity-30" />
-              No earnings yet. Share your link to start earning!
+            <div className="text-center py-10 text-slate-500 text-sm bg-slate-800/30 border border-slate-700/50 rounded-2xl">
+              <Users className="w-10 h-10 mx-auto mb-3 opacity-20" />
+              <p>No earnings yet.</p>
+              <p className="text-xs mt-1">Share your link above to start earning!</p>
             </div>
           ) : (
             <div className="space-y-2">

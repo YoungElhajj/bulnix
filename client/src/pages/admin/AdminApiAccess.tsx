@@ -4,132 +4,264 @@ import AdminLayout from "@/components/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Key, Search, User } from "lucide-react";
+import { Key, Search, User, CheckCircle2, XCircle, Clock, AlertCircle } from "lucide-react";
 
 export default function AdminApiAccess() {
   const [search, setSearch] = useState("");
+  const [rejectDialog, setRejectDialog] = useState<{ id: number; label: string; userName: string } | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [approvedKey, setApprovedKey] = useState<{ rawKey: string; keyPrefix: string } | null>(null);
+  const utils = trpc.useUtils();
 
-  const { data: apiKeys, isLoading, refetch } = trpc.apiKeys.adminList.useQuery();
+  const { data: apiKeys, isLoading } = trpc.apiKeys.adminList.useQuery();
+
+  const approveMutation = trpc.apiKeys.adminApprove.useMutation({
+    onSuccess: (data) => {
+      toast.success("API key approved and user notified.");
+      setApprovedKey(data);
+      utils.apiKeys.adminList.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const rejectMutation = trpc.apiKeys.adminReject.useMutation({
+    onSuccess: () => {
+      toast.success("API key request rejected.");
+      setRejectDialog(null);
+      setRejectReason("");
+      utils.apiKeys.adminList.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
 
   const toggleMutation = trpc.apiKeys.adminToggle.useMutation({
-    onSuccess: () => { refetch(); toast.success("API key access updated"); },
+    onSuccess: () => { toast.success("API key updated"); utils.apiKeys.adminList.invalidate(); },
     onError: (e) => toast.error(e.message),
   });
 
   const filtered = (apiKeys ?? []).filter((k: any) => {
     const q = search.toLowerCase();
-    return !q || (k.userName?.toLowerCase().includes(q) || k.userEmail?.toLowerCase().includes(q) || k.label?.toLowerCase().includes(q));
+    return !q || (k.userName ?? "").toLowerCase().includes(q) || (k.userEmail ?? "").toLowerCase().includes(q) || k.label.toLowerCase().includes(q);
   });
 
-  // Group by user
-  const byUser: Record<number, { userName: string; userEmail: string; keys: any[] }> = {};
-  for (const k of filtered) {
-    if (!byUser[k.userId]) byUser[k.userId] = { userName: k.userName ?? "Unknown", userEmail: k.userEmail ?? "", keys: [] };
-    byUser[k.userId].keys.push(k);
-  }
+  const pending = filtered.filter((k: any) => k.status === "pending");
+  const active = filtered.filter((k: any) => k.status === "active");
+  const rejected = filtered.filter((k: any) => k.status === "rejected");
+
+  const KeyCard = ({ k }: { k: any }) => (
+    <div className="bg-[#161b27] border border-slate-700/60 rounded-xl p-4 space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+            k.status === "active" ? "bg-green-500/15" :
+            k.status === "pending" ? "bg-yellow-500/15" : "bg-red-500/15"
+          }`}>
+            {k.status === "active" ? <CheckCircle2 className="w-4 h-4 text-green-400" /> :
+             k.status === "pending" ? <Clock className="w-4 h-4 text-yellow-400" /> :
+             <XCircle className="w-4 h-4 text-red-400" />}
+          </div>
+          <div className="min-w-0">
+            <p className="font-semibold text-white text-sm truncate">{k.label}</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <User className="w-3 h-3 text-slate-500" />
+              <p className="text-xs text-slate-400 truncate">{k.userName ?? "Unknown"} · {k.userEmail ?? ""}</p>
+            </div>
+          </div>
+        </div>
+        <Badge variant="outline" className={`text-xs shrink-0 ${
+          k.status === "active" ? "border-green-500/30 text-green-400" :
+          k.status === "pending" ? "border-yellow-500/30 text-yellow-400" :
+          "border-red-500/30 text-red-400"
+        }`}>
+          {k.status}
+        </Badge>
+      </div>
+
+      {k.status === "active" && k.keyPrefix && (
+        <p className="text-xs text-slate-500 font-mono">{k.keyPrefix}••••••••••••••••••••••••••••••••••••••••</p>
+      )}
+      {k.status === "rejected" && k.adminNote && (
+        <p className="text-xs text-red-400/70">Reason: {k.adminNote}</p>
+      )}
+
+      <div className="flex items-center justify-between gap-2 pt-1">
+        <p className="text-xs text-slate-600">Requested {new Date(k.createdAt).toLocaleDateString()}</p>
+        <div className="flex gap-2">
+          {k.status === "pending" && (
+            <>
+              <Button
+                size="sm"
+                className="bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/30 h-7 text-xs gap-1"
+                onClick={() => approveMutation.mutate({ id: k.id })}
+                disabled={approveMutation.isPending}
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" /> Approve
+              </Button>
+              <Button
+                size="sm"
+                className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 h-7 text-xs gap-1"
+                onClick={() => setRejectDialog({ id: k.id, label: k.label, userName: k.userName ?? "User" })}
+              >
+                <XCircle className="w-3.5 h-3.5" /> Reject
+              </Button>
+            </>
+          )}
+          {k.status === "active" && (
+            <Button
+              size="sm"
+              variant="outline"
+              className={`h-7 text-xs border-slate-600 bg-transparent ${k.adminEnabled ? "text-red-400 hover:text-red-300" : "text-green-400 hover:text-green-300"}`}
+              onClick={() => toggleMutation.mutate({ id: k.id, adminEnabled: !k.adminEnabled })}
+            >
+              {k.adminEnabled ? "Disable" : "Re-enable"}
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-white">API Access Control</h1>
-          <p className="text-slate-400 text-sm mt-1">Enable or disable API keys for users. Disabling a key prevents it from being used even if the user has it enabled.</p>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-4">
-            <p className="text-xs text-slate-400">Total Keys</p>
-            <p className="text-2xl font-bold text-white mt-1">{apiKeys?.length ?? 0}</p>
+        {/* Header */}
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+              <Key className="w-6 h-6 text-cyan-400" /> API Access Control
+            </h1>
+            <p className="text-slate-400 text-sm mt-1">Review and manage API key requests from users.</p>
           </div>
-          <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-4">
-            <p className="text-xs text-slate-400">Active Keys</p>
-            <p className="text-2xl font-bold text-green-400 mt-1">{apiKeys?.filter((k: any) => k.isEnabled && k.adminEnabled).length ?? 0}</p>
-          </div>
-          <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-4">
-            <p className="text-xs text-slate-400">Disabled by Admin</p>
-            <p className="text-2xl font-bold text-red-400 mt-1">{apiKeys?.filter((k: any) => !k.adminEnabled).length ?? 0}</p>
-          </div>
-          <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-4">
-            <p className="text-xs text-slate-400">Unique Users</p>
-            <p className="text-2xl font-bold text-cyan-400 mt-1">{Object.keys(byUser).length}</p>
+          <div className="flex gap-3 text-sm">
+            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-3 py-1.5 text-yellow-400">
+              <span className="font-bold">{(apiKeys ?? []).filter((k: any) => k.status === "pending").length}</span> Pending
+            </div>
+            <div className="bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-1.5 text-green-400">
+              <span className="font-bold">{(apiKeys ?? []).filter((k: any) => k.status === "active").length}</span> Active
+            </div>
           </div>
         </div>
 
         {/* Search */}
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
           <Input
-            placeholder="Search by user or key label..."
+            placeholder="Search by user name, email or key label..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="pl-9 bg-slate-800 border-slate-700 text-white"
+            className="pl-9 bg-[#161b27] border-slate-700 text-white"
           />
         </div>
 
-        {/* Keys by User */}
         {isLoading ? (
-          <div className="text-center py-10 text-slate-400 text-sm">Loading...</div>
-        ) : Object.keys(byUser).length === 0 ? (
-          <div className="text-center py-10 text-slate-500 text-sm">
-            <Key className="w-8 h-8 mx-auto mb-2 opacity-30" />
-            No API keys found.
-          </div>
+          <div className="text-center py-12 text-slate-500">Loading...</div>
         ) : (
-          <div className="space-y-4">
-            {Object.entries(byUser).map(([userId, { userName, userEmail, keys }]) => (
-              <div key={userId} className="bg-slate-800/60 border border-slate-700 rounded-xl overflow-hidden">
-                {/* User header */}
-                <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-700 bg-slate-800/40">
-                  <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0">
-                    <User className="w-4 h-4 text-slate-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate">{userName}</p>
-                    <p className="text-xs text-slate-400 truncate">{userEmail}</p>
-                  </div>
-                  <Badge className="bg-slate-700 text-slate-300 text-xs">{keys.length} key{keys.length !== 1 ? "s" : ""}</Badge>
+          <div className="space-y-8">
+            {/* Pending */}
+            {pending.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-yellow-400" />
+                  <h2 className="font-semibold text-white">Pending Requests ({pending.length})</h2>
                 </div>
-                {/* Keys */}
-                <div className="divide-y divide-slate-700/50">
-                  {keys.map((k: any) => (
-                    <div key={k.id} className="flex items-center gap-3 px-4 py-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm text-white font-medium">{k.label}</span>
-                          {k.isEnabled && k.adminEnabled ? (
-                            <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">Active</Badge>
-                          ) : !k.adminEnabled ? (
-                            <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">Admin Disabled</Badge>
-                          ) : (
-                            <Badge className="bg-slate-600/40 text-slate-400 text-xs">User Disabled</Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3 mt-1">
-                          <span className="text-xs text-slate-500 font-mono">{k.keyPrefix}{"•".repeat(20)}</span>
-                          <span className="text-xs text-slate-500">{k.requestCount ?? 0} requests</span>
-                          <span className="text-xs text-slate-500">
-                            Last used: {k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleDateString() : "Never"}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="text-xs text-slate-400">Admin allow:</span>
-                        <Switch
-                          checked={k.adminEnabled}
-                          onCheckedChange={v => toggleMutation.mutate({ id: k.id, adminEnabled: v })}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                {pending.map((k: any) => <KeyCard key={k.id} k={k} />)}
               </div>
-            ))}
+            )}
+
+            {/* Active */}
+            {active.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-400" />
+                  <h2 className="font-semibold text-white">Active Keys ({active.length})</h2>
+                </div>
+                {active.map((k: any) => <KeyCard key={k.id} k={k} />)}
+              </div>
+            )}
+
+            {/* Rejected */}
+            {rejected.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <XCircle className="w-4 h-4 text-red-400" />
+                  <h2 className="font-semibold text-white">Rejected ({rejected.length})</h2>
+                </div>
+                {rejected.map((k: any) => <KeyCard key={k.id} k={k} />)}
+              </div>
+            )}
+
+            {filtered.length === 0 && (
+              <div className="text-center py-12 text-slate-500 text-sm">
+                <Key className="w-10 h-10 mx-auto mb-3 opacity-20" />
+                {search ? "No results found." : "No API key requests yet."}
+              </div>
+            )}
           </div>
         )}
       </div>
+
+      {/* Reject Dialog */}
+      <Dialog open={!!rejectDialog} onOpenChange={(open) => { if (!open) { setRejectDialog(null); setRejectReason(""); } }}>
+        <DialogContent className="bg-[#161b27] border-slate-700 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <XCircle className="w-5 h-5 text-red-400" /> Reject API Key Request
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <p className="text-sm text-slate-400">
+              Rejecting key <span className="text-white font-medium">"{rejectDialog?.label}"</span> for <span className="text-white font-medium">{rejectDialog?.userName}</span>.
+            </p>
+            <Input
+              placeholder="Reason for rejection (required)"
+              value={rejectReason}
+              onChange={e => setRejectReason(e.target.value)}
+              className="bg-slate-900 border-slate-600 text-white"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="border-slate-600 text-slate-400 bg-transparent" onClick={() => { setRejectDialog(null); setRejectReason(""); }}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-red-500 hover:bg-red-600 text-white"
+              disabled={!rejectReason.trim() || rejectMutation.isPending}
+              onClick={() => rejectDialog && rejectMutation.mutate({ id: rejectDialog.id, reason: rejectReason.trim() })}
+            >
+              {rejectMutation.isPending ? "Rejecting..." : "Reject Request"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Approved Key Info Dialog */}
+      <Dialog open={!!approvedKey} onOpenChange={(open) => { if (!open) setApprovedKey(null); }}>
+        <DialogContent className="bg-[#161b27] border-slate-700 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-green-400" /> API Key Approved
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+              <p className="text-sm text-green-300">The user has been notified via in-app notification. They can view their key prefix in their API Keys page.</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-400 mb-1.5">Key prefix (for your records):</p>
+              <div className="bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 font-mono text-sm text-cyan-300">
+                {approvedKey?.keyPrefix}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button className="bg-slate-700 hover:bg-slate-600 text-white w-full" onClick={() => setApprovedKey(null)}>
+              Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 }

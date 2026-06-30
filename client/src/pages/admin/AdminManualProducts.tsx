@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Key, Upload, Eye, EyeOff, Package, RefreshCw } from "lucide-react";
+import AdminLayout from "@/components/AdminLayout";
 
 type ManualProduct = {
   id: number; title: string; slug: string; customerPriceUSD: string;
@@ -87,7 +88,8 @@ export default function AdminManualProducts() {
   const manualProducts = (productsData?.items ?? []).filter((p: any) => p.isManual);
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <AdminLayout title="Manual Products">
+    <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-white">Manual Products</h1>
@@ -294,5 +296,6 @@ export default function AdminManualProducts() {
         </Dialog>
       )}
     </div>
+    </AdminLayout>
   );
 }
